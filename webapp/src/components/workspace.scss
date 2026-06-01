@@ -6,6 +6,9 @@
     flex-direction: row;
     overflow: hidden;
     position: relative;
+    background:
+        radial-gradient(circle at top left, rgba(var(--button-bg-rgb), 0.08), transparent 360px),
+        rgb(var(--center-channel-bg-rgb));
 
     > .mainFrame {
         @include z-index(workspace-main-frame);
@@ -16,11 +19,12 @@
         overflow: hidden;
 
         > .banner {
-            background-color: rgba(230, 220, 192, 0.9);
+            background-color: rgba(254, 243, 199, 0.95);
             text-align: center;
             padding: 10px;
             color: rgb(63, 67, 80);
             font-weight: bold;
+            border-bottom: 1px solid rgba(180, 83, 9, 0.16);
         }
     }
 }

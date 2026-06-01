@@ -8,8 +8,12 @@
 
     min-height: 100%;
     color: rgb(var(--sidebar-text-rgb));
-    background-color: rgb(var(--sidebar-bg-rgb));
-    padding: 24px 0 12px;
+    background:
+        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0)),
+        rgb(var(--sidebar-bg-rgb));
+    padding: 18px 10px 12px;
+    border-right: 1px solid rgba(255, 255, 255, 0.08);
+    box-shadow: 10px 0 30px rgba(15, 23, 42, 0.08);
 
     &.hidden {
         @include z-index(sidebar-hidden);
@@ -58,7 +62,7 @@
     .WorkspaceTitle {
         display: flex;
         flex-direction: row;
-        padding: 0 16px;
+        padding: 0 8px;
         font-weight: 600;
     }
 
@@ -66,7 +70,8 @@
         flex: 1 1 auto;
         overflow-y: auto;
         max-width: 100%;
-        margin-top: 12px;
+        margin-top: 14px;
+        padding-right: 2px;
 
         &::-webkit-scrollbar-thumb {
             background: rgba(var(--sidebar-text-rgb), 0.24);
@@ -81,10 +86,11 @@
         display: flex;
         flex-direction: row;
         font-weight: 600;
-        padding: 3px 16px;
-        margin-bottom: 16px;
+        padding: 4px 6px;
+        margin-bottom: 12px;
         height: 48px;
         align-items: center;
+        border-radius: 10px;
 
         &:hover {
             background-color: rgba(var(--sidebar-text-rgb), 0.08);
@@ -150,14 +156,18 @@
 
     .add-board {
         display: flex;
-        padding: 0 16px 0 20px;
+        padding: 0 10px;
+        margin: 4px 0;
         cursor: pointer;
         color: rgba(var(--sidebar-text-rgb), 0.64);
         height: 36px;
         align-items: center;
+        border-radius: 8px;
+        font-weight: 600;
 
         &:hover {
             background-color: rgba(var(--sidebar-text-rgb), 0.08);
+            color: rgb(var(--sidebar-text-rgb));
         }
     }
 

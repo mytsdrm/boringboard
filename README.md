@@ -1,15 +1,15 @@
-# Boringboard
+# BoringBoard
 
-Its a fork of focalboard
+BoringBoard is a modernized fork of Focalboard.
 
 ![CI Status](https://github.com/mattermost/focalboard/actions/workflows/ci.yml/badge.svg)
 ![CodeQL](https://github.com/mattermost/focalboard/actions/workflows/codeql-analysis.yml/badge.svg)
 ![Dev Release](https://github.com/mattermost/focalboard/actions/workflows/dev-release.yml/badge.svg)
 ![Prod Release](https://github.com/mattermost/focalboard/actions/workflows/prod-release.yml/badge.svg)
 
-![Focalboard](website/site/static/img/hero.jpg)
+![BoringBoard](website/site/static/img/hero.jpg)
 
-Focalboard is an open source, multilingual, self-hosted project management tool that's an alternative to Trello, Notion, and Asana.
+BoringBoard is an open source, multilingual, self-hosted project management tool that's an alternative to Trello, Notion, and Asana.
 
 It helps define, organize, track and manage work across individuals and teams. Focalboard comes in two editions:
 

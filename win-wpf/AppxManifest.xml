@@ -4,9 +4,9 @@
     xmlns:rescap="http://schemas.microsoft.com/appx/manifest/foundation/windows10/restrictedcapabilities">
     <Identity Name="MattermostInc.Focalboard" Publisher="CN=5C59534D-C37D-4D0C-8464-26AA0D0B6EFE" Version="7.0.0.0" ProcessorArchitecture="x64" />
     <Properties>
-        <DisplayName>Focalboard</DisplayName>
+        <DisplayName>BoringBoard</DisplayName>
         <PublisherDisplayName>Mattermost, Inc.</PublisherDisplayName>
-        <Description>Focalboard Desktop Edition</Description>
+        <Description>BoringBoard Desktop Edition</Description>
         <Logo>Assets\StoreLogo.png</Logo>
     </Properties>
     <Resources>
@@ -20,7 +20,7 @@
     </Capabilities>
     <Applications>
         <Application Id="Focalboard" Executable="Focalboard.exe" EntryPoint="Windows.FullTrustApplication">
-            <uap:VisualElements BackgroundColor="#ffffff" DisplayName="Focalboard" Square150x150Logo="Assets\icon150.png" Square44x44Logo="Assets\icon44.png" Description="Focalboard Desktop Edition" />
+            <uap:VisualElements BackgroundColor="#ffffff" DisplayName="BoringBoard" Square150x150Logo="Assets\icon150.png" Square44x44Logo="Assets\icon44.png" Description="BoringBoard Desktop Edition" />
         </Application>
     </Applications>
 </Package>

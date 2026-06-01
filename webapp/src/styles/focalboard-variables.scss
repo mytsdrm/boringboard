@@ -3,25 +3,25 @@
 
     // Label Colors
     --prop-default: #fff;
-    --prop-gray: #ededed;
-    --prop-brown: #f7ddc3;
-    --prop-orange: #ffd3c1;
-    --prop-yellow: #f7f0b6;
-    --prop-green: #c7eac3;
-    --prop-blue: #b1d1f6;
-    --prop-purple: #e6d0ff;
-    --prop-pink: #ffd6e9;
-    --prop-red: #ffa9a9;
+    --prop-gray: #e5e7eb;
+    --prop-brown: #fde7d2;
+    --prop-orange: #fed7aa;
+    --prop-yellow: #fef08a;
+    --prop-green: #bbf7d0;
+    --prop-blue: #bfdbfe;
+    --prop-purple: #ddd6fe;
+    --prop-pink: #fbcfe8;
+    --prop-red: #fecaca;
 
     // Elevations
-    --elevation-1: 0 2px 3px 0 rgba(0, 0, 0, 0.08);
-    --elevation-2: 0 4px 6px 0 rgba(0, 0, 0, 0.12);
-    --elevation-3: 0 6px 14px 0 rgba(0, 0, 0, 0.12);
-    --elevation-4: 0 8px 24px 0 rgba(0, 0, 0, 0.12);
-    --elevation-5: 0 12px 32px 0 rgba(0, 0, 0, 0.12);
-    --elevation-6: 0 20px 32px 0 rgba(0, 0, 0, 0.12);
+    --elevation-1: 0 1px 2px 0 rgba(15, 23, 42, 0.06), 0 1px 3px 0 rgba(15, 23, 42, 0.1);
+    --elevation-2: 0 8px 18px -12px rgba(15, 23, 42, 0.24), 0 2px 6px -2px rgba(15, 23, 42, 0.12);
+    --elevation-3: 0 14px 30px -18px rgba(15, 23, 42, 0.3), 0 6px 12px -8px rgba(15, 23, 42, 0.16);
+    --elevation-4: 0 22px 44px -24px rgba(15, 23, 42, 0.34), 0 10px 18px -12px rgba(15, 23, 42, 0.2);
+    --elevation-5: 0 28px 56px -30px rgba(15, 23, 42, 0.4), 0 16px 28px -18px rgba(15, 23, 42, 0.24);
+    --elevation-6: 0 36px 72px -34px rgba(15, 23, 42, 0.46), 0 20px 36px -20px rgba(15, 23, 42, 0.3);
 
     // Radius
-    --default-rad: 4px;
+    --default-rad: 8px;
     --modal-rad: 8px;
 }

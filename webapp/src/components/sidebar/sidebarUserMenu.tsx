@@ -38,7 +38,7 @@ const SidebarUserMenu = () => {
                     <div className='logo'>
                         <div className='logo-title'>
                             <FocalboardLogoIcon/>
-                            <span>{'Focalboard'}</span>
+                            <span>{'BoringBoard'}</span>
                             <div className='versionFrame'>
                                 <div
                                     className='version'
@@ -81,7 +81,7 @@ const SidebarUserMenu = () => {
 
                         <Menu.Text
                             id='about'
-                            name={intl.formatMessage({id: 'Sidebar.about', defaultMessage: 'About Focalboard'})}
+                            name={intl.formatMessage({id: 'Sidebar.about', defaultMessage: 'About BoringBoard'})}
                             onClick={async () => {
                                 window.open('https://www.focalboard.com?utm_source=webapp', '_blank')
 

@@ -39,28 +39,28 @@ export const systemThemeName = 'system-theme'
 export const defaultThemeName = 'default-theme'
 
 export const defaultTheme = {
-    mainBg: '255, 255, 255',
-    mainFg: '63, 67, 80',
-    buttonBg: '28, 88, 217',
+    mainBg: '248, 250, 252',
+    mainFg: '31, 41, 55',
+    buttonBg: '37, 99, 235',
     buttonFg: '255, 255, 255',
-    sidebarBg: '30, 50, 92',
+    sidebarBg: '15, 23, 42',
     sidebarFg: '255, 255, 255',
-    sidebarTextActiveBorder: '93, 137, 243',
+    sidebarTextActiveBorder: '96, 165, 250',
     sidebarWhiteLogo: 'true',
 
-    link: '93, 137, 234',
+    link: '37, 99, 235',
     linkVisited: '#551a8b',
 
     propDefault: '#fff',
-    propGray: '#EDEDED',
-    propBrown: '#F7DDC3',
-    propOrange: '#ffd3c1',
-    propYellow: '#f7f0b6',
-    propGreen: '#c7eac3',
-    propBlue: '#B1D1F6',
-    propPurple: '#e6d0ff',
-    propPink: '#ffd6e9',
-    propRed: '#ffa9a9',
+    propGray: '#e5e7eb',
+    propBrown: '#fde7d2',
+    propOrange: '#fed7aa',
+    propYellow: '#fef08a',
+    propGreen: '#bbf7d0',
+    propBlue: '#bfdbfe',
+    propPurple: '#ddd6fe',
+    propPink: '#fbcfe8',
+    propRed: '#fecaca',
 }
 
 export const darkThemeName = 'dark-theme'
@@ -122,7 +122,7 @@ export function setTheme(theme: Theme | null): Theme {
 
     setActiveThemeName(consolidatedTheme, theme)
 
-    // for personal server and desktop, Focalboard is responsible for managing the theme,
+    // for personal server and desktop, BoringBoard is responsible for managing the theme,
     // so we set all the color variables here.
     document.documentElement.style.setProperty('--center-channel-bg-rgb', consolidatedTheme.mainBg)
     document.documentElement.style.setProperty('--center-channel-color-rgb', consolidatedTheme.mainFg)

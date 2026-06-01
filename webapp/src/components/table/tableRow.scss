@@ -10,20 +10,20 @@
             text-transform: uppercase;
             font-weight: 600;
             color: rgba(var(--center-channel-color-rgb), 0.64);
-            background-color: rgb(var(--center-channel-bg-rgb));
-            box-shadow: rgba(var(--center-channel-color-rgb), 0.1) 0 0 0 1px,
-                rgba(var(--center-channel-color-rgb), 0.1) 0 2px 4px;
+            background-color: rgb(255, 255, 255);
+            border-radius: 6px;
+            box-shadow: var(--elevation-1);
             height: 24px;
             width: 100%;
         }
     }
 
     &.selected {
-        background-color: rgba(90, 200, 255, 0.2);
+        background-color: rgba(var(--button-bg-rgb), 0.08);
     }
 
     &:hover {
-        background-color: rgba(var(--center-channel-color-rgb), 0.05);
+        background-color: rgba(var(--button-bg-rgb), 0.05);
         overflow: initial;
 
         .delete-button {

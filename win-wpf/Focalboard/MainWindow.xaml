@@ -6,7 +6,7 @@
         xmlns:wv2="clr-namespace:Microsoft.Web.WebView2.Wpf;assembly=Microsoft.Web.WebView2.Wpf"
         xmlns:local="clr-namespace:Focalboard"
         mc:Ignorable="d"
-        Title="Focalboard" Height="800" Width="1024">
+        Title="BoringBoard" Height="800" Width="1024">
     <DockPanel>
         <Label Name="installingLabel" Visibility="Collapsed" DockPanel.Dock="Top">Downloading webview2...</Label>
         <wv2:WebView2

@@ -28,7 +28,7 @@ const config = merge.merge(commonConfig, {
         }),
         new HtmlWebpackPlugin({
             inject: true,
-            title: 'Focalboard',
+            title: 'BoringBoard',
             chunks: ['main'],
             template: 'html-templates/deveditor.ejs',
             filename: 'editor.html',

@@ -127,7 +127,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	w.SetTitle("Focalboard")
+	w.SetTitle("BoringBoard")
 	w.SetSize(1024, 768, webview.HintNone)
 
 	script := fmt.Sprintf("localStorage.setItem('focalboardSessionId', '%s');", sessionToken)
