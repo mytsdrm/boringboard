@@ -2,7 +2,10 @@
 
 BoringBoard is fork of Focalboard for my own project management workflow.
 
+Default Theme
 ![BoringBoard](README.assets/boringboard.png)
+
+Dark Theme
 ![BoringBoard](README.assets/boringboard-dark.png)
 
 ## How to start
@@ -96,6 +99,7 @@ Once the server is running, you can rebuild just the web app via `make webapp` i
     - `docker build -f docker/Dockerfile .`
   - To build it for a custom architecture (experimental):
     - `docker build -f docker/Dockerfile --platform linux/arm64 .`
+
 ### Unit testing
 
 Before checking in commits, run `make ci`, which includes:
