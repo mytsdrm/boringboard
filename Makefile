@@ -1,4 +1,4 @@
-.PHONY: prebuild clean cleanall ci server server-mac server-linux server-win server-linux-package generate watch-server webapp mac-app win-app-wpf linux-app modd-precheck templates-archive
+.PHONY: prebuild clean cleanall ci server server-mac server-linux server-win server-linux-package generate watch-server webapp linux-app modd-precheck templates-archive
 
 PACKAGE_FOLDER = focalboard
 
@@ -36,7 +36,7 @@ all: webapp server ## Build server and webapp.
 prebuild: ## Run prebuild actions (install dependencies etc.).
 	cd webapp; npm install
 
-ci: webapp-ci server-test ## Simulate CI, locally.
+ci: webapp-ci server-test-sqlite ## Simulate CI, locally.
 
 templates-archive: ## Build templates archive file
 	cd server/assets/build-template-archive; go run -tags '$(BUILD_TAGS)' main.go --dir="../templates-boardarchive" --out="../templates.boardarchive"
@@ -123,7 +123,7 @@ watch-single-user: modd-precheck ## Run both server and webapp in single user mo
 watch-server-test: modd-precheck ## Run server tests watching for changes
 	env FOCALBOARD_BUILD_TAGS='$(BUILD_TAGS)' modd -f modd-servertest.conf
 
-server-test: server-test-sqlite server-test-mysql server-test-mariadb server-test-postgres ## Run server tests
+server-test: server-test-sqlite ## Run server tests
 
 server-test-sqlite: export FOCALBOARD_UNIT_TESTING=1
 
@@ -136,42 +136,6 @@ server-test-mini-sqlite: export FOCALBOARD_UNIT_TESTING=1
 server-test-mini-sqlite: ## Run server tests using sqlite
 	cd server/integrationtests; go test -tags '$(BUILD_TAGS)' $(RACE) -v -count=1 -timeout=30m ./...
 
-server-test-mysql: export FOCALBOARD_UNIT_TESTING=1
-server-test-mysql: export FOCALBOARD_STORE_TEST_DB_TYPE=mysql
-server-test-mysql: export FOCALBOARD_STORE_TEST_DOCKER_PORT=44446
-
-server-test-mysql: ## Run server tests using mysql
-	@echo Starting docker container for mysql
-	docker compose -f ./docker-testing/docker-compose-mysql.yml down -v --remove-orphans
-	docker compose -f ./docker-testing/docker-compose-mysql.yml run start_dependencies
-	cd server; go test -tags '$(BUILD_TAGS)' -race -v -coverpkg=./... -coverprofile=server-mysql-profile.coverage -count=1 -timeout=30m ./...
-	cd server; go tool cover -func server-mysql-profile.coverage
-	docker compose -f ./docker-testing/docker-compose-mysql.yml down -v --remove-orphans
-
-server-test-mariadb: export FOCALBOARD_UNIT_TESTING=1
-server-test-mariadb: export FOCALBOARD_STORE_TEST_DB_TYPE=mariadb
-server-test-mariadb: export FOCALBOARD_STORE_TEST_DOCKER_PORT=44445
-
-server-test-mariadb: templates-archive ## Run server tests using mysql
-	@echo Starting docker container for mariadb
-	docker compose -f ./docker-testing/docker-compose-mariadb.yml down -v --remove-orphans
-	docker compose -f ./docker-testing/docker-compose-mariadb.yml run start_dependencies
-	cd server; go test -tags '$(BUILD_TAGS)' -race -v -coverpkg=./... -coverprofile=server-mariadb-profile.coverage -count=1 -timeout=30m ./...
-	cd server; go tool cover -func server-mariadb-profile.coverage
-	docker compose -f ./docker-testing/docker-compose-mariadb.yml down -v --remove-orphans
-
-server-test-postgres: export FOCALBOARD_UNIT_TESTING=1
-server-test-postgres: export FOCALBOARD_STORE_TEST_DB_TYPE=postgres
-server-test-postgres: export FOCALBOARD_STORE_TEST_DOCKER_PORT=44447
-
-server-test-postgres: ## Run server tests using postgres
-	@echo Starting docker container for postgres
-	docker compose -f ./docker-testing/docker-compose-postgres.yml down -v --remove-orphans
-	docker compose -f ./docker-testing/docker-compose-postgres.yml run start_dependencies
-	cd server; go test -tags '$(BUILD_TAGS)' -race -v -coverpkg=./... -coverprofile=server-postgres-profile.coverage -count=1 -timeout=30m ./...
-	cd server; go tool cover -func server-postgres-profile.coverage
-	docker compose -f ./docker-testing/docker-compose-postgres.yml down -v --remove-orphans
-
 webapp: ## Build webapp.
 	cd webapp; npm run pack
 
@@ -182,30 +146,6 @@ webapp-ci: ## Webapp CI: linting & testing.
 
 webapp-test: ## jest tests for webapp
 	cd webapp; npm run test
-
-mac-app: server-mac webapp ## Build Mac application.
-	rm -rf mac/temp
-	rm -rf mac/dist
-	rm -rf mac/resources/bin
-	rm -rf mac/resources/pack
-	mkdir -p mac/resources/bin
-	cp bin/mac/focalboard-server mac/resources/bin/focalboard-server
-	cp app-config.json mac/resources/config.json
-	cp -R webapp/pack mac/resources/pack
-	mkdir -p mac/temp
-	xcodebuild archive -workspace mac/Focalboard.xcworkspace -scheme Focalboard -archivePath mac/temp/focalboard.xcarchive CODE_SIGN_IDENTITY="" CODE_SIGNING_REQUIRED="NO" CODE_SIGNING_ALLOWED="NO" \
-		|| { echo "xcodebuild failed, did you install the full Xcode and not just the CLI tools?"; exit 1; }
-	mkdir -p mac/dist
-	cp -R mac/temp/focalboard.xcarchive/Products/Applications/Focalboard.app mac/dist/
-	# xcodebuild -exportArchive -archivePath mac/temp/focalboard.xcarchive -exportPath mac/dist -exportOptionsPlist mac/export.plist
-	cp NOTICE.txt mac/dist
-	cp webapp/NOTICE.txt mac/dist/webapp-NOTICE.txt
-	cd mac/dist; zip -r focalboard-mac.zip Focalboard.app MIT-COMPILED-LICENSE.md NOTICE.txt webapp-NOTICE.txt
-
-win-wpf-app: server-dll webapp ## Build Windows WPF application.
-	cd win-wpf && ./build.bat
-	cd win-wpf && ./package.bat
-	cd win-wpf && ./package-zip.bat
 
 linux-app: webapp ## Build Linux application.
 	rm -rf linux/temp
@@ -222,11 +162,9 @@ linux-app: webapp ## Build Linux application.
 	rm -rf linux/temp
 
 swagger: ## Generate swagger API spec and clients based on it.
-	mkdir -p server/swagger/docs
 	mkdir -p server/swagger/clients
 	cd server && swagger generate spec -m -o ./swagger/swagger.yml
 
-	cd server/swagger && openapi-generator generate -i swagger.yml -g html2 -o docs/html
 	cd server/swagger && openapi-generator generate -i swagger.yml -g go -o clients/go
 	cd server/swagger && openapi-generator generate -i swagger.yml -g javascript -o clients/javascript
 	cd server/swagger && openapi-generator generate -i swagger.yml -g typescript-fetch -o clients/typescript
@@ -237,11 +175,7 @@ clean: ## Clean build artifacts.
 	rm -rf bin
 	rm -rf dist
 	rm -rf webapp/pack
-	rm -rf mac/temp
-	rm -rf mac/dist
 	rm -rf linux/dist
-	rm -rf win-wpf/msix
-	rm -f win-wpf/focalboard.msix
 
 cleanall: clean ## Clean all build artifacts and dependencies.
 	rm -rf webapp/node_modules

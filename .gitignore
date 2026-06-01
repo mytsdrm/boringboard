@@ -44,31 +44,45 @@ build/Release
 # Dependency directory
 # https://docs.npmjs.com/misc/faq#should-i-check-my-node-modules-folder-into-git
 node_modules
-dist
-pack
-package
-bin
+
+# BoringBoard build output
+/bin/
+/dist/
+/package/
+/webapp/pack/
+/linux/bin/
+/linux/dist/
+/linux/temp/
+
+# Local runtime data
+/files/
+/octo*.db*
+/focalboard*.db*
+/boringboard*.db*
+*.sqlite
+*.sqlite3
+*.boardarchive
+
+# Generated caches and debug output
 debug
 __debug_bin
-files
-octo*.db
-focalboard*.db
-*.boardarchive
 .eslintcache
+.stylelintcache
+*.coverage
 .vscode/settings.json
 # config.json is copied from app-config.json in the Makefile
 mac/resources/config.json
 mac/temp
 mac/dist
 mac/*.xcodeproj/**/xcuserdata
-linux/bin
-linux/dist
-linux/temp
 win/temp
 win/dist
 webapp/cypress/screenshots
 webapp/cypress/videos
-server/swagger/clients
+webapp/.eslintcache
+webapp/.stylelintcache
+/server/swagger/clients/
+/server/swagger/docs/
 server/vendor
 .idea
 docker/certs

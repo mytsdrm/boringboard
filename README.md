@@ -2,8 +2,8 @@
 
 BoringBoard is fork of Focalboard for my own project management workflow.
 
-![BoringBoard](website/site/static/img/boringboard.png)
-![BoringBoard](website/site/static/img/boringboard-dark.png)
+![BoringBoard](README.assets/boringboard.png)
+![BoringBoard](README.assets/boringboard-dark.png)
 
 ## How to start
 
@@ -30,7 +30,7 @@ The content below is kept from the original Focalboard project for upstream refe
 ![Dev Release](https://github.com/mattermost/focalboard/actions/workflows/dev-release.yml/badge.svg)
 ![Prod Release](https://github.com/mattermost/focalboard/actions/workflows/prod-release.yml/badge.svg)
 
-![BoringBoard](website/site/static/img/hero.jpg)
+![BoringBoard](README.assets/hero.jpg)
 
 BoringBoard is an open source, multilingual, self-hosted project management tool that's an alternative to Trello, Notion, and Asana.
 
@@ -83,36 +83,12 @@ Then navigate your browser to [`http://localhost:8000`](http://localhost:8000) t
 
 Once the server is running, you can rebuild just the web app via `make webapp` in a separate terminal window. Reload your browser to see the changes.
 
-### Building and running standalone desktop apps
+### Building and running production builds
 
-You can build standalone apps that package the server to run locally against SQLite:
-
-- **Windows**:
-  - _Requires Windows 10, [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/) 10.0.19041.0, and .NET 4.8 developer pack_
-  - Open a `git-bash` prompt.
+- **Linux server package**:
   - Run `make prebuild`
-  - The above prebuild step needs to be run only when you make changes to or want to install your npm dependencies, etc.
-  - Once the prebuild is completed, you can keep repeating the below steps to build the app & see the changes.
-  - Run `make win-wpf-app`
-  - Run `cd win-wpf/msix && focalboard.exe`
-- **Mac**:
-  - _Requires macOS 11.3+ and Xcode 13.2.1+_
-  - Run `make prebuild`
-  - The above prebuild step needs to be run only when you make changes to or want to install your npm dependencies, etc.
-  - Once the prebuild is completed, you can keep repeating the below steps to build the app & see the changes.
-  - Run `make mac-app`
-  - Run `open mac/dist/Focalboard.app`
-- **Linux**:
-  - _Tested on Ubuntu 18.04_
-  - Install `webgtk` dependencies
-    - Run `sudo apt-get install libgtk-3-dev`
-    - Run `sudo apt-get install libwebkit2gtk-4.0-dev`
-  - Run `make prebuild`
-  - The above prebuild step needs to be run only when you make changes to or want to install your npm dependencies, etc.
-  - Once the prebuild is completed, you can keep repeating the below steps to build the app & see the changes.
-  - Run `make linux-app`
-  - Uncompress `linux/dist/focalboard-linux.tar.gz` to a directory of your choice
-  - Run `focalboard-app` from the directory you have chosen
+  - Run `make server-linux-package`
+  - Uncompress `dist/focalboard-server-linux-amd64.tar.gz` to a directory of your choice.
 - **Docker**:
   - To run it locally from offical image:
     - `docker run -it -p 80:8000 mattermost/focalboard`
@@ -120,12 +96,9 @@ You can build standalone apps that package the server to run locally against SQL
     - `docker build -f docker/Dockerfile .`
   - To build it for a custom architecture (experimental):
     - `docker build -f docker/Dockerfile --platform linux/arm64 .`
-
-Cross-compilation currently isn't fully supported, so please build on the appropriate platform. Refer to the GitHub Actions workflows (`build-mac.yml`, `build-win.yml`, `build-ubuntu.yml`) for the detailed list of steps on each platform.
-
 ### Unit testing
 
-Before checking in commits, run `make ci`, which is similar to the `.gitlab-ci.yml` workflow and includes:
+Before checking in commits, run `make ci`, which includes:
 
 - **Server unit tests**: `make server-test`
 - **Web app ESLint**: `cd webapp; npm run check`
