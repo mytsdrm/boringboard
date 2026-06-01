@@ -2,11 +2,19 @@
 @import '../../styles/z-index';
 
 .ShareBoardDialog {
+    .wrapper {
+        align-items: center;
+        justify-content: center;
+        padding: 24px;
+        box-sizing: border-box;
+    }
+
     .dialog {
         width: 600px;
         max-width: 90%;
         height: auto;
-        position: relative;
+        margin: 0;
+        max-height: calc(100vh - 96px);
         overflow: unset;
     }
 
@@ -141,6 +149,12 @@
     .share-input__container {
         padding: 0 32px 24px;
         border-bottom: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+    }
+
+    .share-dialog-footer {
+        display: flex;
+        justify-content: flex-end;
+        padding: 0 32px 24px;
     }
 
     .share-input {

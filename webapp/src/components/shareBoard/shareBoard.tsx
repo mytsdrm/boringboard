@@ -26,6 +26,7 @@ import {BoardMember, createBoard, MemberRole} from '../../blocks/board'
 import client from '../../octoClient'
 import Dialog from '../dialog'
 import ConfirmationDialog from '../confirmationDialogBox'
+import RootPortal from '../rootPortal'
 import {IUser} from '../../user'
 import Switch from '../../widgets/switch'
 import Button from '../../widgets/buttons/button'
@@ -322,12 +323,13 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
     }
 
     return (
-        <Dialog
-            onClose={props.onClose}
-            title={board.isTemplate ? shareTemplateTitle : shareBoardTitle}
-            className='ShareBoardDialog'
-        >
-            {showLinkChannelConfirmation &&
+        <RootPortal>
+            <Dialog
+                onClose={props.onClose}
+                title={board.isTemplate ? shareTemplateTitle : shareBoardTitle}
+                className='ShareBoardDialog'
+            >
+                {showLinkChannelConfirmation &&
                 <ConfirmationDialog
                     dialogBox={{
                         heading: intl.formatMessage({id: 'shareBoard.confirm-link-channel', defaultMessage: 'Link board to channel'}),
@@ -338,99 +340,99 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
                         onClose: () => setShowLinkChannelConfirmation(null),
                     }}
                 />}
-            <BoardPermissionGate permissions={[Permission.ManageBoardRoles]}>
-                <div className='share-input__container'>
-                    <div className='share-input'>
-                        <SearchIcon/>
-                        <Select
-                            styles={styles}
-                            value={selectedUser}
-                            className={'userSearchInput'}
-                            cacheOptions={true}
-                            filterOption={(o) => {
+                <BoardPermissionGate permissions={[Permission.ManageBoardRoles]}>
+                    <div className='share-input__container'>
+                        <div className='share-input'>
+                            <SearchIcon/>
+                            <Select
+                                styles={styles}
+                                value={selectedUser}
+                                className={'userSearchInput'}
+                                cacheOptions={true}
+                                filterOption={(o) => {
                                 // render non-explicit members
-                                if (members[o.value]) {
-                                    return members[o.value].synthetic
-                                }
+                                    if (members[o.value]) {
+                                        return members[o.value].synthetic
+                                    }
 
-                                // not a member, definitely render
-                                return true
-                            }}
-                            loadOptions={async (inputValue: string) => {
-                                const result = []
-                                const users = await client.searchTeamUsers(inputValue) || []
-                                result.push(...users)
-                                return result
-                            }}
-                            components={{DropdownIndicator: () => null, IndicatorSeparator: () => null}}
-                            defaultOptions={true}
-                            formatOptionLabel={formatOptionLabel}
-                            getOptionValue={(u) => u.id}
-                            getOptionLabel={(u: IUser|Channel) => (u as IUser).username || (u as Channel).display_name}
-                            isMulti={false}
-                            placeholder={board.isTemplate ? intl.formatMessage({id: 'ShareTemplate.searchPlaceholder', defaultMessage: 'Search for people'}) : intl.formatMessage({id: 'ShareBoard.searchPlaceholder', defaultMessage: 'Search for people and channels'})
-                            }
-                            onChange={(newValue) => {
-                                if (newValue && (newValue as IUser).username) {
-                                    addUser(newValue as IUser)
-                                    setSelectedUser(null)
-                                } else if (newValue) {
-                                    onLinkBoard(newValue as Channel)
+                                    // not a member, definitely render
+                                    return true
+                                }}
+                                loadOptions={async (inputValue: string) => {
+                                    const result = []
+                                    const users = await client.searchTeamUsers(inputValue) || []
+                                    result.push(...users)
+                                    return result
+                                }}
+                                components={{DropdownIndicator: () => null, IndicatorSeparator: () => null}}
+                                defaultOptions={true}
+                                formatOptionLabel={formatOptionLabel}
+                                getOptionValue={(u) => u.id}
+                                getOptionLabel={(u: IUser|Channel) => (u as IUser).username || (u as Channel).display_name}
+                                isMulti={false}
+                                placeholder={board.isTemplate ? intl.formatMessage({id: 'ShareTemplate.searchPlaceholder', defaultMessage: 'Search for people'}) : intl.formatMessage({id: 'ShareBoard.searchPlaceholder', defaultMessage: 'Search for people and channels'})
                                 }
-                            }}
-                        />
+                                onChange={(newValue) => {
+                                    if (newValue && (newValue as IUser).username) {
+                                        addUser(newValue as IUser)
+                                        setSelectedUser(null)
+                                    } else if (newValue) {
+                                        onLinkBoard(newValue as Channel)
+                                    }
+                                }}
+                            />
+                        </div>
                     </div>
+                </BoardPermissionGate>
+                <div className='user-items'>
+                    <TeamPermissionsRow/>
+
+                    {boardUsers.map((user) => {
+                        if (!members[user.id]) {
+                            return null
+                        }
+                        if (members[user.id].synthetic) {
+                            return null
+                        }
+                        return (
+                            <UserPermissionsRow
+                                key={user.id}
+                                user={user}
+                                member={members[user.id]}
+                                teammateNameDisplay={me?.props?.teammateNameDisplay || clientConfig.teammateNameDisplay}
+                                onDeleteBoardMember={onDeleteBoardMember}
+                                onUpdateBoardMember={onUpdateBoardMember}
+                                isMe={user.id === me?.id}
+                            />
+                        )
+                    })}
                 </div>
-            </BoardPermissionGate>
-            <div className='user-items'>
-                <TeamPermissionsRow/>
 
-                {boardUsers.map((user) => {
-                    if (!members[user.id]) {
-                        return null
-                    }
-                    if (members[user.id].synthetic) {
-                        return null
-                    }
-                    return (
-                        <UserPermissionsRow
-                            key={user.id}
-                            user={user}
-                            member={members[user.id]}
-                            teammateNameDisplay={me?.props?.teammateNameDisplay || clientConfig.teammateNameDisplay}
-                            onDeleteBoardMember={onDeleteBoardMember}
-                            onUpdateBoardMember={onUpdateBoardMember}
-                            isMe={user.id === me?.id}
-                        />
-                    )
-                })}
-            </div>
-
-            {props.enableSharedBoards && !board.isTemplate && (
-                <div className='tabs-container'>
-                    <button
-                        onClick={() => setPublish(false)}
-                        className={`tab-item ${!publish && 'tab-item--active'}`}
-                    >
-                        <FormattedMessage
-                            id='share-board.share'
-                            defaultMessage='Share'
-                        />
-                    </button>
-                    <BoardPermissionGate permissions={[Permission.ShareBoard]}>
+                {props.enableSharedBoards && !board.isTemplate && (
+                    <div className='tabs-container'>
                         <button
-                            onClick={() => setPublish(true)}
-                            className={`tab-item ${publish && 'tab-item--active'}`}
+                            onClick={() => setPublish(false)}
+                            className={`tab-item ${!publish && 'tab-item--active'}`}
                         >
                             <FormattedMessage
-                                id='share-board.publish'
-                                defaultMessage='Publish'
+                                id='share-board.share'
+                                defaultMessage='Share'
                             />
                         </button>
-                    </BoardPermissionGate>
-                </div>
-            )}
-            {(props.enableSharedBoards && publish && !board.isTemplate) &&
+                        <BoardPermissionGate permissions={[Permission.ShareBoard]}>
+                            <button
+                                onClick={() => setPublish(true)}
+                                className={`tab-item ${publish && 'tab-item--active'}`}
+                            >
+                                <FormattedMessage
+                                    id='share-board.publish'
+                                    defaultMessage='Publish'
+                                />
+                            </button>
+                        </BoardPermissionGate>
+                    </div>
+                )}
+                {(props.enableSharedBoards && publish && !board.isTemplate) &&
             (<BoardPermissionGate permissions={[Permission.ShareBoard]}>
                 <div className='tabs-content'>
                     <div>
@@ -508,58 +510,71 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
             </BoardPermissionGate>
             )}
 
-            {!publish && !board.isTemplate && (
-                <div className='tabs-content'>
-                    <div>
-                        <div className='d-flex justify-content-between'>
-                            <div className='d-flex flex-column'>
-                                <div className='text-heading2'>{intl.formatMessage({id: 'ShareBoard.ShareInternal', defaultMessage: 'Share internally'})}</div>
-                                <div className='text-light'>{intl.formatMessage({id: 'ShareBoard.ShareInternalDescription', defaultMessage: 'Users who have permissions will be able to use this link.'})}</div>
+                {!publish && !board.isTemplate && (
+                    <div className='tabs-content'>
+                        <div>
+                            <div className='d-flex justify-content-between'>
+                                <div className='d-flex flex-column'>
+                                    <div className='text-heading2'>{intl.formatMessage({id: 'ShareBoard.ShareInternal', defaultMessage: 'Share internally'})}</div>
+                                    <div className='text-light'>{intl.formatMessage({id: 'ShareBoard.ShareInternalDescription', defaultMessage: 'Users who have permissions will be able to use this link.'})}</div>
+                                </div>
                             </div>
                         </div>
-                    </div>
-                    <div className='d-flex justify-content-between tabs-inputs'>
-                        <div className='d-flex input-container'>
-                            <a
-                                className='shareUrl'
-                                href={boardUrl.toString()}
-                                target='_blank'
-                                rel='noreferrer'
+                        <div className='d-flex justify-content-between tabs-inputs'>
+                            <div className='d-flex input-container'>
+                                <a
+                                    className='shareUrl'
+                                    href={boardUrl.toString()}
+                                    target='_blank'
+                                    rel='noreferrer'
+                                >
+                                    {boardUrl.toString()}
+                                </a>
+                            </div>
+                            <Button
+                                emphasis='secondary'
+                                size='medium'
+                                title={intl.formatMessage({id: 'ShareBoard.copyLink', defaultMessage: 'Copy link'})}
+                                onClick={() => {
+                                    TelemetryClient.trackEvent(TelemetryCategory, TelemetryActions.ShareLinkInternalCopy, {board: boardId})
+                                    Utils.copyTextToClipboard(boardUrl.toString())
+                                    setWasCopiedPublic(false)
+                                    setWasCopiedInternal(true)
+                                }}
+                                icon={
+                                    <CompassIcon
+                                        icon='content-copy'
+                                        className='CompassIcon'
+                                    />
+                                }
                             >
-                                {boardUrl.toString()}
-                            </a>
-                        </div>
-                        <Button
-                            emphasis='secondary'
-                            size='medium'
-                            title={intl.formatMessage({id: 'ShareBoard.copyLink', defaultMessage: 'Copy link'})}
-                            onClick={() => {
-                                TelemetryClient.trackEvent(TelemetryCategory, TelemetryActions.ShareLinkInternalCopy, {board: boardId})
-                                Utils.copyTextToClipboard(boardUrl.toString())
-                                setWasCopiedPublic(false)
-                                setWasCopiedInternal(true)
-                            }}
-                            icon={
-                                <CompassIcon
-                                    icon='content-copy'
-                                    className='CompassIcon'
-                                />
-                            }
-                        >
-                            {wasCopiedInternal &&
+                                {wasCopiedInternal &&
                                 <FormattedMessage
                                     id='ShareBoard.copiedLink'
                                     defaultMessage='Copied!'
                                 />}
-                            {!wasCopiedInternal &&
+                                {!wasCopiedInternal &&
                                 <FormattedMessage
                                     id='ShareBoard.copyLink'
                                     defaultMessage='Copy link'
                                 />}
-                        </Button>
+                            </Button>
+                        </div>
                     </div>
+                )}
+                <div className='share-dialog-footer'>
+                    <Button
+                        emphasis='tertiary'
+                        size='medium'
+                        onClick={props.onClose}
+                    >
+                        <FormattedMessage
+                            id='Dialog.close'
+                            defaultMessage='Close'
+                        />
+                    </Button>
                 </div>
-            )}
-        </Dialog>
+            </Dialog>
+        </RootPortal>
     )
 }
