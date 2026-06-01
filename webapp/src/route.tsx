@@ -24,6 +24,10 @@ function FBRoute(props: RouteProps) {
     const loggedIn = useAppSelector<boolean|null>(getLoggedIn)
     let redirect: React.ReactNode = null
 
+    if (props.loginRequired && loggedIn === null) {
+        return null
+    }
+
     if (redirect === null && loggedIn === false && props.loginRequired) {
         redirect = ({match}: any) => {
             if (props.getOriginalPath) {
