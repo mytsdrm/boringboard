@@ -1,7 +1,7 @@
 .BoardsSwitcherWrapper {
     display: flex;
     flex-direction: row;
-    padding: 0 16px;
+    padding: 0;
 
     .BoardsSwitcher {
         display: flex;
@@ -9,13 +9,14 @@
         background-color: rgba(var(--sidebar-text-rgb), 0.08);
         color: rgba(var(--sidebar-text-rgb), 0.56);
         flex: 1;
-        padding: 6px 8px 6px 4px;
-        gap: 4px;
-        border-radius: 4px;
+        padding: 0 10px;
+        gap: 8px;
+        border-radius: 8px;
         cursor: pointer;
-        height: 28px;
+        height: 36px;
         align-items: center;
-        font-size: 12px;
+        font-size: 13px;
+        font-weight: 600;
 
         &:hover {
             background: rgba(var(--sidebar-text-rgb), 0.16);
