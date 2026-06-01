@@ -26,13 +26,21 @@ fi
 
 mkdir -p "$ROOT_DIR/bin"
 
-if command -v lsof >/dev/null 2>&1 && lsof -ti tcp:"$PORT" >/dev/null 2>&1; then
-    echo "Port $PORT is already in use."
-    echo "Stop the running server first:"
-    echo "  kill \$(lsof -ti tcp:$PORT)"
-    echo
-    echo "Or edit config.json to use another port."
-    exit 1
+if command -v lsof >/dev/null 2>&1; then
+    PIDS="$(lsof -ti tcp:"$PORT" || true)"
+    if [ -n "$PIDS" ]; then
+        echo "Stopping process(es) on port $PORT: $PIDS"
+        kill $PIDS
+        sleep 1
+    fi
+
+    PIDS="$(lsof -ti tcp:"$PORT" || true)"
+    if [ -n "$PIDS" ]; then
+        echo "Force stopping process(es) on port $PORT: $PIDS"
+        kill -9 $PIDS
+    fi
+else
+    echo "lsof is not installed; skipping port $PORT cleanup."
 fi
 
 if command -v modd >/dev/null 2>&1; then
