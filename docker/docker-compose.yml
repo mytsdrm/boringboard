@@ -1,16 +1,15 @@
-version: "3"
 services:
   app:
     build:
       context: ../
       dockerfile: docker/Dockerfile
-    container_name: focalboard
+    container_name: boringboard
     volumes:
       - fbdata:/opt/focalboard/data
     ports:
       - 80:8000
     environment:
-      - VIRTUAL_HOST=focalboard.local
+      - VIRTUAL_HOST=boringboard.local
       - VIRTUAL_PORT=8000
 
 volumes:

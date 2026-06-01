@@ -1,13 +1,11 @@
-version: "3"
-
 services:
   app:
     build:
       context: ../
       dockerfile: docker/Dockerfile
-    container_name: focalboard
+    container_name: boringboard
     depends_on:
-      - focalboard-db
+      - boringboard-db
     expose:
       - 8000
     environment:
@@ -24,7 +22,7 @@ services:
 
   proxy:
     image: jwilder/nginx-proxy:latest
-    container_name: focalboard-proxy
+    container_name: boringboard-proxy
     restart: always
     ports:
       - 80:80
@@ -33,9 +31,9 @@ services:
     networks:
       - proxy
 
-  focalboard-db:
+  boringboard-db:
     image: postgres:latest
-    container_name: focalboard-postgres
+    container_name: boringboard-postgres
     restart: always
     volumes:
       - pgdata:/var/lib/postgresql/data
@@ -50,4 +48,3 @@ volumes:
 
 networks:
   proxy:
-
