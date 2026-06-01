@@ -70,7 +70,7 @@
         flex: 1 1 auto;
         overflow-y: auto;
         max-width: 100%;
-        margin-top: 14px;
+        margin-top: 10px;
         padding-right: 2px;
 
         &::-webkit-scrollbar-thumb {
@@ -79,6 +79,32 @@
 
         > div:last-child {
             margin-bottom: 16px;
+        }
+    }
+
+    .octo-sidebar-dashboard-item {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        height: 36px;
+        padding: 0 10px;
+        margin: 8px 0 4px;
+        border-radius: 8px;
+        color: rgba(var(--sidebar-text-rgb), 0.72);
+        cursor: pointer;
+        font-size: 14px;
+        font-weight: 600;
+
+        .Icon {
+            width: 18px;
+            height: 18px;
+            margin: 0;
+        }
+
+        &:hover,
+        &.active {
+            background: rgba(var(--sidebar-text-rgb), 0.14);
+            color: rgb(var(--sidebar-text-rgb));
         }
     }
 

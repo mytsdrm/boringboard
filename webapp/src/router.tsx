@@ -98,6 +98,19 @@ const FocalboardRouter = (props: Props): JSX.Element => {
                     <BoardPage new={true}/>
                 </FBRoute>
 
+                <FBRoute
+                    loginRequired={true}
+                    path='/dashboard'
+                >
+                    <BoardPage dashboard={true}/>
+                </FBRoute>
+                <FBRoute
+                    loginRequired={true}
+                    path='/templates'
+                >
+                    <BoardPage templates={true}/>
+                </FBRoute>
+
                 <FBRoute path={['/team/:teamId/shared/:boardId?/:viewId?/:cardId?', '/shared/:boardId?/:viewId?/:cardId?']}>
                     <BoardPage readonly={true}/>
                 </FBRoute>
@@ -122,6 +135,14 @@ const FocalboardRouter = (props: Props): JSX.Element => {
                     }}
                 >
                     <BoardPage/>
+                </FBRoute>
+
+                <FBRoute
+                    exact={true}
+                    loginRequired={true}
+                    path='/'
+                >
+                    <BoardPage dashboard={true}/>
                 </FBRoute>
 
                 <FBRoute

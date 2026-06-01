@@ -34,11 +34,14 @@ import BoardTemplateSelector from './boardTemplateSelector/boardTemplateSelector
 import GuestNoBoards from './guestNoBoards'
 
 import Sidebar from './sidebar/sidebar'
+import Dashboard from './dashboard/dashboard'
 
 import './workspace.scss'
 
 type Props = {
     readonly: boolean
+    dashboard?: boolean
+    templates?: boolean
 }
 
 function CenterContent(props: Props) {
@@ -110,10 +113,18 @@ function CenterContent(props: Props) {
         />
     )
 
+    if (props.dashboard) {
+        return <Dashboard/>
+    }
+
     if (match.params.channelId) {
         if (me?.is_guest) {
             return <GuestNoBoards/>
         }
+        return templateSelector
+    }
+
+    if (props.templates) {
         return templateSelector
     }
 
@@ -181,6 +192,8 @@ const Workspace = (props: Props) => {
                     onBoardTemplateSelectorOpen={openBoardTemplateSelector}
                     onBoardTemplateSelectorClose={closeBoardTemplateSelector}
                     activeBoardId={board?.id}
+                    dashboardActive={props.dashboard || false}
+                    templatesActive={props.templates || false}
                 />
             }
             <div className='mainFrame'>
@@ -195,6 +208,8 @@ const Workspace = (props: Props) => {
                 </div>}
                 <CenterContent
                     readonly={props.readonly}
+                    dashboard={props.dashboard || false}
+                    templates={props.templates || false}
                 />
             </div>
         </div>

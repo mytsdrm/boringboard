@@ -87,6 +87,7 @@ const SidebarCategory = (props: Props) => {
     const menuWrapperRef = useRef<HTMLDivElement>(null)
 
     const [boardDraggingOver, setBoardDraggingOver] = useState<boolean>(false)
+    const isTaskBoardsCategory = props.categoryBoards.name === 'Boards'
 
     const shouldViewSidebarTour = props.boards.length !== 0 &&
                                   noCardOpen &&
@@ -220,6 +221,10 @@ const SidebarCategory = (props: Props) => {
     const debouncedUpdateCategory = useMemo(() => debounce(updateCategory, 400), [updateCategory])
 
     const toggleCollapse = async () => {
+        if (isTaskBoardsCategory) {
+            return
+        }
+
         const newVal = !collapsed
         await setCollapsed(newVal)
 
@@ -256,6 +261,9 @@ const SidebarCategory = (props: Props) => {
             </span>
         </div>
     )
+
+    const categoryName = isTaskBoardsCategory ? 'Task Boards' : props.categoryBoards.name
+    const categoryCollapsed = isTaskBoardsCategory ? false : collapsed
 
     const delayedSetBoardDraggingOver = (isDraggingOver: boolean) => {
         setTimeout(() => {
@@ -294,16 +302,16 @@ const SidebarCategory = (props: Props) => {
                                         {...categoryProvided.droppableProps}
                                     >
                                         <div
-                                            className={`octo-sidebar-item category ${collapsed || props.forceCollapse ? 'collapsed' : 'expanded'} ${props.categoryBoards.id === props.activeCategoryId ? 'active' : ''}`}
+                                            className={`octo-sidebar-item category ${categoryCollapsed || props.forceCollapse ? 'collapsed' : 'expanded'} ${props.categoryBoards.id === props.activeCategoryId ? 'active' : ''}`}
                                         >
                                             <div
                                                 className='octo-sidebar-title category-title'
-                                                title={props.categoryBoards.name}
+                                                title={categoryName}
                                                 onClick={toggleCollapse}
                                                 {...provided.dragHandleProps}
                                             >
-                                                {collapsed || snapshot.isDragging || props.forceCollapse ? <ChevronRight/> : <ChevronDown/>}
-                                                {props.categoryBoards.name}
+                                                {categoryCollapsed || snapshot.isDragging || props.forceCollapse ? <ChevronRight/> : <ChevronDown/>}
+                                                {categoryName}
                                                 <div className='sidebarCategoriesTour'>
                                                     {props.index === 0 && shouldViewSidebarTour && <SidebarCategoriesTourStep/>}
                                                 </div>
@@ -353,7 +361,7 @@ const SidebarCategory = (props: Props) => {
                                                 </MenuWrapper>
                                             </div>
                                         </div>
-                                        {!(collapsed || props.forceCollapse || snapshot.isDragging || props.draggedItemID === props.categoryBoards.id) && visibleBlocks.length === 0 &&
+                                        {!(categoryCollapsed || props.forceCollapse || snapshot.isDragging || props.draggedItemID === props.categoryBoards.id) && visibleBlocks.length === 0 &&
                                             (
                                                 <div>
                                                     {!props.categoryBoards.isNew && (
@@ -369,7 +377,7 @@ const SidebarCategory = (props: Props) => {
                                                 </div>
                                             )
                                         }
-                                        {!props.forceCollapse && collapsed && !snapshot.isDragging && props.draggedItemID !== props.categoryBoards.id && props.boards.filter((board: Board) => board.id === props.activeBoardID).map((board: Board, zzz) => {
+                                        {!props.forceCollapse && categoryCollapsed && !snapshot.isDragging && props.draggedItemID !== props.categoryBoards.id && props.boards.filter((board: Board) => board.id === props.activeBoardID).map((board: Board, zzz) => {
                                             if (!isBoardVisible(board.id)) {
                                                 return null
                                             }
@@ -387,7 +395,7 @@ const SidebarCategory = (props: Props) => {
                                                 />
                                             )
                                         })}
-                                        {!(collapsed || props.forceCollapse || snapshot.isDragging || props.draggedItemID === props.categoryBoards.id) && props.boards.filter((board) => isBoardVisible(board.id) && !board.isTemplate).map((board: Board, zzz) => {
+                                        {!(categoryCollapsed || props.forceCollapse || snapshot.isDragging || props.draggedItemID === props.categoryBoards.id) && props.boards.filter((board) => isBoardVisible(board.id) && !board.isTemplate).map((board: Board, zzz) => {
                                             return (
                                                 <SidebarBoardItem
                                                     index={zzz}

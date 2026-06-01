@@ -759,6 +759,9 @@ class Utils {
         if (currentPath === '/team/:teamId/new/:channelId') {
             return '/team/:teamId/:boardId?/:viewId?/:cardId?'
         }
+        if (currentPath === '/' || currentPath === '/dashboard' || currentPath === '/templates') {
+            return '/:boardId?/:viewId?/:cardId?'
+        }
         return currentPath
     }
 

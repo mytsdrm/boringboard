@@ -3,9 +3,11 @@
 import React, {useCallback, useEffect, useState} from 'react'
 import {FormattedMessage} from 'react-intl'
 import {DragDropContext, Droppable, DropResult} from 'react-beautiful-dnd'
+import {useHistory} from 'react-router-dom'
 
 import {getActiveThemeName, loadTheme} from '../../theme'
 import IconButton from '../../widgets/buttons/iconButton'
+import CompassIcon from '../../widgets/icons/compassIcon'
 import HamburgerIcon from '../../widgets/icons/hamburger'
 import HideSidebarIcon from '../../widgets/icons/hideSidebar'
 import ShowSidebarIcon from '../../widgets/icons/showSidebar'
@@ -53,6 +55,8 @@ import SidebarUserMenu from './sidebarUserMenu'
 
 type Props = {
     activeBoardId?: string
+    dashboardActive?: boolean
+    templatesActive?: boolean
     onBoardTemplateSelectorOpen: () => void
     onBoardTemplateSelectorClose?: () => void
 }
@@ -69,6 +73,7 @@ const Sidebar = (props: Props) => {
     const [isHidden, setHidden] = useState(false)
     const [userHidden, setUserHidden] = useState(false)
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions())
+    const history = useHistory()
     const boards = useAppSelector(getMySortedBoards)
     const dispatch = useAppDispatch()
     const sidebarCategories = useAppSelector<CategoryBoards[]>(getSidebarCategories)
@@ -367,6 +372,28 @@ const Sidebar = (props: Props) => {
             }
 
             <BoardsSwitcher/>
+
+            <div
+                className={`octo-sidebar-dashboard-item${props.dashboardActive ? ' active' : ''}`}
+                onClick={() => {
+                    history.push('/')
+                    hideSidebar()
+                }}
+            >
+                <CompassIcon icon='chart-bar'/>
+                <span>{'Dashboard'}</span>
+            </div>
+
+            <div
+                className={`octo-sidebar-dashboard-item${props.templatesActive ? ' active' : ''}`}
+                onClick={() => {
+                    history.push('/templates')
+                    hideSidebar()
+                }}
+            >
+                <CompassIcon icon='product-boards'/>
+                <span>{'Templates'}</span>
+            </div>
 
             <DragDropContext
                 onDragEnd={onDragEnd}
