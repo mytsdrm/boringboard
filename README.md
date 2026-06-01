@@ -30,7 +30,10 @@ http://localhost:8000
 
 The script starts the server, builds/watches the web app, clears ports `8000` and `8001` when needed, and enables browser auto-reload for frontend changes.
 
-## Original Focalboard README
+---
+
+<details>
+<summary><strong>Original Focalboard README</strong></summary>
 
 The content below is kept from the original Focalboard project for upstream reference.
 
@@ -120,3 +123,5 @@ Before checking in commits, run `make ci`, which includes:
 - **Changes**: See the [CHANGELOG](CHANGELOG.md) for the latest updates
 - **Bug Reports**: [File a bug report](https://github.com/mattermost/focalboard/issues/new?assignees=&labels=bug&template=bug_report.md&title=)
 - **Chat**: Join the [~Focalboard community channel](https://community.mattermost.com/core/channels/focalboard)
+
+</details>
