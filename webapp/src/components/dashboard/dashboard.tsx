@@ -1,31 +1,54 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React, {useEffect, useMemo, useState} from 'react'
+import React, {useCallback, useEffect, useMemo, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
-import {useHistory} from 'react-router-dom'
+import {useHistory, useRouteMatch} from 'react-router-dom'
 
+import {Block} from '../../blocks/block'
+import {Board} from '../../blocks/board'
 import {Card} from '../../blocks/card'
+import {useWebsockets} from '../../hooks/websockets'
 import octoClient from '../../octoClient'
-import {getMySortedBoards} from '../../store/boards'
+import {getMySortedBoards, updateBoards} from '../../store/boards'
 import {useAppDispatch, useAppSelector} from '../../store/hooks'
+import {getCurrentTeamId, getFirstTeam} from '../../store/teams'
 import {getMe, setMe} from '../../store/users'
+import {Utils} from '../../utils'
 import CompassIcon from '../../widgets/icons/compassIcon'
+import {WSClient} from '../../wsclient'
 
 import './dashboard.scss'
 
 type BoardStats = {
     total: number
     invitedUserIds: string[]
+    latestActivityAt: number
+}
+
+const getCardStats = (board: Board, cards: Card[]) => {
+    const latestActivityAt = cards.reduce((latest, card) => {
+        return Math.max(latest, card.updateAt || card.createAt || 0)
+    }, board.updateAt || board.createAt || 0)
+
+    return {
+        latestActivityAt,
+        total: cards.length,
+    }
 }
 
 const Dashboard = (): JSX.Element => {
     const intl = useIntl()
     const dispatch = useAppDispatch()
     const history = useHistory()
+    const match = useRouteMatch<{boardId: string, viewId?: string, cardId?: string, teamId?: string}>()
     const boards = useAppSelector(getMySortedBoards)
+    const currentTeamId = useAppSelector(getCurrentTeamId)
+    const firstTeam = useAppSelector(getFirstTeam)
     const me = useAppSelector(getMe)
     const [statsByBoard, setStatsByBoard] = useState<{[boardId: string]: BoardStats}>({})
     const taskBoards = useMemo(() => boards.filter((board) => !board.isTemplate), [boards])
+    const taskBoardsById = useMemo(() => new Map(taskBoards.map((board) => [board.id, board])), [taskBoards])
+    const websocketTeamId = currentTeamId || firstTeam?.id || taskBoards[0]?.teamId || ''
     const personalTaskBoards = useMemo(() => {
         if (!me?.id) {
             return taskBoards
@@ -40,9 +63,42 @@ const Dashboard = (): JSX.Element => {
     }, [me?.id, taskBoards])
     const recentlyUpdatedBoards = useMemo(() => {
         return [...taskBoards].
-            sort((a, b) => (b.updateAt || b.createAt) - (a.updateAt || a.createAt)).
+            sort((a, b) => {
+                const aActivityAt = statsByBoard[a.id]?.latestActivityAt || a.updateAt || a.createAt
+                const bActivityAt = statsByBoard[b.id]?.latestActivityAt || b.updateAt || b.createAt
+                return bActivityAt - aActivityAt
+            }).
             slice(0, 3)
-    }, [taskBoards])
+    }, [statsByBoard, taskBoards])
+
+    const refreshBoardCardStats = useCallback(async (boardIds: string[]) => {
+        const uniqueBoardIds = Array.from(new Set(boardIds))
+        const entries = await Promise.all(uniqueBoardIds.map(async (boardId) => {
+            const board = taskBoardsById.get(boardId)
+            if (!board) {
+                return null
+            }
+
+            const blocks = await octoClient.getAllBlocks(board.id)
+            const cards = blocks.filter((block) => block.type === 'card' && !block.fields.isTemplate) as Card[]
+            return [board.id, getCardStats(board, cards)] as [string, ReturnType<typeof getCardStats>]
+        }))
+
+        setStatsByBoard((previous) => {
+            const next = {...previous}
+            entries.forEach((entry) => {
+                if (!entry) {
+                    return
+                }
+                const [boardId, cardStats] = entry
+                next[boardId] = {
+                    invitedUserIds: previous[boardId]?.invitedUserIds || [],
+                    ...cardStats,
+                }
+            })
+            return next
+        })
+    }, [taskBoardsById])
 
     useEffect(() => {
         let canceled = false
@@ -57,8 +113,9 @@ const Dashboard = (): JSX.Element => {
                 const invitedUserIds = members.
                     filter((member) => !member.synthetic && member.userId !== board.createdBy).
                     map((member) => member.userId)
+                const cardStats = getCardStats(board, cards)
 
-                return [board.id, {total: cards.length, invitedUserIds}] as [string, BoardStats]
+                return [board.id, {...cardStats, invitedUserIds}] as [string, BoardStats]
             }))
 
             if (!canceled) {
@@ -72,6 +129,30 @@ const Dashboard = (): JSX.Element => {
             canceled = true
         }
     }, [taskBoards])
+
+    useWebsockets(websocketTeamId, (wsClient) => {
+        const incrementalBlockUpdate = (_: WSClient, blocks: Block[]) => {
+            const boardIds = blocks.
+                filter((block) => block.type === 'card' && !block.fields.isTemplate).
+                map((block) => block.boardId)
+
+            if (boardIds.length > 0) {
+                refreshBoardCardStats(boardIds)
+            }
+        }
+
+        const incrementalBoardUpdate = (_: WSClient, updatedBoards: Board[]) => {
+            dispatch(updateBoards(updatedBoards))
+        }
+
+        wsClient.addOnChange(incrementalBlockUpdate, 'block')
+        wsClient.addOnChange(incrementalBoardUpdate, 'board')
+
+        return () => {
+            wsClient.removeOnChange(incrementalBlockUpdate, 'block')
+            wsClient.removeOnChange(incrementalBoardUpdate, 'board')
+        }
+    }, [refreshBoardCardStats])
 
     const totalTasks = useMemo(() => {
         return taskBoards.reduce((result, board) => {
@@ -112,6 +193,10 @@ const Dashboard = (): JSX.Element => {
         dispatch(setMe(null))
         history.push('/login')
     }
+
+    const showBoard = useCallback((boardId: string) => {
+        Utils.showBoard(boardId, match, history)
+    }, [history, match])
 
     return (
         <div className='Dashboard'>
@@ -264,14 +349,16 @@ const Dashboard = (): JSX.Element => {
                     </div>
                     <div className='dashboard-widget-list'>
                         {recentlyUpdatedBoards.map((board) => (
-                            <div
+                            <button
                                 className='dashboard-widget-row'
                                 key={board.id}
+                                type='button'
+                                onClick={() => showBoard(board.id)}
                             >
                                 <span className='dashboard-board-icon'>{board.icon || <CompassIcon icon='product-boards'/>}</span>
                                 <span className='dashboard-board-name'>{board.title}</span>
-                                <span className='dashboard-time-pill'>{formatRelativeTime(board.updateAt || board.createAt)}</span>
-                            </div>
+                                <span className='dashboard-time-pill'>{formatRelativeTime(statsByBoard[board.id]?.latestActivityAt || board.updateAt || board.createAt)}</span>
+                            </button>
                         ))}
                         {recentlyUpdatedBoards.length === 0 &&
                             <div className='dashboard-empty-state'>

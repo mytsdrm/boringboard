@@ -271,7 +271,7 @@
     }
 
     .dashboard-widget {
-        min-height: 340px;
+        min-height: 390px;
         padding: 28px;
     }
 
@@ -315,14 +315,27 @@
         grid-template-columns: 28px minmax(0, 1fr) auto;
         align-items: center;
         gap: 12px;
+        width: 100%;
         min-height: 58px;
+        padding: 0;
         border-bottom: 1px solid var(--bb-border);
+        border-top: 0;
+        border-right: 0;
+        border-left: 0;
+        background: transparent;
         color: var(--bb-text);
+        cursor: pointer;
         font-size: 13px;
         font-weight: 750;
+        text-align: left;
 
         &:last-child {
             border-bottom: 0;
+        }
+
+        &:hover,
+        &:focus {
+            color: var(--bb-blue-text);
         }
     }
 
