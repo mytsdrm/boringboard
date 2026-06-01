@@ -1,11 +1,17 @@
 # BoringBoard
 
-BoringBoard is fork of Focalboard for my own project management workflow.
+Focalboard is one of those rare tools that just makes sense. Simple, clean, and easy to understand. Big love to the original team ❤️
 
-Default Theme
+BoringBoard started as a small fork of Focalboard, then slowly evolved into my personal playground for project management. It follows my own workflow, habits, and occasionally my questionable decisions.
+
+The goal isn't to reinvent project management. The goal is to make it a little less painful, a little more practical, and maybe even a little less boring.
+
+That's why it's called **BoringBoard**.
+
+**Default Theme**
 ![BoringBoard](README.assets/boringboard.png)
 
-Dark Theme
+**Dark Theme**
 ![BoringBoard](README.assets/boringboard-dark.png)
 
 ## How to start
