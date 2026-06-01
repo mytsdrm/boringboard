@@ -54,7 +54,7 @@ const Dashboard = (): JSX.Element => {
                 <div>
                     <div className='dashboard-eyebrow'>{'Dashboard'}</div>
                     <h1>{'Workspace summary'}</h1>
-                    <p>{'A clean overview of your Task Boards and the tasks inside them.'}</p>
+                    <p>{'BoringBoard, A place for all those "I\'ll do it later" tasks'}</p>
                 </div>
             </div>
 
