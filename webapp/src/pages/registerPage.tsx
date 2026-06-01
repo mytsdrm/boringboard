@@ -50,6 +50,17 @@ const RegisterPage = () => {
                     handleRegister()
                 }}
             >
+                <div className='brand'>
+                    <img
+                        src='/static/boringboard-logo.webp'
+                        alt='BoringBoard'
+                    />
+                </div>
+                {errorMessage &&
+                    <div className='error'>
+                        {errorMessage}
+                    </div>
+                }
                 <div className='title'>
                     <FormattedMessage
                         id='register.signup-title'
@@ -87,18 +98,13 @@ const RegisterPage = () => {
                 >
                     {'Register'}
                 </Button>
+                <Link to='/login'>
+                    <FormattedMessage
+                        id='register.login-button'
+                        defaultMessage={'Log in to an existing account'}
+                    />
+                </Link>
             </form>
-            <Link to='/login'>
-                <FormattedMessage
-                    id='register.login-button'
-                    defaultMessage={'or log in if you already have an account'}
-                />
-            </Link>
-            {errorMessage &&
-                <div className='error'>
-                    {errorMessage}
-                </div>
-            }
         </div>
     )
 }

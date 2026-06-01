@@ -1,22 +1,26 @@
 .RegisterPage {
-    border: 1px solid #ccc;
-    border-radius: 15px;
-    width: 450px;
-    height: 600px;
-    margin: 150px auto;
-    padding: 40px;
+    width: 100%;
+    min-height: 100%;
+    padding: 48px 24px;
     display: flex;
     align-items: center;
-    justify-content: flex-start;
+    justify-content: center;
     flex-direction: column;
-    box-shadow: rgba(var(--center-channel-color-rgb), 0.1) 0 0 0 1px,
-        rgba(var(--center-channel-color-rgb), 0.3) 0 4px 8px;
+    background:
+        radial-gradient(circle at 20% 20%, rgba(var(--button-bg-rgb), 0.12), transparent 280px),
+        linear-gradient(135deg, rgba(255, 255, 255, 0.92), rgba(var(--center-channel-bg-rgb), 1));
 
     form {
+        width: min(100%, 430px);
         display: flex;
         flex-direction: column;
-        align-items: flex-start;
-        justify-content: center;
+        align-items: stretch;
+        justify-content: flex-start;
+        padding: 36px;
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(var(--center-channel-color-rgb), 0.08);
+        border-radius: 18px;
+        box-shadow: var(--elevation-5);
     }
 
     @media screen and (max-width: 430px) {
@@ -28,42 +32,83 @@
         width: 100%;
         height: 100%;
         margin: auto;
-        padding-top: 10px;
+        padding: 16px;
+
+        form {
+            padding: 28px 20px;
+            border-radius: 14px;
+        }
+    }
+
+    .brand {
+        display: flex;
+        justify-content: center;
+        margin-bottom: 18px;
+
+        img {
+            width: 190px;
+            max-width: 72%;
+            height: auto;
+            display: block;
+        }
     }
 
     .title {
-        font-size: 16px;
-        font-weight: 500;
+        margin-bottom: 18px;
+        color: rgb(var(--center-channel-color-rgb));
+        font-size: 18px;
+        line-height: 26px;
+        font-weight: 600;
+        text-align: center;
     }
 
     .email,
     .username,
     .password {
-        margin-bottom: 10px;
-
-        label {
-            display: inline-block;
-            width: 140px;
-        }
+        margin-bottom: 12px;
 
         input {
-            display: inline-block;
-            width: 250px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            display: block;
+            width: 100%;
+            border: 1px solid rgba(var(--center-channel-color-rgb), 0.12);
+            border-radius: 10px;
             min-height: 44px;
-            padding: 7px;
+            padding: 0 14px;
+            background: rgb(255, 255, 255);
+            transition: border 120ms ease-out, box-shadow 120ms ease-out;
+
+            &:focus {
+                border-color: rgba(var(--button-bg-rgb), 0.72);
+                box-shadow: 0 0 0 4px rgba(var(--button-bg-rgb), 0.12);
+            }
         }
     }
 
     form > .Button {
-        margin-top: 10px;
-        margin-bottom: 20px;
+        width: 100%;
+        margin-top: 8px;
+        margin-bottom: 16px;
         min-height: 38px;
-        min-width: 250px;
+        min-width: 0;
+        border-radius: 10px;
+    }
+
+    form > a {
+        color: rgb(var(--button-bg-rgb));
+        font-size: 13px;
+        font-weight: 600;
+        text-align: center;
     }
 
     .error {
-        color: #900000;
+        width: 100%;
+        margin: -4px 0 18px;
+        padding: 10px 14px;
+        color: rgb(var(--button-danger-bg-rgb));
+        background: rgba(var(--button-danger-bg-rgb), 0.08);
+        border: 1px solid rgba(var(--button-danger-bg-rgb), 0.18);
+        border-radius: 10px;
+        font-weight: 400;
+        text-align: center;
     }
 }

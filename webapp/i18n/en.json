@@ -421,7 +421,7 @@
   "person.add-user-to-board-permissions": "Permissions",
   "person.add-user-to-board-question": "Do you want to add {username} to the board?",
   "person.add-user-to-board-warning": "{username} isn't a member of the board, and won't receive any notifications about it.",
-  "register.login-button": "or log in if you already have an account",
+  "register.login-button": "Log in to an existing account",
   "register.signup-title": "Sign up for your account",
   "rhs-board-non-admin-msg": "You're not an admin of the board",
   "rhs-boards.add": "Add",
