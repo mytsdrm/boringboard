@@ -13,7 +13,10 @@
         rgb(var(--sidebar-bg-rgb));
     padding: 18px 10px 12px;
     border-right: 1px solid rgba(148, 163, 184, 0.28);
-    box-shadow: 8px 0 24px rgba(3, 20, 84, 0.06);
+    box-shadow:
+        inset -1px 0 0 rgba(255, 255, 255, 0.72),
+        10px 0 26px rgba(3, 20, 84, 0.08),
+        22px 0 46px rgba(15, 23, 42, 0.06);
 
     &.hidden {
         @include z-index(sidebar-hidden);
