@@ -1,6 +1,6 @@
 # BoringBoard
 
-BoringBoard is of Focalboard for my own project management workflow.
+BoringBoard is fork of Focalboard for my own project management workflow.
 
 ## How to start
 
