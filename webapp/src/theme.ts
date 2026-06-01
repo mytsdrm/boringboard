@@ -113,17 +113,25 @@ function setBoringBoardThemeVariables(theme: Theme) {
     const buttonBg = color(`rgb(${theme.buttonBg})`)
     const isDark = mainBg.isDark()
 
-    const bg = isDark ? mainBg.darken(0.08) : mainBg.mix(color('#eef4fb'), 0.55)
-    const bgSoft = isDark ? mainBg.lighten(0.06) : mainBg.mix(color('#f6f9fd'), 0.72)
-    const panel = isDark ? mainBg.lighten(0.12) : color('#ffffff')
-    const panelSoft = isDark ? mainBg.lighten(0.18) : color('#f8fafc')
-    const card = isDark ? mainBg.lighten(0.17) : color('#ffffff')
-    const cardHover = isDark ? mainBg.lighten(0.22) : color('#fbfdff')
-    const border = mainFg.alpha(isDark ? 0.16 : 0.14)
-    const borderStrong = mainFg.alpha(isDark ? 0.24 : 0.22)
+    const bg = isDark ? mainBg.darken(0.08) : mainBg.mix(buttonBg, 0.035)
+    const bgSoft = isDark ? mainBg.lighten(0.06) : mainBg.mix(buttonBg, 0.02).lighten(0.01)
+    const panel = isDark ? mainBg.lighten(0.12) : mainBg.lighten(0.06)
+    const panelSoft = isDark ? mainBg.lighten(0.18) : mainBg.mix(buttonBg, 0.025)
+    const card = isDark ? mainBg.lighten(0.17) : mainBg.lighten(0.08)
+    const cardHover = isDark ? mainBg.lighten(0.22) : mainBg.mix(buttonBg, 0.025).lighten(0.02)
+    const kanbanColumnFrom = isDark ? mainBg.lighten(0.14) : mainBg.mix(buttonBg, 0.075)
+    const kanbanColumnTo = isDark ? mainBg.lighten(0.09) : mainBg.mix(buttonBg, 0.04)
+    const border = mainFg.alpha(isDark ? 0.16 : 0.16)
+    const borderStrong = mainFg.alpha(isDark ? 0.24 : 0.26)
     const shadow = isDark ? 'rgba(0, 0, 0, 0.24)' : 'rgba(15, 23, 42, 0.06)'
     const shadowSoft = isDark ? 'rgba(0, 0, 0, 0.18)' : 'rgba(15, 23, 42, 0.035)'
     const sidebarShadow = isDark ? 'rgba(0, 0, 0, 0.28)' : 'rgba(3, 20, 84, 0.055)'
+    const tableHeader = isDark ? mainBg.lighten(0.2) : mainBg.mix(buttonBg, 0.07)
+    const tableRow = isDark ? mainBg.lighten(0.11) : mainBg.lighten(0.07)
+    const tableRowAlt = isDark ? mainBg.lighten(0.14) : mainBg.mix(buttonBg, 0.018).lighten(0.04)
+    const tableRowHover = isDark ? mainBg.lighten(0.19) : mainBg.mix(buttonBg, 0.045).lighten(0.02)
+    const tableBorder = mainFg.alpha(isDark ? 0.18 : 0.16)
+    const tableBorderStrong = mainFg.alpha(isDark ? 0.28 : 0.24)
 
     document.documentElement.style.setProperty('--bb-bg', bg.rgb().string())
     document.documentElement.style.setProperty('--bb-bg-soft', bgSoft.rgb().string())
@@ -131,6 +139,8 @@ function setBoringBoardThemeVariables(theme: Theme) {
     document.documentElement.style.setProperty('--bb-panel-bg-soft', panelSoft.rgb().string())
     document.documentElement.style.setProperty('--bb-card-bg', card.rgb().string())
     document.documentElement.style.setProperty('--bb-card-hover-bg', cardHover.rgb().string())
+    document.documentElement.style.setProperty('--bb-kanban-column-from', kanbanColumnFrom.rgb().string())
+    document.documentElement.style.setProperty('--bb-kanban-column-to', kanbanColumnTo.rgb().string())
     document.documentElement.style.setProperty('--bb-text', mainFg.rgb().string())
     document.documentElement.style.setProperty('--bb-text-muted', mainFg.alpha(isDark ? 0.72 : 0.68).rgb().string())
     document.documentElement.style.setProperty('--bb-text-subtle', mainFg.alpha(isDark ? 0.52 : 0.5).rgb().string())
@@ -144,6 +154,13 @@ function setBoringBoardThemeVariables(theme: Theme) {
     document.documentElement.style.setProperty('--bb-green-text', isDark ? '#86efac' : '#15803d')
     document.documentElement.style.setProperty('--bb-template-sidebar-bg', isDark ? mainBg.lighten(0.08).rgb().string() : '#f6f9fd')
     document.documentElement.style.setProperty('--bb-template-item-active-bg', buttonBg.alpha(isDark ? 0.18 : 0.12).rgb().string())
+    document.documentElement.style.setProperty('--bb-table-header-bg', tableHeader.rgb().string())
+    document.documentElement.style.setProperty('--bb-table-row-bg', tableRow.rgb().string())
+    document.documentElement.style.setProperty('--bb-table-row-alt-bg', tableRowAlt.rgb().string())
+    document.documentElement.style.setProperty('--bb-table-row-hover-bg', tableRowHover.rgb().string())
+    document.documentElement.style.setProperty('--bb-table-border', tableBorder.rgb().string())
+    document.documentElement.style.setProperty('--bb-table-border-strong', tableBorderStrong.rgb().string())
+    document.documentElement.style.setProperty('--bb-table-shadow', isDark ? 'rgba(0, 0, 0, 0.16)' : 'rgba(15, 23, 42, 0.024)')
 }
 
 export function setTheme(theme: Theme | null): Theme {

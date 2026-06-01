@@ -31,8 +31,8 @@
         overflow: initial;
 
         .octo-table-cell {
-            background-color: var(--bb-card-hover-bg);
-            border-color: rgba(var(--button-bg-rgb), 0.18);
+            background-color: var(--bb-table-row-hover-bg);
+            border-color: rgba(var(--button-bg-rgb), 0.22);
         }
 
         .delete-button {

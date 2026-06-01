@@ -113,8 +113,8 @@
         display: flex;
         flex-direction: row;
         color: var(--bb-text);
-        border-right: solid 1px var(--bb-border);
-        border-bottom: solid 1px var(--bb-border);
+        border-right: solid 1px var(--bb-table-border);
+        border-bottom: solid 1px var(--bb-table-border);
         border-left: 1px solid transparent;
         border-top: 1px solid transparent;
         box-sizing: border-box;
@@ -242,19 +242,19 @@
         .octo-table-cell {
             height: 44px;
             color: var(--bb-text-muted);
-            background: var(--bb-panel-bg-soft);
+            background: var(--bb-table-header-bg);
             font-weight: 760;
             font-size: 12px;
             letter-spacing: 0;
-            border-top: 1px solid var(--bb-border-strong);
-            border-bottom: 1px solid var(--bb-border-strong);
+            border-top: 1px solid var(--bb-table-border-strong);
+            border-bottom: 1px solid var(--bb-table-border-strong);
 
             .Label {
                 color: var(--bb-text-muted);
             }
 
             &:first-child {
-                border-left: 1px solid var(--bb-border-strong);
+                border-left: 1px solid var(--bb-table-border-strong);
                 border-radius: 8px 0 0 8px;
             }
 
@@ -269,7 +269,7 @@
 
         .octo-table-cell {
             align-items: center;
-            background: var(--bb-card-bg);
+            background: var(--bb-table-row-bg);
 
             .octo-propertyvalue {
                 font-size: inherit;
@@ -282,14 +282,20 @@
         .octo-table-row {
             filter: none;
             position: relative;
-            box-shadow: 0 4px 12px var(--bb-shadow-soft);
+            box-shadow: 0 4px 12px var(--bb-table-shadow);
+
+            &:nth-child(even) {
+                .octo-table-cell {
+                    background: var(--bb-table-row-alt-bg);
+                }
+            }
 
             .octo-table-cell {
-                border-top: 1px solid var(--bb-border);
-                border-bottom: 1px solid var(--bb-border);
+                border-top: 1px solid var(--bb-table-border);
+                border-bottom: 1px solid var(--bb-table-border);
 
                 &:first-child {
-                    border-left: 1px solid var(--bb-border);
+                    border-left: 1px solid var(--bb-table-border);
                     border-radius: 8px 0 0 8px;
                 }
 

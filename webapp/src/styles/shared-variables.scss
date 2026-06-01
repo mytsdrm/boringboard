@@ -15,6 +15,8 @@
     --bb-panel-bg-soft: #f8fafc;
     --bb-card-bg: #fff;
     --bb-card-hover-bg: #fbfdff;
+    --bb-kanban-column-from: #edf5fc;
+    --bb-kanban-column-to: #e7f0f8;
     --bb-text: #1f2937;
     --bb-text-muted: #667085;
     --bb-text-subtle: #98a2b3;
@@ -28,4 +30,11 @@
     --bb-green-text: #15803d;
     --bb-template-sidebar-bg: #f6f9fd;
     --bb-template-item-active-bg: rgba(18, 98, 255, 0.12);
+    --bb-table-header-bg: #eaf2fb;
+    --bb-table-row-bg: #fff;
+    --bb-table-row-alt-bg: #fbfdff;
+    --bb-table-row-hover-bg: #f6faff;
+    --bb-table-border: rgba(100, 116, 139, 0.16);
+    --bb-table-border-strong: rgba(100, 116, 139, 0.24);
+    --bb-table-shadow: rgba(15, 23, 42, 0.024);
 }
