@@ -5,33 +5,15 @@ services:
       dockerfile: docker/Dockerfile
     container_name: boringboard
     depends_on:
-      - boringboard-db
-    expose:
-      - 8000
-    environment:
-      - VIRTUAL_HOST=localhost
-      - VIRTUAL_PORT=8000
-      - VIRTUAL_PROTO=http
+      - focalboard-db
+    ports:
+      - "${EXTERNAL_PORT:-8000}:8000"
     volumes:
       - "./config.json:/opt/focalboard/config.json"
       - fbdata:/opt/focalboard/data
     restart: always
-    networks:
-      - proxy
-      - default
 
-  proxy:
-    image: jwilder/nginx-proxy:latest
-    container_name: boringboard-proxy
-    restart: always
-    ports:
-      - "${EXTERNAL_PORT:-80}:80"
-    volumes:
-      - /var/run/docker.sock:/tmp/docker.sock:ro
-    networks:
-      - proxy
-
-  boringboard-db:
+  focalboard-db:
     image: postgres:latest
     container_name: boringboard-postgres
     restart: always
@@ -45,6 +27,3 @@ services:
 volumes:
   fbdata:
   pgdata:
-
-networks:
-  proxy:
