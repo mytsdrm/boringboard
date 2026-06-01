@@ -65,4 +65,24 @@
     >.description>* {
         flex-grow: 1;
     }
+
+    @media screen and (max-width: 768px) {
+        > div {
+            min-width: 0;
+        }
+
+        .Editable {
+            font-size: 24px;
+            line-height: 30px;
+        }
+
+        .description {
+            max-height: 70px;
+
+            .MarkdownEditor {
+                font-size: 13px;
+                line-height: 20px;
+            }
+        }
+    }
 }

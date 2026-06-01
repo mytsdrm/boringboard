@@ -143,4 +143,32 @@
     .kanban-hidden-cards {
         margin-left: 4px;
     }
+
+    @media screen and (max-width: 768px) {
+        padding-top: 14px;
+
+        .octo-board-header {
+            margin-top: 0;
+            padding-bottom: 12px;
+        }
+
+        .octo-board-header-cell {
+            width: 276px;
+            margin-right: 14px;
+
+            &.narrow {
+                width: 190px;
+            }
+        }
+
+        .octo-board-column {
+            width: 276px;
+            margin-right: 14px;
+            padding: 14px;
+
+            &.narrow {
+                width: 190px;
+            }
+        }
+    }
 }

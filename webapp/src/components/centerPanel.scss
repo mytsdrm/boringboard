@@ -73,6 +73,20 @@
             display: flex;
             flex-direction: column;
         }
+
+        @media screen and (max-width: 768px) {
+            padding-bottom: 10px;
+
+            > .mid-head {
+                margin-top: 18px;
+                align-items: flex-start;
+            }
+
+            .ViewTitle {
+                min-width: 0;
+                padding-right: 56px;
+            }
+        }
     }
 
 
@@ -89,6 +103,10 @@
     .shareButtonWrapper {
         position: relative;
         flex: 0 0 auto;
+
+        @media screen and (max-width: 768px) {
+            display: none;
+        }
     }
 
     .NotificationBox {

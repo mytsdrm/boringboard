@@ -16,6 +16,10 @@
     font-weight: 650;
 
     @media (max-width: 768px) {
+        width: max-content;
+        min-width: 100%;
+        margin-top: 12px;
+        padding: 9px 10px;
         overflow: auto;
         -webkit-overflow-scrolling: touch;
     }
@@ -60,6 +64,10 @@
         border: 1px solid var(--bb-border-strong);
         border-radius: 9px;
         color: var(--bb-text);
+
+        @media (max-width: 768px) {
+            min-width: 188px;
+        }
 
         .MenuWrapper {
             display: flex;
