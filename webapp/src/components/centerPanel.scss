@@ -16,23 +16,25 @@
 
 
 .BoardComponent {
+    --board-gutter: 32px;
+
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
     overflow: hidden;
 
     > * {
-        padding: 0 40px;
+        padding: 0 var(--board-gutter);
 
         @media screen and (max-width: 768px) {
-            padding: 0 40px;
+            padding: 0 16px;
         }
 
         &:first-child {
             padding-top: 10px;
 
             @media screen and (max-width: 768px) {
-                padding: 0 8px;
+                padding: 0 16px;
             }
         }
 
@@ -46,12 +48,12 @@
         position: sticky;
         top: 0;
         left: 0;
-        background: rgba(var(--center-channel-bg-rgb), 0.88);
+        background: rgba(var(--center-channel-bg-rgb), 0.92);
         backdrop-filter: blur(18px);
-        border-bottom: 1px solid rgba(var(--center-channel-color-rgb), 0.08);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
 
         > .mid-head {
-            margin-top: 18px;
+            margin-top: 22px;
             flex: 0 0 auto;
             display: flex;
             flex-direction: row;
@@ -72,12 +74,11 @@
 
 
     > div:nth-child(2) {
-        padding: 0 0 0 1px;
-        margin-left: 32px;
+        padding: 0 var(--board-gutter);
+        margin-left: 0;
 
         @media (max-width: 768px) {
-            margin-left: 0;
-            padding-left: 20px;
+            padding: 0 16px;
             -webkit-overflow-scrolling: touch;
         }
     }

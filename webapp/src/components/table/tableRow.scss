@@ -20,11 +20,20 @@
 
     &.selected {
         background-color: rgba(var(--button-bg-rgb), 0.08);
+
+        .octo-table-cell {
+            background-color: rgba(var(--button-bg-rgb), 0.08);
+            border-color: rgba(var(--button-bg-rgb), 0.24);
+        }
     }
 
     &:hover {
-        background-color: rgba(var(--button-bg-rgb), 0.05);
         overflow: initial;
+
+        .octo-table-cell {
+            background-color: rgba(255, 255, 255, 0.96);
+            border-color: rgba(148, 163, 184, 0.16);
+        }
 
         .delete-button {
             display: block;
@@ -56,8 +65,14 @@
     .action-cell {
         display: flex;
         visibility: hidden;
-        margin-left: 8px;
+        position: absolute;
+        left: -30px;
+        top: 7px;
+        margin-left: 0;
         width: 24px;
+        height: 30px;
+        background: transparent !important;
+        border: 0 !important;
     }
 
     .URLProperty:hover .Button_Copy {

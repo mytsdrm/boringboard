@@ -88,7 +88,7 @@
         font-weight: 600;
         padding: 4px 6px;
         margin-bottom: 12px;
-        height: 48px;
+        height: 44px;
         align-items: center;
         border-radius: 10px;
 
@@ -164,6 +164,7 @@
         align-items: center;
         border-radius: 8px;
         font-weight: 600;
+        font-size: 13px;
 
         &:hover {
             background-color: rgba(var(--sidebar-text-rgb), 0.08);

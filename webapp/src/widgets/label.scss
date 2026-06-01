@@ -1,17 +1,18 @@
 .Label {
     display: inline-flex;
     align-items: center;
-    padding: 2px 8px;
-    margin: 4px 4px 0 0;
-    border-radius: 3px;
-    line-height: 20px;
+    padding: 1px 8px;
+    margin: 2px 4px 0 0;
+    border-radius: 6px;
+    line-height: 18px;
     color: rgba(var(--center-channel-color-rgb), 0.8);
     white-space: nowrap;
     text-transform: uppercase;
     overflow: hidden;
-    font-weight: 600;
-    font-size: 13px;
+    font-weight: 700;
+    font-size: 11px;
     max-width: 100%;
+    letter-spacing: 0.02em;
 
     &.empty {
         color: rgba(var(--center-channel-color-rgb), 0.4);
@@ -21,9 +22,9 @@
     }
 
     input {
-        line-height: 20px;
+        line-height: 18px;
         color: rgba(var(--center-channel-color-rgb), 0.8);
-        font-weight: 600;
-        font-size: 13px;
+        font-weight: 700;
+        font-size: 11px;
     }
 }
