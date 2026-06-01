@@ -46,8 +46,10 @@
         }
     }
 
-    @media screen and (max-width: 768px) { 
-        .mobileWarning {display: flex;}
+    @media screen and (max-width: 768px) {
+        .mobileWarning {
+            display: none;
+        } /*hide warning*/
     }
 }
 

@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 import React, {useState} from 'react'
 import {useHistory, Link, Redirect} from 'react-router-dom'
-import {FormattedMessage} from 'react-intl'
+import {FormattedMessage, useIntl} from 'react-intl'
 
 import {useAppDispatch, useAppSelector} from '../store/hooks'
 import {fetchMe, getLoggedIn} from '../store/users'
@@ -19,6 +19,7 @@ const RegisterPage = () => {
     const history = useHistory()
     const dispatch = useAppDispatch()
     const loggedIn = useAppSelector<boolean|null>(getLoggedIn)
+    const intl = useIntl()
 
     const handleRegister = async (): Promise<void> => {
         const queryString = new URLSearchParams(window.location.search)
@@ -32,7 +33,7 @@ const RegisterPage = () => {
                 history.push('/')
             }
         } else if (response.code === 401) {
-            setErrorMessage('Invalid registration link, please contact your administrator')
+            setErrorMessage(intl.formatMessage({id: 'register.error-invalid-link', defaultMessage: 'Invalid registration link, please contact your administrator'}))
         } else {
             setErrorMessage(`${response.json?.error}`)
         }
@@ -70,7 +71,7 @@ const RegisterPage = () => {
                 <div className='email'>
                     <input
                         id='login-email'
-                        placeholder={'Enter email'}
+                        placeholder={intl.formatMessage({id: 'register.email-placeholder', defaultMessage: 'Enter email'})}
                         value={email}
                         onChange={(e) => setEmail(e.target.value.trim())}
                     />
@@ -78,7 +79,7 @@ const RegisterPage = () => {
                 <div className='username'>
                     <input
                         id='login-username'
-                        placeholder={'Enter username'}
+                        placeholder={intl.formatMessage({id: 'register.username-placeholder', defaultMessage: 'Enter username'})}
                         value={username}
                         onChange={(e) => setUsername(e.target.value.trim())}
                     />
@@ -87,7 +88,7 @@ const RegisterPage = () => {
                     <input
                         id='login-password'
                         type='password'
-                        placeholder={'Enter password'}
+                        placeholder={intl.formatMessage({id: 'register.password-placeholder', defaultMessage: 'Enter password'})}
                         value={password}
                         onChange={(e) => setPassword(e.target.value)}
                     />
@@ -96,7 +97,10 @@ const RegisterPage = () => {
                     filled={true}
                     submit={true}
                 >
-                    {'Register'}
+                    <FormattedMessage
+                        id='register.submit-button'
+                        defaultMessage='Register'
+                    />
                 </Button>
                 <Link to='/login'>
                     <FormattedMessage

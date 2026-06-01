@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 import React, {useState} from 'react'
 import {Link, Redirect, useLocation, useHistory} from 'react-router-dom'
-import {FormattedMessage} from 'react-intl'
+import {FormattedMessage, useIntl} from 'react-intl'
 
 import {useAppDispatch, useAppSelector} from '../store/hooks'
 import {fetchMe, getLoggedIn} from '../store/users'
@@ -23,19 +23,20 @@ const LoginPage = () => {
     const loggedIn = useAppSelector<boolean|null>(getLoggedIn)
     const queryParams = new URLSearchParams(useLocation().search)
     const history = useHistory()
+    const intl = useIntl()
 
     const handleLogin = async (): Promise<void> => {
         const trimmedUsername = username.trim()
         if (!trimmedUsername && !password) {
-            setErrorMessage('Please enter your username and password.')
+            setErrorMessage(intl.formatMessage({id: 'login.error-missing-username-password', defaultMessage: 'Please enter your username and password.'}))
             return
         }
         if (!trimmedUsername) {
-            setErrorMessage('Please enter your username.')
+            setErrorMessage(intl.formatMessage({id: 'login.error-missing-username', defaultMessage: 'Please enter your username.'}))
             return
         }
         if (!password) {
-            setErrorMessage('Please enter your password.')
+            setErrorMessage(intl.formatMessage({id: 'login.error-missing-password', defaultMessage: 'Please enter your password.'}))
             return
         }
 
@@ -48,7 +49,7 @@ const LoginPage = () => {
                 history.push('/')
             }
         } else {
-            setErrorMessage('Username or password is incorrect.')
+            setErrorMessage(intl.formatMessage({id: 'login.error-invalid-credentials', defaultMessage: 'Username or password is incorrect.'}))
         }
     }
 
@@ -76,10 +77,15 @@ const LoginPage = () => {
                     </div>
                 }
                 <div className='username'>
-                    <label htmlFor='login-username'>{'Username'}</label>
+                    <label htmlFor='login-username'>
+                        <FormattedMessage
+                            id='login.username-label'
+                            defaultMessage='Username'
+                        />
+                    </label>
                     <input
                         id='login-username'
-                        placeholder={'Enter your username'}
+                        placeholder={intl.formatMessage({id: 'login.username-placeholder', defaultMessage: 'Enter your username'})}
                         value={username}
                         onChange={(e) => {
                             setUsername(e.target.value)
@@ -88,12 +94,17 @@ const LoginPage = () => {
                     />
                 </div>
                 <div className='password'>
-                    <label htmlFor='login-password'>{'Password'}</label>
+                    <label htmlFor='login-password'>
+                        <FormattedMessage
+                            id='login.password-label'
+                            defaultMessage='Password'
+                        />
+                    </label>
                     <div className='passwordField'>
                         <input
                             id='login-password'
                             type={showPassword ? 'text' : 'password'}
-                            placeholder={'Enter your password'}
+                            placeholder={intl.formatMessage({id: 'login.password-placeholder', defaultMessage: 'Enter your password'})}
                             value={password}
                             onChange={(e) => {
                                 setPassword(e.target.value)
@@ -102,7 +113,7 @@ const LoginPage = () => {
                         />
                         <IconButton
                             className='togglePassword'
-                            title={showPassword ? 'Hide password' : 'Show password'}
+                            title={showPassword ? intl.formatMessage({id: 'login.hide-password', defaultMessage: 'Hide password'}) : intl.formatMessage({id: 'login.show-password', defaultMessage: 'Show password'})}
                             icon={showPassword ? <HideIcon/> : <ShowIcon/>}
                             onClick={() => setShowPassword(!showPassword)}
                         />

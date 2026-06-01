@@ -381,7 +381,12 @@ const Sidebar = (props: Props) => {
                 }}
             >
                 <CompassIcon icon='chart-bar'/>
-                <span className='active-text'>{'Dashboard'}</span>
+                <span className='active-text'>
+                    <FormattedMessage
+                        id='Sidebar.dashboard'
+                        defaultMessage='Dashboard'
+                    />
+                </span>
             </div>
 
             <div
@@ -392,7 +397,12 @@ const Sidebar = (props: Props) => {
                 }}
             >
                 <CompassIcon icon='product-boards'/>
-                <span className='active-text'>{'Templates'}</span>
+                <span className='active-text'>
+                    <FormattedMessage
+                        id='Sidebar.templates'
+                        defaultMessage='Templates'
+                    />
+                </span>
             </div>
 
             <DragDropContext

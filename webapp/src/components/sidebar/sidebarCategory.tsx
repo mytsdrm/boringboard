@@ -262,7 +262,10 @@ const SidebarCategory = (props: Props) => {
         </div>
     )
 
-    const categoryName = isTaskBoardsCategory ? 'Task Boards' : props.categoryBoards.name
+    const categoryName = isTaskBoardsCategory ? intl.formatMessage({
+        id: 'Sidebar.task-boards',
+        defaultMessage: 'Task Boards',
+    }) : props.categoryBoards.name
     const categoryCollapsed = isTaskBoardsCategory ? false : collapsed
 
     const delayedSetBoardDraggingOver = (isDraggingOver: boolean) => {

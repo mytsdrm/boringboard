@@ -152,6 +152,8 @@ function setBoringBoardThemeVariables(theme: Theme) {
     document.documentElement.style.setProperty('--bb-blue-soft', buttonBg.alpha(isDark ? 0.18 : 0.1).rgb().string())
     document.documentElement.style.setProperty('--bb-green-soft', isDark ? 'rgba(34, 197, 94, 0.16)' : 'rgba(22, 163, 74, 0.1)')
     document.documentElement.style.setProperty('--bb-green-text', isDark ? '#86efac' : '#15803d')
+    document.documentElement.style.setProperty('--bb-assigned-soft', isDark ? buttonBg.alpha(0.2).rgb().string() : buttonBg.alpha(0.12).rgb().string())
+    document.documentElement.style.setProperty('--bb-assigned-text', buttonBg.rgb().string())
     document.documentElement.style.setProperty('--bb-template-sidebar-bg', isDark ? mainBg.lighten(0.08).rgb().string() : '#f6f9fd')
     document.documentElement.style.setProperty('--bb-template-item-active-bg', buttonBg.alpha(isDark ? 0.18 : 0.12).rgb().string())
     document.documentElement.style.setProperty('--bb-table-header-bg', tableHeader.rgb().string())

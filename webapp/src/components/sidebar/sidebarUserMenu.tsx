@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useState} from 'react'
-import {useIntl} from 'react-intl'
+import {FormattedMessage, useIntl} from 'react-intl'
 import {useHistory} from 'react-router-dom'
 
 import {Constants} from '../../constants'
@@ -102,7 +102,12 @@ const SidebarUserMenu = () => {
                     <Dialog
                         size='small'
                         className='AboutBoringBoardDialog'
-                        title={<>{'About BoringBoard'}</>}
+                        title={(
+                            <FormattedMessage
+                                id='Sidebar.about'
+                                defaultMessage='About BoringBoard'
+                            />
+                        )}
                         onClose={() => setShowAboutDialog(false)}
                     >
                         <div className='about-boringboard'>
@@ -111,10 +116,16 @@ const SidebarUserMenu = () => {
                                 alt='BoringBoard'
                             />
                             <p>
-                                {'BoringBoard is customized for my own project management workflow.'}
+                                <FormattedMessage
+                                    id='Sidebar.about-description'
+                                    defaultMessage='BoringBoard is customized for my own project management workflow.'
+                                />
                             </p>
                             <p>
-                                {'This personal fork keeps the core board experience while adjusting the interface and branding for daily personal use.'}
+                                <FormattedMessage
+                                    id='Sidebar.about-fork-description'
+                                    defaultMessage='This personal fork keeps the core board experience while adjusting the interface and branding for daily personal use.'
+                                />
                             </p>
                             <a
                                 className='about-source'
@@ -122,10 +133,17 @@ const SidebarUserMenu = () => {
                                 target='_blank'
                                 rel='noreferrer'
                             >
-                                {'Source: github.com/mytsdrm/boringboard'}
+                                <FormattedMessage
+                                    id='Sidebar.about-source'
+                                    defaultMessage='Source: github.com/mytsdrm/boringboard'
+                                />
                             </a>
                             <div className='about-version'>
-                                {`Version ${Constants.versionString}`}
+                                <FormattedMessage
+                                    id='Sidebar.about-version'
+                                    defaultMessage='Version {version}'
+                                    values={{version: Constants.versionString}}
+                                />
                             </div>
                         </div>
                     </Dialog>

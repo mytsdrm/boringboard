@@ -1,7 +1,7 @@
 .Dashboard {
     flex: 1 1 auto;
     min-height: 100%;
-    padding: 34px 32px 56px;
+    padding: 36px 34px 56px;
     background: var(--bb-bg);
     overflow: auto;
 
@@ -10,38 +10,40 @@
         align-items: flex-end;
         justify-content: space-between;
         gap: 24px;
-        margin-bottom: 24px;
+        margin-bottom: 26px;
 
         h1 {
-            margin: 4px 0 6px;
+            margin: 6px 0 7px;
             color: var(--bb-text);
-            font-size: 30px;
-            font-weight: 750;
-            line-height: 38px;
+            font-size: 28px;
+            font-weight: 800;
+            line-height: 34px;
         }
 
         p {
             max-width: 560px;
             margin: 0;
             color: var(--bb-text-muted);
-            font-size: 14px;
-            line-height: 22px;
+            font-size: 13px;
+            font-weight: 550;
+            line-height: 21px;
         }
     }
 
     .dashboard-eyebrow {
         color: rgb(var(--button-bg-rgb));
         font-size: 12px;
-        font-weight: 700;
-        letter-spacing: 0.08em;
+        font-weight: 800;
+        letter-spacing: 0.06em;
         line-height: 18px;
         text-transform: uppercase;
     }
 
     .dashboard-metric-grid {
         display: grid;
-        grid-template-columns: repeat(2, minmax(260px, 420px));
+        grid-template-columns: repeat(4, minmax(210px, 1fr));
         gap: 18px;
+        max-width: 1280px;
     }
 
     .dashboard-metric-card {
@@ -49,8 +51,8 @@
         display: flex;
         align-items: flex-start;
         gap: 18px;
-        min-height: 168px;
-        padding: 22px;
+        min-height: 164px;
+        padding: 22px 22px 20px;
         overflow: hidden;
         border: 1px solid var(--bb-border-strong);
         border-radius: 12px;
@@ -71,6 +73,18 @@
         &.task-count {
             &::after {
                 background: var(--bb-green-soft);
+            }
+        }
+
+        &.assigned-count {
+            &::after {
+                background: var(--bb-assigned-soft);
+            }
+        }
+
+        &.joined-count {
+            &::after {
+                background: var(--bb-blue-soft);
             }
         }
     }
@@ -104,34 +118,57 @@
         }
     }
 
+    .assigned-count {
+        .metric-icon {
+            border-color: var(--bb-assigned-soft);
+            background: var(--bb-assigned-soft);
+            color: var(--bb-assigned-text);
+        }
+    }
+
+    .joined-count {
+        .metric-icon {
+            border-color: var(--bb-blue-soft);
+            background: var(--bb-blue-soft);
+            color: rgb(var(--button-bg-rgb));
+        }
+    }
+
     .metric-content {
         position: relative;
 
         span {
             color: var(--bb-text-muted);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 700;
-            letter-spacing: 0.02em;
+            letter-spacing: 0.04em;
             line-height: 18px;
             text-transform: uppercase;
+            overflow-wrap: anywhere;
         }
 
         strong {
             display: block;
-            margin-top: 10px;
+            margin-top: 8px;
             color: var(--bb-text);
-            font-size: 48px;
+            font-size: 46px;
             font-weight: 800;
-            line-height: 52px;
+            line-height: 50px;
         }
 
         p {
             max-width: 220px;
-            margin: 8px 0 0;
+            margin: 7px 0 0;
             color: var(--bb-text-muted);
-            font-size: 13px;
-            font-weight: 600;
+            font-size: 12px;
+            font-weight: 650;
             line-height: 20px;
+        }
+    }
+
+    @media screen and (max-width: 1120px) {
+        .dashboard-metric-grid {
+            grid-template-columns: repeat(2, minmax(240px, 420px));
         }
     }
 
