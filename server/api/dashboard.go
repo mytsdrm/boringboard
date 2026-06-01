@@ -18,9 +18,17 @@ func (a *API) registerDashboardRoutes(r *mux.Router) {
 func (a *API) handleGetDashboardActivity(w http.ResponseWriter, r *http.Request) {
 	userID := getUserID(r)
 	teamID := mux.Vars(r)["teamID"]
+	afterUpdateAt := int64(0)
 	beforeUpdateAt := int64(0)
 	limit := uint64(20)
 	maxLimit := uint64(200)
+
+	if afterParam := r.URL.Query().Get("after"); afterParam != "" {
+		parsedAfter, err := strconv.ParseInt(afterParam, 10, 64)
+		if err == nil && parsedAfter > 0 {
+			afterUpdateAt = parsedAfter
+		}
+	}
 
 	if beforeParam := r.URL.Query().Get("before"); beforeParam != "" {
 		parsedBefore, err := strconv.ParseInt(beforeParam, 10, 64)
@@ -40,7 +48,7 @@ func (a *API) handleGetDashboardActivity(w http.ResponseWriter, r *http.Request)
 		limit = maxLimit
 	}
 
-	blocks, err := a.app.GetDashboardActivityBlocks(userID, teamID, limit, beforeUpdateAt)
+	blocks, err := a.app.GetDashboardActivityBlocks(userID, teamID, limit, beforeUpdateAt, afterUpdateAt)
 	if err != nil {
 		a.errorResponse(w, r, err)
 		return

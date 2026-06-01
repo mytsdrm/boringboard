@@ -2,6 +2,8 @@
 // See LICENSE.txt for license information.
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
+import {DateUtils} from 'react-day-picker'
+import DayPicker from 'react-day-picker/DayPicker'
 
 import {Block} from '../../blocks/block'
 import {Board, IPropertyTemplate} from '../../blocks/board'
@@ -15,6 +17,7 @@ import {addBoardUsers, getBoardUsers, getMe} from '../../store/users'
 import CompassIcon from '../../widgets/icons/compassIcon'
 import {WSClient} from '../../wsclient'
 
+import 'react-day-picker/lib/style.css'
 import './activityLogs.scss'
 
 type ActivityAction = 'created' | 'deleted' | 'renamed' | 'moved' | 'edited' | 'updated'
@@ -33,8 +36,34 @@ type ActivityLog = {
 }
 
 const ACTIVITY_LOG_PAGE_SIZE = 20
-const ACTIVITY_LOG_HISTORY_PAGE_LIMIT = 240
+const ACTIVITY_LOG_HISTORY_PAGE_LIMIT = 200
 const ACTIVITY_LOG_TIME_ZONE = 'Asia/Jakarta'
+
+const toDateInputValue = (date: Date): string => {
+    const year = date.getFullYear()
+    const month = `${date.getMonth() + 1}`.padStart(2, '0')
+    const day = `${date.getDate()}`.padStart(2, '0')
+    return `${year}-${month}-${day}`
+}
+
+const getDefaultMonthRange = (): {endDate: string, startDate: string} => {
+    const today = new Date()
+    const firstDay = new Date(today.getFullYear(), today.getMonth(), 1)
+    const lastDay = new Date(today.getFullYear(), today.getMonth() + 1, 0)
+
+    return {
+        endDate: toDateInputValue(lastDay),
+        startDate: toDateInputValue(firstDay),
+    }
+}
+
+const toLocalDate = (dateValue: string): Date | undefined => {
+    if (!dateValue) {
+        return undefined
+    }
+
+    return new Date(`${dateValue}T12:00:00`)
+}
 
 const isCardContentBlock = (block: Block): boolean => {
     return block.type !== 'card' &&
@@ -173,11 +202,60 @@ const ActivityLogs = (): JSX.Element => {
     const [logs, setLogs] = useState<ActivityLog[]>([])
     const [pageCursors, setPageCursors] = useState<number[]>([0])
     const [pageIndex, setPageIndex] = useState(0)
+    const [memberUserIds, setMemberUserIds] = useState<string[]>([])
+    const [selectedUserId, setSelectedUserId] = useState('')
+    const [showDateRangePicker, setShowDateRangePicker] = useState(false)
+    const [startDate, setStartDate] = useState('')
+    const [endDate, setEndDate] = useState('')
     const cardsSnapshot = useRef<{[cardId: string]: Card}>({})
     const taskBoards = useMemo(() => boards.filter((board) => !board.isTemplate), [boards])
     const boardsById = useMemo(() => new Map(taskBoards.map((board) => [board.id, board])), [taskBoards])
     const websocketTeamId = currentTeamId || firstTeam?.id || taskBoards[0]?.teamId || ''
     const currentPageCursor = pageCursors[pageIndex] || 0
+    const startDateAfter = useMemo(() => {
+        if (!startDate) {
+            return 0
+        }
+
+        return new Date(`${startDate}T00:00:00`).getTime() - 1
+    }, [startDate])
+    const endDateBefore = useMemo(() => {
+        if (!endDate) {
+            return 0
+        }
+
+        return new Date(`${endDate}T23:59:59.999`).getTime() + 1
+    }, [endDate])
+    const requestBefore = useMemo(() => {
+        if (currentPageCursor > 0 && endDateBefore > 0) {
+            return Math.min(currentPageCursor, endDateBefore)
+        }
+
+        return currentPageCursor || endDateBefore
+    }, [currentPageCursor, endDateBefore])
+    const selectedDateRange = useMemo(() => {
+        return {
+            from: toLocalDate(startDate),
+            to: toLocalDate(endDate),
+        }
+    }, [endDate, startDate])
+    const dateRangeLabel = useMemo(() => {
+        const from = toLocalDate(startDate)
+        const to = toLocalDate(endDate)
+        if (!from && !to) {
+            return intl.formatMessage({
+                id: 'ActivityLogs.select-date-range',
+                defaultMessage: 'Select date range',
+            })
+        }
+        if (from && to) {
+            return `${intl.formatDate(from)} - ${intl.formatDate(to)}`
+        }
+        if (from) {
+            return intl.formatDate(from)
+        }
+        return intl.formatDate(to as Date)
+    }, [endDate, intl, startDate])
     const visiblePageNumbers = useMemo(() => {
         const pageCount = pageIndex + (hasNextPage ? 2 : 1)
         const pages = new Set<number>([1, pageCount, pageIndex + 1])
@@ -195,38 +273,73 @@ const ActivityLogs = (): JSX.Element => {
     }, [hasNextPage, pageIndex])
 
     useEffect(() => {
+        setPageIndex(0)
+        setPageCursors([0])
+    }, [endDateBefore, selectedUserId, startDateAfter])
+
+    const handleDateRangeDayClick = (day: Date) => {
+        const range = DateUtils.addDayToRange(day, selectedDateRange)
+        setStartDate(range.from ? toDateInputValue(range.from) : '')
+        setEndDate(range.to ? toDateInputValue(range.to) : '')
+    }
+
+    const resetDateRangeToCurrentMonth = () => {
+        const currentMonthRange = getDefaultMonthRange()
+        setStartDate(currentMonthRange.startDate)
+        setEndDate(currentMonthRange.endDate)
+    }
+
+    useEffect(() => {
         let canceled = false
 
         async function loadLogs() {
             setIsLoading(true)
-            const entries = await Promise.all(taskBoards.map(async (board) => {
-                const [blocks, members] = await Promise.all([
-                    octoClient.getAllBlocks(board.id),
-                    octoClient.getBoardMembers(board.teamId, board.id),
-                ])
-                const cards = blocks.filter((block) => block.type === 'card' && block.deleteAt === 0 && !block.fields.isTemplate) as Card[]
-                const realMembers = members.filter((member) => !member.synthetic)
-                const userIds = Array.from(new Set([...realMembers.map((member) => member.userId), board.createdBy]))
+            const [entries, teamUsers] = await Promise.all([
+                Promise.all(taskBoards.map(async (board) => {
+                    const [blocks, members] = await Promise.all([
+                        octoClient.getAllBlocks(board.id),
+                        octoClient.getBoardMembers(board.teamId, board.id),
+                    ])
+                    const cards = blocks.filter((block) => block.type === 'card' && block.deleteAt === 0 && !block.fields.isTemplate) as Card[]
+                    const userIds = Array.from(new Set([
+                        ...members.map((member) => member.userId),
+                        board.createdBy,
+                    ]))
 
-                if (userIds.length > 0) {
-                    const users = await octoClient.getTeamUsersList(userIds, board.teamId)
-                    dispatch(addBoardUsers(users))
-                }
+                    const users = userIds.length > 0 ? await octoClient.getTeamUsersList(userIds, board.teamId) : []
 
-                return cards
-            }))
+                    return {cards, userIds, users}
+                })),
+                octoClient.getTeamUsers(true),
+            ])
 
             const nextCardsSnapshot = {...cardsSnapshot.current}
-            entries.flat().forEach((card) => {
+            entries.flatMap((entry) => entry.cards).forEach((card) => {
                 nextCardsSnapshot[card.id] = card
             })
 
-            const historyBlocks = websocketTeamId ? await octoClient.getDashboardActivityBlocks(websocketTeamId, ACTIVITY_LOG_HISTORY_PAGE_LIMIT, currentPageCursor) : []
+            const historyBlocks = websocketTeamId ? await octoClient.getDashboardActivityBlocks(websocketTeamId, ACTIVITY_LOG_HISTORY_PAGE_LIMIT, requestBefore, startDateAfter) : []
             if (canceled) {
                 return
             }
 
+            const nextUsers = [...entries.flatMap((entry) => entry.users), ...teamUsers]
+            if (nextUsers.length > 0) {
+                dispatch(addBoardUsers(nextUsers))
+            }
+
+            const nextMemberUserIds = new Set<string>()
+            if (me?.id) {
+                nextMemberUserIds.add(me.id)
+            }
+            entries.forEach((entry) => {
+                entry.userIds.forEach((userId) => nextMemberUserIds.add(userId))
+            })
+            teamUsers.forEach((user) => nextMemberUserIds.add(user.id))
+            setMemberUserIds(Array.from(nextMemberUserIds))
+
             const pageLogs = buildActivityLogsFromHistory(historyBlocks, boardsById, nextCardsSnapshot).
+                filter((log) => !selectedUserId || log.actorId === selectedUserId).
                 sort((a, b) => b.timestamp - a.timestamp)
             const currentLogs = pageLogs.slice(0, ACTIVITY_LOG_PAGE_SIZE)
             const nextCursor = currentLogs[currentLogs.length - 1]?.timestamp || 0
@@ -251,7 +364,7 @@ const ActivityLogs = (): JSX.Element => {
         return () => {
             canceled = true
         }
-    }, [boardsById, currentPageCursor, dispatch, pageIndex, taskBoards, websocketTeamId])
+    }, [boardsById, dispatch, pageIndex, requestBefore, selectedUserId, startDateAfter, taskBoards, websocketTeamId])
 
     useWebsockets(websocketTeamId, (wsClient) => {
         const incrementalBlockUpdate = (_: WSClient, blocks: Block[]) => {
@@ -283,10 +396,23 @@ const ActivityLogs = (): JSX.Element => {
                 }
             })
 
-            if (nextLogs.length > 0 && pageIndex === 0) {
+            const filteredNextLogs = nextLogs.filter((log) => {
+                if (selectedUserId && log.actorId !== selectedUserId) {
+                    return false
+                }
+                if (startDateAfter > 0 && log.timestamp <= startDateAfter) {
+                    return false
+                }
+                if (endDateBefore > 0 && log.timestamp >= endDateBefore) {
+                    return false
+                }
+                return true
+            })
+
+            if (filteredNextLogs.length > 0 && pageIndex === 0) {
                 setLogs((previousLogs) => {
                     const seen = new Set<string>()
-                    return [...nextLogs, ...previousLogs].
+                    return [...filteredNextLogs, ...previousLogs].
                         filter((log) => {
                             if (seen.has(log.id)) {
                                 return false
@@ -305,7 +431,7 @@ const ActivityLogs = (): JSX.Element => {
         return () => {
             wsClient.removeOnChange(incrementalBlockUpdate, 'block')
         }
-    }, [boardsById, pageIndex])
+    }, [boardsById, endDateBefore, pageIndex, selectedUserId, startDateAfter])
 
     const getUserDisplayName = useCallback((userId: string): string => {
         if (me?.id === userId) {
@@ -318,6 +444,13 @@ const ActivityLogs = (): JSX.Element => {
             defaultMessage: 'Someone',
         })
     }, [boardUsers, intl, me])
+    const userFilterOptions = useMemo(() => {
+        return Array.from(new Set([
+            ...(me?.id ? [me.id] : []),
+            ...memberUserIds,
+            ...logs.map((log) => log.actorId),
+        ])).sort((a, b) => getUserDisplayName(a).localeCompare(getUserDisplayName(b)))
+    }, [getUserDisplayName, logs, me?.id, memberUserIds])
 
     const formatAuditDate = (timestamp: number): string => {
         const date = [
@@ -435,6 +568,89 @@ const ActivityLogs = (): JSX.Element => {
                         defaultMessage='Recent board activity related to your Task Boards.'
                     />
                 </p>
+            </div>
+
+            <div className='activity-logs-filters'>
+                <label>
+                    <span>
+                        <FormattedMessage
+                            id='ActivityLogs.filter-user'
+                            defaultMessage='User'
+                        />
+                    </span>
+                    <select
+                        onChange={(event) => setSelectedUserId(event.target.value)}
+                        value={selectedUserId}
+                    >
+                        <option value=''>
+                            {intl.formatMessage({
+                                id: 'ActivityLogs.all-users',
+                                defaultMessage: 'All users',
+                            })}
+                        </option>
+                        {userFilterOptions.map((userId) => (
+                            <option
+                                key={userId}
+                                value={userId}
+                            >
+                                {getUserDisplayName(userId)}
+                            </option>
+                        ))}
+                    </select>
+                </label>
+                <div className='activity-logs-date-range'>
+                    <span>
+                        <FormattedMessage
+                            id='ActivityLogs.filter-date-range'
+                            defaultMessage='Date range'
+                        />
+                    </span>
+                    <button
+                        className='activity-logs-date-range-button'
+                        onClick={() => setShowDateRangePicker((showPicker) => !showPicker)}
+                        type='button'
+                    >
+                        {dateRangeLabel}
+                    </button>
+                    {showDateRangePicker &&
+                        <div className='activity-logs-date-range-popover'>
+                            <DayPicker
+                                initialMonth={selectedDateRange.from || new Date()}
+                                modifiers={{
+                                    end: selectedDateRange.to,
+                                    start: selectedDateRange.from,
+                                }}
+                                onDayClick={handleDateRangeDayClick}
+                                selectedDays={[
+                                    selectedDateRange.from,
+                                    {
+                                        from: selectedDateRange.from,
+                                        to: selectedDateRange.to,
+                                    },
+                                ]}
+                            />
+                            <div className='activity-logs-date-range-actions'>
+                                <button
+                                    onClick={resetDateRangeToCurrentMonth}
+                                    type='button'
+                                >
+                                    <FormattedMessage
+                                        id='ActivityLogs.this-month'
+                                        defaultMessage='This month'
+                                    />
+                                </button>
+                                <button
+                                    onClick={() => setShowDateRangePicker(false)}
+                                    type='button'
+                                >
+                                    <FormattedMessage
+                                        id='ActivityLogs.close'
+                                        defaultMessage='Close'
+                                    />
+                                </button>
+                            </div>
+                        </div>}
+                </div>
             </div>
 
             <section className='activity-logs-card'>

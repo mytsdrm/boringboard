@@ -309,10 +309,13 @@ class OctoClient {
         return this.getBlocksWithPath(path)
     }
 
-    async getDashboardActivityBlocks(teamID: string, limit: number, beforeUpdateAt = 0): Promise<Block[]> {
+    async getDashboardActivityBlocks(teamID: string, limit: number, beforeUpdateAt = 0, afterUpdateAt = 0): Promise<Block[]> {
         let path = `/api/v2/teams/${teamID}/dashboard/activity?limit=${encodeURIComponent(limit)}`
         if (beforeUpdateAt > 0) {
             path += `&before=${encodeURIComponent(beforeUpdateAt)}`
+        }
+        if (afterUpdateAt > 0) {
+            path += `&after=${encodeURIComponent(afterUpdateAt)}`
         }
         return this.getBlocksWithPath(path)
     }
