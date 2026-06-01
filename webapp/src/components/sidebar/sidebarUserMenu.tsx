@@ -15,19 +15,17 @@ import {getMe, setMe} from '../../store/users'
 import {useAppSelector, useAppDispatch} from '../../store/hooks'
 
 import ModalWrapper from '../modalWrapper'
-
-import {IAppWindow} from '../../types'
+import Dialog from '../dialog'
 
 import RegistrationLink from './registrationLink'
 
 import './sidebarUserMenu.scss'
 
-declare let window: IAppWindow
-
 const SidebarUserMenu = () => {
     const dispatch = useAppDispatch()
     const history = useHistory()
     const [showRegistrationLinkDialog, setShowRegistrationLinkDialog] = useState(false)
+    const [showAboutDialog, setShowAboutDialog] = useState(false)
     const user = useAppSelector<IUser|null>(getMe)
     const intl = useIntl()
 
@@ -83,12 +81,7 @@ const SidebarUserMenu = () => {
                             id='about'
                             name={intl.formatMessage({id: 'Sidebar.about', defaultMessage: 'About BoringBoard'})}
                             onClick={async () => {
-                                window.open('https://www.focalboard.com?utm_source=webapp', '_blank')
-
-                                // TODO: Review if this is needed in the future, this is to fix the problem with linux webview links
-                                if (window.openInNewBrowser) {
-                                    window.openInNewBrowser('https://www.focalboard.com?utm_source=webapp')
-                                }
+                                setShowAboutDialog(true)
                             }}
                         />
                     </Menu>
@@ -100,6 +93,31 @@ const SidebarUserMenu = () => {
                             setShowRegistrationLinkDialog(false)
                         }}
                     />
+                }
+
+                {showAboutDialog &&
+                    <Dialog
+                        size='small'
+                        className='AboutBoringBoardDialog'
+                        title={<>{'About BoringBoard'}</>}
+                        onClose={() => setShowAboutDialog(false)}
+                    >
+                        <div className='about-boringboard'>
+                            <img
+                                src='/static/boringboard-logo.webp'
+                                alt='BoringBoard'
+                            />
+                            <p>
+                                {'BoringBoard is a personal fork of Focalboard, customized for my own project management workflow.'}
+                            </p>
+                            <p>
+                                {'The original project is Focalboard by Mattermost. This fork keeps the core board experience while adjusting the interface and branding for personal use.'}
+                            </p>
+                            <div className='about-version'>
+                                {`Version ${Constants.versionString}`}
+                            </div>
+                        </div>
+                    </Dialog>
                 }
             </ModalWrapper>
         </div>
