@@ -13,17 +13,29 @@
             cursor: pointer;
 
             .FocalboardLogoIcon {
-                fill: rgba(var(--sidebar-text-rgb), 1);
-                color: rgba(var(--sidebar-text-rgb), 1);
                 height: 24px;
-                width: 22px;
-                margin-right: 3px;
+                width: 24px;
+                margin-right: 7px;
                 position: relative;
-                bottom: 2px;
+                bottom: 1px;
+                box-shadow: 0 0 0 1px rgba(18, 98, 255, 0.16);
             }
 
-            span {
+            .brand-name {
+                display: inline-flex;
+                align-items: center;
                 height: 32px;
+                font-weight: 800;
+                letter-spacing: 0;
+                line-height: 32px;
+            }
+
+            .brand-name-boring {
+                color: #031454;
+            }
+
+            .brand-name-board {
+                color: #1262ff;
             }
         }
 

@@ -424,15 +424,20 @@ class Utils {
     // favicon
 
     static setFavicon(icon?: string): void {
+        document.querySelectorAll("link[rel*='icon']").forEach((n) => n.remove())
+
+        const link = document.createElement('link') as HTMLLinkElement
+        link.rel = 'shortcut icon'
+
         if (!icon) {
-            document.querySelector("link[rel*='icon']")?.remove()
+            link.type = 'image/png'
+            link.href = `${Utils.getFrontendBaseURL()}/static/favicon.png?v=1`
+            document.getElementsByTagName('head')[0].appendChild(link)
             return
         }
-        const link = document.createElement('link') as HTMLLinkElement
+
         link.type = 'image/x-icon'
-        link.rel = 'shortcut icon'
         link.href = `data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><text y=".9em" font-size="90">${icon}</text></svg>`
-        document.querySelectorAll("link[rel*='icon']").forEach((n) => n.remove())
         document.getElementsByTagName('head')[0].appendChild(link)
     }
 

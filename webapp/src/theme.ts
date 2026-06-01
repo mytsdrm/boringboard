@@ -41,14 +41,14 @@ export const defaultThemeName = 'default-theme'
 export const defaultTheme = {
     mainBg: '248, 250, 252',
     mainFg: '31, 41, 55',
-    buttonBg: '37, 99, 235',
+    buttonBg: '18, 98, 255',
     buttonFg: '255, 255, 255',
-    sidebarBg: '15, 23, 42',
-    sidebarFg: '255, 255, 255',
-    sidebarTextActiveBorder: '96, 165, 250',
-    sidebarWhiteLogo: 'true',
+    sidebarBg: '248, 250, 252',
+    sidebarFg: '3, 20, 84',
+    sidebarTextActiveBorder: '18, 98, 255',
+    sidebarWhiteLogo: 'false',
 
-    link: '37, 99, 235',
+    link: '18, 98, 255',
     linkVisited: '#551a8b',
 
     propDefault: '#fff',

@@ -36,7 +36,10 @@ const SidebarUserMenu = () => {
                     <div className='logo'>
                         <div className='logo-title'>
                             <FocalboardLogoIcon/>
-                            <span>{'BoringBoard'}</span>
+                            <span className='brand-name'>
+                                <span className='brand-name-boring'>{'Boring'}</span>
+                                <span className='brand-name-board'>{'Board'}</span>
+                            </span>
                             <div className='versionFrame'>
                                 <div
                                     className='version'
@@ -108,10 +111,10 @@ const SidebarUserMenu = () => {
                                 alt='BoringBoard'
                             />
                             <p>
-                                {'BoringBoard is a personal fork of Focalboard, customized for my own project management workflow.'}
+                                {'BoringBoard is customized for my own project management workflow.'}
                             </p>
                             <p>
-                                {'The original project is Focalboard by Mattermost. This fork keeps the core board experience while adjusting the interface and branding for personal use.'}
+                                {'This personal fork keeps the core board experience while adjusting the interface and branding for daily personal use.'}
                             </p>
                             <a
                                 className='about-source'

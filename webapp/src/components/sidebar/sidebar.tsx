@@ -381,7 +381,7 @@ const Sidebar = (props: Props) => {
                 }}
             >
                 <CompassIcon icon='chart-bar'/>
-                <span>{'Dashboard'}</span>
+                <span className='active-text'>{'Dashboard'}</span>
             </div>
 
             <div
@@ -392,7 +392,7 @@ const Sidebar = (props: Props) => {
                 }}
             >
                 <CompassIcon icon='product-boards'/>
-                <span>{'Templates'}</span>
+                <span className='active-text'>{'Templates'}</span>
             </div>
 
             <DragDropContext

@@ -191,7 +191,7 @@ const Workspace = (props: Props) => {
                 <Sidebar
                     onBoardTemplateSelectorOpen={openBoardTemplateSelector}
                     onBoardTemplateSelectorClose={closeBoardTemplateSelector}
-                    activeBoardId={board?.id}
+                    activeBoardId={(props.dashboard || props.templates) ? undefined : board?.id}
                     dashboardActive={props.dashboard || false}
                     templatesActive={props.templates || false}
                 />

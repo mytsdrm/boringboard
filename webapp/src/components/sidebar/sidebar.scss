@@ -9,11 +9,11 @@
     min-height: 100%;
     color: rgb(var(--sidebar-text-rgb));
     background:
-        linear-gradient(180deg, rgba(255, 255, 255, 0.08), rgba(255, 255, 255, 0)),
+        linear-gradient(180deg, rgba(18, 98, 255, 0.04), rgba(248, 250, 252, 0)),
         rgb(var(--sidebar-bg-rgb));
     padding: 18px 10px 12px;
-    border-right: 1px solid rgba(255, 255, 255, 0.08);
-    box-shadow: 10px 0 30px rgba(15, 23, 42, 0.08);
+    border-right: 1px solid rgba(148, 163, 184, 0.28);
+    box-shadow: 8px 0 24px rgba(3, 20, 84, 0.06);
 
     &.hidden {
         @include z-index(sidebar-hidden);
@@ -90,10 +90,11 @@
         padding: 0 10px;
         margin: 8px 0 4px;
         border-radius: 8px;
-        color: rgba(var(--sidebar-text-rgb), 0.72);
+        color: rgba(var(--sidebar-text-rgb), 0.86);
         cursor: pointer;
         font-size: 14px;
         font-weight: 600;
+        position: relative;
 
         .Icon {
             width: 18px;
@@ -103,8 +104,32 @@
 
         &:hover,
         &.active {
-            background: rgba(var(--sidebar-text-rgb), 0.14);
             color: rgb(var(--sidebar-text-rgb));
+        }
+
+        &:hover {
+            background: rgba(18, 98, 255, 0.08);
+        }
+
+        &.active {
+            &::before {
+                content: none;
+            }
+        }
+
+        .active-text {
+            position: relative;
+        }
+
+        &.active .active-text::after {
+            content: '';
+            background: rgb(var(--sidebar-text-active-border-rgb));
+            height: 2px;
+            position: absolute;
+            right: 0;
+            bottom: -5px;
+            left: 0;
+            border-radius: 999px;
         }
     }
 
