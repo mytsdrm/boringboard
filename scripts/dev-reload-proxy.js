@@ -2,6 +2,7 @@
 
 const fs = require('fs');
 const http = require('http');
+const net = require('net');
 const path = require('path');
 
 const publicPort = Number(process.env.PUBLIC_PORT || '8000');
@@ -116,14 +117,54 @@ function proxyRequest(req, res) {
     req.pipe(backendReq);
 }
 
-http.createServer((req, res) => {
+function proxyUpgrade(req, socket, head) {
+    const backendSocket = net.connect(backendPort, '127.0.0.1', () => {
+        backendSocket.write(`${req.method} ${req.url} HTTP/${req.httpVersion}\r\n`);
+
+        for (const [name, value] of Object.entries(req.headers)) {
+            if (Array.isArray(value)) {
+                for (const item of value) {
+                    backendSocket.write(`${name}: ${item}\r\n`);
+                }
+                continue;
+            }
+
+            if (value !== undefined) {
+                backendSocket.write(`${name}: ${value}\r\n`);
+            }
+        }
+
+        backendSocket.write('\r\n');
+
+        if (head && head.length > 0) {
+            backendSocket.write(head);
+        }
+
+        backendSocket.pipe(socket);
+        socket.pipe(backendSocket);
+    });
+
+    backendSocket.on('error', () => {
+        socket.destroy();
+    });
+
+    socket.on('error', () => {
+        backendSocket.destroy();
+    });
+}
+
+const server = http.createServer((req, res) => {
     if (req.url === '/__dev_reload/events') {
         handleEvents(req, res);
         return;
     }
 
     proxyRequest(req, res);
-}).listen(publicPort, () => {
+});
+
+server.on('upgrade', proxyUpgrade);
+
+server.listen(publicPort, () => {
     console.log(`Auto-reload proxy: http://localhost:${publicPort} -> http://localhost:${backendPort}`);
     console.log(`Watching ${watchDir}`);
 });

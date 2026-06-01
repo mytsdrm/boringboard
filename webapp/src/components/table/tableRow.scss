@@ -45,7 +45,6 @@
 
         .action-cell {
             @include z-index(table-row-action-cell);
-            position: relative;
             align-items: center;
         }
 
