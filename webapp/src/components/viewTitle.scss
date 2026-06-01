@@ -14,7 +14,7 @@
         margin-top: 2px;
 
         .MarkdownEditor {
-            color: #475467;
+            color: var(--bb-text-muted);
             font-size: 14px;
             line-height: 22px;
         }
@@ -59,7 +59,7 @@
         font-size: 26px;
         line-height: 34px;
         font-weight: 760;
-        color: #1f2937;
+        color: var(--bb-text);
     }
 
     >.description>* {

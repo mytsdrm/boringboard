@@ -68,17 +68,17 @@ export const darkThemeName = 'dark-theme'
 export const darkTheme = {
     ...defaultTheme,
 
-    mainBg: '55, 53, 47',
-    mainFg: '220, 220, 220',
-    buttonBg: '80, 170, 221',
+    mainBg: '15, 23, 42',
+    mainFg: '226, 232, 240',
+    buttonBg: '59, 130, 246',
     buttonFg: '255, 255, 255',
-    sidebarBg: '75, 73, 67',
-    sidebarFg: '255, 255, 255',
-    sidebarTextActiveBorder: '102, 185, 167',
+    sidebarBg: '11, 18, 32',
+    sidebarFg: '219, 234, 254',
+    sidebarTextActiveBorder: '96, 165, 250',
     sidebarWhiteLogo: 'true',
 
-    link: '#0090ff',
-    linkVisited: 'hsla(270, 68%, 70%, 1.0)',
+    link: '96, 165, 250',
+    linkVisited: '147, 197, 253',
 
     propDefault: 'hsla(0, 100%, 100%, 0.08)',
     propGray: 'hsla(0, 0%, 70%, 0.4)',
@@ -97,14 +97,53 @@ export const lightThemeName = 'light-theme'
 export const lightTheme = {
     ...defaultTheme,
 
-    mainBg: '255, 255, 255',
-    mainFg: '55, 53, 47',
-    buttonBg: '80, 170, 221',
+    mainBg: '248, 250, 252',
+    mainFg: '31, 41, 55',
+    buttonBg: '18, 98, 255',
     buttonFg: '255, 255, 255',
-    sidebarBg: '247, 246, 243',
-    sidebarFg: '55, 53, 47',
-    sidebarTextActiveBorder: '87, 158, 255',
+    sidebarBg: '248, 250, 252',
+    sidebarFg: '3, 20, 84',
+    sidebarTextActiveBorder: '18, 98, 255',
     sidebarWhiteLogo: 'false',
+}
+
+function setBoringBoardThemeVariables(theme: Theme) {
+    const mainBg = color(`rgb(${theme.mainBg})`)
+    const mainFg = color(`rgb(${theme.mainFg})`)
+    const buttonBg = color(`rgb(${theme.buttonBg})`)
+    const isDark = mainBg.isDark()
+
+    const bg = isDark ? mainBg.darken(0.08) : mainBg.mix(color('#eef4fb'), 0.55)
+    const bgSoft = isDark ? mainBg.lighten(0.06) : mainBg.mix(color('#f6f9fd'), 0.72)
+    const panel = isDark ? mainBg.lighten(0.12) : color('#ffffff')
+    const panelSoft = isDark ? mainBg.lighten(0.18) : color('#f8fafc')
+    const card = isDark ? mainBg.lighten(0.17) : color('#ffffff')
+    const cardHover = isDark ? mainBg.lighten(0.22) : color('#fbfdff')
+    const border = mainFg.alpha(isDark ? 0.16 : 0.14)
+    const borderStrong = mainFg.alpha(isDark ? 0.24 : 0.22)
+    const shadow = isDark ? 'rgba(0, 0, 0, 0.24)' : 'rgba(15, 23, 42, 0.06)'
+    const shadowSoft = isDark ? 'rgba(0, 0, 0, 0.18)' : 'rgba(15, 23, 42, 0.035)'
+    const sidebarShadow = isDark ? 'rgba(0, 0, 0, 0.28)' : 'rgba(3, 20, 84, 0.055)'
+
+    document.documentElement.style.setProperty('--bb-bg', bg.rgb().string())
+    document.documentElement.style.setProperty('--bb-bg-soft', bgSoft.rgb().string())
+    document.documentElement.style.setProperty('--bb-panel-bg', panel.rgb().string())
+    document.documentElement.style.setProperty('--bb-panel-bg-soft', panelSoft.rgb().string())
+    document.documentElement.style.setProperty('--bb-card-bg', card.rgb().string())
+    document.documentElement.style.setProperty('--bb-card-hover-bg', cardHover.rgb().string())
+    document.documentElement.style.setProperty('--bb-text', mainFg.rgb().string())
+    document.documentElement.style.setProperty('--bb-text-muted', mainFg.alpha(isDark ? 0.72 : 0.68).rgb().string())
+    document.documentElement.style.setProperty('--bb-text-subtle', mainFg.alpha(isDark ? 0.52 : 0.5).rgb().string())
+    document.documentElement.style.setProperty('--bb-border', border.rgb().string())
+    document.documentElement.style.setProperty('--bb-border-strong', borderStrong.rgb().string())
+    document.documentElement.style.setProperty('--bb-shadow', shadow)
+    document.documentElement.style.setProperty('--bb-shadow-soft', shadowSoft)
+    document.documentElement.style.setProperty('--bb-sidebar-shadow', sidebarShadow)
+    document.documentElement.style.setProperty('--bb-blue-soft', buttonBg.alpha(isDark ? 0.18 : 0.1).rgb().string())
+    document.documentElement.style.setProperty('--bb-green-soft', isDark ? 'rgba(34, 197, 94, 0.16)' : 'rgba(22, 163, 74, 0.1)')
+    document.documentElement.style.setProperty('--bb-green-text', isDark ? '#86efac' : '#15803d')
+    document.documentElement.style.setProperty('--bb-template-sidebar-bg', isDark ? mainBg.lighten(0.08).rgb().string() : '#f6f9fd')
+    document.documentElement.style.setProperty('--bb-template-item-active-bg', buttonBg.alpha(isDark ? 0.18 : 0.12).rgb().string())
 }
 
 export function setTheme(theme: Theme | null): Theme {
@@ -146,6 +185,8 @@ export function setTheme(theme: Theme | null): Theme {
     document.documentElement.style.setProperty('--prop-purple', consolidatedTheme.propPurple)
     document.documentElement.style.setProperty('--prop-pink', consolidatedTheme.propPink)
     document.documentElement.style.setProperty('--prop-red', consolidatedTheme.propRed)
+
+    setBoringBoardThemeVariables(consolidatedTheme)
 
     return consolidatedTheme
 }

@@ -9,7 +9,7 @@
     margin-bottom: 5px;
     border: 1px solid transparent;
     border-radius: 8px;
-    color: #536176;
+    color: var(--bb-text-muted);
     height: 42px;
 
     .template-name {
@@ -29,9 +29,9 @@
     }
 
     &:hover {
-        background: rgba(255, 255, 255, 0.62);
-        border-color: rgba(100, 116, 139, 0.12);
-        color: #1f2937;
+        background: color-mix(in srgb, var(--bb-panel-bg) 62%, transparent);
+        border-color: var(--bb-border);
+        color: var(--bb-text);
 
         .actions {
             display: flex;
@@ -39,8 +39,8 @@
     }
 
     &.active {
-        background: #e8f1ff;
-        border-color: rgba(18, 98, 255, 0.2);
+        background: var(--bb-template-item-active-bg);
+        border-color: rgba(var(--button-bg-rgb), 0.2);
         color: rgb(var(--button-bg-rgb));
         box-shadow: inset 3px 0 0 rgb(var(--button-bg-rgb));
     }

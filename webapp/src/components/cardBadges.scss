@@ -3,7 +3,7 @@
     align-items: center;
     margin-top: 6px;
     min-height: 22px;
-    color: #667085;
+    color: var(--bb-text-muted);
     font-size: 12px;
     line-height: 18px;
     font-weight: 600;
@@ -15,7 +15,7 @@
 
         .Icon,
         .CompassIcon {
-            color: #667085;
+            color: var(--bb-text-muted);
             fill: currentColor;
             margin-right: 4px;
         }

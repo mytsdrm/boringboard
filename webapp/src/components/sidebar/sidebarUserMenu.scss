@@ -40,7 +40,7 @@
         }
 
         .versionFrame {
-            display: flex;
+            display: none; /*hide version sidebar*/
             flex-direction: column;
             align-items: center;
             margin-left: 8px;

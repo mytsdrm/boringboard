@@ -10,7 +10,7 @@
             text-transform: uppercase;
             font-weight: 600;
             color: rgba(var(--center-channel-color-rgb), 0.64);
-            background-color: rgb(255, 255, 255);
+            background-color: var(--bb-panel-bg);
             border-radius: 6px;
             box-shadow: var(--elevation-1);
             height: 24px;
@@ -31,8 +31,8 @@
         overflow: initial;
 
         .octo-table-cell {
-            background-color: #fbfdff;
-            border-color: rgba(37, 99, 235, 0.18);
+            background-color: var(--bb-card-hover-bg);
+            border-color: rgba(var(--button-bg-rgb), 0.18);
         }
 
         .delete-button {

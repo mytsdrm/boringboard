@@ -6,12 +6,12 @@
     border-bottom: 0;
     margin: 18px 0 0;
     padding: 10px 12px;
-    color: #667085;
+    color: var(--bb-text-muted);
     align-items: center;
-    background: rgba(255, 255, 255, 0.94);
-    border: 1px solid rgba(120, 139, 164, 0.22);
+    background: color-mix(in srgb, var(--bb-panel-bg) 94%, transparent);
+    border: 1px solid var(--bb-border-strong);
     border-radius: 12px;
-    box-shadow: 0 12px 28px rgba(15, 23, 42, 0.07);
+    box-shadow: 0 12px 28px var(--bb-shadow);
     font-size: 13px;
     font-weight: 650;
 
@@ -56,10 +56,10 @@
         padding: 0 10px;
         min-height: 36px;
         align-items: center;
-        background: #f8fafc;
-        border: 1px solid rgba(120, 139, 164, 0.24);
+        background: var(--bb-panel-bg-soft);
+        border: 1px solid var(--bb-border-strong);
         border-radius: 9px;
-        color: #1f2937;
+        color: var(--bb-text);
 
         .MenuWrapper {
             display: flex;
@@ -74,12 +74,12 @@
     input {
         font-size: 13px;
         border-radius: 8px;
-        background: #f8fafc;
+        background: var(--bb-panel-bg-soft);
         padding: 0 12px 0 32px;
         height: 34px;
-        border: 1px solid rgba(120, 139, 164, 0.28);
+        border: 1px solid var(--bb-border-strong);
         padding-bottom: 1px;
-        color: #1f2937;
+        color: var(--bb-text);
 
         &:focus {
             border-color: rgba(var(--button-bg-rgb), 1);
@@ -90,7 +90,7 @@
     .board-search-icon {
         position: absolute;
         left: 10px;
-        color: rgba(var(--center-channel-color-rgb), 0.64);
+        color: var(--bb-text-muted);
         display: flex;
         align-items: center;
         height: 100%;

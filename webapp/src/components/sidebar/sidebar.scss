@@ -12,14 +12,14 @@
     min-height: 100%;
     color: rgb(var(--sidebar-text-rgb));
     background:
-        linear-gradient(180deg, rgba(18, 98, 255, 0.04), rgba(248, 250, 252, 0)),
+        linear-gradient(180deg, var(--bb-blue-soft), transparent),
         rgb(var(--sidebar-bg-rgb));
     padding: 18px 10px 12px;
-    border-right: 1px solid rgba(148, 163, 184, 0.28);
+    border-right: 1px solid var(--bb-border-strong);
     box-shadow:
-        inset -1px 0 0 rgba(255, 255, 255, 0.72),
-        6px 0 14px rgba(3, 20, 84, 0.055),
-        14px 0 28px rgba(15, 23, 42, 0.035);
+        inset -1px 0 0 color-mix(in srgb, var(--bb-panel-bg) 72%, transparent),
+        6px 0 14px var(--bb-sidebar-shadow),
+        14px 0 28px var(--bb-shadow-soft);
 
     &.hidden {
         @include z-index(sidebar-hidden);
@@ -114,7 +114,7 @@
         }
 
         &:hover {
-            background: rgba(18, 98, 255, 0.08);
+            background: var(--bb-blue-soft);
         }
 
         &.active {

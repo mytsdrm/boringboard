@@ -8,23 +8,23 @@
     border-radius: 10px;
     margin-bottom: 14px;
     padding: 15px 16px 14px;
-    background: #fff;
-    border: 1px solid rgba(100, 116, 139, 0.32);
+    background: var(--bb-card-bg);
+    border: 1px solid var(--bb-border-strong);
     box-shadow:
-        0 1px 0 rgba(255, 255, 255, 0.96) inset,
-        0 8px 16px rgba(15, 23, 42, 0.06);
+        0 1px 0 color-mix(in srgb, var(--bb-card-bg) 96%, transparent) inset,
+        0 8px 16px var(--bb-shadow);
 
     cursor: pointer;
-    color: #1f2937;
+    color: var(--bb-text);
 
     transition: background 120ms ease-out 0s, border-color 120ms ease-out 0s, box-shadow 120ms ease-out 0s;
 
     &:hover {
-        background: #fff;
-        border-color: rgba(37, 99, 235, 0.42);
+        background: var(--bb-card-hover-bg);
+        border-color: rgba(var(--button-bg-rgb), 0.42);
         box-shadow:
-            0 1px 0 rgba(255, 255, 255, 0.94) inset,
-            0 12px 22px rgba(15, 23, 42, 0.09);
+            0 1px 0 color-mix(in srgb, var(--bb-card-bg) 94%, transparent) inset,
+            0 12px 22px var(--bb-shadow);
 
         .optionsMenu {
             display: block;
@@ -54,7 +54,7 @@
 
     .octo-propertyvalue {
         margin-top: 3px;
-        color: #344054;
+        color: var(--bb-text-muted);
         font-size: 12px;
         line-height: 18px;
         font-weight: 560;
@@ -77,7 +77,7 @@
         font-size: 15px;
         line-height: 22px;
         margin-bottom: 9px;
-        color: #0f172a;
+        color: var(--bb-text);
 
         .octo-icon {
             font-size: 17px;
@@ -104,7 +104,7 @@
         margin-top: 3px;
         padding: 2px 8px;
         border-radius: 6px;
-        color: #344054;
+        color: var(--bb-text-muted);
         font-size: 11px;
         line-height: 17px;
         font-weight: 800;

@@ -4,7 +4,7 @@
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    background: linear-gradient(180deg, #f8fbff 0%, #f4f7fb 300px, #f1f5f9 100%);
+    background: linear-gradient(180deg, var(--bb-bg-soft) 0%, var(--bb-bg) 300px, var(--bb-bg) 100%);
 
     .octo-board {
         flex: 0 1 auto;
@@ -49,10 +49,10 @@
         position: sticky;
         top: 0;
         left: 0;
-        background: linear-gradient(180deg, rgba(249, 251, 255, 0.98), rgba(246, 249, 253, 0.96));
+        background: linear-gradient(180deg, color-mix(in srgb, var(--bb-bg-soft) 96%, transparent), color-mix(in srgb, var(--bb-bg) 96%, transparent));
         backdrop-filter: blur(18px);
-        border-bottom: 1px solid rgba(120, 139, 164, 0.24);
-        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.045);
+        border-bottom: 1px solid var(--bb-border-strong);
+        box-shadow: 0 12px 26px var(--bb-shadow-soft);
         padding-bottom: 14px;
 
         > .mid-head {

@@ -91,21 +91,21 @@
         flex-direction: column;
         overflow: hidden;
         background:
-            linear-gradient(180deg, rgba(239, 246, 255, 0.64), rgba(248, 250, 252, 0.92)),
-            #f6f9fd;
-        border-right: 1px solid rgba(100, 116, 139, 0.18);
+            linear-gradient(180deg, var(--bb-blue-soft), color-mix(in srgb, var(--bb-template-sidebar-bg) 92%, transparent)),
+            var(--bb-template-sidebar-bg);
+        border-right: 1px solid var(--bb-border-strong);
         box-shadow:
-            inset -1px 0 0 rgba(255, 255, 255, 0.74),
-            6px 0 18px rgba(15, 23, 42, 0.035);
+            inset -1px 0 0 color-mix(in srgb, var(--bb-panel-bg) 74%, transparent),
+            6px 0 18px var(--bb-shadow-soft);
     }
 
     .templates-sidebar__footer {
         display: flex;
         align-items: center;
-        border-top: 1px solid rgba(100, 116, 139, 0.16);
+        border-top: 1px solid var(--bb-border);
         padding: 24px;
         height: 89px;
-        background: rgba(248, 250, 252, 0.84);
+        background: color-mix(in srgb, var(--bb-panel-bg-soft) 84%, transparent);
 
         button {
             width: 100%;

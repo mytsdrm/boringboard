@@ -14,10 +14,10 @@
         min-height: 38px;
         margin-top: 16px;
         padding: 0 0 16px;
-        color: #344054;
+        color: var(--bb-text-muted);
         position: sticky;
         top: 0;
-        background: rgba(241, 245, 249, 0.96);
+        background: color-mix(in srgb, var(--bb-bg) 96%, transparent);
         backdrop-filter: blur(14px);
     }
 
@@ -53,19 +53,19 @@
             margin: 0 10px 0 0;
             padding: 4px 12px;
             border-radius: 7px;
-            color: #1f2937;
+            color: var(--bb-text);
             font-size: 12px;
             line-height: 18px;
             font-weight: 800;
             letter-spacing: 0;
 
             &.empty {
-                color: #344054;
+                color: var(--bb-text-muted);
                 font-weight: 700;
             }
 
             .Editable {
-                color: #1f2937;
+                color: var(--bb-text);
                 background: transparent;
             }
         }
@@ -95,12 +95,12 @@
         width: 286px;
         margin-right: 18px;
         padding: 14px;
-        background: linear-gradient(180deg, #edf5fc 0%, #e7f0f8 100%);
-        border: 1px solid rgba(100, 116, 139, 0.28);
+        background: linear-gradient(180deg, var(--bb-panel-bg-soft) 0%, var(--bb-bg-soft) 100%);
+        border: 1px solid var(--bb-border-strong);
         border-radius: 12px;
         box-shadow:
-            inset 0 1px 0 rgba(255, 255, 255, 0.82),
-            0 12px 24px rgba(15, 23, 42, 0.05);
+            inset 0 1px 0 color-mix(in srgb, var(--bb-card-bg) 82%, transparent),
+            0 12px 24px var(--bb-shadow-soft);
 
         &.narrow {
             width: 220px;
@@ -112,12 +112,12 @@
             min-height: 36px;
             margin-top: 2px;
             border-radius: 8px;
-            color: #1f2937;
+            color: var(--bb-text);
             font-weight: 700;
 
             &:hover {
-                background: rgba(37, 99, 235, 0.08);
-                color: #155eef;
+                background: var(--bb-blue-soft);
+                color: rgb(var(--button-bg-rgb));
             }
         }
     }
