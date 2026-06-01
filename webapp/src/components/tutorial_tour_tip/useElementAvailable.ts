@@ -8,24 +8,26 @@ export default function useElementAvailable(
     const checkAvailableInterval = useRef<NodeJS.Timeout | null>(null)
     const [available, setAvailable] = useState(false)
     useEffect(() => {
-        if (available) {
+        const cleanup = () => {
             if (checkAvailableInterval.current) {
                 clearInterval(checkAvailableInterval.current)
                 checkAvailableInterval.current = null
             }
-            return
+        }
+
+        if (available) {
+            cleanup()
+            return cleanup
         } else if (checkAvailableInterval.current) {
-            return
+            return cleanup
         }
         checkAvailableInterval.current = setInterval(() => {
             if (elementIds.every((x) => document.querySelector(x))) {
                 setAvailable(true)
-                if (checkAvailableInterval.current) {
-                    clearInterval(checkAvailableInterval.current)
-                    checkAvailableInterval.current = null
-                }
+                cleanup()
             }
         }, 500)
+        return cleanup
     }, [])
 
     return available

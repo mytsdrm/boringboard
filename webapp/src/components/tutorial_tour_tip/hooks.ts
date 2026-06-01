@@ -23,8 +23,10 @@ export function useMeasurePunchouts(elementIds: string[], additionalDeps: any[],
 
     useLayoutEffect(() => {
         window.addEventListener('resize', updateSize)
-        return () =>
+        return () => {
             window.removeEventListener('resize', updateSize)
+            updateSize.cancel()
+        }
     }, [])
 
     const channelPunchout = useMemo(() => {
