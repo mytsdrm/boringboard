@@ -24,19 +24,33 @@
     &.hidden {
         @include z-index(sidebar-hidden);
         position: absolute;
-        top: 0;
-        left: 0;
+        top: 16px;
+        right: 16px;
+        left: auto;
         min-height: 0;
-        height: 50px;
-        width: 50px;
-        background: none;
+        height: 44px;
+        width: 44px;
+        background: rgb(var(--center-channel-bg-rgb));
         padding: 0;
-        padding-left: 10px;
+        border: 1px solid var(--bb-border);
+        border-radius: 10px;
+        box-shadow: 0 8px 22px var(--bb-shadow-soft);
         display: block !important;
 
         > div {
+            width: 100%;
+            height: 100%;
             padding: 0;
-            margin: auto;
+            margin: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .octo-sidebar-header.show-button {
+            height: 100%;
+            margin: 0;
+            border-radius: inherit;
         }
     }
 
@@ -232,6 +246,18 @@
     @media screen and (min-width: 768px) {
         .WorkspaceTitle .sidebarSwitcher {
             display: none;
+        }
+    }
+
+    @media screen and (max-width: 767px) {
+        flex: 0 0 100%;
+        max-width: 100%;
+        width: 100%;
+        height: 100%;
+
+        &.hidden {
+            width: 44px;
+            height: 44px;
         }
     }
 }
