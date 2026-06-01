@@ -309,6 +309,11 @@ class OctoClient {
         return this.getBlocksWithPath(path)
     }
 
+    async getDashboardActivityBlocks(teamID: string, limit: number): Promise<Block[]> {
+        const path = `/api/v2/teams/${teamID}/dashboard/activity?limit=${encodeURIComponent(limit)}`
+        return this.getBlocksWithPath(path)
+    }
+
     private async getBlocksWithPath(path: string): Promise<Block[]> {
         const response = await fetch(this.getBaseURL() + path, {headers: this.headers()})
         if (response.status !== 200) {

@@ -42,6 +42,7 @@ type DashboardActivity = {
 }
 
 const DASHBOARD_ACTIVITY_LIMIT = 20
+const DASHBOARD_ACTIVITY_HISTORY_LIMIT = 120
 const DASHBOARD_AUDIT_TIME_ZONE = 'Asia/Jakarta'
 
 const getCardStats = (board: Board, cards: Card[]) => {
@@ -142,6 +143,45 @@ const createDashboardActivity = (
     }
 }
 
+const getHistoryPreviousBlock = (historyById: Map<string, Block[]>, block: Block): Block | undefined => {
+    return historyById.get(block.id)?.find((historyBlock) => historyBlock.updateAt < block.updateAt)
+}
+
+const buildActivitiesFromHistory = (
+    historyBlocks: Block[],
+    taskBoardsById: Map<string, Board>,
+    cardsById: {[cardId: string]: Card},
+): DashboardActivity[] => {
+    const historyById = new Map<string, Block[]>()
+    historyBlocks.forEach((block) => {
+        historyById.set(block.id, [...(historyById.get(block.id) || []), block])
+    })
+    historyById.forEach((blocks) => blocks.sort((a, b) => b.updateAt - a.updateAt))
+
+    return historyBlocks.reduce<DashboardActivity[]>((result, block) => {
+        const board = taskBoardsById.get(block.boardId)
+        if (!board) {
+            return result
+        }
+
+        if (block.type === 'card') {
+            const card = block as Card
+            const previousCard = getHistoryPreviousBlock(historyById, block) as Card | undefined
+            result.push(createDashboardActivity(card, board, getActivityAction(board, card, previousCard), previousCard))
+            return result
+        }
+
+        if (isCardContentBlock(block)) {
+            const parentCard = cardsById[block.parentId]
+            if (parentCard) {
+                result.push(createDashboardActivity(parentCard, board, 'edited', parentCard, block))
+            }
+        }
+
+        return result
+    }, [])
+}
+
 const Dashboard = (): JSX.Element => {
     const intl = useIntl()
     const dispatch = useAppDispatch()
@@ -234,26 +274,26 @@ const Dashboard = (): JSX.Element => {
                 return [board.id, {...cardStats, invitedUserIds}, cards] as [string, BoardStats, Card[]]
             }))
 
-            if (!canceled) {
-                const nextCardsSnapshot = {...cardsSnapshot.current}
-                const seededActivities: DashboardActivity[] = []
-                entries.forEach(([boardId, , cards]) => {
-                    const board = taskBoardsById.get(boardId)
-                    cards.forEach((card) => {
-                        nextCardsSnapshot[card.id] = card
-                        if (board) {
-                            seededActivities.push(createDashboardActivity(card, board, 'updated'))
-                        }
-                    })
+            const nextCardsSnapshot = {...cardsSnapshot.current}
+            entries.forEach(([, , cards]) => {
+                cards.forEach((card) => {
+                    nextCardsSnapshot[card.id] = card
                 })
-                cardsSnapshot.current = nextCardsSnapshot
-                setStatsByBoard(Object.fromEntries(entries.map(([boardId, stats]) => [boardId, stats])))
-                setActivities(
-                    seededActivities.
-                        sort((a, b) => b.timestamp - a.timestamp).
-                        slice(0, DASHBOARD_ACTIVITY_LIMIT),
-                )
+            })
+
+            const historyBlocks = websocketTeamId ? await octoClient.getDashboardActivityBlocks(websocketTeamId, DASHBOARD_ACTIVITY_HISTORY_LIMIT) : []
+            if (canceled) {
+                return
             }
+
+            const seededActivities = buildActivitiesFromHistory(historyBlocks, taskBoardsById, nextCardsSnapshot)
+            cardsSnapshot.current = nextCardsSnapshot
+            setStatsByBoard(Object.fromEntries(entries.map(([boardId, stats]) => [boardId, stats])))
+            setActivities(
+                seededActivities.
+                    sort((a, b) => b.timestamp - a.timestamp).
+                    slice(0, DASHBOARD_ACTIVITY_LIMIT),
+            )
         }
 
         loadStats()
@@ -261,13 +301,14 @@ const Dashboard = (): JSX.Element => {
         return () => {
             canceled = true
         }
-    }, [dispatch, taskBoards, taskBoardsById])
+    }, [dispatch, taskBoards, taskBoardsById, websocketTeamId])
 
     useWebsockets(websocketTeamId, (wsClient) => {
         const incrementalBlockUpdate = (_: WSClient, blocks: Block[]) => {
             const cardUpdates = blocks.
                 filter((block) => block.type === 'card' && !block.fields.isTemplate) as Card[]
             const boardIds = cardUpdates.map((block) => block.boardId)
+            const contentUpdates = blocks.filter(isCardContentBlock)
 
             if (boardIds.length > 0) {
                 refreshBoardCardStats(boardIds)
@@ -280,7 +321,7 @@ const Dashboard = (): JSX.Element => {
                 }
 
                 const previousCard = cardsSnapshot.current[card.id]
-                result.push(createDashboardActivity(card, board, getActivityAction(card, previousCard), previousCard))
+                result.push(createDashboardActivity(card, board, getActivityAction(board, card, previousCard), previousCard))
 
                 if (card.deleteAt === 0) {
                     cardsSnapshot.current[card.id] = card
@@ -290,6 +331,14 @@ const Dashboard = (): JSX.Element => {
 
                 return result
             }, [])
+
+            contentUpdates.forEach((block) => {
+                const board = taskBoardsById.get(block.boardId)
+                const parentCard = cardsSnapshot.current[block.parentId]
+                if (board && parentCard) {
+                    nextActivities.push(createDashboardActivity(parentCard, board, 'edited', parentCard, block))
+                }
+            })
 
             if (nextActivities.length > 0) {
                 setActivities((previousActivities) => {
@@ -410,7 +459,24 @@ const Dashboard = (): JSX.Element => {
                 id: 'Dashboard.untitled-card',
                 defaultMessage: 'Untitled card',
             }),
-            strong: (chunks: React.ReactNode) => <strong className='dashboard-activity-user'>{chunks}</strong>,
+            b: (chunks: React.ReactNode) => <strong className='dashboard-activity-user'>{chunks}</strong>,
+            from: activity.fromValue || intl.formatMessage({
+                id: 'Dashboard.empty-value',
+                defaultMessage: 'Empty',
+            }),
+            property: activity.propertyName || '',
+            source: activity.fromValue || intl.formatMessage({
+                id: 'Dashboard.empty-value',
+                defaultMessage: 'Empty',
+            }),
+            target: activity.toValue || intl.formatMessage({
+                id: 'Dashboard.empty-value',
+                defaultMessage: 'Empty',
+            }),
+            to: activity.toValue || intl.formatMessage({
+                id: 'Dashboard.empty-value',
+                defaultMessage: 'Empty',
+            }),
             user: getUserDisplayName(activity.actorId),
         }
 
@@ -419,7 +485,7 @@ const Dashboard = (): JSX.Element => {
             return (
                 <FormattedMessage
                     id='Dashboard.activity-created'
-                    defaultMessage='<strong>{user}</strong> created {card} in {board}'
+                    defaultMessage='<b>{user}</b> created <b>{card}</b> in <b>{board}</b>'
                     values={values}
                 />
             )
@@ -427,7 +493,7 @@ const Dashboard = (): JSX.Element => {
             return (
                 <FormattedMessage
                     id='Dashboard.activity-deleted'
-                    defaultMessage='<strong>{user}</strong> deleted {card} in {board}'
+                    defaultMessage='<b>{user}</b> deleted <b>{card}</b> in <b>{board}</b>'
                     values={values}
                 />
             )
@@ -435,15 +501,23 @@ const Dashboard = (): JSX.Element => {
             return (
                 <FormattedMessage
                     id='Dashboard.activity-renamed'
-                    defaultMessage='<strong>{user}</strong> renamed {card} in {board}'
+                    defaultMessage='<b>{user}</b> renamed <b>{card}</b> in <b>{board}</b>'
                     values={values}
                 />
             )
-        case 'changed':
+        case 'moved':
             return (
                 <FormattedMessage
-                    id='Dashboard.activity-changed'
-                    defaultMessage='<strong>{user}</strong> moved or edited {card} in {board}'
+                    id='Dashboard.activity-moved'
+                    defaultMessage='<b>{user}</b> moved <b>{card}</b> from <b>{source}</b> to <b>{target}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'edited':
+            return (
+                <FormattedMessage
+                    id='Dashboard.activity-edited'
+                    defaultMessage='<b>{user}</b> edited content in <b>{card}</b> in <b>{board}</b>'
                     values={values}
                 />
             )
@@ -451,7 +525,7 @@ const Dashboard = (): JSX.Element => {
             return (
                 <FormattedMessage
                     id='Dashboard.activity-updated'
-                    defaultMessage='<strong>{user}</strong> updated {card} in {board}'
+                    defaultMessage='<b>{user}</b> updated <b>{card}</b> in <b>{board}</b>'
                     values={values}
                 />
             )
