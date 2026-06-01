@@ -426,11 +426,7 @@ func (s *SQLStore) deleteBlockAndChildren(db sq.BaseRunner, blockID string, modi
 	}
 
 	if fileID != "" {
-		deleteFileInfoQuery := s.getQueryBuilder(db).
-			Update("FileInfo").
-			Set("DeleteAt", model.GetMillis()).
-			Where(sq.Eq{"id": fileID})
-		if _, err := deleteFileInfoQuery.Exec(); err != nil {
+		if err := s.softDeleteFileInfos(db, []string{fileID}); err != nil {
 			return err
 		}
 	}
@@ -983,12 +979,7 @@ func (s *SQLStore) deleteBlockChildren(db sq.BaseRunner, boardID string, parentI
 	}
 
 	if len(fileIDs) > 0 {
-		deleteFileInfoQuery := s.getQueryBuilder(db).
-			Update("FileInfo").
-			Set("DeleteAt", model.GetMillis()).
-			Where(sq.Eq{"id": fileIDs})
-
-		if _, err := deleteFileInfoQuery.Exec(); err != nil {
+		if err := s.softDeleteFileInfos(db, fileIDs); err != nil {
 			return err
 		}
 	}
@@ -1006,6 +997,41 @@ func (s *SQLStore) deleteBlockChildren(db sq.BaseRunner, boardID string, parentI
 	}
 
 	return nil
+}
+
+func (s *SQLStore) softDeleteFileInfos(db sq.BaseRunner, fileIDs []string) error {
+	deleteFileInfoQuery := s.getQueryBuilder(db).
+		Update(s.tablePrefix+"file_info").
+		Set("delete_at", model.GetMillis()).
+		Where(sq.Eq{"id": fileIDs})
+
+	if _, err := deleteFileInfoQuery.Exec(); err != nil {
+		if isMissingFileInfoCleanupTarget(err) {
+			s.logger.Warn("skipping file info cleanup because the file metadata table is unavailable", mlog.Err(err))
+			return nil
+		}
+
+		return err
+	}
+
+	return nil
+}
+
+func isMissingFileInfoCleanupTarget(err error) bool {
+	if err == nil {
+		return false
+	}
+
+	errMessage := strings.ToLower(err.Error())
+	if !strings.Contains(errMessage, "fileinfo") && !strings.Contains(errMessage, "file_info") {
+		return false
+	}
+
+	return strings.Contains(errMessage, "no such table") ||
+		strings.Contains(errMessage, "doesn't exist") ||
+		strings.Contains(errMessage, "unknown table") ||
+		strings.Contains(errMessage, "no such column") ||
+		strings.Contains(errMessage, "unknown column")
 }
 
 func (s *SQLStore) undeleteBlockChildren(db sq.BaseRunner, boardID string, parentID string, modifiedBy string) error {

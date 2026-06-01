@@ -7,6 +7,7 @@ import (
 	"github.com/mattermost/focalboard/server/model"
 	"github.com/mattermost/focalboard/server/services/store"
 	"github.com/mattermost/focalboard/server/utils"
+	mmModel "github.com/mattermost/mattermost/server/public/model"
 
 	"github.com/stretchr/testify/require"
 )
@@ -572,6 +573,51 @@ func testDeleteBoard(t *testing.T, store store.Store) {
 		r2Board, err := store.GetBoard(boardID)
 		require.True(t, model.IsErrNotFound(err), "Should be ErrNotFound compatible error")
 		require.Nil(t, r2Board)
+	})
+
+	t.Run("should delete a board with file blocks", func(t *testing.T) {
+		boardID := utils.NewID(utils.IDTypeBoard)
+		fileID := utils.NewID(utils.IDTypeBlock)
+
+		board := &model.Board{
+			ID:     boardID,
+			TeamID: testTeamID,
+			Type:   model.BoardTypeOpen,
+		}
+
+		_, err := store.InsertBoard(board, userID)
+		require.NoError(t, err)
+
+		err = store.SaveFileInfo(&mmModel.FileInfo{
+			Id:        fileID,
+			CreateAt:  utils.GetMillis(),
+			Name:      "delete-board-file.png",
+			Extension: ".png",
+			Size:      123,
+			DeleteAt:  0,
+		})
+		require.NoError(t, err)
+
+		err = store.InsertBlock(&model.Block{
+			ID:        utils.NewID(utils.IDTypeBlock),
+			BoardID:   boardID,
+			ParentID:  boardID,
+			Type:      model.TypeImage,
+			CreatedBy: userID,
+			Fields: map[string]interface{}{
+				"fileId": "A" + fileID + ".png",
+			},
+		}, userID)
+		require.NoError(t, err)
+
+		// wait to avoid hitting pk uniqueness constraint in history
+		time.Sleep(10 * time.Millisecond)
+
+		require.NoError(t, store.DeleteBoard(boardID, userID))
+
+		fileInfo, err := store.GetFileInfo(fileID)
+		require.NoError(t, err)
+		require.Greater(t, fileInfo.DeleteAt, int64(0))
 	})
 }
 
