@@ -56,6 +56,38 @@ start_proxy() {
     PUBLIC_PORT="$PORT" BACKEND_PORT="$APP_PORT" WATCH_DIR="$ROOT_DIR/webapp/pack" node "$ROOT_DIR/scripts/dev-reload-proxy.js"
 }
 
+server_signature() {
+    find "$ROOT_DIR/server" -type f \( -name '*.go' -o -name '*.sql' \) -printf '%T@ %p\n' | sort
+}
+
+watch_server_without_modd() {
+    local last_signature=""
+    local server_pid=""
+
+    while true; do
+        local current_signature
+        current_signature="$(server_signature)"
+
+        if [ "$current_signature" != "$last_signature" ]; then
+            if [ -n "$server_pid" ]; then
+                echo "Restarting BoringBoard server..."
+                kill "$server_pid" 2>/dev/null || true
+                wait "$server_pid" 2>/dev/null || true
+            fi
+
+            if make server; then
+                ./bin/focalboard-server -port "$APP_PORT" $FOCALBOARDSERVER_ARGS &
+                server_pid="$!"
+                last_signature="$current_signature"
+            else
+                echo "Server build failed; waiting for changes..."
+            fi
+        fi
+
+        sleep 1
+    done
+}
+
 if command -v modd >/dev/null 2>&1; then
     export FOCALBOARDSERVER_ARGS="-port $APP_PORT $FOCALBOARDSERVER_ARGS"
     echo "Starting BoringBoard in development watch mode..."
@@ -68,15 +100,15 @@ if command -v modd >/dev/null 2>&1; then
 fi
 
 echo "modd is not installed, so watch mode is unavailable."
-echo "Running server once with webapp auto-rebuild instead."
+echo "Running fallback auto-rebuild for server and webapp instead."
 echo "Install modd for auto-rebuilds: go install github.com/cortesi/modd/cmd/modd@latest"
 
-make server webapp
+make webapp
 
 echo "Starting BoringBoard..."
 echo "Open http://localhost:$PORT"
-./bin/focalboard-server -port "$APP_PORT" $FOCALBOARDSERVER_ARGS &
-SERVER_PID="$!"
+watch_server_without_modd &
+SERVER_WATCH_PID="$!"
 
 (
     cd "$ROOT_DIR/webapp"
@@ -84,5 +116,5 @@ SERVER_PID="$!"
 ) &
 WEBAPP_WATCH_PID="$!"
 
-trap 'kill "$SERVER_PID" "$WEBAPP_WATCH_PID" 2>/dev/null || true' EXIT INT TERM
+trap 'kill "$SERVER_WATCH_PID" "$WEBAPP_WATCH_PID" 2>/dev/null || true' EXIT INT TERM
 start_proxy

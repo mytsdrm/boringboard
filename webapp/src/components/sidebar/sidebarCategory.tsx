@@ -38,6 +38,7 @@ import {TOUR_SIDEBAR, SidebarTourSteps, TOUR_BOARD, FINISHED} from '../../compon
 import telemetryClient, {TelemetryActions, TelemetryCategory} from '../../telemetry/telemetryClient'
 
 import {getCurrentTeam} from '../../store/teams'
+import {UserSettings} from '../../userSettings'
 
 import ConfirmationDialogBox, {ConfirmationDialogBoxProps} from '../confirmationDialogBox'
 
@@ -127,6 +128,16 @@ const SidebarCategory = (props: Props) => {
         props.hideSidebar()
     }, [match, history])
 
+    const showMain = useCallback(() => {
+        const currentTeamID = match.params.teamId || teamID
+        if (currentTeamID) {
+            history.replace(`/team/${currentTeamID}`)
+        } else {
+            history.replace('/')
+        }
+        props.hideSidebar()
+    }, [history, match.params.teamId, teamID])
+
     const isBoardVisible = (boardID: string, existingBoardMetadata?: CategoryBoardMetadata): boolean => {
         const categoryBoardMetadata = existingBoardMetadata || sidebarBoardMetadata.find((metadata) => metadata.boardID === boardID)
 
@@ -178,28 +189,25 @@ const SidebarCategory = (props: Props) => {
             return
         }
         telemetryClient.trackEvent(TelemetryCategory, TelemetryActions.DeleteBoard, {board: deleteBoard.id})
-        mutator.deleteBoard(
+        const currentTeamID = match.params.teamId || teamID
+        if (currentTeamID) {
+            UserSettings.setLastBoardID(currentTeamID, null)
+        }
+        UserSettings.setLastViewId(deleteBoard.id, null)
+
+        await mutator.deleteBoard(
             deleteBoard,
             intl.formatMessage({id: 'Sidebar.delete-board', defaultMessage: 'Delete board'}),
             async () => {
-                let nextBoardId: number | undefined
-                if (props.boards.length > 1) {
-                    const deleteBoardIndex = props.boards.findIndex((board) => board.id === deleteBoard.id)
-                    nextBoardId = deleteBoardIndex + 1 === props.boards.length ? deleteBoardIndex - 1 : deleteBoardIndex + 1
-                }
-
-                if (nextBoardId) {
                 // This delay is needed because WSClient has a default 100 ms notification delay before updates
-                    setTimeout(() => {
-                        showBoard(props.boards[nextBoardId as number].id)
-                    }, 120)
-                }
+                await new Promise((resolve) => setTimeout(resolve, 120))
+                showMain()
             },
             async () => {
                 showBoard(deleteBoard.id)
             },
         )
-    }, [showBoard, deleteBoard, props.boards])
+    }, [showMain, showBoard, deleteBoard, match.params.teamId, teamID])
 
     const updateCategory = useCallback(async (value: boolean) => {
         const updatedCategory: Category = {
