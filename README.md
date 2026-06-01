@@ -1,6 +1,26 @@
 # BoringBoard
 
-BoringBoard is a modernized fork of Focalboard.
+BoringBoard is of Focalboard for my own project management workflow.
+
+## How to start
+
+Run the local development script:
+
+```bash
+./run.sh
+```
+
+Then open:
+
+```text
+http://localhost:8000
+```
+
+The script starts the server, builds/watches the web app, clears ports `8000` and `8001` when needed, and enables browser auto-reload for frontend changes.
+
+## Original Focalboard README
+
+The content below is kept from the original Focalboard project for upstream reference.
 
 ![CI Status](https://github.com/mattermost/focalboard/actions/workflows/ci.yml/badge.svg)
 ![CodeQL](https://github.com/mattermost/focalboard/actions/workflows/codeql-analysis.yml/badge.svg)
@@ -13,17 +33,17 @@ BoringBoard is an open source, multilingual, self-hosted project management tool
 
 It helps define, organize, track and manage work across individuals and teams. Focalboard comes in two editions:
 
-* **[Personal Desktop](https://www.focalboard.com/docs/personal-edition/desktop/)**: A standalone, single-user [macOS](https://apps.apple.com/app/apple-store/id1556908618?pt=2114704&ct=website&mt=8), [Windows](https://www.microsoft.com/store/apps/9NLN2T0SX9VF?cid=website), or [Linux](https://www.focalboard.com/download/personal-edition/desktop/#linux-desktop) desktop app for your own todos and personal projects.
+- **[Personal Desktop](https://www.focalboard.com/docs/personal-edition/desktop/)**: A standalone, single-user [macOS](https://apps.apple.com/app/apple-store/id1556908618?pt=2114704&ct=website&mt=8), [Windows](https://www.microsoft.com/store/apps/9NLN2T0SX9VF?cid=website), or [Linux](https://www.focalboard.com/download/personal-edition/desktop/#linux-desktop) desktop app for your own todos and personal projects.
 
-* **[Personal Server](https://www.focalboard.com/download/personal-edition/ubuntu/)**: A standalone, multi-user server for development and personal use.
+- **[Personal Server](https://www.focalboard.com/download/personal-edition/ubuntu/)**: A standalone, multi-user server for development and personal use.
 
 ## Try Focalboard
 
 ### Personal Desktop (Windows, Mac or Linux Desktop)
 
-* **Windows**: Download from the [Windows App Store](https://www.microsoft.com/store/productId/9NLN2T0SX9VF) or download `focalboard-win.zip` from the [latest release](https://github.com/mattermost/focalboard/releases), unpack, and run `Focalboard.exe`.
-* **Mac**: Download from the [Mac App Store](https://apps.apple.com/us/app/focalboard-insiders/id1556908618?mt=12).
-* **Linux Desktop**: Download `focalboard-linux.tar.gz` from the [latest release](https://github.com/mattermost/focalboard/releases), unpack, and open `focalboard-app`.
+- **Windows**: Download from the [Windows App Store](https://www.microsoft.com/store/productId/9NLN2T0SX9VF) or download `focalboard-win.zip` from the [latest release](https://github.com/mattermost/focalboard/releases), unpack, and run `Focalboard.exe`.
+- **Mac**: Download from the [Mac App Store](https://apps.apple.com/us/app/focalboard-insiders/id1556908618?mt=12).
+- **Linux Desktop**: Download `focalboard-linux.tar.gz` from the [latest release](https://github.com/mattermost/focalboard/releases), unpack, and open `focalboard-app`.
 
 ### Personal Server
 
@@ -64,39 +84,39 @@ Once the server is running, you can rebuild just the web app via `make webapp` i
 
 You can build standalone apps that package the server to run locally against SQLite:
 
-* **Windows**:
-  * *Requires Windows 10, [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/) 10.0.19041.0, and .NET 4.8 developer pack*
-  * Open a `git-bash` prompt.
-  * Run `make prebuild`
-  * The above prebuild step needs to be run only when you make changes to or want to install your npm dependencies, etc.
-  * Once the prebuild is completed, you can keep repeating the below steps to build the app & see the changes.
-  * Run `make win-wpf-app`
-  * Run `cd win-wpf/msix && focalboard.exe`
-* **Mac**:
-  * *Requires macOS 11.3+ and Xcode 13.2.1+*
-  * Run `make prebuild`
-  * The above prebuild step needs to be run only when you make changes to or want to install your npm dependencies, etc.
-  * Once the prebuild is completed, you can keep repeating the below steps to build the app & see the changes.
-  * Run `make mac-app`
-  * Run `open mac/dist/Focalboard.app`
-* **Linux**:
-  * *Tested on Ubuntu 18.04*
-  * Install `webgtk` dependencies
-    * Run `sudo apt-get install libgtk-3-dev`
-    * Run `sudo apt-get install libwebkit2gtk-4.0-dev`
-  * Run `make prebuild`
-  * The above prebuild step needs to be run only when you make changes to or want to install your npm dependencies, etc.
-  * Once the prebuild is completed, you can keep repeating the below steps to build the app & see the changes.
-  * Run `make linux-app`
-  * Uncompress `linux/dist/focalboard-linux.tar.gz` to a directory of your choice
-  * Run `focalboard-app` from the directory you have chosen
-* **Docker**:
-  * To run it locally from offical image:
-    * `docker run -it -p 80:8000 mattermost/focalboard`
-  * To build it for your current architecture:
-    * `docker build -f docker/Dockerfile .`
-  * To build it for a custom architecture (experimental):
-    * `docker build -f docker/Dockerfile --platform linux/arm64 .`
+- **Windows**:
+  - _Requires Windows 10, [Windows 10 SDK](https://developer.microsoft.com/en-us/windows/downloads/sdk-archive/) 10.0.19041.0, and .NET 4.8 developer pack_
+  - Open a `git-bash` prompt.
+  - Run `make prebuild`
+  - The above prebuild step needs to be run only when you make changes to or want to install your npm dependencies, etc.
+  - Once the prebuild is completed, you can keep repeating the below steps to build the app & see the changes.
+  - Run `make win-wpf-app`
+  - Run `cd win-wpf/msix && focalboard.exe`
+- **Mac**:
+  - _Requires macOS 11.3+ and Xcode 13.2.1+_
+  - Run `make prebuild`
+  - The above prebuild step needs to be run only when you make changes to or want to install your npm dependencies, etc.
+  - Once the prebuild is completed, you can keep repeating the below steps to build the app & see the changes.
+  - Run `make mac-app`
+  - Run `open mac/dist/Focalboard.app`
+- **Linux**:
+  - _Tested on Ubuntu 18.04_
+  - Install `webgtk` dependencies
+    - Run `sudo apt-get install libgtk-3-dev`
+    - Run `sudo apt-get install libwebkit2gtk-4.0-dev`
+  - Run `make prebuild`
+  - The above prebuild step needs to be run only when you make changes to or want to install your npm dependencies, etc.
+  - Once the prebuild is completed, you can keep repeating the below steps to build the app & see the changes.
+  - Run `make linux-app`
+  - Uncompress `linux/dist/focalboard-linux.tar.gz` to a directory of your choice
+  - Run `focalboard-app` from the directory you have chosen
+- **Docker**:
+  - To run it locally from offical image:
+    - `docker run -it -p 80:8000 mattermost/focalboard`
+  - To build it for your current architecture:
+    - `docker build -f docker/Dockerfile .`
+  - To build it for a custom architecture (experimental):
+    - `docker build -f docker/Dockerfile --platform linux/arm64 .`
 
 Cross-compilation currently isn't fully supported, so please build on the appropriate platform. Refer to the GitHub Actions workflows (`build-mac.yml`, `build-win.yml`, `build-ubuntu.yml`) for the detailed list of steps on each platform.
 
@@ -104,13 +124,13 @@ Cross-compilation currently isn't fully supported, so please build on the approp
 
 Before checking in commits, run `make ci`, which is similar to the `.gitlab-ci.yml` workflow and includes:
 
-* **Server unit tests**: `make server-test`
-* **Web app ESLint**: `cd webapp; npm run check`
-* **Web app unit tests**: `cd webapp; npm run test`
-* **Web app UI tests**: `cd webapp; npm run cypress:ci`
+- **Server unit tests**: `make server-test`
+- **Web app ESLint**: `cd webapp; npm run check`
+- **Web app unit tests**: `cd webapp; npm run test`
+- **Web app UI tests**: `cd webapp; npm run cypress:ci`
 
 ### Staying informed
 
-* **Changes**: See the [CHANGELOG](CHANGELOG.md) for the latest updates
-* **Bug Reports**: [File a bug report](https://github.com/mattermost/focalboard/issues/new?assignees=&labels=bug&template=bug_report.md&title=)
-* **Chat**: Join the [~Focalboard community channel](https://community.mattermost.com/core/channels/focalboard)
+- **Changes**: See the [CHANGELOG](CHANGELOG.md) for the latest updates
+- **Bug Reports**: [File a bug report](https://github.com/mattermost/focalboard/issues/new?assignees=&labels=bug&template=bug_report.md&title=)
+- **Chat**: Join the [~Focalboard community channel](https://community.mattermost.com/core/channels/focalboard)
