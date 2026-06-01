@@ -64,6 +64,7 @@ import './boardPage.scss'
 type Props = {
     readonly?: boolean
     new?: boolean
+    activityLogs?: boolean
     dashboard?: boolean
     templates?: boolean
 }
@@ -284,7 +285,7 @@ const BoardPage = (props: Props): JSX.Element => {
 
             {!showJoinBoardDialog &&
                 <div className='BoardPage'>
-                    {!props.new && !props.dashboard && !props.templates && <TeamToBoardAndViewRedirect/>}
+                    {!props.new && !props.activityLogs && !props.dashboard && !props.templates && <TeamToBoardAndViewRedirect/>}
                     <BackwardCompatibilityQueryParamsRedirect/>
                     <SetWindowTitleAndIcon/>
                     <UndoRedoHotKeys/>
@@ -321,6 +322,7 @@ const BoardPage = (props: Props): JSX.Element => {
                         (!props.readonly || activeBoardId !== undefined) &&
                         <Workspace
                             readonly={props.readonly || false}
+                            activityLogs={props.activityLogs || false}
                             dashboard={props.dashboard || false}
                             templates={props.templates || false}
                         />

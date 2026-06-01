@@ -11,7 +11,7 @@ import (
 
 // GetDashboardActivityBlocks returns persisted block history for boards visible to the user.
 // The dashboard turns these historical block snapshots into user-facing activity rows.
-func (a *App) GetDashboardActivityBlocks(userID, teamID string, limit uint64) ([]*model.Block, error) {
+func (a *App) GetDashboardActivityBlocks(userID, teamID string, limit uint64, beforeUpdateAt int64) ([]*model.Block, error) {
 	boards, err := a.store.GetBoardsForUserAndTeam(userID, teamID, true)
 	if err != nil {
 		return nil, err
@@ -29,8 +29,9 @@ func (a *App) GetDashboardActivityBlocks(userID, teamID string, limit uint64) ([
 	blocks := []*model.Block{}
 	for _, board := range boards {
 		boardBlocks, err := a.store.GetBlockHistoryDescendants(board.ID, model.QueryBlockHistoryOptions{
-			Descending: true,
-			Limit:      historyLimitPerBoard,
+			BeforeUpdateAt: beforeUpdateAt,
+			Descending:     true,
+			Limit:          historyLimitPerBoard,
 		})
 		if err != nil {
 			return nil, err

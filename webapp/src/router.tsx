@@ -106,6 +106,12 @@ const FocalboardRouter = (props: Props): JSX.Element => {
                 </FBRoute>
                 <FBRoute
                     loginRequired={true}
+                    path='/activity-logs'
+                >
+                    <BoardPage activityLogs={true}/>
+                </FBRoute>
+                <FBRoute
+                    loginRequired={true}
                     path='/templates'
                 >
                     <BoardPage templates={true}/>

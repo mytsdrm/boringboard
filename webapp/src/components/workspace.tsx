@@ -35,12 +35,14 @@ import GuestNoBoards from './guestNoBoards'
 
 import Sidebar from './sidebar/sidebar'
 import Dashboard from './dashboard/dashboard'
+import ActivityLogs from './activityLogs/activityLogs'
 
 import './workspace.scss'
 
 type Props = {
     readonly: boolean
     dashboard?: boolean
+    activityLogs?: boolean
     templates?: boolean
 }
 
@@ -117,6 +119,10 @@ function CenterContent(props: Props) {
         return <Dashboard/>
     }
 
+    if (props.activityLogs) {
+        return <ActivityLogs/>
+    }
+
     if (match.params.channelId) {
         if (me?.is_guest) {
             return <GuestNoBoards/>
@@ -189,7 +195,8 @@ const Workspace = (props: Props) => {
                 <Sidebar
                     onBoardTemplateSelectorOpen={openBoardTemplateSelector}
                     onBoardTemplateSelectorClose={closeBoardTemplateSelector}
-                    activeBoardId={(props.dashboard || props.templates) ? undefined : board?.id}
+                    activeBoardId={(props.activityLogs || props.dashboard || props.templates) ? undefined : board?.id}
+                    activityLogsActive={props.activityLogs || false}
                     dashboardActive={props.dashboard || false}
                     templatesActive={props.templates || false}
                 />
@@ -204,6 +211,7 @@ const Workspace = (props: Props) => {
                 </div>}
                 <CenterContent
                     readonly={props.readonly}
+                    activityLogs={props.activityLogs || false}
                     dashboard={props.dashboard || false}
                     templates={props.templates || false}
                 />

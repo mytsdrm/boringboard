@@ -55,6 +55,7 @@ import SidebarUserMenu from './sidebarUserMenu'
 
 type Props = {
     activeBoardId?: string
+    activityLogsActive?: boolean
     dashboardActive?: boolean
     templatesActive?: boolean
     onBoardTemplateSelectorOpen: () => void
@@ -385,6 +386,22 @@ const Sidebar = (props: Props) => {
                     <FormattedMessage
                         id='Sidebar.dashboard'
                         defaultMessage='Dashboard'
+                    />
+                </span>
+            </div>
+
+            <div
+                className={`octo-sidebar-dashboard-item${props.activityLogsActive ? ' active' : ''}`}
+                onClick={() => {
+                    history.push('/activity-logs')
+                    hideSidebar()
+                }}
+            >
+                <CompassIcon icon='clock-outline'/>
+                <span className='active-text'>
+                    <FormattedMessage
+                        id='Sidebar.activity-logs'
+                        defaultMessage='Activity Logs'
                     />
                 </span>
             </div>
