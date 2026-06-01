@@ -1,7 +1,7 @@
 @import '../../styles/z-index';
 
 .Table {
-    margin-top: 18px;
+    margin-top: 22px;
     margin-left: 0 !important;
     overflow: auto;
     position: relative;
@@ -12,9 +12,9 @@
         display: flex;
         flex-shrink: 0;
         align-items: center;
-        height: 48px;
+        height: 46px;
         margin-right: 0;
-        margin-top: 18px;
+        margin-top: 20px;
         vertical-align: middle;
         border-bottom: 0;
 
@@ -113,14 +113,15 @@
         display: flex;
         flex-direction: row;
         color: #263243;
-        border-right: solid 1px rgba(148, 163, 184, 0.18);
-        border-bottom: solid 1px rgba(148, 163, 184, 0.18);
+        border-right: solid 1px rgba(100, 116, 139, 0.16);
+        border-bottom: solid 1px rgba(100, 116, 139, 0.16);
         border-left: 1px solid transparent;
         border-top: 1px solid transparent;
         box-sizing: border-box;
-        padding: 10px 14px;
-        height: 48px;
+        padding: 9px 14px;
+        height: 46px;
         font-size: 13px;
+        line-height: 20px;
         position: relative;
         text-overflow: ellipsis;
 
@@ -134,12 +135,12 @@
 
         .octo-icontitle {
             flex: 1 1 auto;
-            font-weight: 600;
-            color: #111827;
+            font-weight: 650;
+            color: #0f172a;
 
             .octo-icon {
                 min-width: 20px;
-                margin-top: 2px;
+                margin-top: 1px;
                 font-size: 16px;
                 margin-right: 8px;
                 display: flex;
@@ -183,6 +184,7 @@
             line-height: 18px;
             overflow: hidden;
             text-overflow: ellipsis;
+            color: #475467;
 
             .Label {
                 margin: 0 4px 0 0;
@@ -225,34 +227,34 @@
     .octo-table-row {
         display: flex;
         flex-direction: row;
-        margin-bottom: 6px;
+        margin-bottom: 3px;
     }
 
     .octo-table-header {
         @include z-index(table-header);
         position: sticky;
         top: 0;
-        background: rgba(244, 247, 251, 0.96);
+        background: rgba(241, 245, 249, 0.96);
         backdrop-filter: blur(14px);
         width: fit-content;
-        padding: 2px 0 10px;
+        padding: 4px 0 12px;
 
         .octo-table-cell {
-            height: 46px;
-            color: #667085;
-            background: #eef3f8;
-            font-weight: 700;
+            height: 44px;
+            color: #475467;
+            background: #eaf1f8;
+            font-weight: 760;
             font-size: 12px;
             letter-spacing: 0;
-            border-top: 1px solid rgba(148, 163, 184, 0.24);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.24);
+            border-top: 1px solid rgba(100, 116, 139, 0.24);
+            border-bottom: 1px solid rgba(100, 116, 139, 0.24);
 
             .Label {
-                color: #667085;
+                color: #475467;
             }
 
             &:first-child {
-                border-left: 1px solid rgba(148, 163, 184, 0.24);
+                border-left: 1px solid rgba(100, 116, 139, 0.24);
                 border-radius: 8px 0 0 8px;
             }
 
@@ -271,22 +273,23 @@
 
             .octo-propertyvalue {
                 font-size: inherit;
-                font-weight: normal;
+                font-weight: 500;
                 color: #475467;
             }
 
         }
 
         .octo-table-row {
-            filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.035));
+            filter: none;
             position: relative;
+            box-shadow: 0 4px 12px rgba(15, 23, 42, 0.026);
 
             .octo-table-cell {
-                border-top: 1px solid rgba(148, 163, 184, 0.16);
-                border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+                border-top: 1px solid rgba(100, 116, 139, 0.14);
+                border-bottom: 1px solid rgba(100, 116, 139, 0.14);
 
                 &:first-child {
-                    border-left: 1px solid rgba(148, 163, 184, 0.16);
+                    border-left: 1px solid rgba(100, 116, 139, 0.14);
                     border-radius: 8px 0 0 8px;
                 }
 

@@ -1,15 +1,16 @@
 .BoardTemplateSelectorItem {
     cursor: pointer;
-    transition: all 100ms ease-out 0s;
+    transition: background 120ms ease-out 0s, border-color 120ms ease-out 0s, color 120ms ease-out 0s;
     font-weight: 600;
     position: relative;
     display: flex;
     align-items: center;
-    padding: 8px 16px;
-    margin-bottom: 4px;
-    border-radius: var(--default-rad);
-    color: rgba(var(--center-channel-color-rgb), 0.64);
-    height: 40px;
+    padding: 8px 12px;
+    margin-bottom: 5px;
+    border: 1px solid transparent;
+    border-radius: 8px;
+    color: #536176;
+    height: 42px;
 
     .template-name {
         white-space: nowrap;
@@ -20,6 +21,7 @@
 
     .template-icon {
         margin-right: 10px;
+        flex: 0 0 auto;
 
         i {
             font-size: 16px;
@@ -27,8 +29,9 @@
     }
 
     &:hover {
-        background-color: rgba(var(--center-channel-color-rgb), 0.08);
-        color: rgba(var(--center-channel-color-rgb), 1);
+        background: rgba(255, 255, 255, 0.62);
+        border-color: rgba(100, 116, 139, 0.12);
+        color: #1f2937;
 
         .actions {
             display: flex;
@@ -36,8 +39,10 @@
     }
 
     &.active {
-        background-color: rgba(var(--button-bg-rgb), 0.08);
-        color: rgba(var(--button-bg-rgb), 1);
+        background: #e8f1ff;
+        border-color: rgba(18, 98, 255, 0.2);
+        color: rgb(var(--button-bg-rgb));
+        box-shadow: inset 3px 0 0 rgb(var(--button-bg-rgb));
     }
 
     .actions {
@@ -46,4 +51,3 @@
         right: -8px;
     }
 }
-
