@@ -8,6 +8,29 @@ cd "$ROOT_DIR"
 export FOCALBOARD_BUILD_TAGS="${FOCALBOARD_BUILD_TAGS:-json1 sqlite3}"
 export FOCALBOARDSERVER_ARGS="${FOCALBOARDSERVER_ARGS:-}"
 PORT="${PORT:-8000}"
+APP_PORT="${APP_PORT:-8001}"
+
+cleanup_port() {
+    local port="$1"
+
+    if command -v lsof >/dev/null 2>&1; then
+        local pids
+        pids="$(lsof -ti tcp:"$port" || true)"
+        if [ -n "$pids" ]; then
+            echo "Stopping process(es) on port $port: $pids"
+            kill $pids
+            sleep 1
+        fi
+
+        pids="$(lsof -ti tcp:"$port" || true)"
+        if [ -n "$pids" ]; then
+            echo "Force stopping process(es) on port $port: $pids"
+            kill -9 $pids
+        fi
+    else
+        echo "lsof is not installed; skipping port $port cleanup."
+    fi
+}
 
 if ! command -v go >/dev/null 2>&1; then
     echo "Go is required to run BoringBoard locally."
@@ -26,35 +49,40 @@ fi
 
 mkdir -p "$ROOT_DIR/bin"
 
-if command -v lsof >/dev/null 2>&1; then
-    PIDS="$(lsof -ti tcp:"$PORT" || true)"
-    if [ -n "$PIDS" ]; then
-        echo "Stopping process(es) on port $PORT: $PIDS"
-        kill $PIDS
-        sleep 1
-    fi
+cleanup_port "$PORT"
+cleanup_port "$APP_PORT"
 
-    PIDS="$(lsof -ti tcp:"$PORT" || true)"
-    if [ -n "$PIDS" ]; then
-        echo "Force stopping process(es) on port $PORT: $PIDS"
-        kill -9 $PIDS
-    fi
-else
-    echo "lsof is not installed; skipping port $PORT cleanup."
-fi
+start_proxy() {
+    PUBLIC_PORT="$PORT" BACKEND_PORT="$APP_PORT" WATCH_DIR="$ROOT_DIR/webapp/pack" node "$ROOT_DIR/scripts/dev-reload-proxy.js"
+}
 
 if command -v modd >/dev/null 2>&1; then
+    export FOCALBOARDSERVER_ARGS="-port $APP_PORT $FOCALBOARDSERVER_ARGS"
     echo "Starting BoringBoard in development watch mode..."
     echo "Open http://localhost:$PORT"
-    exec make watch
+    make watch &
+    WATCH_PID="$!"
+    trap 'kill "$WATCH_PID" 2>/dev/null || true' EXIT INT TERM
+    start_proxy
+    exit 0
 fi
 
 echo "modd is not installed, so watch mode is unavailable."
-echo "Running a one-shot local build instead."
+echo "Running server once with webapp auto-rebuild instead."
 echo "Install modd for auto-rebuilds: go install github.com/cortesi/modd/cmd/modd@latest"
 
 make server webapp
 
 echo "Starting BoringBoard..."
 echo "Open http://localhost:$PORT"
-exec ./bin/focalboard-server $FOCALBOARDSERVER_ARGS
+./bin/focalboard-server -port "$APP_PORT" $FOCALBOARDSERVER_ARGS &
+SERVER_PID="$!"
+
+(
+    cd "$ROOT_DIR/webapp"
+    npm run watchdev
+) &
+WEBAPP_WATCH_PID="$!"
+
+trap 'kill "$SERVER_PID" "$WEBAPP_WATCH_PID" 2>/dev/null || true' EXIT INT TERM
+start_proxy
