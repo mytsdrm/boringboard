@@ -2,6 +2,8 @@
 
 BoringBoard is fork of Focalboard for my own project management workflow.
 
+![BoringBoard](website/site/static/img/boringboard.png)
+
 ## How to start
 
 Run the local development script:
