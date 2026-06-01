@@ -4,7 +4,7 @@
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
-    background: #f4f7fb;
+    background: linear-gradient(180deg, #f8fbff 0%, #f4f7fb 300px, #f1f5f9 100%);
 
     .octo-board {
         flex: 0 1 auto;
@@ -17,7 +17,7 @@
 
 
 .BoardComponent {
-    --board-gutter: 32px;
+    --board-gutter: 30px;
 
     flex: 1 1 auto;
     display: flex;
@@ -49,12 +49,14 @@
         position: sticky;
         top: 0;
         left: 0;
-        background: rgba(244, 247, 251, 0.94);
+        background: linear-gradient(180deg, rgba(249, 251, 255, 0.98), rgba(246, 249, 253, 0.96));
         backdrop-filter: blur(18px);
-        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
+        border-bottom: 1px solid rgba(120, 139, 164, 0.24);
+        box-shadow: 0 12px 26px rgba(15, 23, 42, 0.045);
+        padding-bottom: 14px;
 
         > .mid-head {
-            margin-top: 22px;
+            margin-top: 24px;
             flex: 0 0 auto;
             display: flex;
             flex-direction: row;
@@ -66,7 +68,7 @@
             flex: 1;
             padding: 0 16px 0 0;
             position: relative;
-            min-height: 44px;
+            min-height: 52px;
             justify-content: center;
             display: flex;
             flex-direction: column;

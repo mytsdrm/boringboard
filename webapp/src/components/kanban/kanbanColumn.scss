@@ -1,5 +1,6 @@
 .octo-board-column {
     &.dragover {
-        background-color: rgba(128, 192, 255, 0.15);
+        background: linear-gradient(180deg, #e2eefc 0%, #dceafa 100%);
+        border-color: rgba(var(--button-bg-rgb), 0.36);
     }
 }

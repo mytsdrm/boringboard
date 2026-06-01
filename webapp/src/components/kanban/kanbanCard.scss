@@ -5,22 +5,26 @@
     flex-direction: column;
     align-items: flex-start;
     overflow-wrap: anywhere;
-    border-radius: 8px;
-    margin-bottom: 12px;
-    padding: 12px 14px;
+    border-radius: 10px;
+    margin-bottom: 14px;
+    padding: 15px 16px 14px;
     background: #fff;
-    border: 1px solid rgba(71, 85, 105, 0.2);
-    box-shadow: 0 6px 14px rgba(15, 23, 42, 0.045);
+    border: 1px solid rgba(100, 116, 139, 0.32);
+    box-shadow:
+        0 1px 0 rgba(255, 255, 255, 0.96) inset,
+        0 8px 16px rgba(15, 23, 42, 0.06);
 
     cursor: pointer;
-    color: #253041;
+    color: #1f2937;
 
     transition: background 120ms ease-out 0s, border-color 120ms ease-out 0s, box-shadow 120ms ease-out 0s;
 
     &:hover {
-        background-color: #fff;
-        border-color: rgba(37, 99, 235, 0.34);
-        box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+        background: #fff;
+        border-color: rgba(37, 99, 235, 0.42);
+        box-shadow:
+            0 1px 0 rgba(255, 255, 255, 0.94) inset,
+            0 12px 22px rgba(15, 23, 42, 0.09);
 
         .optionsMenu {
             display: block;
@@ -49,6 +53,12 @@
     }
 
     .octo-propertyvalue {
+        margin-top: 3px;
+        color: #344054;
+        font-size: 12px;
+        line-height: 18px;
+        font-weight: 560;
+
         input[value=''] {
             display: none;
         }
@@ -62,19 +72,22 @@
 
     .octo-icontitle {
         flex: 1 1 auto;
-        font-weight: 650;
-        line-height: 20px;
-        margin-bottom: 8px;
-        color: #111827;
+        width: 100%;
+        font-weight: 760;
+        font-size: 15px;
+        line-height: 22px;
+        margin-bottom: 9px;
+        color: #0f172a;
 
         .octo-icon {
-            font-size: 16px;
-            margin-right: 4px;
+            font-size: 17px;
+            margin-right: 7px;
             display: flex;
             align-items: center;
             justify-content: center;
-            width: 20px;
-            height: 20px;
+            width: 22px;
+            height: 22px;
+            flex: 0 0 22px;
         }
 
         .octo-titletext {
@@ -85,5 +98,16 @@
             -webkit-line-clamp: 5;
             -webkit-box-orient: vertical; // stylelint-disable-line
         }
+    }
+
+    .Label {
+        margin-top: 3px;
+        padding: 2px 8px;
+        border-radius: 6px;
+        color: #344054;
+        font-size: 11px;
+        line-height: 17px;
+        font-weight: 800;
+        letter-spacing: 0;
     }
 }

@@ -1,17 +1,21 @@
 .CardBadges {
     display: flex;
     align-items: center;
-    margin-top: 4px;
-    height: 24px;
+    margin-top: 6px;
+    min-height: 22px;
+    color: #667085;
+    font-size: 12px;
+    line-height: 18px;
+    font-weight: 600;
 
     span {
         display: flex;
         align-items: center;
-        margin-right: 4px;
+        margin-right: 6px;
 
         .Icon,
         .CompassIcon {
-            color: rgba(var(--center-channel-color-rgb), 0.64);
+            color: #667085;
             fill: currentColor;
             margin-right: 4px;
         }

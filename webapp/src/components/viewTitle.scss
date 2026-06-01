@@ -11,6 +11,13 @@
     .description {
         max-height: 80px;
         overflow: auto;
+        margin-top: 2px;
+
+        .MarkdownEditor {
+            color: #475467;
+            font-size: 14px;
+            line-height: 22px;
+        }
     }
 
     > .add-buttons {
@@ -42,16 +49,17 @@
     }
 
     .IconSelector {
-        margin-right: 8px;
+        margin-right: 10px;
+        margin-top: 1px;
     }
 
     .Editable {
         margin-bottom: 0;
         flex-grow: 1;
-        font-size: 24px;
-        line-height: 32px;
-        font-weight: 700;
-        color: rgba(var(--center-channel-color-rgb), 0.94);
+        font-size: 26px;
+        line-height: 34px;
+        font-weight: 760;
+        color: #1f2937;
     }
 
     >.description>* {
