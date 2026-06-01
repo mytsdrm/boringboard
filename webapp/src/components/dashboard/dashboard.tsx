@@ -1,13 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React, {useEffect, useMemo, useState} from 'react'
-import {FormattedMessage} from 'react-intl'
+import {FormattedMessage, useIntl} from 'react-intl'
+import {useHistory} from 'react-router-dom'
 
 import {Card} from '../../blocks/card'
 import octoClient from '../../octoClient'
 import {getMySortedBoards} from '../../store/boards'
-import {useAppSelector} from '../../store/hooks'
-import {getMe} from '../../store/users'
+import {useAppDispatch, useAppSelector} from '../../store/hooks'
+import {getMe, setMe} from '../../store/users'
 import CompassIcon from '../../widgets/icons/compassIcon'
 
 import './dashboard.scss'
@@ -18,6 +19,9 @@ type BoardStats = {
 }
 
 const Dashboard = (): JSX.Element => {
+    const intl = useIntl()
+    const dispatch = useAppDispatch()
+    const history = useHistory()
     const boards = useAppSelector(getMySortedBoards)
     const me = useAppSelector(getMe)
     const [statsByBoard, setStatsByBoard] = useState<{[boardId: string]: BoardStats}>({})
@@ -34,6 +38,11 @@ const Dashboard = (): JSX.Element => {
         }
         return taskBoards.filter((board) => board.createdBy !== me.id)
     }, [me?.id, taskBoards])
+    const recentlyUpdatedBoards = useMemo(() => {
+        return [...taskBoards].
+            sort((a, b) => (b.updateAt || b.createAt) - (a.updateAt || a.createAt)).
+            slice(0, 3)
+    }, [taskBoards])
 
     useEffect(() => {
         let canceled = false
@@ -79,6 +88,31 @@ const Dashboard = (): JSX.Element => {
         return userIds.size
     }, [taskBoards, statsByBoard])
 
+    const formatRelativeTime = (timestamp: number): string => {
+        const ageMs = Math.max(Date.now() - timestamp, 0)
+        const hours = Math.floor(ageMs / (60 * 60 * 1000))
+        const days = Math.floor(hours / 24)
+
+        if (days > 0) {
+            return intl.formatMessage({id: 'Dashboard.time-days-ago', defaultMessage: '{count}d ago'}, {count: days})
+        }
+        if (hours > 0) {
+            return intl.formatMessage({id: 'Dashboard.time-hours-ago', defaultMessage: '{count}h ago'}, {count: hours})
+        }
+        return intl.formatMessage({id: 'Dashboard.time-just-now', defaultMessage: 'Just now'})
+    }
+
+    const greetingName = me?.username || intl.formatMessage({
+        id: 'Dashboard.default-greeting-name',
+        defaultMessage: 'Procrastinator',
+    })
+
+    const handleLogout = async () => {
+        await octoClient.logout()
+        dispatch(setMe(null))
+        history.push('/login')
+    }
+
     return (
         <div className='Dashboard'>
             <div className='dashboard-header'>
@@ -101,6 +135,31 @@ const Dashboard = (): JSX.Element => {
                             defaultMessage={'BoringBoard, A place for all those "I\'ll do it later" tasks'}
                         />
                     </p>
+                </div>
+                <div className='dashboard-actions'>
+                    <details className='dashboard-user-menu'>
+                        <summary className='dashboard-greeting'>
+                            <span className='dashboard-greeting-icon'>{'😎'}</span>
+                            <FormattedMessage
+                                id='Dashboard.greeting'
+                                defaultMessage='Hello, {name}!'
+                                values={{name: greetingName}}
+                            />
+                            <CompassIcon icon='chevron-down'/>
+                        </summary>
+                        <div className='dashboard-user-dropdown'>
+                            <button
+                                type='button'
+                                onClick={handleLogout}
+                            >
+                                <CompassIcon icon='logout-variant'/>
+                                <FormattedMessage
+                                    id='Sidebar.logout'
+                                    defaultMessage='Log out'
+                                />
+                            </button>
+                        </div>
+                    </details>
                 </div>
             </div>
 
@@ -186,6 +245,62 @@ const Dashboard = (): JSX.Element => {
                                 defaultMessage='Users invited through sharing across Task Boards.'
                             />
                         </p>
+                    </div>
+                </div>
+            </section>
+
+            <section className='dashboard-widget-grid'>
+                <div className='dashboard-widget recent-boards'>
+                    <div className='dashboard-widget-title'>
+                        <span className='dashboard-widget-icon blue'>
+                            <CompassIcon icon='clock-outline'/>
+                        </span>
+                        <h2>
+                            <FormattedMessage
+                                id='Dashboard.recently-updated-boards'
+                                defaultMessage='Recently updated boards'
+                            />
+                        </h2>
+                    </div>
+                    <div className='dashboard-widget-list'>
+                        {recentlyUpdatedBoards.map((board) => (
+                            <div
+                                className='dashboard-widget-row'
+                                key={board.id}
+                            >
+                                <span className='dashboard-board-icon'>{board.icon || <CompassIcon icon='product-boards'/>}</span>
+                                <span className='dashboard-board-name'>{board.title}</span>
+                                <span className='dashboard-time-pill'>{formatRelativeTime(board.updateAt || board.createAt)}</span>
+                            </div>
+                        ))}
+                        {recentlyUpdatedBoards.length === 0 &&
+                            <div className='dashboard-empty-state'>
+                                <FormattedMessage
+                                    id='Dashboard.no-recent-boards'
+                                    defaultMessage='No task boards yet.'
+                                />
+                            </div>
+                        }
+                    </div>
+                </div>
+
+                <div className='dashboard-widget recent-activity'>
+                    <div className='dashboard-widget-title'>
+                        <span className='dashboard-widget-icon orange'>
+                            <CompassIcon icon='lightning-bolt-outline'/>
+                        </span>
+                        <h2>
+                            <FormattedMessage
+                                id='Dashboard.recent-activity'
+                                defaultMessage='Recent activity'
+                            />
+                        </h2>
+                    </div>
+                    <div className='dashboard-empty-state activity-empty'>
+                        <FormattedMessage
+                            id='Dashboard.no-recent-activity'
+                            defaultMessage='No recent activity yet.'
+                        />
                     </div>
                 </div>
             </section>

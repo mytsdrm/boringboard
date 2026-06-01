@@ -39,11 +39,11 @@ export const systemThemeName = 'system-theme'
 export const defaultThemeName = 'default-theme'
 
 export const defaultTheme = {
-    mainBg: '248, 250, 252',
+    mainBg: '251, 253, 255',
     mainFg: '31, 41, 55',
     buttonBg: '18, 98, 255',
     buttonFg: '255, 255, 255',
-    sidebarBg: '248, 250, 252',
+    sidebarBg: '238, 244, 252',
     sidebarFg: '3, 20, 84',
     sidebarTextActiveBorder: '18, 98, 255',
     sidebarWhiteLogo: 'false',
@@ -97,11 +97,11 @@ export const lightThemeName = 'light-theme'
 export const lightTheme = {
     ...defaultTheme,
 
-    mainBg: '248, 250, 252',
+    mainBg: '251, 253, 255',
     mainFg: '31, 41, 55',
     buttonBg: '18, 98, 255',
     buttonFg: '255, 255, 255',
-    sidebarBg: '248, 250, 252',
+    sidebarBg: '238, 244, 252',
     sidebarFg: '3, 20, 84',
     sidebarTextActiveBorder: '18, 98, 255',
     sidebarWhiteLogo: 'false',
@@ -132,6 +132,9 @@ function setBoringBoardThemeVariables(theme: Theme) {
     const tableRowHover = isDark ? mainBg.lighten(0.19) : mainBg.mix(buttonBg, 0.045).lighten(0.02)
     const tableBorder = mainFg.alpha(isDark ? 0.18 : 0.16)
     const tableBorderStrong = mainFg.alpha(isDark ? 0.28 : 0.24)
+    const purple = color('#673aff')
+    const green = color('#16a34a')
+    const orange = color('#f97316')
 
     document.documentElement.style.setProperty('--bb-bg', bg.rgb().string())
     document.documentElement.style.setProperty('--bb-bg-soft', bgSoft.rgb().string())
@@ -150,10 +153,17 @@ function setBoringBoardThemeVariables(theme: Theme) {
     document.documentElement.style.setProperty('--bb-shadow-soft', shadowSoft)
     document.documentElement.style.setProperty('--bb-sidebar-shadow', sidebarShadow)
     document.documentElement.style.setProperty('--bb-blue-soft', buttonBg.alpha(isDark ? 0.18 : 0.1).rgb().string())
-    document.documentElement.style.setProperty('--bb-green-soft', isDark ? 'rgba(34, 197, 94, 0.16)' : 'rgba(22, 163, 74, 0.1)')
-    document.documentElement.style.setProperty('--bb-green-text', isDark ? '#86efac' : '#15803d')
-    document.documentElement.style.setProperty('--bb-assigned-soft', isDark ? buttonBg.alpha(0.2).rgb().string() : buttonBg.alpha(0.12).rgb().string())
-    document.documentElement.style.setProperty('--bb-assigned-text', buttonBg.rgb().string())
+    document.documentElement.style.setProperty('--bb-blue-text', buttonBg.rgb().string())
+    document.documentElement.style.setProperty('--bb-purple-soft', purple.alpha(isDark ? 0.24 : 0.12).rgb().string())
+    document.documentElement.style.setProperty('--bb-purple-text', isDark ? purple.lighten(0.35).rgb().string() : purple.rgb().string())
+    document.documentElement.style.setProperty('--bb-green-soft', green.alpha(isDark ? 0.2 : 0.1).rgb().string())
+    document.documentElement.style.setProperty('--bb-green-text', isDark ? green.lighten(0.32).rgb().string() : green.darken(0.12).rgb().string())
+    document.documentElement.style.setProperty('--bb-orange-soft', orange.alpha(isDark ? 0.22 : 0.12).rgb().string())
+    document.documentElement.style.setProperty('--bb-orange-text', isDark ? orange.lighten(0.22).rgb().string() : orange.rgb().string())
+    document.documentElement.style.setProperty('--bb-assigned-soft', orange.alpha(isDark ? 0.22 : 0.12).rgb().string())
+    document.documentElement.style.setProperty('--bb-assigned-text', isDark ? orange.lighten(0.22).rgb().string() : orange.rgb().string())
+    document.documentElement.style.setProperty('--bb-dashboard-panel-bg', isDark ? panel.rgb().string() : '#ffffff')
+    document.documentElement.style.setProperty('--bb-dashboard-glow', buttonBg.alpha(isDark ? 0.12 : 0.08).rgb().string())
     document.documentElement.style.setProperty('--bb-template-sidebar-bg', isDark ? mainBg.lighten(0.08).rgb().string() : '#f6f9fd')
     document.documentElement.style.setProperty('--bb-template-item-active-bg', buttonBg.alpha(isDark ? 0.18 : 0.12).rgb().string())
     document.documentElement.style.setProperty('--bb-table-header-bg', tableHeader.rgb().string())
