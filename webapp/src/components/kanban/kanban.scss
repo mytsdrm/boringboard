@@ -3,7 +3,7 @@
 .Kanban {
     overflow: auto;
     flex: 1;
-    padding-top: 14px;
+    padding-top: 18px;
 
     .octo-board-header {
         @include z-index(kanban-board-header);
@@ -11,11 +11,11 @@
         flex-direction: row;
         width: max-content;
         min-height: 30px;
-        padding: 6px 0 12px;
-        color: rgba(var(--center-channel-color-rgb), 0.62);
+        padding: 6px 0 14px;
+        color: #475467;
         position: sticky;
         top: 0;
-        background: rgba(var(--center-channel-bg-rgb), 0.9);
+        background: rgba(244, 247, 251, 0.94);
         backdrop-filter: blur(14px);
     }
 
@@ -85,10 +85,10 @@
         width: 272px;
         margin-right: 16px;
         padding: 12px;
-        background: rgba(255, 255, 255, 0.56);
-        border: 1px solid rgba(var(--center-channel-color-rgb), 0.08);
+        background: #eef3f8;
+        border: 1px solid rgba(148, 163, 184, 0.24);
         border-radius: 12px;
-        box-shadow: var(--elevation-1);
+        box-shadow: 0 8px 20px rgba(15, 23, 42, 0.04);
 
         &.narrow {
             width: 220px;

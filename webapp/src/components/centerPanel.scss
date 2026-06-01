@@ -4,6 +4,7 @@
     flex: 1 1 auto;
     display: flex;
     flex-direction: column;
+    background: #f4f7fb;
 
     .octo-board {
         flex: 0 1 auto;
@@ -48,9 +49,9 @@
         position: sticky;
         top: 0;
         left: 0;
-        background: rgba(var(--center-channel-bg-rgb), 0.92);
+        background: rgba(244, 247, 251, 0.94);
         backdrop-filter: blur(18px);
-        border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+        border-bottom: 1px solid rgba(148, 163, 184, 0.18);
 
         > .mid-head {
             margin-top: 22px;

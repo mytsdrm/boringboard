@@ -1,12 +1,12 @@
 @import '../../styles/z-index';
 
 .Table {
-    margin-top: 16px;
+    margin-top: 18px;
     margin-left: 0 !important;
     overflow: auto;
     position: relative;
     flex: 1;
-    padding: 0 0 48px;
+    padding: 0 0 56px;
 
     .octo-group-header-cell {
         display: flex;
@@ -112,14 +112,14 @@
         flex: 0 0 auto;
         display: flex;
         flex-direction: row;
-        color: rgb(var(--center-channel-color-rgb));
-        border-right: solid 1px rgba(148, 163, 184, 0.14);
-        border-bottom: solid 1px rgba(148, 163, 184, 0.14);
+        color: #263243;
+        border-right: solid 1px rgba(148, 163, 184, 0.18);
+        border-bottom: solid 1px rgba(148, 163, 184, 0.18);
         border-left: 1px solid transparent;
         border-top: 1px solid transparent;
         box-sizing: border-box;
-        padding: 8px 12px;
-        height: 44px;
+        padding: 10px 14px;
+        height: 48px;
         font-size: 13px;
         position: relative;
         text-overflow: ellipsis;
@@ -135,7 +135,7 @@
         .octo-icontitle {
             flex: 1 1 auto;
             font-weight: 600;
-            color: rgba(var(--center-channel-color-rgb), 0.9);
+            color: #111827;
 
             .octo-icon {
                 min-width: 20px;
@@ -180,13 +180,13 @@
         }
 
         .octo-propertyvalue {
-            line-height: 17px;
+            line-height: 18px;
             overflow: hidden;
             text-overflow: ellipsis;
 
             .Label {
                 margin: 0 4px 0 0;
-                padding: 1px 8px;
+                padding: 2px 8px;
             }
         }
 
@@ -225,39 +225,39 @@
     .octo-table-row {
         display: flex;
         flex-direction: row;
-        margin-bottom: 3px;
+        margin-bottom: 6px;
     }
 
     .octo-table-header {
         @include z-index(table-header);
         position: sticky;
         top: 0;
-        background: rgba(var(--center-channel-bg-rgb), 0.94);
+        background: rgba(244, 247, 251, 0.96);
         backdrop-filter: blur(14px);
         width: fit-content;
-        padding: 2px 0 8px;
+        padding: 2px 0 10px;
 
         .octo-table-cell {
-            height: 44px;
-            color: rgba(var(--center-channel-color-rgb), 0.52);
-            background: rgba(248, 250, 252, 0.92);
-            font-weight: 600;
+            height: 46px;
+            color: #667085;
+            background: #eef3f8;
+            font-weight: 700;
             font-size: 12px;
-            letter-spacing: 0.01em;
-            border-top: 1px solid rgba(148, 163, 184, 0.16);
-            border-bottom: 1px solid rgba(148, 163, 184, 0.16);
+            letter-spacing: 0;
+            border-top: 1px solid rgba(148, 163, 184, 0.24);
+            border-bottom: 1px solid rgba(148, 163, 184, 0.24);
 
             .Label {
-                color: rgba(var(--center-channel-color-rgb), 0.6);
+                color: #667085;
             }
 
             &:first-child {
-                border-left: 1px solid rgba(148, 163, 184, 0.16);
-                border-radius: 10px 0 0 10px;
+                border-left: 1px solid rgba(148, 163, 184, 0.24);
+                border-radius: 8px 0 0 8px;
             }
 
             &:last-child {
-                border-radius: 0 10px 10px 0;
+                border-radius: 0 8px 8px 0;
             }
         }
     }
@@ -267,31 +267,31 @@
 
         .octo-table-cell {
             align-items: center;
-            background: rgba(255, 255, 255, 0.92);
+            background: #fff;
 
             .octo-propertyvalue {
                 font-size: inherit;
                 font-weight: normal;
-                color: rgba(var(--center-channel-color-rgb), 0.72);
+                color: #475467;
             }
 
         }
 
         .octo-table-row {
-            filter: drop-shadow(0 4px 10px rgba(15, 23, 42, 0.025));
+            filter: drop-shadow(0 6px 14px rgba(15, 23, 42, 0.035));
             position: relative;
 
             .octo-table-cell {
-                border-top: 1px solid rgba(148, 163, 184, 0.12);
-                border-bottom: 1px solid rgba(148, 163, 184, 0.12);
+                border-top: 1px solid rgba(148, 163, 184, 0.16);
+                border-bottom: 1px solid rgba(148, 163, 184, 0.16);
 
                 &:first-child {
-                    border-left: 1px solid rgba(148, 163, 184, 0.12);
-                    border-radius: 10px 0 0 10px;
+                    border-left: 1px solid rgba(148, 163, 184, 0.16);
+                    border-radius: 8px 0 0 8px;
                 }
 
                 &:last-child {
-                    border-radius: 0 10px 10px 0;
+                    border-radius: 0 8px 8px 0;
                 }
             }
         }

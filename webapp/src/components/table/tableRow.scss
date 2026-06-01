@@ -19,11 +19,11 @@
     }
 
     &.selected {
-        background-color: rgba(var(--button-bg-rgb), 0.08);
+        background-color: rgba(var(--button-bg-rgb), 0.1);
 
         .octo-table-cell {
-            background-color: rgba(var(--button-bg-rgb), 0.08);
-            border-color: rgba(var(--button-bg-rgb), 0.24);
+            background-color: rgba(var(--button-bg-rgb), 0.09);
+            border-color: rgba(var(--button-bg-rgb), 0.3);
         }
     }
 
@@ -31,8 +31,8 @@
         overflow: initial;
 
         .octo-table-cell {
-            background-color: rgba(255, 255, 255, 0.96);
-            border-color: rgba(148, 163, 184, 0.16);
+            background-color: #fdfefe;
+            border-color: rgba(71, 85, 105, 0.22);
         }
 
         .delete-button {
