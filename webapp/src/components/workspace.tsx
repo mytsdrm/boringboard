@@ -177,10 +177,8 @@ const Workspace = (props: Props) => {
         setBoardTemplateSelectorOpen(false)
     }, [])
     const openBoardTemplateSelector = useCallback(() => {
-        if (board) {
-            setBoardTemplateSelectorOpen(true)
-        }
-    }, [board])
+        setBoardTemplateSelectorOpen(true)
+    }, [])
     useEffect(() => {
         setBoardTemplateSelectorOpen(false)
     }, [board, viewId])
@@ -197,8 +195,6 @@ const Workspace = (props: Props) => {
                 />
             }
             <div className='mainFrame'>
-                {boardTemplateSelectorOpen &&
-                    <BoardTemplateSelector onClose={closeBoardTemplateSelector}/>}
                 {(board?.isTemplate) &&
                 <div className='banner'>
                     <FormattedMessage
@@ -212,6 +208,8 @@ const Workspace = (props: Props) => {
                     templates={props.templates || false}
                 />
             </div>
+            {boardTemplateSelectorOpen &&
+                <BoardTemplateSelector onClose={closeBoardTemplateSelector}/>}
         </div>
     )
 }
