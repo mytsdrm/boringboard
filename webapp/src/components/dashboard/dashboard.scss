@@ -1,14 +1,17 @@
 .Dashboard {
     --dashboard-content-width: min(100%, 1440px);
 
+    display: flex;
+    flex-direction: column;
     flex: 1 1 auto;
+    height: 100%;
     min-height: 100%;
     padding: 42px 48px 56px;
     background:
         radial-gradient(circle at 18% 0, var(--bb-dashboard-glow), transparent 360px),
         radial-gradient(circle at 82% 12%, var(--bb-blue-soft), transparent 320px),
         var(--bb-bg);
-    overflow: auto;
+    overflow: hidden;
 
     .dashboard-header {
         display: flex;
@@ -259,7 +262,9 @@
         display: grid;
         grid-template-columns: minmax(280px, 0.85fr) minmax(380px, 1.35fr);
         gap: 18px;
+        flex: 1 1 auto;
         width: var(--dashboard-content-width);
+        min-height: 0;
         margin: 0 auto;
     }
 
@@ -271,8 +276,9 @@
     }
 
     .dashboard-widget {
-        min-height: 390px;
+        min-height: 100%;
         padding: 28px;
+        overflow: auto;
     }
 
     .dashboard-widget-title {
@@ -385,6 +391,60 @@
         background: color-mix(in srgb, var(--bb-panel-bg-soft) 72%, transparent);
     }
 
+    .dashboard-activity-list {
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+    }
+
+    .dashboard-activity-row {
+        display: grid;
+        grid-template-columns: 38px minmax(0, 1fr);
+        gap: 12px;
+        padding: 11px 0;
+        border-bottom: 1px solid var(--bb-border);
+
+        &:last-child {
+            border-bottom: 0;
+        }
+
+        p {
+            margin: 0 0 2px;
+            color: var(--bb-text);
+            font-size: 13px;
+            font-weight: 550;
+            line-height: 20px;
+        }
+
+        time {
+            color: var(--bb-text-muted);
+            font-size: 12px;
+            font-weight: 650;
+            line-height: 18px;
+        }
+    }
+
+    .dashboard-activity-user {
+        font-weight: 850;
+    }
+
+    .dashboard-activity-icon {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: 34px;
+        height: 34px;
+        border-radius: 999px;
+        background: var(--bb-orange-soft);
+        color: var(--bb-orange-text);
+
+        .Icon {
+            width: 17px;
+            height: 17px;
+            margin: 0;
+        }
+    }
+
     @media screen and (max-width: 1280px) {
         .dashboard-metric-grid {
             grid-template-columns: repeat(2, minmax(240px, 1fr));
@@ -397,6 +457,7 @@
 
     @media screen and (max-width: 768px) {
         padding: 24px 18px 40px;
+        overflow: auto;
 
         .dashboard-header {
             align-items: flex-start;
