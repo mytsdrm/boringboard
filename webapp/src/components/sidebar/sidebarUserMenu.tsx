@@ -113,6 +113,14 @@ const SidebarUserMenu = () => {
                             <p>
                                 {'The original project is Focalboard by Mattermost. This fork keeps the core board experience while adjusting the interface and branding for personal use.'}
                             </p>
+                            <a
+                                className='about-source'
+                                href='https://github.com/mytsdrm/boringboard'
+                                target='_blank'
+                                rel='noreferrer'
+                            >
+                                {'Source: github.com/mytsdrm/boringboard'}
+                            </a>
                             <div className='about-version'>
                                 {`Version ${Constants.versionString}`}
                             </div>
