@@ -15,3 +15,11 @@
         overflow: hidden;
     }
 }
+
+@media screen and (max-width: 767px) {
+    .BoardTemplateSelectorPreview {
+        transform: scale(0.58);
+        width: 172%;
+        height: 300px;
+    }
+}

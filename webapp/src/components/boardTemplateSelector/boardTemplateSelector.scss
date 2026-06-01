@@ -180,3 +180,95 @@
         }
     }
 }
+
+@media screen and (max-width: 767px) {
+    .BoardTemplateSelector__container {
+        padding: 16px;
+        align-items: stretch;
+    }
+
+    .BoardTemplateSelector__container--page {
+        padding: 0;
+
+        .BoardTemplateSelector {
+            height: 100%;
+        }
+    }
+
+    .BoardTemplateSelector {
+        overflow: hidden;
+
+        .toolbar {
+            padding: 12px;
+            right: 6px;
+            top: 6px;
+        }
+
+        .header {
+            height: auto;
+            min-height: 112px;
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 24px 72px 18px 20px;
+
+            .title {
+                font-size: 24px;
+                line-height: 1.12;
+            }
+
+            .description {
+                max-width: none;
+                margin: 8px 0 0;
+                padding-left: 0;
+                border-left: 0;
+                text-align: left;
+                line-height: 1.45;
+            }
+        }
+
+        .templates {
+            flex-direction: column;
+            justify-content: flex-start;
+            overflow-y: auto;
+        }
+
+        .templates-sidebar {
+            flex: 0 0 auto;
+            max-height: 52vh;
+            border-right: 0;
+            border-bottom: 1px solid var(--bb-border-strong);
+            box-shadow: inset 0 -1px 0 color-mix(in srgb, var(--bb-panel-bg) 74%, transparent);
+        }
+
+        .templates .templates-list {
+            max-height: calc(52vh - 77px);
+            padding: 16px;
+        }
+
+        .templates-sidebar__footer {
+            height: auto;
+            padding: 14px 16px 16px;
+        }
+
+        .templates-content {
+            min-height: 360px;
+            height: auto;
+            overflow: visible;
+        }
+
+        .template-preview-box {
+            min-height: 280px;
+            padding: 20px 16px 0;
+            overflow: hidden;
+        }
+
+        .buttons {
+            height: auto;
+            padding: 16px;
+
+            button {
+                width: 100%;
+            }
+        }
+    }
+}
