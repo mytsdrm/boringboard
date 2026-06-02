@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
-import {IconChevronLeft, IconChevronRight, IconPencil, IconSearch} from '@tabler/icons-react'
+import {IconCalendarEvent, IconChevronDown, IconChevronLeft, IconChevronRight, IconPencil, IconSearch} from '@tabler/icons-react'
 import {FormattedMessage, useIntl} from 'react-intl'
 import {DateUtils} from 'react-day-picker'
 import DayPicker from 'react-day-picker/DayPicker'
@@ -740,7 +740,14 @@ const ActivityLogs = (props: Props): JSX.Element => {
                             onClick={() => setShowDateRangePicker((showPicker) => !showPicker)}
                             type='button'
                         >
-                            {dateRangeLabel}
+                            <span className='activity-logs-date-range-label'>
+                                <IconCalendarEvent size={18}/>
+                                <span>{dateRangeLabel}</span>
+                            </span>
+                            <IconChevronDown
+                                className='activity-logs-date-range-chevron'
+                                size={18}
+                            />
                         </button>
                         {showDateRangePicker &&
                             <div className='activity-logs-date-range-popover'>

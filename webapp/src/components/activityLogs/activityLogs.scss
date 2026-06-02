@@ -1,3 +1,5 @@
+@import '../../styles/z-index';
+
 .ActivityLogs {
     &.admin-users-page {
         --admin-content-width: 100%;
@@ -21,26 +23,67 @@
     .activity-logs-date-range {
         position: relative;
         display: flex;
+        flex: 0 0 210px;
         flex-direction: column;
-        min-width: 260px;
+        width: 210px;
+        min-width: 210px;
+        max-width: 210px;
     }
 
     .activity-logs-date-range-button {
-        justify-content: flex-start;
-        min-height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        width: 100%;
+        min-width: 0;
+        max-width: none;
+        min-height: 48px;
         color: var(--bb-text);
         font-size: 14px;
         font-weight: 500;
         letter-spacing: 0;
+        line-height: 20px;
+        padding-right: 14px;
+        padding-left: 14px;
         text-align: left;
         text-transform: none;
+
+        &:hover {
+            border-color: #90b5f9;
+        }
+    }
+
+    .activity-logs-date-range-label {
+        display: inline-flex;
+        align-items: center;
+        min-width: 0;
+        gap: 10px;
+
+        svg {
+            flex: 0 0 auto;
+            color: #667085;
+        }
+
+        span {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    .activity-logs-date-range-chevron {
+        flex: 0 0 auto;
+        color: #667085;
     }
 
     .activity-logs-date-range-popover {
+        @include z-index(activity-logs-popover);
+
         position: absolute;
         top: calc(100% + 8px);
         right: 0;
-        padding: 12px;
+        overflow: hidden;
+        padding: 10px;
         border: 1px solid var(--bb-border);
         border-radius: 8px;
         background: var(--bb-dashboard-panel-bg);
@@ -69,8 +112,10 @@
         display: flex;
         justify-content: flex-end;
         gap: 8px;
-        padding-top: 8px;
+        margin: 0 -10px -10px;
+        padding: 10px;
         border-top: 1px solid var(--bb-border);
+        background: #f8fafc;
     }
 
     .activity-logs-table-card {
@@ -152,10 +197,17 @@
             overflow: hidden;
         }
 
+        .admin-page-header {
+            p {
+                max-width: 520px;
+                font-size: 13px;
+                line-height: 20px;
+            }
+        }
+
         .admin-page-header-row,
         .admin-header-actions {
             align-items: stretch;
-            flex-direction: column;
         }
 
         .admin-header-actions {
@@ -164,9 +216,19 @@
             .admin-users-search,
             label,
             .activity-logs-date-range {
-                width: 100%;
-                min-width: 0;
+                width: auto;
             }
+
+            .activity-logs-date-range {
+                flex: 0 0 210px;
+                min-width: 210px;
+                max-width: 210px;
+            }
+        }
+
+        .activity-logs-date-range-button {
+            width: 100%;
+            font-size: 13px;
         }
 
         .activity-logs-date-range-popover {

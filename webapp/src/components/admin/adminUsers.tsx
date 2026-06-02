@@ -16,7 +16,7 @@ import './adminPages.scss'
 
 type UserGroup = AdminUserPayload['group']
 
-const PAGE_SIZE_OPTIONS = [10, 25, 50]
+const USER_PAGE_SIZE = 10
 
 type UserFormState = {
     id: string
@@ -46,7 +46,6 @@ const AdminUsers = (): JSX.Element => {
     const [isSaving, setIsSaving] = useState(false)
     const [groupFilter, setGroupFilter] = useState<UserGroup | 'All'>('All')
     const [searchQuery, setSearchQuery] = useState('')
-    const [pageSize, setPageSize] = useState(10)
     const [currentPage, setCurrentPage] = useState(1)
     const [form, setForm] = useState<UserFormState>(emptyForm)
     const [showForm, setShowForm] = useState(false)
@@ -96,11 +95,11 @@ const AdminUsers = (): JSX.Element => {
             }).
             sort((a, b) => a.username.localeCompare(b.username))
     }, [groupFilter, searchQuery, users])
-    const totalPages = Math.max(1, Math.ceil(sortedUsers.length / pageSize))
+    const totalPages = Math.max(1, Math.ceil(sortedUsers.length / USER_PAGE_SIZE))
     const paginatedUsers = useMemo(() => {
-        const startIndex = (currentPage - 1) * pageSize
-        return sortedUsers.slice(startIndex, startIndex + pageSize)
-    }, [currentPage, pageSize, sortedUsers])
+        const startIndex = (currentPage - 1) * USER_PAGE_SIZE
+        return sortedUsers.slice(startIndex, startIndex + USER_PAGE_SIZE)
+    }, [currentPage, sortedUsers])
     const visiblePages = useMemo(() => {
         const pages = new Set<number>([1, totalPages, currentPage])
 
@@ -237,15 +236,15 @@ const AdminUsers = (): JSX.Element => {
                 </div>
                 <div className='admin-header-actions'>
                     <label className='admin-users-search'>
-                        <FormattedMessage
-                            id='AdminUsers.search'
-                            defaultMessage='Search'
-                        />
                         <div className='input-icon'>
                             <span className='input-icon-addon'>
                                 <IconSearch size={18}/>
                             </span>
                             <input
+                                aria-label={intl.formatMessage({
+                                    id: 'AdminUsers.search',
+                                    defaultMessage: 'Search',
+                                })}
                                 className='form-control'
                                 placeholder={intl.formatMessage({
                                     id: 'AdminUsers.search-placeholder',
@@ -258,11 +257,11 @@ const AdminUsers = (): JSX.Element => {
                         </div>
                     </label>
                     <label>
-                        <FormattedMessage
-                            id='AdminUsers.filter-group'
-                            defaultMessage='Group'
-                        />
                         <select
+                            aria-label={intl.formatMessage({
+                                id: 'AdminUsers.filter-group',
+                                defaultMessage: 'Group',
+                            })}
                             className='form-select'
                             value={groupFilter}
                             onChange={(event) => setGroupFilter(event.target.value as UserGroup | 'All')}
@@ -572,100 +571,69 @@ const AdminUsers = (): JSX.Element => {
                 {!isLoading && sortedUsers.length > 0 &&
                     <div className='card-footer admin-users-pagination'>
                         <div className='admin-users-pagination-inner'>
-                            <div className='admin-users-pagination-size'>
-                                <span className='text-secondary'>
-                                    <FormattedMessage
-                                        id='AdminUsers.rows-per-page'
-                                        defaultMessage='Rows per page'
-                                    />
-                                </span>
-                                <select
-                                    aria-label={intl.formatMessage({
-                                        id: 'AdminUsers.rows-per-page',
-                                        defaultMessage: 'Rows per page',
-                                    })}
-                                    className='form-select form-select-sm admin-users-page-size'
-                                    value={pageSize}
-                                    onChange={(event) => {
-                                        setPageSize(Number(event.target.value))
-                                        setCurrentPage(1)
-                                    }}
-                                >
-                                    {PAGE_SIZE_OPTIONS.map((option) => (
-                                        <option
-                                            key={option}
-                                            value={option}
-                                        >
-                                            {option}
-                                        </option>
-                                    ))}
-                                </select>
-                            </div>
                             <span className='text-secondary admin-users-pagination-summary'>
                                 <FormattedMessage
                                     id='AdminUsers.pagination-summary'
-                                    defaultMessage='Page {page} of {pages} · {total} users'
+                                    defaultMessage='Page {page}'
                                     values={{
                                         page: currentPage,
-                                        pages: totalPages,
-                                        total: sortedUsers.length,
                                     }}
                                 />
                             </span>
-                            {totalPages > 1 &&
-                                <ul className='pagination m-0'>
-                                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                                        <button
-                                            aria-label={intl.formatMessage({
-                                                id: 'AdminUsers.previous-page',
-                                                defaultMessage: 'Previous page',
-                                            })}
-                                            className='page-link'
-                                            disabled={currentPage === 1}
-                                            type='button'
-                                            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
-                                        >
-                                            <IconChevronLeft
-                                                className='icon'
-                                                size={18}
-                                            />
-                                        </button>
-                                    </li>
-                                    {visiblePages.map((page, index) => (
-                                        <React.Fragment key={page}>
-                                            {index > 0 && page - visiblePages[index - 1] > 1 &&
-                                                <li className='page-item disabled'>
-                                                    <span className='page-link'>{'...'}</span>
-                                                </li>}
-                                            <li className={`page-item ${page === currentPage ? 'active' : ''}`}>
-                                                <button
-                                                    className='page-link'
-                                                    type='button'
-                                                    onClick={() => setCurrentPage(page)}
-                                                >
-                                                    {page}
-                                                </button>
-                                            </li>
-                                        </React.Fragment>
-                                    ))}
-                                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                                        <button
-                                            aria-label={intl.formatMessage({
-                                                id: 'AdminUsers.next-page',
-                                                defaultMessage: 'Next page',
-                                            })}
-                                            className='page-link'
-                                            disabled={currentPage === totalPages}
-                                            type='button'
-                                            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
-                                        >
-                                            <IconChevronRight
-                                                className='icon'
-                                                size={18}
-                                            />
-                                        </button>
-                                    </li>
-                                </ul>}
+                            <ul className='pagination m-0'>
+                                <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                    <button
+                                        aria-label={intl.formatMessage({
+                                            id: 'AdminUsers.previous-page',
+                                            defaultMessage: 'Previous page',
+                                        })}
+                                        className='page-link'
+                                        disabled={currentPage === 1}
+                                        type='button'
+                                        onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                                    >
+                                        <IconChevronLeft
+                                            className='icon'
+                                            size={18}
+                                        />
+                                    </button>
+                                </li>
+                                {visiblePages.map((page, index) => (
+                                    <React.Fragment key={page}>
+                                        {index > 0 && page - visiblePages[index - 1] > 1 &&
+                                            <li className='page-item disabled'>
+                                                <span className='page-link'>{'...'}</span>
+                                            </li>}
+                                        <li className={`page-item ${page === currentPage ? 'active' : ''}`}>
+                                            <button
+                                                className='page-link'
+                                                disabled={page === currentPage}
+                                                type='button'
+                                                onClick={() => setCurrentPage(page)}
+                                            >
+                                                {page}
+                                            </button>
+                                        </li>
+                                    </React.Fragment>
+                                ))}
+                                <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                    <button
+                                        aria-label={intl.formatMessage({
+                                            id: 'AdminUsers.next-page',
+                                            defaultMessage: 'Next page',
+                                        })}
+                                        className='page-link'
+                                        disabled={currentPage === totalPages}
+                                        type='button'
+                                        onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                                    >
+                                        <IconChevronRight
+                                            className='icon'
+                                            size={18}
+                                        />
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
                     </div>}
             </section>
