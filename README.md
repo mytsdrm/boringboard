@@ -16,6 +16,15 @@ That's why it's called **BoringBoard**.
 
 ## How to start
 
+Create an `.env` file in the BoringBoard directory if it does not already exist:
+
+```bash
+EXCLUDE_ENTERPRISE="1"
+EXTERNAL_PORT="8000"
+BORINGBOARD_DEFAULTADMINUSERNAME="admin"
+BORINGBOARD_DEFAULTADMINPASSWORD="admin123"
+```
+
 Run the local development script:
 
 ```bash

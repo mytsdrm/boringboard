@@ -4,6 +4,8 @@
 package localpermissions
 
 import (
+	"strings"
+
 	"github.com/mattermost/focalboard/server/model"
 	"github.com/mattermost/focalboard/server/services/permissions"
 
@@ -24,6 +26,31 @@ func New(store permissions.Store, logger mlog.LoggerIFace) *Service {
 }
 
 func (s *Service) HasPermissionTo(userID string, permission *mmModel.Permission) bool {
+	if userID == "" || permission == nil {
+		return false
+	}
+	user, err := s.store.GetUserByID(userID)
+	if err != nil {
+		if !model.IsErrNotFound(err) {
+			s.logger.Error("error getting user for permission check",
+				mlog.String("userID", userID),
+				mlog.Err(err),
+			)
+		}
+		return false
+	}
+	if permission.Id == model.PermissionManageSystem.Id {
+		return roleIncludes(user.Roles, model.RoleSystemAdmin) || roleIncludes(user.Roles, model.GroupSuperAdmin)
+	}
+	return false
+}
+
+func roleIncludes(roles string, role string) bool {
+	for _, r := range strings.Fields(roles) {
+		if r == role {
+			return true
+		}
+	}
 	return false
 }
 

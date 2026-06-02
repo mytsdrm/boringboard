@@ -186,6 +186,7 @@ func (a *App) RegisterUser(username, email, password string) error {
 		MfaSecret:   "",
 		AuthService: a.config.AuthMode,
 		AuthData:    "",
+		Roles:       model.RoleSystemUser + " " + model.GroupPublicUser,
 	})
 	if err != nil {
 		return errors.Wrap(err, "Unable to create the new user")

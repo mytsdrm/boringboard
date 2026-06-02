@@ -10,6 +10,12 @@ const (
 	GlobalTeamID                  = "0"
 	SystemUserID                  = "system"
 	PreferencesCategoryFocalboard = "focalboard"
+	GroupSuperAdmin               = "SuperAdmin"
+	GroupPublicUser               = "PublicUser"
+	RoleSystemAdmin               = "system_admin"
+	RoleSystemUser                = "system_user"
+	DefaultAdminUsername          = "admin"
+	DefaultAdminPassword          = "admin123"
 )
 
 // User is a user

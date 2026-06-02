@@ -59,7 +59,9 @@ type Configuration struct {
 	ShowEmailAddress         bool              `json:"show_email_address" mapstructure:"showEmailAddress"`
 	ShowFullName             bool              `json:"show_full_name" mapstructure:"showFullName"`
 
-	AuthMode string `json:"authMode" mapstructure:"authMode"`
+	AuthMode             string `json:"authMode" mapstructure:"authMode"`
+	DefaultAdminUsername string `json:"defaultAdminUsername" mapstructure:"defaultAdminUsername"`
+	DefaultAdminPassword string `json:"defaultAdminPassword" mapstructure:"defaultAdminPassword"`
 
 	LoggingCfgFile string `json:"logging_cfg_file" mapstructure:"logging_cfg_file"`
 	LoggingCfgJSON string `json:"logging_cfg_json" mapstructure:"logging_cfg_json"`
@@ -79,8 +81,8 @@ func ReadConfigFile(configFilePath string) (*Configuration, error) {
 		viper.SetConfigFile(configFilePath)
 	}
 
-	viper.SetEnvPrefix("focalboard")
-	viper.AutomaticEnv() // read config values from env like FOCALBOARD_SERVERROOT=...
+	viper.SetEnvPrefix("boringboard")
+	viper.AutomaticEnv() // read config values from env like BORINGBOARD_SERVERROOT=...
 	viper.SetDefault("ServerRoot", DefaultServerRoot)
 	viper.SetDefault("DBPingAttempts", DBPingAttempts)
 	viper.SetDefault("Port", DefaultPort)
@@ -101,6 +103,8 @@ func ReadConfigFile(configFilePath string) (*Configuration, error) {
 	viper.SetDefault("LocalModeSocketLocation", "/var/tmp/focalboard_local.socket")
 	viper.SetDefault("EnablePublicSharedBoards", false)
 	viper.SetDefault("AuthMode", "native")
+	viper.SetDefault("DefaultAdminUsername", "admin")
+	viper.SetDefault("DefaultAdminPassword", "admin123")
 	viper.SetDefault("NotifyFreqCardSeconds", 120)    // 2 minutes after last card edit
 	viper.SetDefault("NotifyFreqBoardSeconds", 86400) // 1 day after last card edit
 	viper.SetDefault("EnableDataRetention", false)
@@ -131,5 +135,6 @@ func ReadConfigFile(configFilePath string) (*Configuration, error) {
 
 func removeSecurityData(config Configuration) Configuration {
 	clean := config
+	clean.DefaultAdminPassword = ""
 	return clean
 }
