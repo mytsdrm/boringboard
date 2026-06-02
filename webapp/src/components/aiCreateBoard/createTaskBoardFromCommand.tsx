@@ -12,6 +12,7 @@ import Button from '../../widgets/buttons/button'
 import CompassIcon from '../../widgets/icons/compassIcon'
 import {buildTaskBoardFromPreview, taskBoardPreviewIcon, taskBoardTaskIcon} from '../../ai/taskBoardBuilder'
 import {StoredIcon} from '../icons/storedIcon'
+import {getStoredProjectSystemSettings, ProjectSystemSettings, SYSTEM_SETTINGS_UPDATED_EVENT} from '../../systemSettings'
 
 import './createTaskBoardFromCommand.scss'
 
@@ -31,7 +32,7 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
     const [isGenerating, setIsGenerating] = useState(false)
     const [isCreating, setIsCreating] = useState(false)
     const [isOpen, setIsOpen] = useState(false)
-    const [aiSettings, setAISettings] = useState<AdminAISettings|null>(null)
+    const [aiSettings, setAISettings] = useState<AdminAISettings|null>(getStoredProjectSystemSettings().ai)
 
     useEffect(() => {
         let canceled = false
@@ -41,9 +42,17 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
                 setAISettings(settings.ai)
             }
         }
+
+        const handleSystemSettingsUpdated = (event: Event) => {
+            const settings = (event as CustomEvent<ProjectSystemSettings>).detail
+            setAISettings(settings?.ai || getStoredProjectSystemSettings().ai)
+        }
+
+        window.addEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
         loadAISettings()
         return () => {
             canceled = true
+            window.removeEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
         }
     }, [])
 

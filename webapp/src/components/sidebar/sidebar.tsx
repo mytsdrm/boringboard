@@ -42,6 +42,7 @@ import {getMe} from '../../store/users'
 import {getCurrentViewId} from '../../store/views'
 
 import octoClient from '../../octoClient'
+import {getStoredProjectSystemSettings, ProjectSystemSettings, SYSTEM_SETTINGS_UPDATED_EVENT} from '../../systemSettings'
 
 import {useWebsockets} from '../../hooks/websockets'
 
@@ -78,7 +79,7 @@ const Sidebar = (props: Props) => {
     const [isHidden, setHidden] = useState(false)
     const [userHidden, setUserHidden] = useState(false)
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions())
-    const [aiEnabled, setAIEnabled] = useState(false)
+    const [aiEnabled, setAIEnabled] = useState(getStoredProjectSystemSettings().ai.enabled)
     const history = useHistory()
     const match = useRouteMatch<{boardId: string, viewId?: string, cardId?: string, teamId?: string}>()
     const boards = useAppSelector(getMySortedBoards)
@@ -128,9 +129,17 @@ const Sidebar = (props: Props) => {
                 setAIEnabled(Boolean(settings.ai?.enabled))
             }
         }
+
+        const handleSystemSettingsUpdated = (event: Event) => {
+            const settings = (event as CustomEvent<ProjectSystemSettings>).detail
+            setAIEnabled(Boolean(settings?.ai?.enabled))
+        }
+
+        window.addEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
         loadSystemSettings()
         return () => {
             canceled = true
+            window.removeEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
         }
     }, [])
 
