@@ -37,6 +37,12 @@ Rules:
 - Include 3 to 6 columns.
 - Include 0 to 12 starter tasks.
 - Every task column must match one returned column name.
+- Make every task a real job task, not a vague label.
+- Every task description must be detailed enough for a worker to start without asking follow-up questions.
+- Task descriptions should include: objective, concrete implementation steps, expected output, validation or acceptance criteria, and important risks or constraints.
+- When the command mentions platforms, integrations, devices, APIs, compliance, quality, reliability, or security, include platform-specific notes in the task descriptions.
+- Keep descriptions concise but useful: 2 to 4 sentences per task, no bullet formatting, no markdown.
+- Prefer action-oriented task titles using the format requested by the user, such as "Platform - Feature" or "Area - Action".
 - Use only these colors: propColorGray, propColorBrown, propColorOrange, propColorYellow, propColorGreen, propColorBlue, propColorPurple, propColorPink, propColorRed.
 - When tasks belong to a platform, product, tool, app, or domain entity, include that name at the start of the task title so BoringBoard can choose a meaningful icon. Example: "Facebook - Login", not just "Login".
 - Prefer specific, recognizable nouns in task titles over generic labels.
@@ -104,6 +110,12 @@ Rules:
 - Include 3 to 6 columns.
 - Include 0 to 12 starter tasks.
 - Every task column must match one returned column name.
+- Make every task a real job task, not a vague label.
+- Every task description must be detailed enough for a worker to start without asking follow-up questions.
+- Task descriptions should include: objective, concrete implementation steps, expected output, validation or acceptance criteria, and important risks or constraints.
+- When the response mentions platforms, integrations, devices, APIs, compliance, quality, reliability, or security, include platform-specific notes in the task descriptions.
+- Keep descriptions concise but useful: 2 to 4 sentences per task, no bullet formatting, no markdown.
+- Prefer action-oriented task titles using the format requested by the user, such as "Platform - Feature" or "Area - Action".
 - Use only these colors: propColorGray, propColorBrown, propColorOrange, propColorYellow, propColorGreen, propColorBlue, propColorPurple, propColorPink, propColorRed.
 - When tasks belong to a platform, product, tool, app, or domain entity, include that name at the start of the task title so BoringBoard can choose a meaningful icon. Example: "Facebook - Login", not just "Login".
 - Prefer specific, recognizable nouns in task titles over generic labels.
