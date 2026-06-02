@@ -13,6 +13,7 @@ import {getMySortedBoards, updateBoards} from '../../store/boards'
 import {useAppDispatch, useAppSelector} from '../../store/hooks'
 import {getCurrentTeamId, getFirstTeam} from '../../store/teams'
 import {addBoardUsers, getBoardUsers, getMe, setMe} from '../../store/users'
+import {applyProjectSystemSettings, getStoredProjectSystemSettings, ProjectSystemSettings, SYSTEM_SETTINGS_UPDATED_EVENT} from '../../systemSettings'
 import {Utils} from '../../utils'
 import CompassIcon from '../../widgets/icons/compassIcon'
 import {WSClient} from '../../wsclient'
@@ -43,7 +44,6 @@ type DashboardActivity = {
 
 const DASHBOARD_ACTIVITY_LIMIT = 20
 const DASHBOARD_ACTIVITY_HISTORY_LIMIT = 120
-const DASHBOARD_AUDIT_TIME_ZONE = 'Asia/Jakarta'
 
 const getCardStats = (board: Board, cards: Card[]) => {
     const latestActivityAt = cards.reduce((latest, card) => {
@@ -194,6 +194,7 @@ const Dashboard = (): JSX.Element => {
     const boardUsers = useAppSelector(getBoardUsers)
     const [statsByBoard, setStatsByBoard] = useState<{[boardId: string]: BoardStats}>({})
     const [activities, setActivities] = useState<DashboardActivity[]>([])
+    const [projectSettings, setProjectSettings] = useState<ProjectSystemSettings>(getStoredProjectSystemSettings)
     const cardsSnapshot = useRef<{[cardId: string]: Card}>({})
     const taskBoards = useMemo(() => boards.filter((board) => !board.isTemplate), [boards])
     const taskBoardsById = useMemo(() => new Map(taskBoards.map((board) => [board.id, board])), [taskBoards])
@@ -219,6 +220,26 @@ const Dashboard = (): JSX.Element => {
             }).
             slice(0, 3)
     }, [statsByBoard, taskBoards])
+
+    useEffect(() => {
+        let canceled = false
+        async function loadSystemSettings() {
+            const nextSettings = await octoClient.getSystemSettings()
+            if (!canceled) {
+                setProjectSettings(applyProjectSystemSettings(nextSettings))
+            }
+        }
+        const handleSystemSettingsUpdated = (event: Event) => {
+            setProjectSettings((event as CustomEvent<ProjectSystemSettings>).detail || getStoredProjectSystemSettings())
+        }
+
+        window.addEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
+        loadSystemSettings()
+        return () => {
+            canceled = true
+            window.removeEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
+        }
+    }, [])
 
     const refreshBoardCardStats = useCallback(async (boardIds: string[]) => {
         const uniqueBoardIds = Array.from(new Set(boardIds))
@@ -430,14 +451,14 @@ const Dashboard = (): JSX.Element => {
         const date = [
             intl.formatDate(timestamp, {
                 day: '2-digit',
-                timeZone: DASHBOARD_AUDIT_TIME_ZONE,
+                timeZone: projectSettings.timeZone,
             }),
             intl.formatDate(timestamp, {
                 month: 'long',
-                timeZone: DASHBOARD_AUDIT_TIME_ZONE,
+                timeZone: projectSettings.timeZone,
             }),
             intl.formatDate(timestamp, {
-                timeZone: DASHBOARD_AUDIT_TIME_ZONE,
+                timeZone: projectSettings.timeZone,
                 year: 'numeric',
             }),
         ].join(' ')
@@ -446,7 +467,7 @@ const Dashboard = (): JSX.Element => {
             hour12: false,
             minute: '2-digit',
             second: '2-digit',
-            timeZone: DASHBOARD_AUDIT_TIME_ZONE,
+            timeZone: projectSettings.timeZone,
         })
 
         return `${date}, ${time}`

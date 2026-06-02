@@ -15,6 +15,7 @@ import {getMySortedBoards} from '../../store/boards'
 import {useAppDispatch, useAppSelector} from '../../store/hooks'
 import {getCurrentTeamId, getFirstTeam} from '../../store/teams'
 import {addBoardUsers, getBoardUsers, getMe} from '../../store/users'
+import {applyProjectSystemSettings, getStoredProjectSystemSettings, ProjectSystemSettings, SYSTEM_SETTINGS_UPDATED_EVENT} from '../../systemSettings'
 import {WSClient} from '../../wsclient'
 
 import 'react-day-picker/lib/style.css'
@@ -39,7 +40,6 @@ type ActivityLog = {
 
 const ACTIVITY_LOG_PAGE_SIZE = 20
 const ACTIVITY_LOG_HISTORY_PAGE_LIMIT = 200
-const ACTIVITY_LOG_TIME_ZONE = 'Asia/Jakarta'
 
 const toDateInputValue = (date: Date): string => {
     const year = date.getFullYear()
@@ -253,6 +253,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
     const [logs, setLogs] = useState<ActivityLog[]>([])
     const [pageCursors, setPageCursors] = useState<number[]>([0])
     const [pageIndex, setPageIndex] = useState(0)
+    const [projectSettings, setProjectSettings] = useState<ProjectSystemSettings>(getStoredProjectSystemSettings)
     const [memberUserIds, setMemberUserIds] = useState<string[]>([])
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedUserId, setSelectedUserId] = useState('')
@@ -332,6 +333,26 @@ const ActivityLogs = (props: Props): JSX.Element => {
             filter((page) => page >= 1 && page <= pageCount).
             sort((a, b) => a - b)
     }, [hasNextPage, pageIndex])
+
+    useEffect(() => {
+        let canceled = false
+        async function loadSystemSettings() {
+            const nextSettings = await octoClient.getSystemSettings()
+            if (!canceled) {
+                setProjectSettings(applyProjectSystemSettings(nextSettings))
+            }
+        }
+        const handleSystemSettingsUpdated = (event: Event) => {
+            setProjectSettings((event as CustomEvent<ProjectSystemSettings>).detail || getStoredProjectSystemSettings())
+        }
+
+        window.addEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
+        loadSystemSettings()
+        return () => {
+            canceled = true
+            window.removeEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
+        }
+    }, [])
 
     useEffect(() => {
         setPageIndex(0)
@@ -535,14 +556,14 @@ const ActivityLogs = (props: Props): JSX.Element => {
         const date = [
             intl.formatDate(timestamp, {
                 day: '2-digit',
-                timeZone: ACTIVITY_LOG_TIME_ZONE,
+                timeZone: projectSettings.timeZone,
             }),
             intl.formatDate(timestamp, {
                 month: 'long',
-                timeZone: ACTIVITY_LOG_TIME_ZONE,
+                timeZone: projectSettings.timeZone,
             }),
             intl.formatDate(timestamp, {
-                timeZone: ACTIVITY_LOG_TIME_ZONE,
+                timeZone: projectSettings.timeZone,
                 year: 'numeric',
             }),
         ].join(' ')
@@ -551,7 +572,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
             hour12: false,
             minute: '2-digit',
             second: '2-digit',
-            timeZone: ACTIVITY_LOG_TIME_ZONE,
+            timeZone: projectSettings.timeZone,
         })
 
         return `${date}, ${time}`

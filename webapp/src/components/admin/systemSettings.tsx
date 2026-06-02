@@ -5,6 +5,7 @@ import {FormattedMessage} from 'react-intl'
 
 import {applySystemBranding, getBrandingFromSettings} from '../../branding'
 import octoClient, {AdminSystemSettings} from '../../octoClient'
+import {applyProjectSystemSettings, DEFAULT_PROJECT_TIME_ZONE} from '../../systemSettings'
 
 import './adminPages.scss'
 
@@ -19,11 +20,40 @@ const defaultProviderHints: {[key: string]: string} = {
 const defaultSettings: AdminSystemSettings = {
     appName: 'BoringBoard',
     logo: '/static/boringboard-logo.webp',
+    timeZone: DEFAULT_PROJECT_TIME_ZONE,
     ai: {
         apiKey: '',
         enabled: false,
         provider: 'OpenAI',
     },
+}
+
+const fallbackTimeZones = [
+    'Asia/Jakarta',
+    'Asia/Singapore',
+    'Asia/Kuala_Lumpur',
+    'Asia/Bangkok',
+    'Asia/Tokyo',
+    'Asia/Seoul',
+    'Asia/Dubai',
+    'Australia/Sydney',
+    'Europe/London',
+    'Europe/Paris',
+    'UTC',
+    'America/New_York',
+    'America/Chicago',
+    'America/Denver',
+    'America/Los_Angeles',
+]
+
+const getTimeZoneOptions = (selectedTimeZone: string): string[] => {
+    const intlWithSupportedValues = Intl as typeof Intl & {
+        supportedValuesOf?: (key: 'timeZone') => string[]
+    }
+    const timeZones = intlWithSupportedValues.supportedValuesOf?.('timeZone') || fallbackTimeZones
+    const normalizedSelectedTimeZone = selectedTimeZone || DEFAULT_PROJECT_TIME_ZONE
+
+    return Array.from(new Set([normalizedSelectedTimeZone, ...timeZones])).sort((a, b) => a.localeCompare(b))
 }
 
 const SystemSettings = (): JSX.Element => {
@@ -38,6 +68,7 @@ const SystemSettings = (): JSX.Element => {
             if (!canceled) {
                 setSettings(nextSettings)
                 applySystemBranding(nextSettings)
+                applyProjectSystemSettings(nextSettings)
             }
         }
         loadSettings()
@@ -52,12 +83,14 @@ const SystemSettings = (): JSX.Element => {
         if (saved) {
             setSettings(saved)
             applySystemBranding(saved)
+            applyProjectSystemSettings(saved)
             setSaveState('saved')
             window.setTimeout(() => setSaveState('idle'), 1500)
         } else {
             setSaveState('idle')
         }
     }
+    const timeZoneOptions = getTimeZoneOptions(settings.timeZone)
     const uploadLogo = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (!file) {
@@ -164,6 +197,45 @@ const SystemSettings = (): JSX.Element => {
                                 </div>
                             </div>
                         </div>
+                    </div>
+                </div>
+                <div className='admin-settings-section'>
+                    <div className='admin-settings-section-header'>
+                        <h2>
+                            <FormattedMessage
+                                id='SystemSettings.time-zone'
+                                defaultMessage='Time zone'
+                            />
+                        </h2>
+                        <p>
+                            <FormattedMessage
+                                id='SystemSettings.time-zone-description'
+                                defaultMessage='Choose the timezone used for project dates and activity logs.'
+                            />
+                        </p>
+                    </div>
+                    <div className='admin-settings-field-grid'>
+                        <label>
+                            <span>
+                                <FormattedMessage
+                                    id='SystemSettings.time-zone'
+                                    defaultMessage='Time zone'
+                                />
+                            </span>
+                            <select
+                                onChange={(event) => setSettings({...settings, timeZone: event.target.value})}
+                                value={settings.timeZone || DEFAULT_PROJECT_TIME_ZONE}
+                            >
+                                {timeZoneOptions.map((timeZone) => (
+                                    <option
+                                        key={timeZone}
+                                        value={timeZone}
+                                    >
+                                        {timeZone}
+                                    </option>
+                                ))}
+                            </select>
+                        </label>
                     </div>
                 </div>
                 <div className='admin-settings-section'>

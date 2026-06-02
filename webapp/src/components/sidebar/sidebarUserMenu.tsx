@@ -138,7 +138,7 @@ const SidebarUserMenu = () => {
                             <p>
                                 <FormattedMessage
                                     id='Sidebar.about-description'
-                                    defaultMessage='BoringBoard is customized for my own project management workflow.'
+                                    defaultMessage='This is BoringBoard, yes its customized for my own project management workflow.'
                                 />
                             </p>
                             <p>

@@ -10,6 +10,7 @@ import (
 )
 
 func (a *API) registerAdminDashboardRoutes(r *mux.Router) {
+	r.HandleFunc("/system-settings", a.sessionRequired(a.handleGetSystemSettings)).Methods(http.MethodGet)
 	r.HandleFunc("/admin/boards", a.sessionRequired(a.handleGetAdminBoards)).Methods(http.MethodGet)
 	r.HandleFunc("/admin/users", a.sessionRequired(a.handleGetAdminUsers)).Methods(http.MethodGet)
 	r.HandleFunc("/admin/users", a.sessionRequired(a.handleCreateAdminUser)).Methods(http.MethodPost)
@@ -17,6 +18,11 @@ func (a *API) registerAdminDashboardRoutes(r *mux.Router) {
 	r.HandleFunc("/admin/users/{userID}", a.sessionRequired(a.handleDeleteAdminUser)).Methods(http.MethodDelete)
 	r.HandleFunc("/admin/system-settings", a.sessionRequired(a.handleGetAdminSystemSettings)).Methods(http.MethodGet)
 	r.HandleFunc("/admin/system-settings", a.sessionRequired(a.handleSaveAdminSystemSettings)).Methods(http.MethodPut)
+}
+
+func sanitizeSystemSettings(settings model.AdminSystemSettings) model.AdminSystemSettings {
+	settings.AI.APIKey = ""
+	return settings
 }
 
 func (a *API) requireSystemAdmin(w http.ResponseWriter, r *http.Request) bool {
@@ -180,6 +186,22 @@ func (a *API) handleGetAdminSystemSettings(w http.ResponseWriter, r *http.Reques
 	}
 
 	data, err := json.Marshal(settings)
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	jsonBytesResponse(w, http.StatusOK, data)
+}
+
+func (a *API) handleGetSystemSettings(w http.ResponseWriter, r *http.Request) {
+	settings, err := a.app.GetAdminSystemSettings()
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	data, err := json.Marshal(sanitizeSystemSettings(settings))
 	if err != nil {
 		a.errorResponse(w, r, err)
 		return

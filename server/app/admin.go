@@ -13,8 +13,9 @@ const adminSystemSettingsKey = "boringboard_admin_system_settings"
 
 func defaultAdminSystemSettings() model.AdminSystemSettings {
 	return model.AdminSystemSettings{
-		AppName: "BoringBoard",
-		Logo:    "",
+		AppName:  "BoringBoard",
+		Logo:     "",
+		TimeZone: "Asia/Jakarta",
 		AI: model.AdminAISettings{
 			Enabled:  false,
 			Provider: "OpenAI",
@@ -180,6 +181,9 @@ func (a *App) SaveAdminSystemSettings(settings model.AdminSystemSettings) (model
 	}
 	if settings.AI.Provider == "" {
 		settings.AI.Provider = defaultAdminSystemSettings().AI.Provider
+	}
+	if settings.TimeZone == "" {
+		settings.TimeZone = defaultAdminSystemSettings().TimeZone
 	}
 
 	data, err := json.Marshal(settings)

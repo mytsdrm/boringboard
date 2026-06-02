@@ -28,6 +28,7 @@ export type AdminAISettings = {
 export type AdminSystemSettings = {
     appName: string
     logo: string
+    timeZone: string
     ai: AdminAISettings
 }
 
@@ -402,6 +403,7 @@ class OctoClient {
         return this.getJson<AdminSystemSettings>(response, {
             appName: 'BoringBoard',
             logo: '',
+            timeZone: 'Asia/Jakarta',
             ai: {
                 apiKey: '',
                 enabled: false,
@@ -421,6 +423,21 @@ class OctoClient {
             return null
         }
         return this.getJson<AdminSystemSettings>(response, settings)
+    }
+
+    async getSystemSettings(): Promise<AdminSystemSettings> {
+        const path = '/api/v2/system-settings'
+        const response = await fetch(this.getBaseURL() + path, {headers: this.headers()})
+        return this.getJson<AdminSystemSettings>(response, {
+            appName: 'BoringBoard',
+            logo: '',
+            timeZone: 'Asia/Jakarta',
+            ai: {
+                apiKey: '',
+                enabled: false,
+                provider: 'OpenAI',
+            },
+        })
     }
 
     private async getBlocksWithPath(path: string): Promise<Block[]> {

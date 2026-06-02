@@ -7,9 +7,10 @@ type AdminAISettings struct {
 }
 
 type AdminSystemSettings struct {
-	AppName string          `json:"appName"`
-	Logo    string          `json:"logo"`
-	AI      AdminAISettings `json:"ai"`
+	AppName  string          `json:"appName"`
+	Logo     string          `json:"logo"`
+	TimeZone string          `json:"timeZone"`
+	AI       AdminAISettings `json:"ai"`
 }
 
 type AdminUserRequest struct {

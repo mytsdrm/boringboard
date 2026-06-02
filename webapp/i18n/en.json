@@ -311,7 +311,7 @@
     "ShareTemplate.Title": "Share template",
     "ShareTemplate.searchPlaceholder": "Search for people",
     "Sidebar.about": "About BoringBoard",
-    "Sidebar.about-description": "BoringBoard is customized for my own project management workflow.",
+    "Sidebar.about-description": "This is BoringBoard, yes its fork of focalboard and customized for my own project management workflow.",
     "Sidebar.about-fork-description": "This personal fork keeps the core board experience while adjusting the interface and branding for daily personal use.",
     "Sidebar.about-source": "Source: github.com/mytsdrm/boringboard",
     "Sidebar.about-version": "Version {version}",
