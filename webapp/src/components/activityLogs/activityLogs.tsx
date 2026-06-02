@@ -735,6 +735,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
                                 defaultMessage: 'User',
                             })}
                             className='form-select'
+                            disabled={isLoading}
                             onChange={(event) => setSelectedUserId(event.target.value)}
                             value={selectedUserId}
                         >
@@ -761,6 +762,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
                                 defaultMessage: 'Date range',
                             })}
                             className='form-control activity-logs-date-range-button'
+                            disabled={isLoading}
                             onClick={() => setShowDateRangePicker((showPicker) => !showPicker)}
                             type='button'
                         >
@@ -793,6 +795,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
                                 <div className='activity-logs-date-range-actions'>
                                     <button
                                         className='btn btn-outline-secondary'
+                                        disabled={isLoading}
                                         onClick={resetDateRangeToCurrentMonth}
                                         type='button'
                                     >
@@ -803,6 +806,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
                                     </button>
                                     <button
                                         className='btn btn-primary'
+                                        disabled={isLoading}
                                         onClick={() => setShowDateRangePicker(false)}
                                         type='button'
                                     >
@@ -837,6 +841,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
                                     defaultMessage: 'Search',
                                 })}
                                 className='form-control'
+                                disabled={isLoading}
                                 placeholder={intl.formatMessage({
                                     id: 'ActivityLogs.search-placeholder',
                                     defaultMessage: 'Search activity',
@@ -915,13 +920,26 @@ const ActivityLogs = (props: Props): JSX.Element => {
                 {(logs.length > 0 || pageIndex > 0 || hasNextPage) &&
                     <div className='card-footer admin-users-pagination'>
                         <div className='admin-users-pagination-inner'>
-                            <span className='text-secondary admin-users-pagination-summary'>
-                                <FormattedMessage
-                                    id='ActivityLogs.pagination-summary'
-                                    defaultMessage='Page {page}'
-                                    values={{page: pageIndex + 1}}
-                                />
-                            </span>
+                            <div className='activity-logs-pagination-status'>
+                                <span className='text-secondary admin-users-pagination-summary'>
+                                    <FormattedMessage
+                                        id='ActivityLogs.pagination-summary'
+                                        defaultMessage='Page {page}'
+                                        values={{page: pageIndex + 1}}
+                                    />
+                                </span>
+                                {isLoading && visibleLogs.length > 0 &&
+                                    <span className='activity-logs-inline-loader'>
+                                        <span
+                                            aria-hidden={true}
+                                            className='spinner-border spinner-border-sm'
+                                        />
+                                        <FormattedMessage
+                                            id='ActivityLogs.refreshing'
+                                            defaultMessage='Loading...'
+                                        />
+                                    </span>}
+                            </div>
                             <ul className='pagination m-0'>
                                 <li className={`page-item ${pageIndex === 0 ? 'disabled' : ''}`}>
                                     <button

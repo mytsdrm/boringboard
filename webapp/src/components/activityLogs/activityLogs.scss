@@ -141,6 +141,24 @@
         overflow: auto;
     }
 
+    .activity-logs-pagination-status,
+    .activity-logs-inline-loader {
+        display: inline-flex;
+        align-items: center;
+    }
+
+    .activity-logs-pagination-status {
+        gap: 12px;
+    }
+
+    .activity-logs-inline-loader {
+        gap: 8px;
+        color: var(--bb-text-muted);
+        font-size: 13px;
+        font-weight: 650;
+        line-height: 18px;
+    }
+
     .activity-logs-table {
         min-width: 1040px;
 
