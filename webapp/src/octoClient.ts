@@ -45,6 +45,13 @@ export type UserProfilePayload = {
     nickname: string
 }
 
+export type TablePDFPayload = {
+    fileName: string
+    headers: string[]
+    rows: string[][]
+    title: string
+}
+
 //
 // OctoClient is the client interface to the server APIs
 //
@@ -172,6 +179,15 @@ class OctoClient {
         })
         const json = (await this.getJson(response, {})) as IUser | {error?: string}
         return {code: response.status, json}
+    }
+
+    async printTablePDF(payload: TablePDFPayload): Promise<Response> {
+        const path = '/api/v2/print/pdf'
+        return fetch(this.getBaseURL() + path, {
+            method: 'POST',
+            headers: this.headers(),
+            body: JSON.stringify(payload),
+        })
     }
 
     private headers() {

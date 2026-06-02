@@ -108,6 +108,36 @@
                 background: var(--bb-blue-soft);
                 color: var(--bb-blue-text);
             }
+
+            &.print-excel {
+                color: var(--bb-green-text);
+
+                &:hover,
+                &:focus {
+                    background: var(--bb-green-soft);
+                    color: var(--bb-green-text);
+                }
+            }
+
+            &.print-pdf {
+                color: rgb(var(--button-danger-bg-rgb));
+
+                &:hover,
+                &:focus {
+                    background: rgba(var(--button-danger-bg-rgb), 0.08);
+                    color: rgb(var(--button-danger-bg-rgb));
+                }
+            }
+
+            &.print-web {
+                color: var(--bb-blue-text);
+
+                &:hover,
+                &:focus {
+                    background: var(--bb-blue-soft);
+                    color: var(--bb-blue-text);
+                }
+            }
         }
     }
 
