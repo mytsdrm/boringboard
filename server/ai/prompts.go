@@ -34,8 +34,9 @@ The JSON must match this shape:
 Rules:
 - Use only these view values: board, table, calendar, gallery.
 - Always include board, table, and calendar views.
-- Include 3 to 6 columns.
-- Include 0 to 12 starter tasks.
+- Include 3 to 8 columns.
+- Include enough starter tasks to satisfy the user's requested scope; use up to 120 tasks when the command lists many platforms, categories, or repeated features.
+- If the user gives a list of platforms/categories and a list of features/actions, create tasks for each valid combination instead of summarizing them.
 - Every task column must match one returned column name.
 - Make every task a real job task, not a vague label.
 - Every task description must be detailed enough for a worker to start without asking follow-up questions.
@@ -107,8 +108,9 @@ The JSON must match this shape:
 Rules:
 - Use only these view values: board, table, calendar, gallery.
 - Always include board, table, and calendar views.
-- Include 3 to 6 columns.
-- Include 0 to 12 starter tasks.
+- Include 3 to 8 columns.
+- Include enough starter tasks to satisfy the user's requested scope; use up to 120 tasks when the response lists many platforms, categories, or repeated features.
+- If the source response contains a list of platforms/categories and a list of features/actions, create tasks for each valid combination instead of summarizing them.
 - Every task column must match one returned column name.
 - Make every task a real job task, not a vague label.
 - Every task description must be detailed enough for a worker to start without asking follow-up questions.

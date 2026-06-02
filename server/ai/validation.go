@@ -13,7 +13,7 @@ const (
 	maxTaskTitleLength   = 140
 	maxTaskDescription   = 500
 	maxColumns           = 8
-	maxTasks             = 24
+	maxTasks             = 120
 )
 
 var defaultTaskBoardViews = []string{"board", "table", "calendar"}
