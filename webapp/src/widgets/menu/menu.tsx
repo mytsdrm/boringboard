@@ -49,6 +49,20 @@ export default class Menu extends React.PureComponent<Props> {
         if (this.props.parentRef) {
             const forceBottom = position ? ['bottom', 'left', 'right'].includes(position) : false
             style = MenuUtil.openUp(this.props.parentRef, forceBottom).style
+            if (fixed && position === 'left' && this.props.parentRef.current) {
+                const boundingRect = this.props.parentRef.current.getBoundingClientRect()
+                const menuWidth = this.menuRef.current?.offsetWidth || 240
+                const menuMargin = 12
+                const anchorPadding = 8
+                const alignedLeft = (boundingRect.right - menuWidth) + anchorPadding
+                style.left = Math.min(
+                    Math.max(alignedLeft, menuMargin),
+                    window.innerWidth - menuWidth - menuMargin,
+                )
+            } else if (fixed && position === 'right' && this.props.parentRef.current) {
+                const boundingRect = this.props.parentRef.current.getBoundingClientRect()
+                style.left = boundingRect.left
+            }
         }
 
         return (

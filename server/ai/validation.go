@@ -16,6 +16,8 @@ const (
 	maxTasks             = 24
 )
 
+var defaultTaskBoardViews = []string{"board", "table", "calendar"}
+
 var (
 	ErrAIIsDisabled     = errors.New("ai is disabled")
 	ErrCommandRequired  = errors.New("command is required")
@@ -66,8 +68,11 @@ func normalizePreview(preview TaskBoardPreview) (TaskBoardPreview, error) {
 	}
 	preview.Columns = normalizedColumns
 
-	normalizedViews := []string{}
+	normalizedViews := append([]string{}, defaultTaskBoardViews...)
 	seenViews := map[string]bool{}
+	for _, view := range normalizedViews {
+		seenViews[view] = true
+	}
 	for _, view := range preview.Views {
 		view = strings.ToLower(strings.TrimSpace(view))
 		if view != "board" && view != "table" && view != "calendar" && view != "gallery" {
@@ -78,9 +83,6 @@ func normalizePreview(preview TaskBoardPreview) (TaskBoardPreview, error) {
 		}
 		seenViews[view] = true
 		normalizedViews = append(normalizedViews, view)
-	}
-	if len(normalizedViews) == 0 {
-		normalizedViews = []string{"board", "table"}
 	}
 	preview.Views = normalizedViews
 

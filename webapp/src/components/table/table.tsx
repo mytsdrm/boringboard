@@ -176,65 +176,73 @@ const Table = (props: Props): JSX.Element => {
                 columnWidths={activeView.fields.columnWidths}
                 onResizeColumn={resizeColumn}
             >
-                <div className='octo-table-body'>
-                    <TableHeaders
-                        board={board}
-                        cards={cards}
-                        activeView={activeView}
-                        views={views}
-                        readonly={props.readonly || !canEditBoardProperties}
-                    />
+                <div className='table-scroll-region'>
+                    <div className='octo-table-body'>
+                        <TableHeaders
+                            board={board}
+                            cards={cards}
+                            activeView={activeView}
+                            views={views}
+                            readonly={props.readonly || !canEditBoardProperties}
+                        />
 
-                    {/* Table rows */}
-                    <div className='table-row-container'>
-                        {activeView.fields.groupById &&
-                    visibleGroups.map((group) => {
-                        return (
-                            <TableGroup
-                                key={group.option.id}
+                        {/* Table rows */}
+                        <div className='table-row-container'>
+                            {activeView.fields.groupById &&
+                        visibleGroups.map((group) => {
+                            return (
+                                <TableGroup
+                                    key={group.option.id}
+                                    board={board}
+                                    activeView={activeView}
+                                    groupByProperty={groupByProperty}
+                                    group={group}
+                                    readonly={props.readonly || !canEditCards}
+                                    selectedCardIds={props.selectedCardIds}
+                                    cardIdToFocusOnRender={props.cardIdToFocusOnRender}
+                                    hideGroup={hideGroup}
+                                    addCard={props.addCard}
+                                    showCard={props.showCard}
+                                    propertyNameChanged={propertyNameChanged}
+                                    onCardClicked={props.onCardClicked}
+                                    onDropToGroupHeader={onDropToGroupHeader}
+                                    onDropToCard={onDropToCard}
+                                    onDropToGroup={onDropToGroup}
+                                />)
+                        })
+                            }
+
+                            {/* No Grouping, Rows, one per card */}
+                            {!activeView.fields.groupById &&
+                            <TableRows
                                 board={board}
                                 activeView={activeView}
-                                groupByProperty={groupByProperty}
-                                group={group}
-                                readonly={props.readonly || !canEditCards}
+                                cards={cards}
                                 selectedCardIds={props.selectedCardIds}
+                                readonly={props.readonly || !canEditCards}
                                 cardIdToFocusOnRender={props.cardIdToFocusOnRender}
-                                hideGroup={hideGroup}
-                                addCard={props.addCard}
                                 showCard={props.showCard}
-                                propertyNameChanged={propertyNameChanged}
+                                addCard={props.addCard}
                                 onCardClicked={props.onCardClicked}
-                                onDropToGroupHeader={onDropToGroupHeader}
-                                onDropToCard={onDropToCard}
-                                onDropToGroup={onDropToGroup}
-                            />)
-                    })
-                        }
-
-                        {/* No Grouping, Rows, one per card */}
-                        {!activeView.fields.groupById &&
-                        <TableRows
-                            board={board}
-                            activeView={activeView}
-                            cards={cards}
-                            selectedCardIds={props.selectedCardIds}
-                            readonly={props.readonly || !canEditCards}
-                            cardIdToFocusOnRender={props.cardIdToFocusOnRender}
-                            showCard={props.showCard}
-                            addCard={props.addCard}
-                            onCardClicked={props.onCardClicked}
-                            onDrop={onDropToCard}
-                        />
-                        }
+                                onDrop={onDropToCard}
+                            />
+                            }
+                        </div>
                     </div>
+                </div>
 
-                    {/* Add New row */}
-                    <div className='octo-table-footer'>
-                        {!props.readonly && !activeView.fields.groupById &&
+                <CalculationRow
+                    board={board}
+                    cards={cards}
+                    activeView={activeView}
+                    readonly={props.readonly || !canEditBoardProperties}
+                    startAction={!props.readonly && !activeView.fields.groupById ? (
                         <BoardPermissionGate permissions={[Permission.ManageBoardCards]}>
-                            <div
-                                className='octo-table-cell'
-                                onClick={() => {
+                            <button
+                                type='button'
+                                className='table-bottom-new-button'
+                                onClick={(event) => {
+                                    event.stopPropagation()
                                     props.addCard('')
                                 }}
                             >
@@ -242,18 +250,10 @@ const Table = (props: Props): JSX.Element => {
                                     id='TableComponent.plus-new'
                                     defaultMessage='+ New'
                                 />
-                            </div>
+                            </button>
                         </BoardPermissionGate>
-                        }
-                    </div>
-
-                    <CalculationRow
-                        board={board}
-                        cards={cards}
-                        activeView={activeView}
-                        readonly={props.readonly || !canEditBoardProperties}
-                    />
-                </div>
+                    ) : undefined}
+                />
             </ColumnResizeProvider>
 
             {hiddenCardsCount > 0 &&

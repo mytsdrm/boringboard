@@ -28,8 +28,12 @@ export type ColumnResizeProviderProps = {
     onResizeColumn: (columnId: string, width: number) => void
 }
 
+const defaultColumnWidth = (columnId: string, columnWidths: Record<string, number>): number => {
+    return columnWidths[columnId] || (columnId === Constants.titleColumnId ? Constants.defaultTitleColumnWidth : Constants.minColumnWidth)
+}
+
 const columnWidth = (columnId: string, columnWidths: Record<string, number>, offset: number): string => {
-    return `${Math.max(Constants.minColumnWidth, (columnWidths[columnId] || 0) + offset)}px`
+    return `${Math.max(Constants.minColumnWidth, defaultColumnWidth(columnId, columnWidths) + offset)}px`
 }
 
 export const ColumnResizeProvider = (props: ColumnResizeProviderProps): ReactElement => {
@@ -67,7 +71,7 @@ export const ColumnResizeProvider = (props: ColumnResizeProviderProps): ReactEle
             return undefined
         },
         width: (columnId) => {
-            return Math.max(Constants.minColumnWidth, (columnWidths[columnId] || 0))
+            return Math.max(Constants.minColumnWidth, defaultColumnWidth(columnId, columnWidths))
         },
         updateOffset: (columnId, offset) => {
             const elements = columns.get(columnId)

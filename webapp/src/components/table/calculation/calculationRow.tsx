@@ -20,6 +20,7 @@ type Props = {
     cards: Card[]
     activeView: BoardView
     readonly: boolean
+    startAction?: React.ReactNode
 }
 
 const CalculationRow = (props: Props): JSX.Element => {
@@ -58,7 +59,8 @@ const CalculationRow = (props: Props): JSX.Element => {
                     return (
                         <Calculation
                             key={template.id}
-                            class={`octo-table-cell ${readonly ? 'disabled' : ''}`}
+                            class={`octo-table-cell ${template.id === Constants.titleColumnId ? 'title-cell' : ''} ${readonly ? 'disabled' : ''}`}
+                            prefix={template.id === Constants.titleColumnId ? props.startAction : undefined}
                             value={value}
                             menuOpen={Boolean(readonly ? false : showOptions.get(template.id))}
                             onMenuClose={() => toggleOptions(template.id, false)}

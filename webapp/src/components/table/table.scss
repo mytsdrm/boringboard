@@ -3,12 +3,22 @@
 .Table {
     margin-top: 22px;
     margin-left: 0 !important;
-    overflow: auto;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
     position: relative;
     flex: 1 1 auto;
     min-height: 0;
-    padding: 0 0 56px;
+    padding: 0 24px 0 0;
     -webkit-overflow-scrolling: touch;
+
+    .table-scroll-region {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
+        padding-bottom: 28px;
+        -webkit-overflow-scrolling: touch;
+    }
 
     .octo-group-header-cell {
         display: flex;
@@ -114,6 +124,7 @@
         flex: 0 0 auto;
         display: flex;
         flex-direction: row;
+        min-width: 0;
         color: var(--bb-text);
         border-right: solid 1px var(--bb-table-border);
         border-bottom: solid 1px var(--bb-table-border);
@@ -137,6 +148,7 @@
 
         .octo-icontitle {
             flex: 1 1 auto;
+            min-width: 0;
             font-weight: 650;
             color: var(--bb-text);
 
@@ -154,6 +166,9 @@
 
             .Editable {
                 flex: 1 1 auto;
+                min-width: 0;
+                overflow: hidden;
+                text-overflow: ellipsis;
             }
         }
 
@@ -183,6 +198,7 @@
         }
 
         .octo-propertyvalue {
+            display: block;
             line-height: 18px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -206,12 +222,18 @@
         .DateRange.octo-propertyvalue {
             overflow: unset;
         }
+
+        &.title-cell {
+            flex: 1 1 420px;
+            min-width: 360px;
+        }
     }
 
     .octo-table-body {
         display: flex;
         flex-direction: column;
-        width: fit-content;
+        width: 100%;
+        min-width: max-content;
     }
 
     .octo-table-header,
@@ -220,6 +242,8 @@
         flex-direction: row;
         border-bottom: 0;
         margin-left: 0;
+        width: 100%;
+        min-width: max-content;
 
         &.hidden {
             display: none;
@@ -238,7 +262,8 @@
         top: 0;
         background: color-mix(in srgb, var(--bb-bg) 96%, transparent);
         backdrop-filter: blur(14px);
-        width: fit-content;
+        width: 100%;
+        min-width: max-content;
         padding: 4px 0 12px;
 
         .octo-table-cell {
@@ -267,7 +292,8 @@
     }
 
     .table-row-container {
-        width: fit-content;
+        width: 100%;
+        min-width: max-content;
 
         .octo-table-cell {
             align-items: center;
@@ -282,6 +308,8 @@
         }
 
         .octo-table-row {
+            width: 100%;
+            min-width: max-content;
             filter: none;
             position: relative;
             box-shadow: 0 4px 12px var(--bb-table-shadow);
@@ -304,23 +332,6 @@
                 &:last-child {
                     border-radius: 0 8px 8px 0;
                 }
-            }
-        }
-    }
-
-    .octo-table-footer {
-        .octo-table-cell {
-            color: rgba(var(--center-channel-color-rgb), 0.6);
-            cursor: pointer;
-            width: 100%;
-            padding-left: 15px;
-            background: transparent;
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.08em;
-
-            &:hover {
-                background-color: rgba(var(--button-bg-rgb), 0.06);
             }
         }
     }

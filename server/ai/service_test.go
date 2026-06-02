@@ -39,6 +39,25 @@ func TestParseTaskBoardPreviewCoercesNestedPreview(t *testing.T) {
 	}
 }
 
+func TestNormalizePreviewAlwaysIncludesDefaultViews(t *testing.T) {
+	preview, err := normalizePreview(TaskBoardPreview{
+		Title: "Android Farm",
+		Views: []string{"gallery"},
+		Columns: []TaskBoardColumnPreview{
+			{Name: "Planning"},
+			{Name: "Done"},
+		},
+	})
+	if err != nil {
+		t.Fatalf("expected preview, got %v", err)
+	}
+
+	expectedViews := []string{"board", "table", "calendar", "gallery"}
+	if strings.Join(preview.Views, ",") != strings.Join(expectedViews, ",") {
+		t.Fatalf("expected default views %v, got %v", expectedViews, preview.Views)
+	}
+}
+
 func TestOpenAICompatibleMessageContentSupportsParts(t *testing.T) {
 	raw, err := json.Marshal([]map[string]string{
 		{"type": "text", "text": `{"title":"Android Farm"`},

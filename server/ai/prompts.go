@@ -6,6 +6,7 @@ import (
 )
 
 const defaultTaskBoardColumnGuidance = "Create a task board with planning, execution, review, and done columns."
+const defaultTaskBoardViewGuidance = "Always include these views: board, table, calendar."
 
 func createTaskBoardPrompt(command string) string {
 	command = appendDefaultColumnGuidance(command)
@@ -19,7 +20,7 @@ The JSON must match this shape:
 {
   "title": "short task board title",
   "description": "one concise project description",
-  "views": ["board", "table"],
+  "views": ["board", "table", "calendar"],
   "columns": [
     {"name": "Backlog", "color": "propColorGray"},
     {"name": "In Progress", "color": "propColorBlue"},
@@ -32,6 +33,7 @@ The JSON must match this shape:
 
 Rules:
 - Use only these view values: board, table, calendar, gallery.
+- Always include board, table, and calendar views.
 - Include 3 to 6 columns.
 - Include 0 to 12 starter tasks.
 - Every task column must match one returned column name.
@@ -48,7 +50,7 @@ func appendDefaultColumnGuidance(command string) string {
 	if command == "" || commandHasColumnGuidance(command) {
 		return command
 	}
-	return command + "\n\nAdditional board structure guidance:\n" + defaultTaskBoardColumnGuidance
+	return command + "\n\nAdditional board structure guidance:\n" + defaultTaskBoardColumnGuidance + "\n" + defaultTaskBoardViewGuidance
 }
 
 func commandHasColumnGuidance(command string) bool {
@@ -83,7 +85,7 @@ The JSON must match this shape:
 {
   "title": "short task board title",
   "description": "one concise project description",
-  "views": ["board", "table"],
+  "views": ["board", "table", "calendar"],
   "columns": [
     {"name": "Backlog", "color": "propColorGray"},
     {"name": "In Progress", "color": "propColorBlue"},
@@ -96,6 +98,7 @@ The JSON must match this shape:
 
 Rules:
 - Use only these view values: board, table, calendar, gallery.
+- Always include board, table, and calendar views.
 - Include 3 to 6 columns.
 - Include 0 to 12 starter tasks.
 - Every task column must match one returned column name.

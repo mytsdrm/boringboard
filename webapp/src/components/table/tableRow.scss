@@ -57,6 +57,11 @@
         }
     }
 
+    &:has(.MenuWrapper.menuOpened) {
+        @include z-index(table-row-action-cell);
+        position: relative;
+    }
+
     &.readonly:hover {
         margin-left: unset;
     }
@@ -72,6 +77,22 @@
         height: 30px;
         background: transparent !important;
         border: 0 !important;
+    }
+
+    .table-row-menu-anchor {
+        .Menu.noselect {
+            max-width: 210px;
+
+            .menu-contents {
+                min-width: 176px;
+                max-width: 210px;
+            }
+
+            .menu-option {
+                padding-right: 10px;
+                padding-left: 10px;
+            }
+        }
     }
 
     .URLProperty:hover .Button_Copy {

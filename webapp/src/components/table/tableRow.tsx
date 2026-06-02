@@ -50,6 +50,7 @@ const TableRow = (props: Props) => {
     const {board, card, isManualSort, groupById, visiblePropertyIds, collapsedOptionIds} = props
 
     const titleRef = useRef<{ focus(selectAll?: boolean): void }>(null)
+    const actionMenuRef = useRef<HTMLDivElement>(null)
     const [title, setTitle] = useState(props.card.title || '')
     const isGrouped = Boolean(groupById)
     const [isDragging, isOver, cardRef] = useSortable('card', card, !props.readonly && (isManualSort || isGrouped), props.onDrop)
@@ -181,40 +182,47 @@ const TableRow = (props: Props) => {
                 </div>
 
                 {!props.readonly && (
-                    <MenuWrapper
-                        className='optionsMenu ml-2 mr-2'
-                        stopPropagationOnToggle={true}
+                    <div
+                        className='table-row-menu-anchor'
+                        ref={actionMenuRef}
                     >
-                        <Tooltip
-                            title={intl.formatMessage({id: 'TableRow.MoreOption', defaultMessage: 'More actions'})}
+                        <MenuWrapper
+                            className='optionsMenu ml-2 mr-2'
+                            stopPropagationOnToggle={true}
                         >
-                            <IconButton
-                                title='MenuBtn'
-                                icon={<OptionsIcon/>}
+                            <Tooltip
+                                title={intl.formatMessage({id: 'TableRow.MoreOption', defaultMessage: 'More actions'})}
+                            >
+                                <IconButton
+                                    title='MenuBtn'
+                                    icon={<OptionsIcon/>}
+                                />
+                            </Tooltip>
+                            <CardActionsMenu
+                                cardId={card.id}
+                                boardId={card.boardId}
+                                fixed={true}
+                                parentRef={actionMenuRef}
+                                onClickDelete={handleDeleteButtonOnClick}
+                                onClickDuplicate={() => {
+                                    mutator.duplicateCard(
+                                        card.id,
+                                        board.id,
+                                        false,
+                                        intl.formatMessage({id: 'TableRow.DuplicateCard', defaultMessage: 'duplicate card'}),
+                                        false,
+                                        {},
+                                        async (newCardId) => {
+                                            props.showCard(newCardId)
+                                        },
+                                        async () => {
+                                            props.showCard(undefined)
+                                        },
+                                    )
+                                }}
                             />
-                        </Tooltip>
-                        <CardActionsMenu
-                            cardId={card.id}
-                            boardId={card.boardId}
-                            onClickDelete={handleDeleteButtonOnClick}
-                            onClickDuplicate={() => {
-                                mutator.duplicateCard(
-                                    card.id,
-                                    board.id,
-                                    false,
-                                    intl.formatMessage({id: 'TableRow.DuplicateCard', defaultMessage: 'duplicate card'}),
-                                    false,
-                                    {},
-                                    async (newCardId) => {
-                                        props.showCard(newCardId)
-                                    },
-                                    async () => {
-                                        props.showCard(undefined)
-                                    },
-                                )
-                            }}
-                        />
-                    </MenuWrapper>
+                        </MenuWrapper>
+                    </div>
                 )}
 
                 <div className='open-button'>

@@ -23,6 +23,8 @@ type Props = {
     onClickDelete: () => void
     onClickDuplicate?: () => void
     children?: ReactNode
+    fixed?: boolean
+    parentRef?: React.RefObject<HTMLElement>
 }
 
 export const CardActionsMenu = (props: Props): JSX.Element => {
@@ -44,7 +46,11 @@ export const CardActionsMenu = (props: Props): JSX.Element => {
     }
 
     return (
-        <Menu position='left'>
+        <Menu
+            position='left'
+            fixed={props.fixed}
+            parentRef={props.parentRef}
+        >
             <BoardPermissionGate permissions={[Permission.ManageBoardCards]}>
                 <Menu.Text
                     icon={<DeleteIcon/>}

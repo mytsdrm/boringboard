@@ -30,6 +30,7 @@ type Props = {
     property: IPropertyTemplate
     hovered: boolean
     optionsComponent: React.ComponentType<CommonCalculationOptionProps>
+    prefix?: React.ReactNode
 }
 
 const Calculation = (props: Props): JSX.Element => {
@@ -68,6 +69,8 @@ const Calculation = (props: Props): JSX.Element => {
                     </div>
                 )
             }
+
+            {props.prefix}
 
             <span className='calculationLabel'>
                 {optionDisplayNameString(valueOption!, intl)}

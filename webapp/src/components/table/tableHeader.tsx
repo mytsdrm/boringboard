@@ -48,11 +48,13 @@ const TableHeader = (props: Props): JSX.Element => {
     }
 
     let className = 'octo-table-cell header-cell'
+    const templateId = props.template.id
+    if (templateId === Constants.titleColumnId) {
+        className += ' title-cell'
+    }
     if (isOver) {
         className += ' dragover'
     }
-
-    const templateId = props.template.id
 
     return (
         <div
