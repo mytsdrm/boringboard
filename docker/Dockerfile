@@ -1,5 +1,5 @@
 ### Webapp build
-FROM node:16.3.0@sha256:ca6daf1543242acb0ca59ff425509eab7defb9452f6ae07c156893db06c7a9a4 AS nodebuild
+FROM node:20-bookworm AS nodebuild
 
 WORKDIR /webapp
 ADD webapp/ /webapp
