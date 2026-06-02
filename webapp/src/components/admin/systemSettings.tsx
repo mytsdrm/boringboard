@@ -244,57 +244,59 @@ const SystemSettings = (): JSX.Element => {
                             />
                         </p>
                     </div>
-                    <label className='admin-settings-checkbox'>
-                        <input
-                            checked={settings.ai.enabled}
-                            onChange={(event) => setSettings({...settings, ai: {...settings.ai, enabled: event.target.checked}})}
-                            type='checkbox'
-                        />
-                        <span>
-                            <FormattedMessage
-                                id='SystemSettings.enable-ai'
-                                defaultMessage='Enable AI'
+                    <div className='admin-ai-controls'>
+                        <label className='admin-settings-checkbox'>
+                            <input
+                                checked={settings.ai.enabled}
+                                onChange={(event) => setSettings({...settings, ai: {...settings.ai, enabled: event.target.checked}})}
+                                type='checkbox'
                             />
-                        </span>
-                    </label>
-                    {settings.ai.enabled &&
-                        <div className='admin-ai-settings'>
-                            <label>
-                                <span>
-                                    <FormattedMessage
-                                        id='SystemSettings.provider'
-                                        defaultMessage='Provider'
-                                    />
-                                </span>
-                                <select
-                                    onChange={(event) => setSettings({...settings, ai: {...settings.ai, provider: event.target.value}})}
-                                    value={settings.ai.provider}
-                                >
-                                    {PROVIDERS.map((provider) => (
-                                        <option
-                                            key={provider}
-                                            value={provider}
-                                        >
-                                            {provider}
-                                        </option>
-                                    ))}
-                                </select>
-                                <small>{defaultProviderHints[settings.ai.provider]}</small>
-                            </label>
-                            <label>
-                                <span>
-                                    <FormattedMessage
-                                        id='SystemSettings.api-key'
-                                        defaultMessage='Api Key'
-                                    />
-                                </span>
-                                <input
-                                    onChange={(event) => setSettings({...settings, ai: {...settings.ai, apiKey: event.target.value}})}
-                                    type='password'
-                                    value={settings.ai.apiKey}
+                            <span>
+                                <FormattedMessage
+                                    id='SystemSettings.enable-ai'
+                                    defaultMessage='Enable AI'
                                 />
-                            </label>
-                        </div>}
+                            </span>
+                        </label>
+                        {settings.ai.enabled &&
+                            <div className='admin-ai-settings'>
+                                <label>
+                                    <span>
+                                        <FormattedMessage
+                                            id='SystemSettings.provider'
+                                            defaultMessage='Provider'
+                                        />
+                                    </span>
+                                    <select
+                                        onChange={(event) => setSettings({...settings, ai: {...settings.ai, provider: event.target.value}})}
+                                        value={settings.ai.provider}
+                                    >
+                                        {PROVIDERS.map((provider) => (
+                                            <option
+                                                key={provider}
+                                                value={provider}
+                                            >
+                                                {provider}
+                                            </option>
+                                        ))}
+                                    </select>
+                                    <small>{defaultProviderHints[settings.ai.provider]}</small>
+                                </label>
+                                <label>
+                                    <span>
+                                        <FormattedMessage
+                                            id='SystemSettings.api-key'
+                                            defaultMessage='Api Key'
+                                        />
+                                    </span>
+                                    <input
+                                        onChange={(event) => setSettings({...settings, ai: {...settings.ai, apiKey: event.target.value}})}
+                                        type='password'
+                                        value={settings.ai.apiKey}
+                                    />
+                                </label>
+                            </div>}
+                    </div>
                 </div>
                 <div className='admin-page-actions'>
                     <button

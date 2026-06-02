@@ -449,13 +449,33 @@
         background: #fff;
     }
 
+    .admin-ai-controls {
+        display: flex;
+        align-items: flex-start;
+        flex-direction: column;
+        gap: 16px;
+        min-width: 0;
+        max-width: 760px;
+    }
+
     .admin-ai-settings {
-        grid-column: 2;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
+        width: 100%;
         max-width: 760px;
-        margin-top: 16px;
+    }
+
+    .admin-ai-controls .admin-settings-checkbox {
+        display: inline-flex;
+        align-items: center;
+        flex-direction: row;
+        justify-content: flex-start;
+        gap: 10px;
+        min-height: 40px;
+        padding: 0;
+        border: 0;
+        background: transparent;
     }
 
     .admin-page-actions {
@@ -558,13 +578,9 @@
         .admin-settings-form,
         .admin-settings-section,
         .admin-settings-field-grid,
+        .admin-ai-controls,
         .admin-ai-settings {
             grid-template-columns: 1fr;
-        }
-
-        .admin-ai-settings {
-            grid-column: 1;
-            padding-left: 0;
         }
 
         .admin-form-actions {
