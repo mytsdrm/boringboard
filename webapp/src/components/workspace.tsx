@@ -81,7 +81,11 @@ function CenterContent(props: Props) {
         if (props.readonly) {
             newPath += `?r=${Utils.getReadToken()}`
         }
-        history.push(newPath)
+        if (cardId) {
+            history.push(newPath)
+        } else {
+            history.replace(newPath)
+        }
         dispatch(setCurrentCard(cardId || ''))
     }, [match, history])
 
@@ -208,6 +212,7 @@ function CenterContent(props: Props) {
 
 const Workspace = (props: Props) => {
     const board = useAppSelector(getCurrentBoard)
+    const match = useRouteMatch<{boardId?: string}>()
 
     const viewId = useAppSelector(getCurrentViewId)
     const [boardTemplateSelectorOpen, setBoardTemplateSelectorOpen] = useState(false)
@@ -228,7 +233,7 @@ const Workspace = (props: Props) => {
                 <Sidebar
                     onBoardTemplateSelectorOpen={openBoardTemplateSelector}
                     onBoardTemplateSelectorClose={closeBoardTemplateSelector}
-                    activeBoardId={(props.activityLogs || props.dashboard || props.systemSettings || props.templates || props.users) ? undefined : board?.id}
+                    activeBoardId={(props.activityLogs || props.dashboard || props.systemSettings || props.templates || props.users) ? undefined : (match.params.boardId || board?.id)}
                     activityLogsActive={props.activityLogs || false}
                     dashboardActive={props.dashboard || false}
                     systemSettingsActive={props.systemSettings || false}
