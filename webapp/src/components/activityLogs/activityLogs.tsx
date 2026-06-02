@@ -1,6 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React, {useCallback, useEffect, useMemo, useRef, useState} from 'react'
+import {IconChevronLeft, IconChevronRight, IconPencil, IconSearch} from '@tabler/icons-react'
 import {FormattedMessage, useIntl} from 'react-intl'
 import {DateUtils} from 'react-day-picker'
 import DayPicker from 'react-day-picker/DayPicker'
@@ -14,10 +15,11 @@ import {getMySortedBoards} from '../../store/boards'
 import {useAppDispatch, useAppSelector} from '../../store/hooks'
 import {getCurrentTeamId, getFirstTeam} from '../../store/teams'
 import {addBoardUsers, getBoardUsers, getMe} from '../../store/users'
-import CompassIcon from '../../widgets/icons/compassIcon'
 import {WSClient} from '../../wsclient'
 
 import 'react-day-picker/lib/style.css'
+import '@tabler/core/dist/css/tabler.min.css'
+import '../admin/adminPages.scss'
 import './activityLogs.scss'
 
 type ActivityAction = 'created' | 'deleted' | 'renamed' | 'moved' | 'edited' | 'updated'
@@ -252,6 +254,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
     const [pageCursors, setPageCursors] = useState<number[]>([0])
     const [pageIndex, setPageIndex] = useState(0)
     const [memberUserIds, setMemberUserIds] = useState<string[]>([])
+    const [searchQuery, setSearchQuery] = useState('')
     const [selectedUserId, setSelectedUserId] = useState('')
     const [showDateRangePicker, setShowDateRangePicker] = useState(false)
     const [startDate, setStartDate] = useState('')
@@ -333,7 +336,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
     useEffect(() => {
         setPageIndex(0)
         setPageCursors([0])
-    }, [endDateBefore, selectedUserId, startDateAfter])
+    }, [endDateBefore, searchQuery, selectedUserId, startDateAfter])
 
     const handleDateRangeDayClick = (day: Date) => {
         const range = DateUtils.addDayToRange(day, selectedDateRange)
@@ -623,226 +626,296 @@ const ActivityLogs = (props: Props): JSX.Element => {
         }
     }
 
+    const getActivitySearchText = useCallback((log: ActivityLog): string => {
+        const user = getUserDisplayName(log.actorId)
+        const action = intl.formatMessage({
+            id: `ActivityLogs.search-action-${log.action}`,
+            defaultMessage: log.action,
+        })
+
+        return [
+            user,
+            action,
+            log.boardTitle,
+            log.cardTitle,
+            log.fromValue,
+            log.toValue,
+            log.timestamp,
+        ].join(' ').toLowerCase()
+    }, [getUserDisplayName, intl])
+    const visibleLogs = useMemo(() => {
+        const normalizedSearch = searchQuery.trim().toLowerCase()
+        if (!normalizedSearch) {
+            return logs
+        }
+
+        return logs.filter((log) => getActivitySearchText(log).includes(normalizedSearch))
+    }, [getActivitySearchText, logs, searchQuery])
+
     return (
-        <div className='ActivityLogs'>
-            <div className='activity-logs-header'>
-                <div className='activity-logs-eyebrow'>
-                    <FormattedMessage
-                        id='ActivityLogs.eyebrow'
-                        defaultMessage='Activity Logs'
-                    />
+        <div className='AdminPage admin-users-page ActivityLogs'>
+            <div className='admin-page-header admin-page-header-row'>
+                <div>
+                    <div className='admin-page-eyebrow'>
+                        <FormattedMessage
+                            id='ActivityLogs.eyebrow'
+                            defaultMessage='Activity Logs'
+                        />
+                    </div>
+                    <h1>
+                        <FormattedMessage
+                            id='ActivityLogs.title'
+                            defaultMessage='User activity logs'
+                        />
+                    </h1>
+                    <p>
+                        {props.adminMode ? (
+                            <FormattedMessage
+                                id='ActivityLogs.admin-description'
+                                defaultMessage='Recent board activity from all registered users.'
+                            />
+                        ) : (
+                            <FormattedMessage
+                                id='ActivityLogs.description'
+                                defaultMessage='Recent board activity related to your Task Boards.'
+                            />
+                        )}
+                    </p>
                 </div>
-                <h1>
-                    <FormattedMessage
-                        id='ActivityLogs.title'
-                        defaultMessage='User activity logs'
-                    />
-                </h1>
-                <p>
-                    {props.adminMode ? (
-                        <FormattedMessage
-                            id='ActivityLogs.admin-description'
-                            defaultMessage='Recent board activity from all registered users.'
-                        />
-                    ) : (
-                        <FormattedMessage
-                            id='ActivityLogs.description'
-                            defaultMessage='Recent board activity related to your Task Boards.'
-                        />
-                    )}
-                </p>
+                <div className='admin-header-actions'>
+                    <label className='admin-users-search'>
+                        <div className='input-icon'>
+                            <span className='input-icon-addon'>
+                                <IconSearch size={18}/>
+                            </span>
+                            <input
+                                aria-label={intl.formatMessage({
+                                    id: 'ActivityLogs.search',
+                                    defaultMessage: 'Search',
+                                })}
+                                className='form-control'
+                                placeholder={intl.formatMessage({
+                                    id: 'ActivityLogs.search-placeholder',
+                                    defaultMessage: 'Search activity',
+                                })}
+                                type='search'
+                                value={searchQuery}
+                                onChange={(event) => setSearchQuery(event.target.value)}
+                            />
+                        </div>
+                    </label>
+                    <label>
+                        <select
+                            aria-label={intl.formatMessage({
+                                id: 'ActivityLogs.filter-user',
+                                defaultMessage: 'User',
+                            })}
+                            className='form-select'
+                            onChange={(event) => setSelectedUserId(event.target.value)}
+                            value={selectedUserId}
+                        >
+                            <option value=''>
+                                {intl.formatMessage({
+                                    id: 'ActivityLogs.all-users',
+                                    defaultMessage: 'All users',
+                                })}
+                            </option>
+                            {userFilterOptions.map((userId) => (
+                                <option
+                                    key={userId}
+                                    value={userId}
+                                >
+                                    {getUserDisplayName(userId)}
+                                </option>
+                            ))}
+                        </select>
+                    </label>
+                    <div className='activity-logs-date-range'>
+                        <button
+                            aria-label={intl.formatMessage({
+                                id: 'ActivityLogs.filter-date-range',
+                                defaultMessage: 'Date range',
+                            })}
+                            className='form-control activity-logs-date-range-button'
+                            onClick={() => setShowDateRangePicker((showPicker) => !showPicker)}
+                            type='button'
+                        >
+                            {dateRangeLabel}
+                        </button>
+                        {showDateRangePicker &&
+                            <div className='activity-logs-date-range-popover'>
+                                <DayPicker
+                                    initialMonth={selectedDateRange.from || new Date()}
+                                    modifiers={{
+                                        end: selectedDateRange.to,
+                                        start: selectedDateRange.from,
+                                    }}
+                                    onDayClick={handleDateRangeDayClick}
+                                    selectedDays={[
+                                        selectedDateRange.from,
+                                        {
+                                            from: selectedDateRange.from,
+                                            to: selectedDateRange.to,
+                                        },
+                                    ]}
+                                />
+                                <div className='activity-logs-date-range-actions'>
+                                    <button
+                                        className='btn btn-outline-secondary'
+                                        onClick={resetDateRangeToCurrentMonth}
+                                        type='button'
+                                    >
+                                        <FormattedMessage
+                                            id='ActivityLogs.this-month'
+                                            defaultMessage='This month'
+                                        />
+                                    </button>
+                                    <button
+                                        className='btn btn-primary'
+                                        onClick={() => setShowDateRangePicker(false)}
+                                        type='button'
+                                    >
+                                        <FormattedMessage
+                                            id='ActivityLogs.close'
+                                            defaultMessage='Close'
+                                        />
+                                    </button>
+                                </div>
+                            </div>
+                        }
+                    </div>
+                </div>
             </div>
 
-            <div className='activity-logs-filters'>
-                <label>
-                    <span>
-                        <FormattedMessage
-                            id='ActivityLogs.filter-user'
-                            defaultMessage='User'
-                        />
-                    </span>
-                    <select
-                        onChange={(event) => setSelectedUserId(event.target.value)}
-                        value={selectedUserId}
-                    >
-                        <option value=''>
-                            {intl.formatMessage({
-                                id: 'ActivityLogs.all-users',
-                                defaultMessage: 'All users',
-                            })}
-                        </option>
-                        {userFilterOptions.map((userId) => (
-                            <option
-                                key={userId}
-                                value={userId}
-                            >
-                                {getUserDisplayName(userId)}
-                            </option>
-                        ))}
-                    </select>
-                </label>
-                <div className='activity-logs-date-range'>
-                    <span>
-                        <FormattedMessage
-                            id='ActivityLogs.filter-date-range'
-                            defaultMessage='Date range'
-                        />
-                    </span>
-                    <button
-                        className='activity-logs-date-range-button'
-                        onClick={() => setShowDateRangePicker((showPicker) => !showPicker)}
-                        type='button'
-                    >
-                        {dateRangeLabel}
-                    </button>
-                    {showDateRangePicker &&
-                        <div className='activity-logs-date-range-popover'>
-                            <DayPicker
-                                initialMonth={selectedDateRange.from || new Date()}
-                                modifiers={{
-                                    end: selectedDateRange.to,
-                                    start: selectedDateRange.from,
-                                }}
-                                onDayClick={handleDateRangeDayClick}
-                                selectedDays={[
-                                    selectedDateRange.from,
-                                    {
-                                        from: selectedDateRange.from,
-                                        to: selectedDateRange.to,
-                                    },
-                                ]}
+            <section className='card admin-users-table-card activity-logs-table-card'>
+                <div className='table-responsive'>
+                    <table className='table table-vcenter card-table activity-logs-table'>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <FormattedMessage
+                                        id='ActivityLogs.column-time'
+                                        defaultMessage='Date & time'
+                                    />
+                                </th>
+                                <th>
+                                    <FormattedMessage
+                                        id='ActivityLogs.column-user'
+                                        defaultMessage='User'
+                                    />
+                                </th>
+                                <th>
+                                    <FormattedMessage
+                                        id='ActivityLogs.column-activity'
+                                        defaultMessage='Activity'
+                                    />
+                                </th>
+                                <th>
+                                    <FormattedMessage
+                                        id='ActivityLogs.column-task-board'
+                                        defaultMessage='Task Board'
+                                    />
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {visibleLogs.map((log) => (
+                                <tr key={log.id}>
+                                    <td className='activity-log-time'>{formatAuditDate(log.timestamp)}</td>
+                                    <td className='activity-log-user'>{getUserDisplayName(log.actorId)}</td>
+                                    <td>
+                                        <div className='activity-log-message'>
+                                            <span className='activity-log-icon'>
+                                                <IconPencil size={18}/>
+                                            </span>
+                                            <span>{renderLogMessage(log)}</span>
+                                        </div>
+                                    </td>
+                                    <td className='activity-log-board'>{log.boardTitle}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                    {!isLoading && visibleLogs.length === 0 &&
+                        <div className='admin-page-empty'>
+                            <FormattedMessage
+                                id='ActivityLogs.empty'
+                                defaultMessage='No activity logs yet.'
                             />
-                            <div className='activity-logs-date-range-actions'>
-                                <button
-                                    onClick={resetDateRangeToCurrentMonth}
-                                    type='button'
-                                >
-                                    <FormattedMessage
-                                        id='ActivityLogs.this-month'
-                                        defaultMessage='This month'
-                                    />
-                                </button>
-                                <button
-                                    onClick={() => setShowDateRangePicker(false)}
-                                    type='button'
-                                >
-                                    <FormattedMessage
-                                        id='ActivityLogs.close'
-                                        defaultMessage='Close'
-                                    />
-                                </button>
-                            </div>
+                        </div>}
+                    {isLoading &&
+                        <div className='admin-page-empty'>
+                            <FormattedMessage
+                                id='ActivityLogs.loading'
+                                defaultMessage='Loading activity logs...'
+                            />
                         </div>}
                 </div>
-            </div>
-
-            <section className='activity-logs-card'>
-                {(logs.length > 0 || isLoading || pageIndex > 0) &&
-                    <div className='activity-logs-table-wrap'>
-                        <div className='activity-logs-table-scroll'>
-                            {logs.length === 0 && !isLoading &&
-                                <div className='activity-logs-empty'>
-                                    <FormattedMessage
-                                        id='ActivityLogs.empty'
-                                        defaultMessage='No activity logs yet.'
-                                    />
-                                </div>}
-                            <table className='activity-logs-table'>
-                                <thead>
-                                    <tr>
-                                        <th>
-                                            <FormattedMessage
-                                                id='ActivityLogs.column-time'
-                                                defaultMessage='Date & time'
-                                            />
-                                        </th>
-                                        <th>
-                                            <FormattedMessage
-                                                id='ActivityLogs.column-user'
-                                                defaultMessage='User'
-                                            />
-                                        </th>
-                                        <th>
-                                            <FormattedMessage
-                                                id='ActivityLogs.column-activity'
-                                                defaultMessage='Activity'
-                                            />
-                                        </th>
-                                        <th>
-                                            <FormattedMessage
-                                                id='ActivityLogs.column-task-board'
-                                                defaultMessage='Task Board'
-                                            />
-                                        </th>
-                                    </tr>
-                                </thead>
-                                <tbody>
-                                    {logs.map((log) => (
-                                        <tr key={log.id}>
-                                            <td className='activity-log-time'>{formatAuditDate(log.timestamp)}</td>
-                                            <td className='activity-log-user'>{getUserDisplayName(log.actorId)}</td>
-                                            <td>
-                                                <div className='activity-log-message'>
-                                                    <span className='activity-log-icon'>
-                                                        <CompassIcon icon='pencil-outline'/>
-                                                    </span>
-                                                    <span>{renderLogMessage(log)}</span>
-                                                </div>
-                                            </td>
-                                            <td className='activity-log-board'>{log.boardTitle}</td>
-                                        </tr>
-                                    ))}
-                                </tbody>
-                            </table>
-                        </div>
-                        <div className='activity-logs-pagination'>
-                            <button
-                                className='activity-logs-page-arrow'
-                                disabled={isLoading || pageIndex === 0}
-                                onClick={() => setPageIndex((previousPageIndex) => Math.max(previousPageIndex - 1, 0))}
-                                type='button'
-                            >
+                {(logs.length > 0 || pageIndex > 0 || hasNextPage) &&
+                    <div className='card-footer admin-users-pagination'>
+                        <div className='admin-users-pagination-inner'>
+                            <span className='text-secondary admin-users-pagination-summary'>
                                 <FormattedMessage
-                                    id='ActivityLogs.previous'
-                                    defaultMessage='Previous'
+                                    id='ActivityLogs.pagination-summary'
+                                    defaultMessage='Page {page}'
+                                    values={{page: pageIndex + 1}}
                                 />
-                            </button>
-                            <div className='activity-logs-page-list'>
+                            </span>
+                            <ul className='pagination m-0'>
+                                <li className={`page-item ${pageIndex === 0 ? 'disabled' : ''}`}>
+                                    <button
+                                        aria-label={intl.formatMessage({
+                                            id: 'ActivityLogs.previous',
+                                            defaultMessage: 'Previous',
+                                        })}
+                                        className='page-link'
+                                        disabled={isLoading || pageIndex === 0}
+                                        onClick={() => setPageIndex((previousPageIndex) => Math.max(previousPageIndex - 1, 0))}
+                                        type='button'
+                                    >
+                                        <IconChevronLeft
+                                            className='icon'
+                                            size={18}
+                                        />
+                                    </button>
+                                </li>
                                 {visiblePageNumbers.map((pageNumber, index) => (
                                     <React.Fragment key={pageNumber}>
                                         {index > 0 && pageNumber - visiblePageNumbers[index - 1] > 1 &&
-                                            <span className='activity-logs-page-ellipsis'>{'...'}</span>}
-                                        <button
-                                            aria-current={pageNumber === pageIndex + 1 ? 'page' : undefined}
-                                            className='activity-logs-page-number'
-                                            disabled={isLoading || pageNumber === pageIndex + 1}
-                                            onClick={() => setPageIndex(pageNumber - 1)}
-                                            type='button'
-                                        >
-                                            {pageNumber}
-                                        </button>
+                                            <li className='page-item disabled'>
+                                                <span className='page-link'>{'...'}</span>
+                                            </li>}
+                                        <li className={`page-item ${pageNumber === pageIndex + 1 ? 'active' : ''}`}>
+                                            <button
+                                                className='page-link'
+                                                disabled={isLoading || pageNumber === pageIndex + 1}
+                                                onClick={() => setPageIndex(pageNumber - 1)}
+                                                type='button'
+                                            >
+                                                {pageNumber}
+                                            </button>
+                                        </li>
                                     </React.Fragment>
                                 ))}
-                            </div>
-                            <button
-                                className='activity-logs-page-arrow'
-                                disabled={isLoading || !hasNextPage}
-                                onClick={() => setPageIndex((previousPageIndex) => previousPageIndex + 1)}
-                                type='button'
-                            >
-                                <FormattedMessage
-                                    id='ActivityLogs.next'
-                                    defaultMessage='Next'
-                                />
-                            </button>
+                                <li className={`page-item ${hasNextPage ? '' : 'disabled'}`}>
+                                    <button
+                                        aria-label={intl.formatMessage({
+                                            id: 'ActivityLogs.next',
+                                            defaultMessage: 'Next',
+                                        })}
+                                        className='page-link'
+                                        disabled={isLoading || !hasNextPage}
+                                        onClick={() => setPageIndex((previousPageIndex) => previousPageIndex + 1)}
+                                        type='button'
+                                    >
+                                        <IconChevronRight
+                                            className='icon'
+                                            size={18}
+                                        />
+                                    </button>
+                                </li>
+                            </ul>
                         </div>
-                    </div>}
-                {logs.length === 0 && !isLoading && pageIndex === 0 &&
-                    <div className='activity-logs-empty'>
-                        <FormattedMessage
-                            id='ActivityLogs.empty'
-                            defaultMessage='No activity logs yet.'
-                        />
                     </div>}
             </section>
         </div>

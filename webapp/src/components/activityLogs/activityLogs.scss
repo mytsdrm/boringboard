@@ -1,29 +1,13 @@
 .ActivityLogs {
-    --activity-logs-content-width: min(100%, 1500px);
+    &.admin-users-page {
+        --admin-content-width: 100%;
 
-    display: flex;
-    flex: 1 1 auto;
-    flex-direction: column;
-    height: 100%;
-    min-height: 100%;
-    padding: 42px 48px 56px;
-    overflow: hidden;
-    background:
-        radial-gradient(circle at 18% 0, var(--bb-dashboard-glow), transparent 360px),
-        var(--bb-bg);
+        min-height: 0;
+        padding: 32px 32px 48px;
+        overflow: hidden;
+    }
 
-    .activity-logs-header {
-        width: var(--activity-logs-content-width);
-        margin: 0 auto 28px;
-
-        h1 {
-            margin: 10px 0 8px;
-            color: var(--bb-text);
-            font-size: 38px;
-            font-weight: 850;
-            line-height: 46px;
-        }
-
+    .admin-page-header {
         p {
             max-width: 660px;
             margin: 0;
@@ -34,84 +18,39 @@
         }
     }
 
-    .activity-logs-eyebrow {
-        color: var(--bb-blue-text);
-        font-size: 12px;
-        font-weight: 850;
-        letter-spacing: 0.06em;
-        line-height: 18px;
-        text-transform: uppercase;
-    }
-
-    .activity-logs-filters {
-        display: flex;
-        align-items: flex-end;
-        gap: 14px;
-        width: var(--activity-logs-content-width);
-        margin: 0 auto 16px;
-        padding: 16px;
-        border: 1px solid var(--bb-border);
-        border-radius: 16px;
-        background: color-mix(in srgb, var(--bb-dashboard-panel-bg) 92%, transparent);
-        box-shadow: 0 12px 30px var(--bb-shadow-soft);
-
-        label,
-        .activity-logs-date-range {
-            position: relative;
-            display: flex;
-            flex: 0 1 240px;
-            flex-direction: column;
-            gap: 7px;
-        }
-
-        span {
-            color: var(--bb-text-muted);
-            font-size: 12px;
-            font-weight: 850;
-            letter-spacing: 0.04em;
-            line-height: 16px;
-            text-transform: uppercase;
-        }
-
-        button,
-        select {
-            height: 38px;
-            padding: 0 12px;
-            color: var(--bb-text);
-            border: 1px solid var(--bb-border);
-            border-radius: 10px;
-            background: var(--bb-dashboard-panel-bg);
-            font-size: 13px;
-            font-weight: 650;
-        }
-
-        button {
-            cursor: pointer;
-            text-align: left;
-        }
-    }
-
     .activity-logs-date-range {
-        flex-basis: 320px;
+        position: relative;
+        display: flex;
+        flex-direction: column;
+        min-width: 260px;
     }
 
     .activity-logs-date-range-button {
-        width: 100%;
+        justify-content: flex-start;
+        min-height: 40px;
+        color: var(--bb-text);
+        font-size: 14px;
+        font-weight: 500;
+        letter-spacing: 0;
+        text-align: left;
+        text-transform: none;
     }
 
     .activity-logs-date-range-popover {
         position: absolute;
         top: calc(100% + 8px);
-        left: 0;
+        right: 0;
         padding: 12px;
         border: 1px solid var(--bb-border);
-        border-radius: 14px;
+        border-radius: 8px;
         background: var(--bb-dashboard-panel-bg);
         box-shadow: 0 18px 42px var(--bb-shadow-soft);
 
         .DayPicker {
             color: var(--bb-text);
             font-size: 13px;
+            letter-spacing: 0;
+            text-transform: none;
         }
 
         .DayPicker-Day {
@@ -132,217 +71,107 @@
         gap: 8px;
         padding-top: 8px;
         border-top: 1px solid var(--bb-border);
-
-        button {
-            width: auto;
-            min-height: 34px;
-            color: var(--bb-blue-text);
-            font-weight: 800;
-            text-align: center;
-        }
     }
 
-    .activity-logs-card {
-        display: flex;
-        flex-direction: column;
-        width: var(--activity-logs-content-width);
-        min-height: 0;
-        margin: 0 auto;
-        padding: 0;
-        overflow: hidden;
-        border: 1px solid var(--bb-border);
-        border-radius: 18px;
-        background: color-mix(in srgb, var(--bb-dashboard-panel-bg) 96%, transparent);
-        box-shadow: 0 18px 42px var(--bb-shadow-soft);
-    }
-
-    .activity-logs-table-wrap {
+    .activity-logs-table-card {
         display: flex;
         flex: 1 1 auto;
         flex-direction: column;
+        width: var(--admin-content-width);
         min-height: 0;
-        width: 100%;
+        margin: 0 auto;
         overflow: hidden;
     }
 
+    .activity-logs-table-card > .table-responsive {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
+    }
+
     .activity-logs-table {
-        width: 100%;
-        min-width: 980px;
-        border-collapse: separate;
-        border-spacing: 0;
+        min-width: 1040px;
 
-        th {
-            padding: 16px 18px;
-            color: var(--bb-text-muted);
-            border-bottom: 1px solid var(--bb-border);
-            background: color-mix(in srgb, var(--bb-panel-bg-soft) 82%, transparent);
-            font-size: 12px;
-            font-weight: 850;
-            letter-spacing: 0.04em;
-            line-height: 18px;
-            text-align: left;
-            text-transform: uppercase;
+        th:first-child,
+        td:first-child {
+            width: 220px;
         }
 
-        td {
-            padding: 16px 18px;
-            color: var(--bb-text);
-            border-bottom: 1px solid var(--bb-border);
-            font-size: 13px;
-            font-weight: 550;
-            line-height: 20px;
-            vertical-align: top;
+        th:nth-child(2),
+        td:nth-child(2) {
+            width: 190px;
         }
 
-        tr:last-child td {
-            border-bottom: 0;
-        }
-
-        p {
-            margin: 0 0 4px;
-            color: var(--bb-text);
-            font-size: 14px;
-            font-weight: 500;
-            line-height: 22px;
+        th:last-child,
+        td:last-child {
+            width: 240px;
         }
 
         strong {
-            font-weight: 850;
+            font-weight: 700;
         }
     }
 
     .activity-log-icon {
-        display: flex;
+        display: inline-flex;
         flex: 0 0 auto;
         align-items: center;
         justify-content: center;
-        width: 36px;
-        height: 36px;
-        border-radius: 999px;
-        background: var(--bb-orange-soft);
-        color: var(--bb-orange-text);
-        font-size: 15px;
+        width: 30px;
+        height: 30px;
+        border: 1px solid #d0d5dd;
+        border-radius: 50%;
+        background: #fff;
+        color: #475467;
     }
 
     .activity-log-message {
         display: flex;
         align-items: center;
-        gap: 12px;
+        gap: 10px;
+    }
+
+    .activity-log-time,
+    .activity-log-board,
+    .activity-log-user {
+        white-space: nowrap;
     }
 
     .activity-log-time,
     .activity-log-board {
         color: var(--bb-text-muted);
-        white-space: nowrap;
     }
 
     .activity-log-user {
-        font-weight: 850;
-        white-space: nowrap;
-    }
-
-    .activity-logs-pagination {
-        display: flex;
-        flex: 0 0 auto;
-        align-items: center;
-        justify-content: flex-end;
-        gap: 8px;
-        padding: 16px 18px;
-        border-top: 1px solid var(--bb-border);
-        background: color-mix(in srgb, var(--bb-panel-bg-soft) 62%, transparent);
-
-        button {
-            min-width: 36px;
-            min-height: 36px;
-            padding: 0 12px;
-            color: var(--bb-blue-text);
-            border: 1px solid var(--bb-border);
-            border-radius: 8px;
-            background: var(--bb-dashboard-panel-bg);
-            cursor: pointer;
-            font-size: 13px;
-            font-weight: 800;
-
-            &:hover:not(:disabled) {
-                background: var(--bb-blue-soft);
-            }
-
-            &:disabled {
-                cursor: default;
-                opacity: 0.45;
-            }
-
-            &[aria-current='page'] {
-                color: #fff;
-                border-color: var(--bb-blue-text);
-                background: var(--bb-blue-text);
-                opacity: 1;
-            }
-        }
-    }
-
-    .activity-logs-page-list {
-        display: flex;
-        align-items: center;
-        gap: 6px;
-    }
-
-    .activity-logs-page-arrow {
-        min-width: 88px;
-    }
-
-    .activity-logs-page-ellipsis {
-        display: inline-flex;
-        align-items: center;
-        justify-content: center;
-        min-width: 26px;
-        color: var(--bb-text-muted);
-        font-size: 13px;
-        font-weight: 850;
-    }
-
-    .activity-logs-table-scroll {
-        flex: 1 1 auto;
-        min-height: 0;
-        overflow: auto;
-    }
-
-    .activity-logs-empty {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        min-height: 280px;
-        color: var(--bb-text-muted);
-        border: 1px dashed var(--bb-border-strong);
-        border-radius: 14px;
-        background: color-mix(in srgb, var(--bb-panel-bg-soft) 72%, transparent);
-        font-size: 14px;
-        font-weight: 700;
+        font-weight: 650;
     }
 
     @media screen and (max-width: 767px) {
-        padding: 26px 20px 32px;
-        overflow: auto;
-
-        .activity-logs-header {
-            h1 {
-                font-size: 30px;
-                line-height: 36px;
-            }
+        &.admin-users-page {
+            padding: 26px 20px 32px;
+            overflow: hidden;
         }
 
-        .activity-logs-card {
-            padding: 0;
-        }
-
-        .activity-logs-filters {
-            flex-direction: column;
+        .admin-page-header-row,
+        .admin-header-actions {
             align-items: stretch;
+            flex-direction: column;
+        }
 
+        .admin-header-actions {
+            width: 100%;
+
+            .admin-users-search,
             label,
             .activity-logs-date-range {
-                flex: 1 1 auto;
+                width: 100%;
+                min-width: 0;
             }
+        }
+
+        .activity-logs-date-range-popover {
+            right: auto;
+            left: 0;
         }
     }
 }
