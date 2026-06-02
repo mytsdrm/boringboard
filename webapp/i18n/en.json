@@ -610,6 +610,8 @@
     "CreateTaskBoardFromCommand.placeholder": "Create a product launch task board with planning, execution, review, and done columns.",
     "CreateTaskBoardFromCommand.preview": "Preview",
     "CreateTaskBoardFromCommand.preview-error": "Unable to generate a preview. Check AI settings and try again.",
+    "CreateTaskBoardFromCommand.preview-title": "Preview title",
+    "CreateTaskBoardFromCommand.preview-title-placeholder": "Task board title",
     "CreateTaskBoardFromCommand.model": "Model",
     "CreateTaskBoardFromCommand.provider": "Provider",
     "CreateTaskBoardFromCommand.tasks": "Starter tasks",

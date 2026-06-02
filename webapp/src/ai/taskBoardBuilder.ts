@@ -32,11 +32,9 @@ export function buildTaskBoardFromPreview(preview: TaskBoardPreview, teamId: str
     const blocks: Block[] = []
     const cards = preview.tasks.map((task): Card => {
         const card = createCard()
-        const option = statusProperty.options.find((column) => column.value === task.column) || statusProperty.options[0]
         card.boardId = board.id
         card.parentId = board.id
         card.title = task.title
-        card.fields.properties[statusProperty.id] = option.id
         if (task.description) {
             const descriptionBlock = createBlock()
             descriptionBlock.type = 'text'

@@ -51,6 +51,7 @@
 
 .CreateTaskBoardFromCommandModal {
     .dialog {
+        position: relative;
         width: min(920px, calc(100vw - 40px));
         max-height: min(840px, calc(100vh - 40px));
         height: auto;
@@ -110,6 +111,34 @@
         }
     }
 
+    .ai-command-loader {
+        position: absolute;
+        top: 28px;
+        right: 72px;
+        display: inline-flex;
+        align-items: center;
+        gap: 9px;
+        min-height: 34px;
+        padding: 7px 12px;
+        border: 1px solid rgba(var(--button-bg-rgb), 0.22);
+        border-radius: 999px;
+        background: rgb(var(--center-channel-bg-rgb));
+        box-shadow: 0 12px 28px rgba(15, 23, 42, 0.12);
+        color: rgb(var(--button-bg-rgb));
+        font-size: 12px;
+        font-weight: 800;
+        line-height: 1;
+
+        span {
+            width: 14px;
+            height: 14px;
+            border: 2px solid rgba(var(--button-bg-rgb), 0.24);
+            border-top-color: rgb(var(--button-bg-rgb));
+            border-radius: 999px;
+            animation: aiPreviewSpin 0.75s linear infinite;
+        }
+    }
+
     .ai-command-modal-body {
         display: flex;
         flex: 1 1 auto;
@@ -162,12 +191,34 @@
     }
 
     .ai-preview-heading {
-        h3 {
+        .ai-preview-title-input {
+            width: 100%;
             margin: 4px 0 6px;
+            padding: 8px 10px;
+            border: 1px solid transparent;
+            border-radius: 8px;
+            background: transparent;
             color: var(--bb-text);
             font-size: 20px;
             font-weight: 850;
             line-height: 26px;
+
+            &:hover {
+                border-color: var(--bb-border);
+                background: rgb(var(--center-channel-bg-rgb));
+            }
+
+            &:focus {
+                border-color: rgba(var(--button-bg-rgb), 0.64);
+                background: rgb(var(--center-channel-bg-rgb));
+                box-shadow: 0 0 0 3px rgba(var(--button-bg-rgb), 0.14);
+                outline: 0;
+            }
+
+            &:disabled {
+                opacity: 0.72;
+                cursor: not-allowed;
+            }
         }
 
         p {
@@ -348,6 +399,13 @@
                 font-size: 17px;
                 line-height: 17px;
             }
+
+            svg:not(.CompassIcon) {
+                flex: 0 0 auto;
+                width: 18px;
+                height: 18px;
+                stroke-width: 2.2;
+            }
         }
 
         .ai-action-cancel {
@@ -389,6 +447,12 @@
     }
 }
 
+@keyframes aiPreviewSpin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
 @media screen and (max-width: 767px) {
     .CreateTaskBoardFromCommandModal {
         .dialog {
@@ -408,6 +472,15 @@
         .ai-preview-metrics,
         .ai-preview-tasks {
             grid-template-columns: 1fr;
+        }
+
+        .ai-command-loader {
+            top: 18px;
+            right: 58px;
+            max-width: calc(100vw - 140px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
         }
 
         .ai-command-input-area button,

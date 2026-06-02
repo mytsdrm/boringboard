@@ -3,6 +3,7 @@
 
 import React, {useEffect, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
+import {IconEyeSearch} from '@tabler/icons-react'
 
 import octoClient, {AdminAISettings, TaskBoardPreview} from '../../octoClient'
 import mutator from '../../mutator'
@@ -67,14 +68,30 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
 
         setError('')
         setIsGenerating(true)
-        const nextPreview = await octoClient.createTaskBoardPreview(trimmedCommand)
-        setIsGenerating(false)
-        if (!nextPreview) {
+        try {
+            const nextPreview = await octoClient.createTaskBoardPreview(trimmedCommand)
+            if (!nextPreview) {
+                setPreview(null)
+                setError(intl.formatMessage({id: 'CreateTaskBoardFromCommand.preview-error', defaultMessage: 'Unable to generate a preview. Check AI settings and try again.'}))
+                return
+            }
+            setPreview(nextPreview)
+        } catch {
             setPreview(null)
             setError(intl.formatMessage({id: 'CreateTaskBoardFromCommand.preview-error', defaultMessage: 'Unable to generate a preview. Check AI settings and try again.'}))
+        } finally {
+            setIsGenerating(false)
+        }
+    }
+
+    const updatePreviewTitle = (title: string) => {
+        if (!preview || !preview.title.trim()) {
             return
         }
-        setPreview(nextPreview)
+        setPreview({
+            ...preview,
+            title,
+        })
     }
 
     const createBoard = async () => {
@@ -155,6 +172,17 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
                         </React.Fragment>
                     )}
                 >
+                    {isGenerating &&
+                        <div
+                            className='ai-command-loader'
+                            role='status'
+                        >
+                            <span/>
+                            <FormattedMessage
+                                id='CreateTaskBoardFromCommand.generating'
+                                defaultMessage='Generating...'
+                            />
+                        </div>}
                     <div className='ai-command-modal-body'>
                         <div className='ai-command-input-area'>
                             <textarea
@@ -177,7 +205,14 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
                                                 defaultMessage='Preview'
                                             />
                                         </span>
-                                        <h3>{preview.title}</h3>
+                                        <input
+                                            className='ai-preview-title-input'
+                                            value={preview.title}
+                                            onChange={(event) => updatePreviewTitle(event.target.value)}
+                                            placeholder={intl.formatMessage({id: 'CreateTaskBoardFromCommand.preview-title-placeholder', defaultMessage: 'Task board title'})}
+                                            aria-label={intl.formatMessage({id: 'CreateTaskBoardFromCommand.preview-title', defaultMessage: 'Preview title'})}
+                                            disabled={isCreating}
+                                        />
                                         <p>{preview.description}</p>
                                     </div>
                                 </div>
@@ -287,7 +322,7 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
                             className='ai-action-generate'
                             disabled={isGenerating || isCreating}
                             onClick={generatePreview}
-                            icon={<CompassIcon icon='sparkles'/>}
+                            icon={<IconEyeSearch/>}
                         >
                             {isGenerating ? (
                                 <FormattedMessage
@@ -305,7 +340,7 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
                             size='medium'
                             filled={true}
                             className='ai-action-create'
-                            disabled={!preview || isGenerating || isCreating}
+                            disabled={!preview || !preview.title.trim() || isGenerating || isCreating}
                             onClick={createBoard}
                             icon={<CompassIcon icon='check'/>}
                         >
