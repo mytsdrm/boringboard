@@ -51,16 +51,25 @@ export default class Menu extends React.PureComponent<Props> {
             style = MenuUtil.openUp(this.props.parentRef, forceBottom).style
             if (fixed && position === 'left' && this.props.parentRef.current) {
                 const boundingRect = this.props.parentRef.current.getBoundingClientRect()
-                const menuWidth = this.menuRef.current?.offsetWidth || 240
                 const menuMargin = 12
                 const anchorPadding = 8
-                const alignedLeft = (boundingRect.right - menuWidth) + anchorPadding
-                style.left = Math.min(
-                    Math.max(alignedLeft, menuMargin),
-                    window.innerWidth - menuWidth - menuMargin,
-                )
+                const upwardOffset = 10
+                const menuHeight = this.menuRef.current?.offsetHeight || 160
+                const preferredTop = boundingRect.bottom + (anchorPadding - upwardOffset)
+                const maxTop = window.innerHeight - menuHeight - menuMargin
+                style.top = Math.max(menuMargin, Math.min(preferredTop, maxTop))
+                delete style.bottom
+                style.right = Math.max(window.innerWidth - boundingRect.right - anchorPadding, menuMargin)
             } else if (fixed && position === 'right' && this.props.parentRef.current) {
                 const boundingRect = this.props.parentRef.current.getBoundingClientRect()
+                const menuMargin = 12
+                const anchorPadding = 8
+                const upwardOffset = 10
+                const menuHeight = this.menuRef.current?.offsetHeight || 160
+                const preferredTop = boundingRect.bottom + (anchorPadding - upwardOffset)
+                const maxTop = window.innerHeight - menuHeight - menuMargin
+                style.top = Math.max(menuMargin, Math.min(preferredTop, maxTop))
+                delete style.bottom
                 style.left = boundingRect.left
             }
         }
