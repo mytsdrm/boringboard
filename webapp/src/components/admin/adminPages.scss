@@ -8,8 +8,7 @@
     min-height: 0;
     padding: 42px 48px 56px;
     overflow: auto;
-    background:
-        radial-gradient(circle at 18% 0, var(--bb-dashboard-glow), transparent 360px),
+    background: radial-gradient(circle at 18% 0, var(--bb-dashboard-glow), transparent 360px),
         var(--bb-bg);
     -webkit-overflow-scrolling: touch;
 
@@ -506,6 +505,8 @@
         padding: 0;
         border: 0;
         background: transparent;
+        font-weight: normal;
+        color: var(--bb-text);
 
         span {
             letter-spacing: 0;
