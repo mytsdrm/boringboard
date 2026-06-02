@@ -1,9 +1,10 @@
 package model
 
 type AdminAISettings struct {
-	Enabled  bool   `json:"enabled"`
-	Provider string `json:"provider"`
-	APIKey   string `json:"apiKey"`
+	Enabled        bool   `json:"enabled"`
+	Provider       string `json:"provider"`
+	APIKey         string `json:"apiKey"`
+	OllamaEndpoint string `json:"ollamaEndpoint"`
 }
 
 type AdminSystemSettings struct {

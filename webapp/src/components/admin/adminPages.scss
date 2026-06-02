@@ -466,6 +466,10 @@
         max-width: 760px;
     }
 
+    .admin-ai-ollama-endpoint {
+        grid-column: 1 / -1;
+    }
+
     .admin-ai-controls .admin-settings-checkbox {
         display: inline-flex;
         align-items: center;
@@ -494,6 +498,17 @@
             font-size: 14px;
             font-weight: 800;
         }
+    }
+
+    .admin-settings-error {
+        grid-column: 1 / -1;
+        padding: 10px 12px;
+        border-radius: 8px;
+        background: rgba(var(--button-danger-bg-rgb), 0.08);
+        color: rgb(var(--button-danger-bg-rgb));
+        font-size: 13px;
+        font-weight: 750;
+        line-height: 18px;
     }
 
     @media (max-width: 1400px) {

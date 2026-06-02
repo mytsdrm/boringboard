@@ -17,9 +17,10 @@ func defaultAdminSystemSettings() model.AdminSystemSettings {
 		Logo:     "",
 		TimeZone: "Asia/Jakarta",
 		AI: model.AdminAISettings{
-			Enabled:  false,
-			Provider: "OpenAI",
-			APIKey:   "",
+			Enabled:        false,
+			Provider:       "OpenAI",
+			APIKey:         "",
+			OllamaEndpoint: "http://localhost:11434",
 		},
 	}
 }
@@ -185,6 +186,12 @@ func (a *App) SaveAdminSystemSettings(settings model.AdminSystemSettings) (model
 	}
 	if settings.AI.Provider == "" {
 		settings.AI.Provider = defaultAdminSystemSettings().AI.Provider
+	}
+	if settings.AI.OllamaEndpoint == "" {
+		settings.AI.OllamaEndpoint = defaultAdminSystemSettings().AI.OllamaEndpoint
+	}
+	if settings.AI.Enabled && settings.AI.Provider != "Ollama" && strings.TrimSpace(settings.AI.APIKey) == "" {
+		return settings, model.NewErrBadRequest("api key is required")
 	}
 	if settings.TimeZone == "" {
 		settings.TimeZone = defaultAdminSystemSettings().TimeZone

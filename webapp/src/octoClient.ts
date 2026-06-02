@@ -23,6 +23,7 @@ export type AdminAISettings = {
     enabled: boolean
     provider: string
     apiKey: string
+    ollamaEndpoint: string
 }
 
 export type AdminSystemSettings = {
@@ -452,6 +453,7 @@ class OctoClient {
             ai: {
                 apiKey: '',
                 enabled: false,
+                ollamaEndpoint: 'http://localhost:11434',
                 provider: 'OpenAI',
             },
         })
@@ -480,6 +482,7 @@ class OctoClient {
             ai: {
                 apiKey: '',
                 enabled: false,
+                ollamaEndpoint: 'http://localhost:11434',
                 provider: 'OpenAI',
             },
         })

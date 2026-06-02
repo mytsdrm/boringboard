@@ -36,6 +36,7 @@ const defaultSettings: AdminSystemSettings = {
     ai: {
         apiKey: '',
         enabled: false,
+        ollamaEndpoint: 'http://localhost:11434',
         provider: 'OpenAI',
     },
 }
@@ -72,6 +73,7 @@ const SystemSettings = (): JSX.Element => {
     const intl = useIntl()
     const [settings, setSettings] = useState<AdminSystemSettings>(defaultSettings)
     const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
+    const [saveError, setSaveError] = useState('')
     const branding = getBrandingFromSettings(settings)
 
     useEffect(() => {
@@ -91,8 +93,23 @@ const SystemSettings = (): JSX.Element => {
     }, [])
 
     const saveSettings = async () => {
+        if (settings.ai.enabled && settings.ai.provider !== 'Ollama' && !settings.ai.apiKey.trim()) {
+            setSaveError(intl.formatMessage({
+                id: 'SystemSettings.api-key-required',
+                defaultMessage: 'API key is required for this provider.',
+            }))
+            return
+        }
+
+        setSaveError('')
         setSaveState('saving')
-        const saved = await octoClient.saveAdminSystemSettings(settings)
+        const saved = await octoClient.saveAdminSystemSettings({
+            ...settings,
+            ai: {
+                ...settings.ai,
+                ollamaEndpoint: settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint,
+            },
+        })
         if (saved) {
             setSettings(saved)
             applySystemBranding(saved)
@@ -100,6 +117,10 @@ const SystemSettings = (): JSX.Element => {
             setSaveState('saved')
             window.setTimeout(() => setSaveState('idle'), 1500)
         } else {
+            setSaveError(intl.formatMessage({
+                id: 'SystemSettings.save-error',
+                defaultMessage: 'Unable to save system settings.',
+            }))
             setSaveState('idle')
         }
     }
@@ -329,14 +350,35 @@ const SystemSettings = (): JSX.Element => {
                                         />
                                     </span>
                                     <input
+                                        aria-required={settings.ai.enabled && settings.ai.provider !== 'Ollama'}
                                         onChange={(event) => setSettings({...settings, ai: {...settings.ai, apiKey: event.target.value}})}
+                                        required={settings.ai.enabled && settings.ai.provider !== 'Ollama'}
                                         type='password'
                                         value={settings.ai.apiKey}
                                     />
                                 </label>
+                                {settings.ai.provider === 'Ollama' &&
+                                    <label className='admin-ai-ollama-endpoint'>
+                                        <span>
+                                            <FormattedMessage
+                                                id='SystemSettings.ollama-endpoint'
+                                                defaultMessage='Endpoint server'
+                                            />
+                                        </span>
+                                        <input
+                                            onChange={(event) => setSettings({...settings, ai: {...settings.ai, ollamaEndpoint: event.target.value}})}
+                                            placeholder={defaultSettings.ai.ollamaEndpoint}
+                                            required={settings.ai.provider === 'Ollama'}
+                                            value={settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint}
+                                        />
+                                    </label>}
                             </div>}
                     </div>
                 </div>
+                {saveError &&
+                    <div className='admin-settings-error'>
+                        {saveError}
+                    </div>}
                 <div className='admin-page-actions'>
                     <button
                         disabled={saveState === 'saving'}
