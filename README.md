@@ -14,6 +14,21 @@ That's why it's called **BoringBoard**.
 **Dark Theme**
 ![BoringBoard](README.assets/boringboard-dark.png)
 
+## Added Features
+
+- **AI integration**: Create task board previews from a command before creating the real board.
+- **Available AI providers**: OpenAI, Gemini, Ollama, Cline, and Anything LLM.
+- **AI model selection**: Select provider models from System Settings, including Ollama model loading from the configured endpoint.
+- **Centralized admin user**: Default `SuperAdmin` user/group support with configurable admin username and password from `.env`.
+- **User management**: Admin-only Users menu with search, group filtering, pagination, add/edit/delete modals, and Tabler-styled tables.
+- **Activity logs**: Admin activity log view across registered users with search, filters, date range, pagination, and scrollable table area.
+- **System Settings**: Manage app name, logo upload, timezone, AI provider settings, and task board permissions.
+- **Realtime settings updates**: Branding, logo, and selected task board permission settings update across active clients.
+- **Task board permissions**: Configure whether invited users can share task boards or edit task board properties.
+- **Profile menu improvements**: Top-right user menu with Invite users, Profile, Change password, and Logout modals.
+- **Branding updates**: Custom app name/logo support with circular logo preview and sidebar display.
+- **Table utilities**: Reusable table module with search alignment, Options menu, and print/export actions.
+
 ## How to start
 
 Create an `.env` file in the BoringBoard directory if it does not already exist:
