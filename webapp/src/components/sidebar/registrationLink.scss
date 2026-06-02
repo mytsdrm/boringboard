@@ -22,7 +22,7 @@
     }
 
     .invite-link-row {
-        gap: 10px;
+        width: 100%;
     }
 
     .spacer {
@@ -49,7 +49,26 @@
     }
 
     .invite-actions {
+        width: 100%;
+        gap: 10px;
         justify-content: flex-end;
+        flex-wrap: nowrap;
+
+        .Button {
+            flex: 1 1 0;
+            min-width: 0;
+            white-space: nowrap;
+        }
+
+        .invite-close-button {
+            border-color: rgba(var(--button-danger-bg-rgb), 0.42);
+            background: rgba(var(--button-danger-bg-rgb), 0.08);
+            color: rgb(var(--button-danger-bg-rgb));
+
+            &:hover {
+                background: rgba(var(--button-danger-bg-rgb), 0.14);
+            }
+        }
     }
 
     @media screen and (max-width: 560px) {
@@ -61,7 +80,7 @@
         }
 
         .invite-actions {
-            justify-content: stretch;
+            flex-direction: row;
         }
     }
 }

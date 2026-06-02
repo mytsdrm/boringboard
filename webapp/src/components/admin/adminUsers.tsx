@@ -10,6 +10,7 @@ import {getMe} from '../../store/users'
 import {IUser} from '../../user'
 import Dialog from '../dialog'
 import RootPortal from '../rootPortal'
+import TableModule from '../tableModule/tableModule'
 
 import '@tabler/core/dist/css/tabler.min.css'
 import './adminPages.scss'
@@ -235,27 +236,6 @@ const AdminUsers = (): JSX.Element => {
                     </h1>
                 </div>
                 <div className='admin-header-actions'>
-                    <label className='admin-users-search'>
-                        <div className='input-icon'>
-                            <span className='input-icon-addon'>
-                                <IconSearch size={18}/>
-                            </span>
-                            <input
-                                aria-label={intl.formatMessage({
-                                    id: 'AdminUsers.search',
-                                    defaultMessage: 'Search',
-                                })}
-                                className='form-control'
-                                placeholder={intl.formatMessage({
-                                    id: 'AdminUsers.search-placeholder',
-                                    defaultMessage: 'Search users',
-                                })}
-                                type='search'
-                                value={searchQuery}
-                                onChange={(event) => setSearchQuery(event.target.value)}
-                            />
-                        </div>
-                    </label>
                     <label>
                         <select
                             aria-label={intl.formatMessage({
@@ -448,7 +428,37 @@ const AdminUsers = (): JSX.Element => {
                         </div>
                     </Dialog>
                 </RootPortal>}
-            <section className='card admin-users-table-card'>
+            <TableModule
+                className='admin-users-table-card'
+                fileName='registered-users'
+                printTitle={intl.formatMessage({
+                    id: 'AdminUsers.title',
+                    defaultMessage: 'Registered users',
+                })}
+                toolbarLeft={(
+                    <label className='admin-users-search'>
+                        <div className='input-icon'>
+                            <span className='input-icon-addon'>
+                                <IconSearch size={18}/>
+                            </span>
+                            <input
+                                aria-label={intl.formatMessage({
+                                    id: 'AdminUsers.search',
+                                    defaultMessage: 'Search',
+                                })}
+                                className='form-control'
+                                placeholder={intl.formatMessage({
+                                    id: 'AdminUsers.search-placeholder',
+                                    defaultMessage: 'Search users',
+                                })}
+                                type='search'
+                                value={searchQuery}
+                                onChange={(event) => setSearchQuery(event.target.value)}
+                            />
+                        </div>
+                    </label>
+                )}
+            >
                 <div className='table-responsive'>
                     <table className='table table-vcenter card-table admin-table'>
                         <thead>
@@ -636,7 +646,7 @@ const AdminUsers = (): JSX.Element => {
                             </ul>
                         </div>
                     </div>}
-            </section>
+            </TableModule>
         </div>
     )
 }

@@ -128,7 +128,14 @@
         overflow: hidden;
     }
 
-    .activity-logs-table-card > .table-responsive {
+    .activity-logs-table-card > .table-module-content {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .activity-logs-table-card .table-module-content > .table-responsive {
         flex: 1 1 auto;
         min-height: 0;
         overflow: auto;

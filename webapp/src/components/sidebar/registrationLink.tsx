@@ -74,6 +74,26 @@ const RegistrationLink = (props: Props) => {
                             >
                                 {registrationUrl}
                             </a>
+                        </div>
+                        <div className='row invite-actions'>
+                            <Button
+                                className='invite-close-button'
+                                onClick={onClose}
+                                emphasis='secondary'
+                                size='small'
+                            >
+                                <FormattedMessage
+                                    id='RegistrationLink.close'
+                                    defaultMessage='Close'
+                                />
+                            </Button>
+                            <Button
+                                onClick={regenerateToken}
+                                emphasis='secondary'
+                                size='small'
+                            >
+                                {intl.formatMessage({id: 'RegistrationLink.regenerateToken', defaultMessage: 'Regenerate token'})}
+                            </Button>
                             <Button
                                 filled={true}
                                 size='small'
@@ -83,15 +103,6 @@ const RegistrationLink = (props: Props) => {
                                 }}
                             >
                                 {wasCopied ? intl.formatMessage({id: 'RegistrationLink.copiedLink', defaultMessage: 'Copied!'}) : intl.formatMessage({id: 'RegistrationLink.copyLink', defaultMessage: 'Copy link'})}
-                            </Button>
-                        </div>
-                        <div className='row invite-actions'>
-                            <Button
-                                onClick={regenerateToken}
-                                emphasis='secondary'
-                                size='small'
-                            >
-                                {intl.formatMessage({id: 'RegistrationLink.regenerateToken', defaultMessage: 'Regenerate token'})}
                             </Button>
                         </div>
                     </>}

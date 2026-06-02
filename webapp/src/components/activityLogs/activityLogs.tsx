@@ -17,6 +17,7 @@ import {getCurrentTeamId, getFirstTeam} from '../../store/teams'
 import {addBoardUsers, getBoardUsers, getMe} from '../../store/users'
 import {applyProjectSystemSettings, getStoredProjectSystemSettings, ProjectSystemSettings, SYSTEM_SETTINGS_UPDATED_EVENT} from '../../systemSettings'
 import {WSClient} from '../../wsclient'
+import TableModule from '../tableModule/tableModule'
 
 import 'react-day-picker/lib/style.css'
 import '@tabler/core/dist/css/tabler.min.css'
@@ -704,27 +705,6 @@ const ActivityLogs = (props: Props): JSX.Element => {
                     </p>
                 </div>
                 <div className='admin-header-actions'>
-                    <label className='admin-users-search'>
-                        <div className='input-icon'>
-                            <span className='input-icon-addon'>
-                                <IconSearch size={18}/>
-                            </span>
-                            <input
-                                aria-label={intl.formatMessage({
-                                    id: 'ActivityLogs.search',
-                                    defaultMessage: 'Search',
-                                })}
-                                className='form-control'
-                                placeholder={intl.formatMessage({
-                                    id: 'ActivityLogs.search-placeholder',
-                                    defaultMessage: 'Search activity',
-                                })}
-                                type='search'
-                                value={searchQuery}
-                                onChange={(event) => setSearchQuery(event.target.value)}
-                            />
-                        </div>
-                    </label>
                     <label>
                         <select
                             aria-label={intl.formatMessage({
@@ -815,7 +795,37 @@ const ActivityLogs = (props: Props): JSX.Element => {
                 </div>
             </div>
 
-            <section className='card admin-users-table-card activity-logs-table-card'>
+            <TableModule
+                className='admin-users-table-card activity-logs-table-card'
+                fileName='activity-logs'
+                printTitle={intl.formatMessage({
+                    id: 'ActivityLogs.title',
+                    defaultMessage: 'User activity logs',
+                })}
+                toolbarLeft={(
+                    <label className='admin-users-search'>
+                        <div className='input-icon'>
+                            <span className='input-icon-addon'>
+                                <IconSearch size={18}/>
+                            </span>
+                            <input
+                                aria-label={intl.formatMessage({
+                                    id: 'ActivityLogs.search',
+                                    defaultMessage: 'Search',
+                                })}
+                                className='form-control'
+                                placeholder={intl.formatMessage({
+                                    id: 'ActivityLogs.search-placeholder',
+                                    defaultMessage: 'Search activity',
+                                })}
+                                type='search'
+                                value={searchQuery}
+                                onChange={(event) => setSearchQuery(event.target.value)}
+                            />
+                        </div>
+                    </label>
+                )}
+            >
                 <div className='table-responsive'>
                     <table className='table table-vcenter card-table activity-logs-table'>
                         <thead>
@@ -945,7 +955,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
                             </ul>
                         </div>
                     </div>}
-            </section>
+            </TableModule>
         </div>
     )
 }
