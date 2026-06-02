@@ -15,6 +15,8 @@ import (
 func (a *API) registerDashboardRoutes(r *mux.Router) {
 	r.HandleFunc("/teams/{teamID}/dashboard/activity", a.sessionRequired(a.handleGetDashboardActivity)).Methods("GET")
 	r.HandleFunc("/teams/{teamID}/dashboard/activity/all", a.sessionRequired(a.handleGetDashboardAllActivity)).Methods("GET")
+	r.HandleFunc("/teams/{teamID}/dashboard/member_activity", a.sessionRequired(a.handleGetDashboardMemberActivity)).Methods("GET")
+	r.HandleFunc("/teams/{teamID}/dashboard/member_activity/all", a.sessionRequired(a.handleGetDashboardAllMemberActivity)).Methods("GET")
 }
 
 func (a *API) handleGetDashboardActivity(w http.ResponseWriter, r *http.Request) {
@@ -54,6 +56,51 @@ func (a *API) handleGetDashboardAllActivity(w http.ResponseWriter, r *http.Reque
 	}
 
 	data, err := json.Marshal(blocks)
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	jsonBytesResponse(w, http.StatusOK, data)
+}
+
+func (a *API) handleGetDashboardMemberActivity(w http.ResponseWriter, r *http.Request) {
+	userID := getUserID(r)
+	teamID := mux.Vars(r)["teamID"]
+	afterUpdateAt, beforeUpdateAt, limit := parseDashboardActivityQuery(r)
+
+	entries, err := a.app.GetDashboardCommenterInviteActivity(userID, teamID, limit, beforeUpdateAt, afterUpdateAt)
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	data, err := json.Marshal(entries)
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	jsonBytesResponse(w, http.StatusOK, data)
+}
+
+func (a *API) handleGetDashboardAllMemberActivity(w http.ResponseWriter, r *http.Request) {
+	userID := getUserID(r)
+	if !a.permissions.HasPermissionTo(userID, model.PermissionManageSystem) {
+		a.errorResponse(w, r, model.NewErrPermission("access denied"))
+		return
+	}
+
+	teamID := mux.Vars(r)["teamID"]
+	afterUpdateAt, beforeUpdateAt, limit := parseDashboardActivityQuery(r)
+
+	entries, err := a.app.GetAdminCommenterInviteActivity(teamID, limit, beforeUpdateAt, afterUpdateAt)
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	data, err := json.Marshal(entries)
 	if err != nil {
 		a.errorResponse(w, r, err)
 		return

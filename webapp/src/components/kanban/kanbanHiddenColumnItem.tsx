@@ -21,6 +21,7 @@ type Props = {
     group: BoardGroup
     intl: IntlShape
     readonly: boolean
+    canDropCards?: boolean
     onDrop: (card: Card) => void
 }
 
@@ -28,18 +29,22 @@ export default function KanbanHiddenColumnItem(props: Props): JSX.Element {
     const {activeView, intl, group} = props
     const hiddenCardGroupId = 'hidden-card-group-id'
 
-    const [{isOver}, drop] = useDrop(() => ({
+    const [{canDrop, isOver}, drop] = useDrop(() => ({
         accept: 'card',
         collect: (monitor) => ({
+            canDrop: monitor.canDrop(),
             isOver: monitor.isOver(),
         }),
+        canDrop: () => props.canDropCards !== false,
         drop: (item: Card) => {
-            props.onDrop(item)
+            if (props.canDropCards !== false) {
+                props.onDrop(item)
+            }
         },
-    }), [props.onDrop])
+    }), [props.canDropCards, props.onDrop])
 
     let className = 'octo-board-hidden-item'
-    if (isOver) {
+    if (isOver && canDrop) {
         className += ' dragover'
     }
 
@@ -72,4 +77,3 @@ export default function KanbanHiddenColumnItem(props: Props): JSX.Element {
         </div>
     )
 }
-

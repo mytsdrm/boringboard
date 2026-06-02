@@ -1,6 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React, {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {generatePath, useRouteMatch, useHistory} from 'react-router-dom'
 import {FormattedMessage} from 'react-intl'
 
@@ -28,6 +28,7 @@ import propsRegistry from '../properties'
 import {applyProjectSystemSettings} from '../systemSettings'
 
 import {getMe} from '../store/users'
+import {loadBoardData} from '../store/initialLoad'
 
 import {getHiddenBoardIDs} from '../store/sidebar'
 
@@ -70,6 +71,7 @@ function CenterContent(props: Props) {
     const me = useAppSelector<IUser|null>(getMe)
     const hiddenBoardIDs = useAppSelector(getHiddenBoardIDs)
     const isSystemAdmin = Boolean(me?.roles && Utils.isSystemAdmin(me.roles)) || Boolean(me?.permissions?.includes('manage_system'))
+    const retriedBoardLoads = useRef<Set<string>>(new Set())
 
     const isBoardHidden = () => {
         return hiddenBoardIDs.includes(board.id)
@@ -119,6 +121,19 @@ function CenterContent(props: Props) {
             history.replace('/dashboard')
         }
     }, [props.users, props.systemSettings, me, isSystemAdmin, history])
+
+    useEffect(() => {
+        if (!match.params.boardId || props.readonly || props.dashboard || props.activityLogs || props.systemSettings || props.templates || props.users) {
+            return
+        }
+
+        if (isLoading || !board || activeView || views.length > 0 || retriedBoardLoads.current.has(match.params.boardId)) {
+            return
+        }
+
+        retriedBoardLoads.current.add(match.params.boardId)
+        dispatch(loadBoardData(match.params.boardId))
+    }, [match.params.boardId, props.readonly, props.dashboard, props.activityLogs, props.systemSettings, props.templates, props.users, isLoading, board, activeView, views.length, dispatch])
 
     const templateSelector = (
         <BoardTemplateSelector
@@ -171,6 +186,24 @@ function CenterContent(props: Props) {
         return templateSelector
     }
 
+    if (isLoading) {
+        return (
+            <div
+                className='workspace-loader'
+                role='status'
+            >
+                <span
+                    aria-hidden={true}
+                    className='spinner-border spinner-border-sm'
+                />
+                <FormattedMessage
+                    id='Workspace.loading-board'
+                    defaultMessage='Loading board...'
+                />
+            </div>
+        )
+    }
+
     if (board && !isBoardHidden() && activeView) {
         let property = groupByProperty
         if ((!property || !propsRegistry.get(property.type).canGroup) && activeView.fields.viewType === 'board') {
@@ -199,7 +232,7 @@ function CenterContent(props: Props) {
         )
     }
 
-    if ((board && !isBoardHidden()) || isLoading) {
+    if (board && !isBoardHidden()) {
         return null
     }
 

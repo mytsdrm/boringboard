@@ -24,6 +24,7 @@ import {getCurrentBoardTemplates, updateCards} from '../../store/cards'
 import {updateView} from '../../store/views'
 import BoardPermissionGate from '../permissions/boardPermissionGate'
 import HiddenCardCount from '../../components/hiddenCardCount/hiddenCardCount'
+import {useHasCurrentBoardPermissions} from '../../hooks/permissions'
 
 import KanbanCard from './kanbanCard'
 import KanbanColumn from './kanbanColumn'
@@ -61,6 +62,8 @@ const Kanban = (props: Props) => {
     const [defaultTemplateID, setDefaultTemplateID] = useState<string>()
     const [isScrolled, setIsScrolled] = useState(false)
     const [viewHeaderOffset, setViewHeaderOffset] = useState(0)
+    const canEditCards = useHasCurrentBoardPermissions([Permission.ManageBoardCards])
+    const cardsReadonly = props.readonly || !canEditCards
 
     useEffect(() => {
         if (activeView.fields.defaultTemplateId) {
@@ -332,6 +335,7 @@ const Kanban = (props: Props) => {
                 {visibleGroups.map((group) => (
                     <KanbanColumn
                         key={group.option.id || 'empty'}
+                        readonly={cardsReadonly}
                         onDrop={(card: Card) => onDropToColumn(group.option, card)}
                     >
                         {group.cards.map((card) => (
@@ -341,7 +345,7 @@ const Kanban = (props: Props) => {
                                 visiblePropertyTemplates={visiblePropertyTemplates}
                                 visibleBadges={visibleBadges}
                                 key={card.id}
-                                readonly={props.readonly}
+                                readonly={cardsReadonly}
                                 isSelected={props.selectedCardIds.includes(card.id)}
                                 onClick={props.onCardClicked}
                                 onDrop={onDropToCard}
@@ -381,6 +385,7 @@ const Kanban = (props: Props) => {
                                 activeView={activeView}
                                 intl={props.intl}
                                 readonly={props.readonly}
+                                canDropCards={!cardsReadonly}
                                 onDrop={(card: Card) => onDropToColumn(group.option, card)}
                             />
                         ))}

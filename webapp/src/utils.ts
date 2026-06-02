@@ -775,13 +775,9 @@ class Utils {
         match: routerMatch<{boardId: string, viewId?: string, cardId?: string, teamId?: string}>,
         history: History,
     ) {
-        // if the same board, reuse the match params
-        // otherwise remove viewId and cardId, results in first view being selected
         const params = {...match.params, boardId: boardId || ''}
-        if (boardId !== match.params.boardId) {
-            params.viewId = undefined
-            params.cardId = undefined
-        }
+        params.viewId = undefined
+        params.cardId = undefined
         const newPath = generatePath(Utils.getBoardPagePath(match.path), params)
         history.push(newPath)
     }

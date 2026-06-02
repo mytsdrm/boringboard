@@ -567,7 +567,7 @@ const Dashboard = (): JSX.Element => {
 
     const getUserDisplayName = useCallback((userId: string): string => {
         if (me?.id === userId) {
-            return me.username
+            return me.nickname || me.username || me.email
         }
 
         const user = boardUsers[userId]

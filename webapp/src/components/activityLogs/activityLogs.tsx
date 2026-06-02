@@ -7,10 +7,10 @@ import {DateUtils} from 'react-day-picker'
 import DayPicker from 'react-day-picker/DayPicker'
 
 import {Block} from '../../blocks/block'
-import {Board, IPropertyTemplate} from '../../blocks/board'
+import {Board, BoardMember, IPropertyTemplate} from '../../blocks/board'
 import {Card} from '../../blocks/card'
 import {useWebsockets} from '../../hooks/websockets'
-import octoClient from '../../octoClient'
+import octoClient, {BoardMemberActivityEntry} from '../../octoClient'
 import {getMySortedBoards} from '../../store/boards'
 import {useAppDispatch, useAppSelector} from '../../store/hooks'
 import {getCurrentTeamId, getFirstTeam} from '../../store/teams'
@@ -24,7 +24,7 @@ import '@tabler/core/dist/css/tabler.min.css'
 import '../admin/adminPages.scss'
 import './activityLogs.scss'
 
-type ActivityAction = 'created' | 'deleted' | 'renamed' | 'moved' | 'edited' | 'updated'
+type ActivityAction = 'created' | 'deleted' | 'renamed' | 'moved' | 'edited' | 'updated' | 'invited-commenter'
 
 type ActivityLog = {
     id: string
@@ -151,6 +151,40 @@ const createActivityLog = (
         timestamp,
         toValue: moveDetails?.toValue,
     }
+}
+
+const createCommenterInviteActivityLog = (member: BoardMember, board: Board): ActivityLog => {
+    const timestamp = Date.now()
+
+    return {
+        action: 'invited-commenter',
+        actorId: member.userId,
+        boardId: board.id,
+        boardTitle: board.title,
+        cardId: member.userId,
+        cardTitle: '',
+        id: `${board.id}-${member.userId}-${timestamp}-invited-commenter`,
+        timestamp,
+    }
+}
+
+const createCommenterInviteActivityLogFromHistory = (entry: BoardMemberActivityEntry, board: Board): ActivityLog => {
+    const timestamp = new Date(entry.insertAt).getTime()
+
+    return {
+        action: 'invited-commenter',
+        actorId: entry.userId,
+        boardId: board.id,
+        boardTitle: board.title,
+        cardId: entry.userId,
+        cardTitle: '',
+        id: `${board.id}-${entry.userId}-${timestamp}-invited-commenter`,
+        timestamp,
+    }
+}
+
+const isRealCommenterMember = (member: BoardMember): boolean => {
+    return Boolean(member.schemeCommenter && !member.schemeEditor && !member.schemeAdmin && !member.synthetic)
 }
 
 const getHistoryPreviousBlock = (historyById: Map<string, Block[]>, block: Block): Block | undefined => {
@@ -421,11 +455,18 @@ const ActivityLogs = (props: Props): JSX.Element => {
             })
 
             let historyBlocks: Block[] = []
+            let memberHistoryEntries: BoardMemberActivityEntry[] = []
             if (websocketTeamId) {
                 const historyLimit = props.adminMode ? 50 : ACTIVITY_LOG_HISTORY_PAGE_LIMIT
-                historyBlocks = props.adminMode ?
-                    await octoClient.getAdminActivityBlocks(websocketTeamId, historyLimit, requestBefore, startDateAfter) :
-                    await octoClient.getDashboardActivityBlocks(websocketTeamId, ACTIVITY_LOG_HISTORY_PAGE_LIMIT, requestBefore, startDateAfter)
+                const [nextHistoryBlocks, nextMemberHistoryEntries] = props.adminMode ? await Promise.all([
+                    octoClient.getAdminActivityBlocks(websocketTeamId, historyLimit, requestBefore, startDateAfter),
+                    octoClient.getAdminMemberActivity(websocketTeamId, historyLimit, requestBefore, startDateAfter),
+                ]) : await Promise.all([
+                    octoClient.getDashboardActivityBlocks(websocketTeamId, ACTIVITY_LOG_HISTORY_PAGE_LIMIT, requestBefore, startDateAfter),
+                    octoClient.getDashboardMemberActivity(websocketTeamId, ACTIVITY_LOG_HISTORY_PAGE_LIMIT, requestBefore, startDateAfter),
+                ])
+                historyBlocks = nextHistoryBlocks
+                memberHistoryEntries = nextMemberHistoryEntries
             }
             if (canceled) {
                 return
@@ -450,7 +491,18 @@ const ActivityLogs = (props: Props): JSX.Element => {
             const nextMemberUserIdList = Array.from(nextMemberUserIds)
             setMemberUserIds(nextMemberUserIdList)
 
-            const pageLogs = buildActivityLogsFromHistory(historyBlocks, effectiveBoardsById, nextCardsSnapshot).
+            const memberHistoryLogs = memberHistoryEntries.reduce<ActivityLog[]>((result, entry) => {
+                const board = effectiveBoardsById.get(entry.boardId)
+                if (board && entry.action === 'commenter') {
+                    result.push(createCommenterInviteActivityLogFromHistory(entry, board))
+                }
+                return result
+            }, [])
+
+            const pageLogs = [
+                ...buildActivityLogsFromHistory(historyBlocks, effectiveBoardsById, nextCardsSnapshot),
+                ...memberHistoryLogs,
+            ].
                 filter((log) => !selectedUserId || log.actorId === selectedUserId).
                 sort((a, b) => b.timestamp - a.timestamp)
             const currentLogs = pageLogs.slice(0, ACTIVITY_LOG_PAGE_SIZE)
@@ -550,14 +602,84 @@ const ActivityLogs = (props: Props): JSX.Element => {
 
         wsClient.addOnChange(incrementalBlockUpdate, 'block')
 
+        const incrementalBoardMemberUpdate = async (_: WSClient, members: BoardMember[]) => {
+            const nextLogs = members.reduce<ActivityLog[]>((result, member) => {
+                const board = boardsById.get(member.boardId)
+                if (!board || !isRealCommenterMember(member)) {
+                    return result
+                }
+
+                result.push(createCommenterInviteActivityLog(member, board))
+                return result
+            }, [])
+
+            const filteredNextLogs = nextLogs.filter((log) => {
+                if (selectedUserId && log.actorId !== selectedUserId) {
+                    return false
+                }
+                if (startDateAfter > 0 && log.timestamp <= startDateAfter) {
+                    return false
+                }
+                if (endDateBefore > 0 && log.timestamp >= endDateBefore) {
+                    return false
+                }
+                return true
+            })
+
+            if (filteredNextLogs.length > 0 && pageIndex === 0) {
+                const userIdsByTeamId = new Map<string, Set<string>>()
+                filteredNextLogs.forEach((log) => {
+                    const board = boardsById.get(log.boardId)
+                    if (!board || boardUsers[log.actorId]) {
+                        return
+                    }
+                    userIdsByTeamId.set(board.teamId, userIdsByTeamId.get(board.teamId) || new Set<string>())
+                    userIdsByTeamId.get(board.teamId)?.add(log.actorId)
+                })
+                const nextUsers = (await Promise.all(Array.from(userIdsByTeamId.entries()).map(([teamId, userIds]) => (
+                    octoClient.getTeamUsersList(Array.from(userIds), teamId)
+                )))).flat()
+                if (nextUsers.length > 0) {
+                    dispatch(addBoardUsers(nextUsers))
+                }
+
+                setLogs((previousLogs) => {
+                    const seen = new Set<string>()
+                    const mergedLogs = [...filteredNextLogs, ...previousLogs].
+                        filter((log) => {
+                            if (seen.has(log.id)) {
+                                return false
+                            }
+                            seen.add(log.id)
+                            return true
+                        }).
+                        sort((a, b) => b.timestamp - a.timestamp).
+                        slice(0, ACTIVITY_LOG_PAGE_SIZE)
+                    activityLogsCache.logs = mergedLogs
+                    return mergedLogs
+                })
+                setMemberUserIds((previousMemberUserIds) => {
+                    const mergedUserIds = Array.from(new Set([
+                        ...previousMemberUserIds,
+                        ...filteredNextLogs.map((log) => log.actorId),
+                    ]))
+                    activityLogsCache.memberUserIds = mergedUserIds
+                    return mergedUserIds
+                })
+            }
+        }
+
+        wsClient.addOnChange(incrementalBoardMemberUpdate, 'boardMembers')
+
         return () => {
             wsClient.removeOnChange(incrementalBlockUpdate, 'block')
+            wsClient.removeOnChange(incrementalBoardMemberUpdate, 'boardMembers')
         }
-    }, [boardsById, endDateBefore, pageIndex, selectedUserId, startDateAfter])
+    }, [boardsById, boardUsers, dispatch, endDateBefore, pageIndex, selectedUserId, startDateAfter])
 
     const getUserDisplayName = useCallback((userId: string): string => {
         if (me?.id === userId) {
-            return me.username
+            return me.nickname || me.username || me.email
         }
 
         const user = boardUsers[userId]
@@ -657,6 +779,14 @@ const ActivityLogs = (props: Props): JSX.Element => {
                 <FormattedMessage
                     id='Dashboard.activity-edited'
                     defaultMessage='<b>{user}</b> edited content in <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'invited-commenter':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-invited-commenter'
+                    defaultMessage='<b>{user}</b> was invited as a commenter to <b>{board}</b>'
                     values={values}
                 />
             )

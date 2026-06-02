@@ -28,5 +28,16 @@
             font-weight: bold;
             border-bottom: 1px solid rgba(180, 83, 9, 0.16);
         }
+
+        > .workspace-loader {
+            flex: 1 1 auto;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: var(--bb-text-muted);
+            font-size: 13px;
+            font-weight: 600;
+        }
     }
 }

@@ -535,11 +535,18 @@ func (s *SQLStore) saveMember(db sq.BaseRunner, bm *model.BoardMember) (*model.B
 		return nil, err
 	}
 
-	if oldMember == nil {
+	memberHistoryAction := "created"
+	if bm.SchemeCommenter && !bm.SchemeEditor && !bm.SchemeAdmin {
+		memberHistoryAction = "commenter"
+	}
+	shouldAddMemberHistory := oldMember == nil ||
+		(memberHistoryAction == "commenter" && !oldMember.SchemeCommenter)
+
+	if shouldAddMemberHistory {
 		addToMembersHistory := s.getQueryBuilder(db).
 			Insert(s.tablePrefix+"board_members_history").
 			Columns("board_id", "user_id", "action").
-			Values(bm.BoardID, bm.UserID, "created")
+			Values(bm.BoardID, bm.UserID, memberHistoryAction)
 
 		if _, err := addToMembersHistory.Exec(); err != nil {
 			return nil, err

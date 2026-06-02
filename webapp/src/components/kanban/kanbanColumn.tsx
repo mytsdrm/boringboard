@@ -9,23 +9,26 @@ import './kanbanColumn.scss'
 type Props = {
     onDrop: (card: Card) => void
     children: React.ReactNode
+    readonly?: boolean
 }
 
 const KanbanColumn = (props: Props) => {
-    const [{isOver}, drop] = useDrop(() => ({
+    const [{canDrop, isOver}, drop] = useDrop(() => ({
         accept: 'card',
         collect: (monitor) => ({
+            canDrop: monitor.canDrop(),
             isOver: monitor.isOver(),
         }),
+        canDrop: () => !props.readonly,
         drop: (item: Card, monitor) => {
-            if (monitor.isOver({shallow: true})) {
+            if (!props.readonly && monitor.isOver({shallow: true})) {
                 props.onDrop(item)
             }
         },
-    }), [props.onDrop])
+    }), [props.onDrop, props.readonly])
 
     let className = 'octo-board-column'
-    if (isOver) {
+    if (isOver && canDrop) {
         className += ' dragover'
     }
     return (

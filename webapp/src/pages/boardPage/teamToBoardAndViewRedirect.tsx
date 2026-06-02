@@ -48,7 +48,7 @@ const TeamToBoardAndViewRedirect = (): null => {
             }
 
             if (boardID) {
-                const newPath = generatePath(Utils.getBoardPagePath(match.path), {...match.params, boardId: boardID, viewID: undefined})
+                const newPath = generatePath(Utils.getBoardPagePath(match.path), {...match.params, boardId: boardID, viewId: undefined})
                 history.replace(newPath)
 
                 // return from here because the loadBoardData() call

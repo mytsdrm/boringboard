@@ -41,6 +41,13 @@ export type AdminSystemSettings = {
     taskBoards: AdminTaskBoardSettings
 }
 
+export type BoardMemberActivityEntry = {
+    action: string
+    boardId: string
+    insertAt: string
+    userId: string
+}
+
 export type TaskBoardColumnPreview = {
     name: string
     color: string
@@ -426,6 +433,30 @@ class OctoClient {
             path += `&after=${encodeURIComponent(afterUpdateAt)}`
         }
         return this.getBlocksWithPath(path)
+    }
+
+    async getDashboardMemberActivity(teamID: string, limit: number, beforeUpdateAt = 0, afterUpdateAt = 0): Promise<BoardMemberActivityEntry[]> {
+        let path = `/api/v2/teams/${teamID}/dashboard/member_activity?limit=${encodeURIComponent(limit)}`
+        if (beforeUpdateAt > 0) {
+            path += `&before=${encodeURIComponent(beforeUpdateAt)}`
+        }
+        if (afterUpdateAt > 0) {
+            path += `&after=${encodeURIComponent(afterUpdateAt)}`
+        }
+        const response = await fetch(this.getBaseURL() + path, {headers: this.headers()})
+        return (await this.getJson(response, [])) as BoardMemberActivityEntry[]
+    }
+
+    async getAdminMemberActivity(teamID: string, limit: number, beforeUpdateAt = 0, afterUpdateAt = 0): Promise<BoardMemberActivityEntry[]> {
+        let path = `/api/v2/teams/${teamID}/dashboard/member_activity/all?limit=${encodeURIComponent(limit)}`
+        if (beforeUpdateAt > 0) {
+            path += `&before=${encodeURIComponent(beforeUpdateAt)}`
+        }
+        if (afterUpdateAt > 0) {
+            path += `&after=${encodeURIComponent(afterUpdateAt)}`
+        }
+        const response = await fetch(this.getBaseURL() + path, {headers: this.headers()})
+        return (await this.getJson(response, [])) as BoardMemberActivityEntry[]
     }
 
     async getAdminBoards(teamID: string): Promise<Board[]> {

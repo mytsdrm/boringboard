@@ -29,6 +29,75 @@ func (a *App) GetAdminActivityBlocks(teamID string, limit uint64, beforeUpdateAt
 	return a.getActivityBlocksForBoards(boards, limit, beforeUpdateAt, afterUpdateAt)
 }
 
+func (a *App) GetDashboardCommenterInviteActivity(userID, teamID string, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.BoardMemberHistoryEntry, error) {
+	boards, err := a.store.GetBoardsForUserAndTeam(userID, teamID, true)
+	if err != nil {
+		return nil, err
+	}
+
+	return a.getCommenterInviteActivityForBoards(boards, limit, beforeUpdateAt, afterUpdateAt)
+}
+
+func (a *App) GetAdminCommenterInviteActivity(teamID string, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.BoardMemberHistoryEntry, error) {
+	boards, err := a.GetAdminBoards(teamID)
+	if err != nil {
+		return nil, err
+	}
+
+	return a.getCommenterInviteActivityForBoards(boards, limit, beforeUpdateAt, afterUpdateAt)
+}
+
+func (a *App) getCommenterInviteActivityForBoards(boards []*model.Board, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.BoardMemberHistoryEntry, error) {
+	if limit == 0 {
+		limit = 20
+	}
+
+	history := []*model.BoardMemberHistoryEntry{}
+	for _, board := range boards {
+		members, err := a.store.GetMembersForBoard(board.ID)
+		if err != nil {
+			return nil, err
+		}
+
+		for _, member := range members {
+			if !member.SchemeCommenter || member.SchemeEditor || member.SchemeAdmin || member.Synthetic {
+				continue
+			}
+
+			memberHistory, err := a.store.GetBoardMemberHistory(board.ID, member.UserID, 0)
+			if err != nil {
+				return nil, err
+			}
+			for _, entry := range memberHistory {
+				entryTime := entry.InsertAt.UnixMilli()
+				if entry.Action != "commenter" {
+					continue
+				}
+				if beforeUpdateAt > 0 && entryTime >= beforeUpdateAt {
+					continue
+				}
+				if afterUpdateAt > 0 && entryTime <= afterUpdateAt {
+					continue
+				}
+				history = append(history, entry)
+			}
+		}
+	}
+
+	sort.SliceStable(history, func(i, j int) bool {
+		if history[i].InsertAt.Equal(history[j].InsertAt) {
+			return history[i].BoardID < history[j].BoardID
+		}
+		return history[i].InsertAt.After(history[j].InsertAt)
+	})
+
+	if uint64(len(history)) > limit {
+		history = history[:limit]
+	}
+
+	return history, nil
+}
+
 func (a *App) getActivityBlocksForBoards(boards []*model.Board, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.Block, error) {
 	if limit == 0 {
 		limit = 20

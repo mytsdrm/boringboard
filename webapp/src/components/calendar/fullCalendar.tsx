@@ -75,8 +75,8 @@ const timeZoneOffset = (date: number): number => {
 const CalendarFullView = (props: Props): JSX.Element|null => {
     const intl = useIntl()
     const {board, cards, activeView, dateDisplayProperty, readonly} = props
-    const isSelectable = !readonly
     const canAddCards = useHasCurrentBoardPermissions([Permission.ManageBoardCards])
+    const isSelectable = !readonly && canAddCards
     const [showConfirmationDialogBox, setShowConfirmationDialogBox] = useState<boolean>(false)
     const [cardItem, setCardItem] = useState<Card>()
 
@@ -90,11 +90,11 @@ const CalendarFullView = (props: Props): JSX.Element|null => {
     }
 
     const isEditable = useCallback((): boolean => {
-        if (readonly || !dateDisplayProperty || propsRegistry.get(dateDisplayProperty.type).isReadOnly) {
+        if (readonly || !canAddCards || !dateDisplayProperty || propsRegistry.get(dateDisplayProperty.type).isReadOnly) {
             return false
         }
         return true
-    }, [readonly, dateDisplayProperty])
+    }, [readonly, canAddCards, dateDisplayProperty])
 
     const myEventsList = useMemo(() => (
         cards.flatMap((card): EventInput[] => {
@@ -207,6 +207,11 @@ const CalendarFullView = (props: Props): JSX.Element|null => {
     }
 
     const eventChange = useCallback((eventProps: EventChangeArg) => {
+        if (!isEditable()) {
+            eventProps.revert()
+            return
+        }
+
         const {event} = eventProps
         if (!event.start) {
             return
@@ -222,9 +227,13 @@ const CalendarFullView = (props: Props): JSX.Element|null => {
         if (card && dateDisplayProperty) {
             mutator.changePropertyValue(board.id, card, dateDisplayProperty.id, JSON.stringify(dateProperty))
         }
-    }, [cards, dateDisplayProperty])
+    }, [board.id, cards, dateDisplayProperty, isEditable])
 
     const onNewEvent = useCallback((args: {start: Date, end: Date}) => {
+        if (!canAddCards) {
+            return
+        }
+
         let dateProperty: DateProperty
         if (args.start === args.end) {
             dateProperty = createDatePropertyFromCalendarDate(args.start)
@@ -241,7 +250,7 @@ const CalendarFullView = (props: Props): JSX.Element|null => {
         }
 
         props.addCard(properties)
-    }, [props.addCard, dateDisplayProperty])
+    }, [canAddCards, props.addCard, dateDisplayProperty])
 
     const toolbar = useMemo(() => ({
         left: 'title',
@@ -258,18 +267,19 @@ const CalendarFullView = (props: Props): JSX.Element|null => {
     const dayCellContent = useCallback((args: DayCellContentArg): JSX.Element|null => {
         return (
             <div className={'dateContainer ' + (canAddCards ? 'with-plus' : '')}>
-                <div
-                    className='addEvent'
-                    onClick={() => onNewEvent({start: args.date, end: args.date})}
-                >
-                    {'+'}
-                </div>
+                {canAddCards &&
+                    <div
+                        className='addEvent'
+                        onClick={() => onNewEvent({start: args.date, end: args.date})}
+                    >
+                        {'+'}
+                    </div>}
                 <div className='dateDisplay'>
                     {args.dayNumberText}
                 </div>
             </div>
         )
-    }, [dateDisplayProperty, canAddCards])
+    }, [canAddCards, onNewEvent])
 
     return (
         <div
