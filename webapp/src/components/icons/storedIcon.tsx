@@ -363,13 +363,13 @@ type StoredIconProps = {
 export function StoredIcon(props: StoredIconProps): JSX.Element | null {
     const storedIcon = decodeStoredIcon(props.icon)
     if (storedIcon) {
-        const Icon = storedIcon.Icon
+        const IconComponent = storedIcon.Icon as React.ComponentType<{['aria-hidden']?: boolean}>
         return (
             <span
                 className={`StoredIcon StoredIcon--library ${props.className || ''}`.trim()}
                 title={storedIcon.label}
             >
-                <Icon aria-hidden='true'/>
+                <IconComponent aria-hidden={true}/>
             </span>
         )
     }

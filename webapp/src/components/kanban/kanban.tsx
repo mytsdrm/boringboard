@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 /* eslint-disable max-lines */
-import React, {useCallback, useState, useMemo, useEffect} from 'react'
+import React, {CSSProperties, useCallback, useState, useMemo, useEffect} from 'react'
 import {FormattedMessage, injectIntl, IntlShape} from 'react-intl'
 
 import withScrolling, {createHorizontalStrength, createVerticalStrength} from 'react-dnd-scrolling'
@@ -57,6 +57,8 @@ const Kanban = (props: Props) => {
     const cardTemplates: Card[] = useAppSelector(getCurrentBoardTemplates)
     const {board, activeView, cards, groupByProperty, visibleGroups, hiddenGroups, hiddenCardsCount} = props
     const [defaultTemplateID, setDefaultTemplateID] = useState<string>()
+    const [isScrolled, setIsScrolled] = useState(false)
+    const [viewHeaderOffset, setViewHeaderOffset] = useState(0)
 
     useEffect(() => {
         if (activeView.fields.defaultTemplateId) {
@@ -65,6 +67,21 @@ const Kanban = (props: Props) => {
             }
         }
     }, [activeView.fields.defaultTemplateId])
+
+    useEffect(() => {
+        const updateViewHeaderOffset = () => {
+            const viewHeader = document.querySelector('.ViewHeader')
+            const kanban = document.querySelector('.Kanban')
+            const viewHeaderRect = viewHeader?.getBoundingClientRect()
+            const kanbanRect = kanban?.getBoundingClientRect()
+            const offset = viewHeaderRect && kanbanRect ? Math.max(0, viewHeaderRect.bottom - kanbanRect.top) : 0
+            setViewHeaderOffset(Math.ceil(offset))
+        }
+
+        updateViewHeaderOffset()
+        window.addEventListener('resize', updateViewHeaderOffset)
+        return () => window.removeEventListener('resize', updateViewHeaderOffset)
+    }, [activeView.id])
 
     const propertyValues = groupByProperty?.options || []
     Utils.log(`${propertyValues.length} propertyValues`)
@@ -217,11 +234,17 @@ const Kanban = (props: Props) => {
         return <div/>
     }
 
+    const onKanbanScroll = (event: React.UIEvent<HTMLDivElement>) => {
+        setIsScrolled(event.currentTarget.scrollTop > 0)
+    }
+
     return (
         <ScrollingComponent
-            className='Kanban'
+            className={`Kanban ${isScrolled ? 'Kanban--scrolled' : ''}`}
             horizontalStrength={hStrength}
             verticalStrength={vStrength}
+            onScroll={onKanbanScroll}
+            style={{'--kanban-view-header-offset': `${viewHeaderOffset}px`} as CSSProperties}
         >
             <div
                 className='octo-board-header'

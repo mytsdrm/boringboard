@@ -77,6 +77,10 @@ function makeCommonConfig() {
             ],
         },
         resolve: {
+            alias: {
+                'react-icons/fa$': path.resolve(__dirname, 'node_modules/@draft-js-plugins/emoji/node_modules/react-icons/fa/index.esm.js'),
+                'react-icons/fa/index.esm.js$': path.resolve(__dirname, 'node_modules/@draft-js-plugins/emoji/node_modules/react-icons/fa/index.esm.js'),
+            },
             modules: [
                 'node_modules',
                 path.resolve(__dirname),
