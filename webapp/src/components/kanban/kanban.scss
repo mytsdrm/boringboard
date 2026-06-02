@@ -1,4 +1,4 @@
-@import "../../styles/z-index";
+@import '../../styles/z-index';
 
 .Kanban {
     --kanban-scrolled-header-margin-top: 13rem;
@@ -115,15 +115,11 @@
         width: 286px;
         margin-right: 18px;
         padding: 14px;
-        background: linear-gradient(
-            180deg,
-            var(--bb-kanban-column-from) 0%,
-            var(--bb-kanban-column-to) 100%
-        );
+        background: linear-gradient(180deg, var(--bb-kanban-column-from) 0%, var(--bb-kanban-column-to) 100%);
         border: 1px solid var(--bb-border-strong);
         border-radius: 12px;
         box-shadow: inset 0 1px 0
-                color-mix(in srgb, var(--bb-card-bg) 82%, transparent),
+            color-mix(in srgb, var(--bb-card-bg) 82%, transparent),
             0 12px 24px var(--bb-shadow-soft);
 
         &.narrow {

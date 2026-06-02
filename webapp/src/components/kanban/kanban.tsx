@@ -6,12 +6,12 @@ import {FormattedMessage, injectIntl, IntlShape} from 'react-intl'
 
 import withScrolling, {createHorizontalStrength, createVerticalStrength} from 'react-dnd-scrolling'
 
-import {useAppSelector} from '../../store/hooks'
+import {useAppDispatch, useAppSelector} from '../../store/hooks'
 
 import {Position} from '../cardDetail/cardDetailContents'
 
 import {Board, IPropertyOption, IPropertyTemplate, BoardGroup} from '../../blocks/board'
-import {Card} from '../../blocks/card'
+import {Card, createCard} from '../../blocks/card'
 import {BoardView} from '../../blocks/boardView'
 import mutator from '../../mutator'
 import {Utils, IDType} from '../../utils'
@@ -20,7 +20,8 @@ import {Constants, Permission} from '../../constants'
 
 import {dragAndDropRearrange} from '../cardDetail/cardDetailContentsUtility'
 
-import {getCurrentBoardTemplates} from '../../store/cards'
+import {getCurrentBoardTemplates, updateCards} from '../../store/cards'
+import {updateView} from '../../store/views'
 import BoardPermissionGate from '../permissions/boardPermissionGate'
 import HiddenCardCount from '../../components/hiddenCardCount/hiddenCardCount'
 
@@ -55,6 +56,7 @@ const vStrength = createVerticalStrength(Utils.isMobile() ? 60 : 250)
 
 const Kanban = (props: Props) => {
     const cardTemplates: Card[] = useAppSelector(getCurrentBoardTemplates)
+    const dispatch = useAppDispatch()
     const {board, activeView, cards, groupByProperty, visibleGroups, hiddenGroups, hiddenCardsCount} = props
     const [defaultTemplateID, setDefaultTemplateID] = useState<string>()
     const [isScrolled, setIsScrolled] = useState(false)
@@ -142,6 +144,18 @@ const Kanban = (props: Props) => {
                 }, {})
                 const draggedCards: Card[] = draggedCardIds.map((o: string) => cardsById[o]).filter((c) => c)
                 const description = draggedCards.length > 1 ? `drag ${draggedCards.length} cards` : 'drag card'
+                const optimisticCards = draggedCards.map((draggedCard) => {
+                    const nextCard = createCard(draggedCard)
+                    if (optionId) {
+                        nextCard.fields.properties[groupByProperty!.id] = optionId
+                    } else {
+                        delete nextCard.fields.properties[groupByProperty!.id]
+                    }
+                    return nextCard
+                })
+                const newOrder = orderAfterMoveToColumn(draggedCardIds, optionId)
+                dispatch(updateCards(optimisticCards))
+                dispatch(updateView({...activeView, fields: {...activeView.fields, cardOrder: newOrder}}))
                 const awaits = []
                 for (const draggedCard of draggedCards) {
                     Utils.log(`ondrop. Card: ${draggedCard.title}, column: ${optionId}`)
@@ -150,7 +164,6 @@ const Kanban = (props: Props) => {
                         awaits.push(mutator.changePropertyValue(props.board.id, draggedCard, groupByProperty!.id, optionId, description))
                     }
                 }
-                const newOrder = orderAfterMoveToColumn(draggedCardIds, optionId)
                 awaits.push(mutator.changeViewCardOrder(props.board.id, activeView.id, activeView.fields.cardOrder, newOrder, description))
                 await Promise.all(awaits)
             })
@@ -177,7 +190,7 @@ const Kanban = (props: Props) => {
 
             await mutator.changeViewVisibleOptionIds(props.board.id, activeView.id, activeView.fields.visibleOptionIds, visibleOptionIdsRearranged)
         }
-    }, [cards, visibleGroups, activeView.id, activeView.fields.cardOrder, groupByProperty, props.selectedCardIds])
+    }, [activeView, cards, dispatch, groupByProperty, orderAfterMoveToColumn, props.board.id, props.selectedCardIds, visibleGroups])
 
     const onDropToCard = useCallback(async (srcCard: Card, dstCard: Card) => {
         if (srcCard.id === dstCard.id || !groupByProperty) {
@@ -206,6 +219,17 @@ const Kanban = (props: Props) => {
             destIndex += 1
         }
         cardOrder.splice(destIndex, 0, ...draggedCardIds)
+        const optimisticCards = draggedCards.map((draggedCard) => {
+            const nextCard = createCard(draggedCard)
+            if (optionId) {
+                nextCard.fields.properties[groupByProperty.id] = optionId
+            } else {
+                delete nextCard.fields.properties[groupByProperty.id]
+            }
+            return nextCard
+        })
+        dispatch(updateCards(optimisticCards))
+        dispatch(updateView({...activeView, fields: {...activeView.fields, cardOrder}}))
 
         await mutator.performAsUndoGroup(async () => {
             // Update properties of dragged cards
@@ -220,7 +244,7 @@ const Kanban = (props: Props) => {
             await Promise.all(awaits)
             await mutator.changeViewCardOrder(props.board.id, activeView.id, activeView.fields.cardOrder, cardOrder, description)
         })
-    }, [cards, activeView.id, activeView.fields.cardOrder, groupByProperty, props.selectedCardIds])
+    }, [activeView, cards, dispatch, groupByProperty, props.board.id, props.selectedCardIds])
 
     const [showCalculationsMenu, setShowCalculationsMenu] = useState<Map<string, boolean>>(new Map<string, boolean>())
     const toggleOptions = (templateId: string, show: boolean) => {

@@ -237,6 +237,15 @@ const buildActivityLogsFromHistory = (
     })
 }
 
+const activityLogsCache = {
+    adminBoards: [] as Board[],
+    cardsSnapshot: {} as {[cardId: string]: Card},
+    hasNextPage: false,
+    logs: [] as ActivityLog[],
+    memberUserIds: [] as string[],
+    pageCursors: [0] as number[],
+}
+
 type Props = {
     adminMode?: boolean
 }
@@ -249,20 +258,20 @@ const ActivityLogs = (props: Props): JSX.Element => {
     const firstTeam = useAppSelector(getFirstTeam)
     const me = useAppSelector(getMe)
     const boardUsers = useAppSelector(getBoardUsers)
-    const [hasNextPage, setHasNextPage] = useState(false)
+    const [hasNextPage, setHasNextPage] = useState(activityLogsCache.hasNextPage)
     const [isLoading, setIsLoading] = useState(false)
-    const [logs, setLogs] = useState<ActivityLog[]>([])
-    const [pageCursors, setPageCursors] = useState<number[]>([0])
+    const [logs, setLogs] = useState<ActivityLog[]>(activityLogsCache.logs)
+    const [pageCursors, setPageCursors] = useState<number[]>(activityLogsCache.pageCursors)
     const [pageIndex, setPageIndex] = useState(0)
     const [projectSettings, setProjectSettings] = useState<ProjectSystemSettings>(getStoredProjectSystemSettings)
-    const [memberUserIds, setMemberUserIds] = useState<string[]>([])
+    const [memberUserIds, setMemberUserIds] = useState<string[]>(activityLogsCache.memberUserIds)
     const [searchQuery, setSearchQuery] = useState('')
     const [selectedUserId, setSelectedUserId] = useState('')
     const [showDateRangePicker, setShowDateRangePicker] = useState(false)
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
-    const cardsSnapshot = useRef<{[cardId: string]: Card}>({})
-    const [adminBoards, setAdminBoards] = useState<Board[]>([])
+    const cardsSnapshot = useRef<{[cardId: string]: Card}>({...activityLogsCache.cardsSnapshot})
+    const [adminBoards, setAdminBoards] = useState<Board[]>(activityLogsCache.adminBoards)
     const taskBoards = useMemo(() => {
         if (props.adminMode) {
             return adminBoards
@@ -356,6 +365,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
     }, [])
 
     useEffect(() => {
+        activityLogsCache.pageCursors = [0]
         setPageIndex(0)
         setPageCursors([0])
     }, [endDateBefore, searchQuery, selectedUserId, startDateAfter])
@@ -398,7 +408,9 @@ const ActivityLogs = (props: Props): JSX.Element => {
             ])
             if (props.adminMode) {
                 setAdminBoards((previousBoards) => {
-                    return areBoardListsEqual(previousBoards, nextAdminBoards) ? previousBoards : nextAdminBoards
+                    const boardsToStore = areBoardListsEqual(previousBoards, nextAdminBoards) ? previousBoards : nextAdminBoards
+                    activityLogsCache.adminBoards = boardsToStore
+                    return boardsToStore
                 })
             }
             const effectiveBoardsById = new Map((props.adminMode ? nextAdminBoards : taskBoards).map((board) => [board.id, board]))
@@ -435,7 +447,8 @@ const ActivityLogs = (props: Props): JSX.Element => {
                 entry.userIds.forEach((userId) => nextMemberUserIds.add(userId))
             })
             teamUsers.forEach((user) => nextMemberUserIds.add(user.id))
-            setMemberUserIds(Array.from(nextMemberUserIds))
+            const nextMemberUserIdList = Array.from(nextMemberUserIds)
+            setMemberUserIds(nextMemberUserIdList)
 
             const pageLogs = buildActivityLogsFromHistory(historyBlocks, effectiveBoardsById, nextCardsSnapshot).
                 filter((log) => !selectedUserId || log.actorId === selectedUserId).
@@ -443,17 +456,24 @@ const ActivityLogs = (props: Props): JSX.Element => {
             const currentLogs = pageLogs.slice(0, ACTIVITY_LOG_PAGE_SIZE)
             const nextCursor = currentLogs[currentLogs.length - 1]?.timestamp || 0
 
-            setHasNextPage(pageLogs.length > ACTIVITY_LOG_PAGE_SIZE && nextCursor > 0)
+            const nextHasNextPage = pageLogs.length > ACTIVITY_LOG_PAGE_SIZE && nextCursor > 0
+            setHasNextPage(nextHasNextPage)
             setPageCursors((previousCursors) => {
                 if (pageLogs.length <= ACTIVITY_LOG_PAGE_SIZE || nextCursor === 0) {
+                    activityLogsCache.pageCursors = previousCursors
                     return previousCursors
                 }
 
                 const nextCursors = [...previousCursors]
                 nextCursors[pageIndex + 1] = nextCursor
+                activityLogsCache.pageCursors = nextCursors
                 return nextCursors
             })
             cardsSnapshot.current = nextCardsSnapshot
+            activityLogsCache.cardsSnapshot = nextCardsSnapshot
+            activityLogsCache.hasNextPage = nextHasNextPage
+            activityLogsCache.logs = currentLogs
+            activityLogsCache.memberUserIds = nextMemberUserIdList
             setLogs(currentLogs)
             setIsLoading(false)
         }
@@ -511,7 +531,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
             if (filteredNextLogs.length > 0 && pageIndex === 0) {
                 setLogs((previousLogs) => {
                     const seen = new Set<string>()
-                    return [...filteredNextLogs, ...previousLogs].
+                    const mergedLogs = [...filteredNextLogs, ...previousLogs].
                         filter((log) => {
                             if (seen.has(log.id)) {
                                 return false
@@ -521,6 +541,9 @@ const ActivityLogs = (props: Props): JSX.Element => {
                         }).
                         sort((a, b) => b.timestamp - a.timestamp).
                         slice(0, ACTIVITY_LOG_PAGE_SIZE)
+                    activityLogsCache.logs = mergedLogs
+                    activityLogsCache.cardsSnapshot = cardsSnapshot.current
+                    return mergedLogs
                 })
             }
         }
@@ -881,7 +904,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
                                 defaultMessage='No activity logs yet.'
                             />
                         </div>}
-                    {isLoading &&
+                    {isLoading && visibleLogs.length === 0 &&
                         <div className='admin-page-empty'>
                             <FormattedMessage
                                 id='ActivityLogs.loading'

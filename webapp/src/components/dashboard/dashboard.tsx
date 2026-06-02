@@ -186,6 +186,12 @@ const buildActivitiesFromHistory = (
     }, [])
 }
 
+const dashboardCache = {
+    activities: [] as DashboardActivity[],
+    cardsSnapshot: {} as {[cardId: string]: Card},
+    statsByBoard: {} as {[boardId: string]: BoardStats},
+}
+
 const Dashboard = (): JSX.Element => {
     const intl = useIntl()
     const dispatch = useAppDispatch()
@@ -196,8 +202,8 @@ const Dashboard = (): JSX.Element => {
     const firstTeam = useAppSelector(getFirstTeam)
     const me = useAppSelector(getMe)
     const boardUsers = useAppSelector(getBoardUsers)
-    const [statsByBoard, setStatsByBoard] = useState<{[boardId: string]: BoardStats}>({})
-    const [activities, setActivities] = useState<DashboardActivity[]>([])
+    const [statsByBoard, setStatsByBoard] = useState<{[boardId: string]: BoardStats}>(dashboardCache.statsByBoard)
+    const [activities, setActivities] = useState<DashboardActivity[]>(dashboardCache.activities)
     const [projectSettings, setProjectSettings] = useState<ProjectSystemSettings>(getStoredProjectSystemSettings)
     const [profileModalOpen, setProfileModalOpen] = useState(false)
     const [passwordModalOpen, setPasswordModalOpen] = useState(false)
@@ -209,7 +215,7 @@ const Dashboard = (): JSX.Element => {
     const [passwordError, setPasswordError] = useState('')
     const [passwordSaving, setPasswordSaving] = useState(false)
     const [passwordSucceeded, setPasswordSucceeded] = useState(false)
-    const cardsSnapshot = useRef<{[cardId: string]: Card}>({})
+    const cardsSnapshot = useRef<{[cardId: string]: Card}>({...dashboardCache.cardsSnapshot})
     const userMenuRef = useRef<HTMLDetailsElement|null>(null)
     const taskBoards = useMemo(() => boards.filter((board) => !board.isTemplate), [boards])
     const taskBoardsById = useMemo(() => new Map(taskBoards.map((board) => [board.id, board])), [taskBoards])
@@ -281,6 +287,7 @@ const Dashboard = (): JSX.Element => {
                     ...cardStats,
                 }
             })
+            dashboardCache.statsByBoard = next
             return next
         })
     }, [taskBoardsById])
@@ -323,13 +330,15 @@ const Dashboard = (): JSX.Element => {
             }
 
             const seededActivities = buildActivitiesFromHistory(historyBlocks, taskBoardsById, nextCardsSnapshot)
+            const nextActivities = seededActivities.
+                sort((a, b) => b.timestamp - a.timestamp).
+                slice(0, DASHBOARD_ACTIVITY_LIMIT)
             cardsSnapshot.current = nextCardsSnapshot
-            setStatsByBoard(Object.fromEntries(entries.map(([boardId, stats]) => [boardId, stats])))
-            setActivities(
-                seededActivities.
-                    sort((a, b) => b.timestamp - a.timestamp).
-                    slice(0, DASHBOARD_ACTIVITY_LIMIT),
-            )
+            dashboardCache.cardsSnapshot = nextCardsSnapshot
+            dashboardCache.statsByBoard = Object.fromEntries(entries.map(([boardId, stats]) => [boardId, stats]))
+            dashboardCache.activities = nextActivities
+            setStatsByBoard(dashboardCache.statsByBoard)
+            setActivities(nextActivities)
         }
 
         loadStats()
@@ -379,7 +388,7 @@ const Dashboard = (): JSX.Element => {
             if (nextActivities.length > 0) {
                 setActivities((previousActivities) => {
                     const seen = new Set<string>()
-                    return [...nextActivities, ...previousActivities].
+                    const mergedActivities = [...nextActivities, ...previousActivities].
                         filter((activity) => {
                             if (seen.has(activity.id)) {
                                 return false
@@ -389,6 +398,9 @@ const Dashboard = (): JSX.Element => {
                         }).
                         sort((a, b) => b.timestamp - a.timestamp).
                         slice(0, DASHBOARD_ACTIVITY_LIMIT)
+                    dashboardCache.activities = mergedActivities
+                    dashboardCache.cardsSnapshot = cardsSnapshot.current
+                    return mergedActivities
                 })
             }
         }
