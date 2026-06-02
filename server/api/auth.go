@@ -24,6 +24,7 @@ func (a *API) registerAuthRoutes(r *mux.Router) {
 	r.HandleFunc("/register", a.handleRegister).Methods("POST")
 	r.HandleFunc("/teams/{teamID}/regenerate_signup_token", a.sessionRequired(a.handlePostTeamRegenerateSignupToken)).Methods("POST")
 	r.HandleFunc("/users/{userID}/changepassword", a.sessionRequired(a.handleChangePassword)).Methods("POST")
+	r.HandleFunc("/users/me/password", a.sessionRequired(a.handleSetMyPassword)).Methods(http.MethodPost)
 }
 
 func (a *API) handleLogin(w http.ResponseWriter, r *http.Request) {
@@ -312,6 +313,43 @@ func (a *API) handleChangePassword(w http.ResponseWriter, r *http.Request) {
 	defer a.audit.LogRecord(audit.LevelAuth, auditRec)
 
 	if err = a.app.ChangePassword(userID, requestData.OldPassword, requestData.NewPassword); err != nil {
+		a.errorResponse(w, r, model.NewErrBadRequest(err.Error()))
+		return
+	}
+
+	jsonStringResponse(w, http.StatusOK, "{}")
+	auditRec.Success()
+}
+
+func (a *API) handleSetMyPassword(w http.ResponseWriter, r *http.Request) {
+	if a.MattermostAuth {
+		a.errorResponse(w, r, model.NewErrNotImplemented("not permitted in plugin mode"))
+		return
+	}
+
+	if len(a.singleUserToken) > 0 {
+		a.errorResponse(w, r, model.NewErrUnauthorized("not permitted in single-user mode"))
+		return
+	}
+
+	requestBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	var requestData struct {
+		NewPassword string `json:"newPassword"`
+	}
+	if err = json.Unmarshal(requestBody, &requestData); err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	auditRec := a.makeAuditRecord(r, "setMyPassword", audit.Fail)
+	defer a.audit.LogRecord(audit.LevelAuth, auditRec)
+
+	if err = a.app.SetUserPassword(getUserID(r), requestData.NewPassword); err != nil {
 		a.errorResponse(w, r, model.NewErrBadRequest(err.Error()))
 		return
 	}

@@ -171,6 +171,17 @@ class OctoClient {
         return {code: response.status, json}
     }
 
+    async setMyPassword(newPassword: string): Promise<{code: number, json: {error?: string}}> {
+        const path = '/api/v2/users/me/password'
+        const response = await fetch(this.getBaseURL() + path, {
+            method: 'POST',
+            headers: this.headers(),
+            body: JSON.stringify({newPassword}),
+        })
+        const json = (await this.getJson(response, {})) as {error?: string}
+        return {code: response.status, json}
+    }
+
     async updateMyProfile(payload: UserProfilePayload): Promise<{code: number, json: IUser | {error?: string}}> {
         const path = '/api/v2/users/me/profile'
         const response = await fetch(this.getBaseURL() + path, {

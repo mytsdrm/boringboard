@@ -204,7 +204,7 @@ const Dashboard = (): JSX.Element => {
     const [profileForm, setProfileForm] = useState({username: '', email: '', nickname: ''})
     const [profileError, setProfileError] = useState('')
     const [profileSaving, setProfileSaving] = useState(false)
-    const [passwordForm, setPasswordForm] = useState({current: '', next: ''})
+    const [passwordForm, setPasswordForm] = useState({confirm: '', next: ''})
     const [passwordError, setPasswordError] = useState('')
     const [passwordSaving, setPasswordSaving] = useState(false)
     const [passwordSucceeded, setPasswordSucceeded] = useState(false)
@@ -478,7 +478,7 @@ const Dashboard = (): JSX.Element => {
     }
 
     const openPasswordModal = () => {
-        setPasswordForm({current: '', next: ''})
+        setPasswordForm({confirm: '', next: ''})
         setPasswordError('')
         setPasswordSucceeded(false)
         setPasswordModalOpen(true)
@@ -521,19 +521,23 @@ const Dashboard = (): JSX.Element => {
         if (!me) {
             return
         }
-        if (!passwordForm.current || !passwordForm.next) {
-            setPasswordError(intl.formatMessage({id: 'changePassword.error-missing-current-new', defaultMessage: 'Please enter your current and new password.'}))
+        if (!passwordForm.next || !passwordForm.confirm) {
+            setPasswordError(intl.formatMessage({id: 'changePassword.error-missing-new-confirm', defaultMessage: 'Please enter and confirm your new password.'}))
+            return
+        }
+        if (passwordForm.next !== passwordForm.confirm) {
+            setPasswordError(intl.formatMessage({id: 'changePassword.error-password-mismatch', defaultMessage: 'New password and confirm password do not match.'}))
             return
         }
 
         setPasswordSaving(true)
         setPasswordError('')
         setPasswordSucceeded(false)
-        const response = await octoClient.changePassword(me.id, passwordForm.current, passwordForm.next)
+        const response = await octoClient.setMyPassword(passwordForm.next)
         setPasswordSaving(false)
 
         if (response.code === 200) {
-            setPasswordForm({current: '', next: ''})
+            setPasswordForm({confirm: '', next: ''})
             setPasswordSucceeded(true)
             return
         }
@@ -869,22 +873,22 @@ const Dashboard = (): JSX.Element => {
                             <div className='dashboard-account-fields'>
                                 <input
                                     type='password'
-                                    value={passwordForm.current}
-                                    placeholder={intl.formatMessage({id: 'changePassword.current-password-label', defaultMessage: 'Current password'})}
-                                    aria-label={intl.formatMessage({id: 'changePassword.current-password-label', defaultMessage: 'Current password'})}
+                                    value={passwordForm.next}
+                                    placeholder={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
+                                    aria-label={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
                                     onChange={(e) => {
-                                        setPasswordForm({...passwordForm, current: e.target.value})
+                                        setPasswordForm({...passwordForm, next: e.target.value})
                                         setPasswordError('')
                                         setPasswordSucceeded(false)
                                     }}
                                 />
                                 <input
                                     type='password'
-                                    value={passwordForm.next}
-                                    placeholder={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
-                                    aria-label={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
+                                    value={passwordForm.confirm}
+                                    placeholder={intl.formatMessage({id: 'changePassword.confirm-password-label', defaultMessage: 'Confirm password'})}
+                                    aria-label={intl.formatMessage({id: 'changePassword.confirm-password-label', defaultMessage: 'Confirm password'})}
                                     onChange={(e) => {
-                                        setPasswordForm({...passwordForm, next: e.target.value})
+                                        setPasswordForm({...passwordForm, confirm: e.target.value})
                                         setPasswordError('')
                                         setPasswordSucceeded(false)
                                     }}

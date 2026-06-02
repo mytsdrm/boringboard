@@ -230,3 +230,19 @@ func (a *App) ChangePassword(userID, oldPassword, newPassword string) error {
 
 	return nil
 }
+
+func (a *App) SetUserPassword(userID, newPassword string) error {
+	if userID == "" {
+		return errors.New("invalid user")
+	}
+
+	if err := auth.IsPasswordValid(newPassword, auth.PasswordSettings{MinimumLength: 6}); err != nil {
+		return errors.Wrap(err, "Invalid password")
+	}
+
+	if err := a.store.UpdateUserPasswordByID(userID, auth.HashPassword(newPassword)); err != nil {
+		return errors.Wrap(err, "unable to update password")
+	}
+
+	return nil
+}
