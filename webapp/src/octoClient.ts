@@ -26,11 +26,17 @@ export type AdminAISettings = {
     ollamaEndpoint: string
 }
 
+export type AdminTaskBoardSettings = {
+    enableInvitedUserShare: boolean
+    enableInvitedUserEditProperty: boolean
+}
+
 export type AdminSystemSettings = {
     appName: string
     logo: string
     timeZone: string
     ai: AdminAISettings
+    taskBoards: AdminTaskBoardSettings
 }
 
 export type AdminUserPayload = {
@@ -456,6 +462,10 @@ class OctoClient {
                 ollamaEndpoint: 'http://localhost:11434',
                 provider: 'OpenAI',
             },
+            taskBoards: {
+                enableInvitedUserEditProperty: false,
+                enableInvitedUserShare: false,
+            },
         })
     }
 
@@ -484,6 +494,10 @@ class OctoClient {
                 enabled: false,
                 ollamaEndpoint: 'http://localhost:11434',
                 provider: 'OpenAI',
+            },
+            taskBoards: {
+                enableInvitedUserEditProperty: false,
+                enableInvitedUserShare: false,
             },
         })
     }

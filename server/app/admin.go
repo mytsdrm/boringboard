@@ -22,6 +22,10 @@ func defaultAdminSystemSettings() model.AdminSystemSettings {
 			APIKey:         "",
 			OllamaEndpoint: "http://localhost:11434",
 		},
+		TaskBoards: model.AdminTaskBoardSettings{
+			EnableInvitedUserShare:        false,
+			EnableInvitedUserEditProperty: false,
+		},
 	}
 }
 

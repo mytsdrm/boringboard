@@ -278,6 +278,9 @@ const CalendarFullView = (props: Props): JSX.Element|null => {
                 key={activeView.id}
                 dayCellContent={dayCellContent}
                 dayMaxEventRows={5}
+                contentHeight='auto'
+                expandRows={false}
+                height='auto'
                 initialDate={initialDate}
                 plugins={[dayGridPlugin, interactionPlugin]}
                 initialView='dayGridMonth'

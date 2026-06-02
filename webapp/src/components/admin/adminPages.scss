@@ -469,13 +469,18 @@
         background: #fff;
     }
 
-    .admin-ai-controls {
+    .admin-ai-controls,
+    .admin-task-board-controls {
         display: flex;
         align-items: flex-start;
         flex-direction: column;
         gap: 16px;
         min-width: 0;
         max-width: 760px;
+    }
+
+    .admin-task-board-controls {
+        gap: 2px;
     }
 
     .admin-ai-settings {
@@ -490,16 +495,22 @@
         grid-column: 1 / -1;
     }
 
-    .admin-ai-controls .admin-settings-checkbox {
+    .admin-ai-controls .admin-settings-checkbox,
+    .admin-task-board-controls .admin-settings-checkbox {
         display: inline-flex;
         align-items: center;
         flex-direction: row;
         justify-content: flex-start;
         gap: 10px;
-        min-height: 40px;
+        min-height: 32px;
         padding: 0;
         border: 0;
         background: transparent;
+
+        span {
+            letter-spacing: 0;
+            text-transform: none;
+        }
     }
 
     .admin-page-actions {

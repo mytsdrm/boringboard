@@ -2,8 +2,8 @@
 
 .CalendarContainer {
     flex: 1 1 auto;
+    width: 100%;
     min-height: 0;
-    margin-right: 80px;
     margin-bottom: 10px;
     overflow: auto;
     -webkit-overflow-scrolling: touch;
@@ -82,7 +82,34 @@
     }
 
     .fc {
-        height: 100%;
+        width: 100%;
+        min-width: 760px;
+        height: auto;
+        min-height: 0;
+    }
+
+    .fc-view-harness {
+        width: 100%;
+    }
+
+    .fc-dayGridMonth-view {
+        .fc-scrollgrid-sync-table {
+            height: auto !important;
+        }
+
+        .fc-daygrid-day-frame {
+            min-height: clamp(72px, 10vh, 108px);
+        }
+    }
+
+    .fc-dayGridWeek-view {
+        .fc-scrollgrid-sync-table {
+            height: auto !important;
+        }
+
+        .fc-daygrid-day-frame {
+            min-height: clamp(96px, 16vh, 150px);
+        }
     }
 
     .fc-day {

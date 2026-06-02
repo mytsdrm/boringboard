@@ -39,6 +39,10 @@ const defaultSettings: AdminSystemSettings = {
         ollamaEndpoint: 'http://localhost:11434',
         provider: 'OpenAI',
     },
+    taskBoards: {
+        enableInvitedUserEditProperty: false,
+        enableInvitedUserShare: false,
+    },
 }
 
 const fallbackTimeZones = [
@@ -69,6 +73,19 @@ const getTimeZoneOptions = (selectedTimeZone: string): string[] => {
     return Array.from(new Set([normalizedSelectedTimeZone, ...timeZones])).sort((a, b) => a.localeCompare(b))
 }
 
+const mergeWithDefaultSettings = (settings: AdminSystemSettings): AdminSystemSettings => ({
+    ...defaultSettings,
+    ...settings,
+    ai: {
+        ...defaultSettings.ai,
+        ...(settings.ai || {}),
+    },
+    taskBoards: {
+        ...defaultSettings.taskBoards,
+        ...(settings.taskBoards || {}),
+    },
+})
+
 const SystemSettings = (): JSX.Element => {
     const intl = useIntl()
     const [settings, setSettings] = useState<AdminSystemSettings>(defaultSettings)
@@ -81,9 +98,10 @@ const SystemSettings = (): JSX.Element => {
         async function loadSettings() {
             const nextSettings = await octoClient.getAdminSystemSettings()
             if (!canceled) {
-                setSettings(nextSettings)
-                applySystemBranding(nextSettings)
-                applyProjectSystemSettings(nextSettings)
+                const mergedSettings = mergeWithDefaultSettings(nextSettings)
+                setSettings(mergedSettings)
+                applySystemBranding(mergedSettings)
+                applyProjectSystemSettings(mergedSettings)
             }
         }
         loadSettings()
@@ -109,11 +127,16 @@ const SystemSettings = (): JSX.Element => {
                 ...settings.ai,
                 ollamaEndpoint: settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint,
             },
+            taskBoards: {
+                ...defaultSettings.taskBoards,
+                ...settings.taskBoards,
+            },
         })
         if (saved) {
-            setSettings(saved)
-            applySystemBranding(saved)
-            applyProjectSystemSettings(saved)
+            const mergedSettings = mergeWithDefaultSettings(saved)
+            setSettings(mergedSettings)
+            applySystemBranding(mergedSettings)
+            applyProjectSystemSettings(mergedSettings)
             setSaveState('saved')
             window.setTimeout(() => setSaveState('idle'), 1500)
         } else {
@@ -373,6 +396,56 @@ const SystemSettings = (): JSX.Element => {
                                         />
                                     </label>}
                             </div>}
+                    </div>
+                </div>
+                <div className='admin-settings-section'>
+                    <div className='admin-settings-section-header'>
+                        <h2>
+                            <FormattedMessage
+                                id='SystemSettings.task-boards-title'
+                                defaultMessage='Task Boards'
+                            />
+                        </h2>
+                    </div>
+                    <div className='admin-task-board-controls'>
+                        <label className='admin-settings-checkbox'>
+                            <input
+                                checked={settings.taskBoards.enableInvitedUserShare}
+                                onChange={(event) => setSettings({
+                                    ...settings,
+                                    taskBoards: {
+                                        ...settings.taskBoards,
+                                        enableInvitedUserShare: event.target.checked,
+                                    },
+                                })}
+                                type='checkbox'
+                            />
+                            <span>
+                                <FormattedMessage
+                                    id='SystemSettings.enable-invited-user-share'
+                                    defaultMessage='Enable Invited user to share task board'
+                                />
+                            </span>
+                        </label>
+                        <label className='admin-settings-checkbox'>
+                            <input
+                                checked={settings.taskBoards.enableInvitedUserEditProperty}
+                                onChange={(event) => setSettings({
+                                    ...settings,
+                                    taskBoards: {
+                                        ...settings.taskBoards,
+                                        enableInvitedUserEditProperty: event.target.checked,
+                                    },
+                                })}
+                                type='checkbox'
+                            />
+                            <span>
+                                <FormattedMessage
+                                    id='SystemSettings.enable-invited-user-edit-property'
+                                    defaultMessage='Enable Invited to edit task board property'
+                                />
+                            </span>
+                        </label>
                     </div>
                 </div>
                 {saveError &&
