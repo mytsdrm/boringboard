@@ -2,8 +2,10 @@
 @import 'modifiers';
 @import 'z-index';
 
-html {
+html,
+body {
     height: 100%;
+    overflow: hidden;
 }
 
 .focalboard-body,
@@ -95,7 +97,8 @@ html {
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
-        overflow: auto;
+        min-height: 0;
+        overflow: hidden;
     }
 
     #frame,
@@ -104,6 +107,7 @@ html {
         flex: 1 1 auto;
         display: flex;
         flex-direction: column;
+        min-height: 0;
         overflow: hidden;
     }
 

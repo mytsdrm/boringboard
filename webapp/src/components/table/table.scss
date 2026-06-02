@@ -5,8 +5,10 @@
     margin-left: 0 !important;
     overflow: auto;
     position: relative;
-    flex: 1;
+    flex: 1 1 auto;
+    min-height: 0;
     padding: 0 0 56px;
+    -webkit-overflow-scrolling: touch;
 
     .octo-group-header-cell {
         display: flex;

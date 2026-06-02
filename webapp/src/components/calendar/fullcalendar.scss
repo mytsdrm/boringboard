@@ -1,9 +1,12 @@
 @import '../../styles/z-index';
 
 .CalendarContainer {
+    flex: 1 1 auto;
+    min-height: 0;
     margin-right: 80px;
     margin-bottom: 10px;
     overflow: auto;
+    -webkit-overflow-scrolling: touch;
 
     .fc-daygrid-event,
     .fc-event-main {

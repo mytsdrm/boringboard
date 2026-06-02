@@ -451,65 +451,67 @@ const CenterPanel = (props: Props) => {
                 />
             </div>
 
-            {activeView.fields.viewType === 'board' &&
-            <Kanban
-                board={props.board}
-                activeView={props.activeView}
-                cards={props.cards}
-                groupByProperty={props.groupByProperty}
-                visibleGroups={visibleGroups}
-                hiddenGroups={hiddenGroups}
-                selectedCardIds={selectedCardIds}
-                readonly={props.readonly}
-                onCardClicked={cardClicked}
-                addCard={addCard}
-                addCardFromTemplate={addCardFromTemplate}
-                showCard={showCard}
-                hiddenCardsCount={props.hiddenCardsCount}
-                showHiddenCardCountNotification={hiddenCardCountNotifyHandler}
-            />}
-            {activeView.fields.viewType === 'table' &&
-                <Table
+            <div className='board-view-content'>
+                {activeView.fields.viewType === 'board' &&
+                <Kanban
                     board={props.board}
                     activeView={props.activeView}
                     cards={props.cards}
                     groupByProperty={props.groupByProperty}
-                    views={props.views}
                     visibleGroups={visibleGroups}
+                    hiddenGroups={hiddenGroups}
                     selectedCardIds={selectedCardIds}
                     readonly={props.readonly}
-                    cardIdToFocusOnRender={cardIdToFocusOnRender}
-                    showCard={showCard}
+                    onCardClicked={cardClicked}
                     addCard={addCard}
-                    onCardClicked={cardClicked}
-                    hiddenCardsCount={props.hiddenCardsCount}
-                    showHiddenCardCountNotification={hiddenCardCountNotifyHandler}
-                />}
-            {activeView.fields.viewType === 'calendar' &&
-                <CalendarFullView
-                    board={props.board}
-                    cards={props.cards}
-                    activeView={props.activeView}
-                    readonly={props.readonly}
-                    dateDisplayProperty={props.dateDisplayProperty}
+                    addCardFromTemplate={addCardFromTemplate}
                     showCard={showCard}
-                    addCard={(properties: Record<string, string>) => {
-                        addCard('', true, properties)
-                    }}
-                />}
-
-            {activeView.fields.viewType === 'gallery' &&
-                <Gallery
-                    board={props.board}
-                    cards={props.cards}
-                    activeView={props.activeView}
-                    readonly={props.readonly}
-                    onCardClicked={cardClicked}
-                    selectedCardIds={selectedCardIds}
-                    addCard={(show) => addCard('', show)}
                     hiddenCardsCount={props.hiddenCardsCount}
                     showHiddenCardCountNotification={hiddenCardCountNotifyHandler}
                 />}
+                {activeView.fields.viewType === 'table' &&
+                    <Table
+                        board={props.board}
+                        activeView={props.activeView}
+                        cards={props.cards}
+                        groupByProperty={props.groupByProperty}
+                        views={props.views}
+                        visibleGroups={visibleGroups}
+                        selectedCardIds={selectedCardIds}
+                        readonly={props.readonly}
+                        cardIdToFocusOnRender={cardIdToFocusOnRender}
+                        showCard={showCard}
+                        addCard={addCard}
+                        onCardClicked={cardClicked}
+                        hiddenCardsCount={props.hiddenCardsCount}
+                        showHiddenCardCountNotification={hiddenCardCountNotifyHandler}
+                    />}
+                {activeView.fields.viewType === 'calendar' &&
+                    <CalendarFullView
+                        board={props.board}
+                        cards={props.cards}
+                        activeView={props.activeView}
+                        readonly={props.readonly}
+                        dateDisplayProperty={props.dateDisplayProperty}
+                        showCard={showCard}
+                        addCard={(properties: Record<string, string>) => {
+                            addCard('', true, properties)
+                        }}
+                    />}
+
+                {activeView.fields.viewType === 'gallery' &&
+                    <Gallery
+                        board={props.board}
+                        cards={props.cards}
+                        activeView={props.activeView}
+                        readonly={props.readonly}
+                        onCardClicked={cardClicked}
+                        selectedCardIds={selectedCardIds}
+                        addCard={(show) => addCard('', show)}
+                        hiddenCardsCount={props.hiddenCardsCount}
+                        showHiddenCardCountNotification={hiddenCardCountNotifyHandler}
+                    />}
+            </div>
             <CardLimitNotification
                 showHiddenCardNotification={showHiddenCardCountNotification}
                 hiddenCardCountNotificationHandler={hiddenCardCountNotifyHandler}

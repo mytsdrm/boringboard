@@ -5,20 +5,23 @@
     flex: 1 1 auto;
     flex-direction: column;
     height: 100%;
-    min-height: 100%;
+    min-height: 0;
     padding: 42px 48px 56px;
-    overflow: hidden;
+    overflow: auto;
     background:
         radial-gradient(circle at 18% 0, var(--bb-dashboard-glow), transparent 360px),
         var(--bb-bg);
+    -webkit-overflow-scrolling: touch;
 
     &.admin-users-page {
         --admin-content-width: 100%;
 
         padding: 32px 32px 48px;
+        overflow: hidden;
     }
 
     .admin-page-header {
+        flex: 0 0 auto;
         width: var(--admin-content-width);
         margin: 0 auto 28px;
 
@@ -128,8 +131,25 @@
     }
 
     .admin-users-table-card {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
         width: var(--admin-content-width);
+        min-height: 0;
         margin: 0 auto;
+    }
+
+    .admin-users-table-card > .table-module-content {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-height: 0;
+    }
+
+    .admin-users-table-card .table-module-content > .table-responsive {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
     }
 
     .admin-users-pagination {
