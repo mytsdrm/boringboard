@@ -38,6 +38,9 @@ func (a *App) getActivityBlocksForBoards(boards []*model.Board, limit uint64, be
 	if historyLimitPerBoard < 40 {
 		historyLimitPerBoard = 40
 	}
+	if len(boards) > 20 && historyLimitPerBoard > 100 {
+		historyLimitPerBoard = 100
+	}
 
 	blocks := []*model.Block{}
 	for _, board := range boards {
