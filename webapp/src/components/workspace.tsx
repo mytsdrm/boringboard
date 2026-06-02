@@ -102,6 +102,12 @@ function CenterContent(props: Props) {
         }
     }, [cardLimitTimestamp, match.params.boardId, templates])
 
+    useEffect(() => {
+        if ((props.users || props.systemSettings) && me && !isSystemAdmin) {
+            history.replace('/dashboard')
+        }
+    }, [props.users, props.systemSettings, me, isSystemAdmin, history])
+
     const templateSelector = (
         <BoardTemplateSelector
             title={
@@ -125,10 +131,16 @@ function CenterContent(props: Props) {
     }
 
     if (props.users) {
+        if (!me || !isSystemAdmin) {
+            return null
+        }
         return <AdminUsers/>
     }
 
     if (props.systemSettings) {
+        if (!me || !isSystemAdmin) {
+            return null
+        }
         return <SystemSettings/>
     }
 
