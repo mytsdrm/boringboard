@@ -90,3 +90,4 @@ docker/data
 server/**/*.coverage
 AGENTS.MD
 AGENT.MD
+merge.sh
