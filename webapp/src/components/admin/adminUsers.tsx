@@ -1,20 +1,22 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React, {useEffect, useMemo, useState} from 'react'
-import {IconEdit, IconTrash} from '@tabler/icons-react'
+import {IconChevronLeft, IconChevronRight, IconEdit, IconPlus, IconSearch, IconShieldLock, IconTrash, IconUserCircle} from '@tabler/icons-react'
 import {FormattedMessage, useIntl} from 'react-intl'
 
 import octoClient, {AdminUserPayload} from '../../octoClient'
 import {useAppSelector} from '../../store/hooks'
 import {getMe} from '../../store/users'
 import {IUser} from '../../user'
-import CompassIcon from '../../widgets/icons/compassIcon'
 import Dialog from '../dialog'
 import RootPortal from '../rootPortal'
 
+import '@tabler/core/dist/css/tabler.min.css'
 import './adminPages.scss'
 
 type UserGroup = AdminUserPayload['group']
+
+const PAGE_SIZE_OPTIONS = [10, 25, 50]
 
 type UserFormState = {
     id: string
@@ -43,6 +45,9 @@ const AdminUsers = (): JSX.Element => {
     const [isLoading, setIsLoading] = useState(true)
     const [isSaving, setIsSaving] = useState(false)
     const [groupFilter, setGroupFilter] = useState<UserGroup | 'All'>('All')
+    const [searchQuery, setSearchQuery] = useState('')
+    const [pageSize, setPageSize] = useState(10)
+    const [currentPage, setCurrentPage] = useState(1)
     const [form, setForm] = useState<UserFormState>(emptyForm)
     const [showForm, setShowForm] = useState(false)
     const [deleteTarget, setDeleteTarget] = useState<IUser | null>(null)
@@ -72,10 +77,51 @@ const AdminUsers = (): JSX.Element => {
     }, [])
 
     const sortedUsers = useMemo(() => {
+        const normalizedSearch = searchQuery.trim().toLowerCase()
+
         return [...users].
             filter((user) => groupFilter === 'All' || getUserGroup(user) === groupFilter).
+            filter((user) => {
+                if (!normalizedSearch) {
+                    return true
+                }
+
+                const searchableText = [
+                    user.username,
+                    user.email,
+                    getUserGroup(user),
+                ].join(' ').toLowerCase()
+
+                return searchableText.includes(normalizedSearch)
+            }).
             sort((a, b) => a.username.localeCompare(b.username))
-    }, [groupFilter, users])
+    }, [groupFilter, searchQuery, users])
+    const totalPages = Math.max(1, Math.ceil(sortedUsers.length / pageSize))
+    const paginatedUsers = useMemo(() => {
+        const startIndex = (currentPage - 1) * pageSize
+        return sortedUsers.slice(startIndex, startIndex + pageSize)
+    }, [currentPage, pageSize, sortedUsers])
+    const visiblePages = useMemo(() => {
+        const pages = new Set<number>([1, totalPages, currentPage])
+
+        if (currentPage > 1) {
+            pages.add(currentPage - 1)
+        }
+        if (currentPage < totalPages) {
+            pages.add(currentPage + 1)
+        }
+
+        return Array.from(pages).
+            filter((page) => page >= 1 && page <= totalPages).
+            sort((a, b) => a - b)
+    }, [currentPage, totalPages])
+    useEffect(() => {
+        setCurrentPage(1)
+    }, [groupFilter, searchQuery])
+
+    useEffect(() => {
+        setCurrentPage((previousPage) => Math.min(previousPage, totalPages))
+    }, [totalPages])
 
     const startAddUser = () => {
         setForm(emptyForm)
@@ -190,12 +236,34 @@ const AdminUsers = (): JSX.Element => {
                     </h1>
                 </div>
                 <div className='admin-header-actions'>
+                    <label className='admin-users-search'>
+                        <FormattedMessage
+                            id='AdminUsers.search'
+                            defaultMessage='Search'
+                        />
+                        <div className='input-icon'>
+                            <span className='input-icon-addon'>
+                                <IconSearch size={18}/>
+                            </span>
+                            <input
+                                className='form-control'
+                                placeholder={intl.formatMessage({
+                                    id: 'AdminUsers.search-placeholder',
+                                    defaultMessage: 'Search users',
+                                })}
+                                type='search'
+                                value={searchQuery}
+                                onChange={(event) => setSearchQuery(event.target.value)}
+                            />
+                        </div>
+                    </label>
                     <label>
                         <FormattedMessage
                             id='AdminUsers.filter-group'
                             defaultMessage='Group'
                         />
                         <select
+                            className='form-select'
                             value={groupFilter}
                             onChange={(event) => setGroupFilter(event.target.value as UserGroup | 'All')}
                         >
@@ -207,9 +275,14 @@ const AdminUsers = (): JSX.Element => {
                         </select>
                     </label>
                     <button
+                        className='btn btn-primary'
                         type='button'
                         onClick={startAddUser}
                     >
+                        <IconPlus
+                            className='icon'
+                            size={18}
+                        />
                         <FormattedMessage
                             id='AdminUsers.add-user'
                             defaultMessage='Add User'
@@ -247,6 +320,7 @@ const AdminUsers = (): JSX.Element => {
                                     defaultMessage='Username'
                                 />
                                 <input
+                                    className='form-control'
                                     required={true}
                                     value={form.username}
                                     onChange={(event) => setForm({...form, username: event.target.value})}
@@ -258,6 +332,7 @@ const AdminUsers = (): JSX.Element => {
                                     defaultMessage='Email'
                                 />
                                 <input
+                                    className='form-control'
                                     type='email'
                                     value={form.email}
                                     onChange={(event) => setForm({...form, email: event.target.value})}
@@ -269,6 +344,7 @@ const AdminUsers = (): JSX.Element => {
                                     defaultMessage='Password'
                                 />
                                 <input
+                                    className='form-control'
                                     required={!form.id}
                                     placeholder={form.id ? intl.formatMessage({
                                         id: 'AdminUsers.password-unchanged',
@@ -285,6 +361,7 @@ const AdminUsers = (): JSX.Element => {
                                     defaultMessage='Group'
                                 />
                                 <select
+                                    className='form-select'
                                     value={form.group}
                                     onChange={(event) => setForm({...form, group: event.target.value as UserGroup})}
                                 >
@@ -298,6 +375,7 @@ const AdminUsers = (): JSX.Element => {
                                 </div>}
                             <div className='admin-form-actions'>
                                 <button
+                                    className='btn btn-outline-secondary'
                                     type='button'
                                     onClick={closeForm}
                                 >
@@ -307,6 +385,7 @@ const AdminUsers = (): JSX.Element => {
                                     />
                                 </button>
                                 <button
+                                    className='btn btn-primary'
                                     disabled={isSaving}
                                     type='submit'
                                 >
@@ -346,6 +425,7 @@ const AdminUsers = (): JSX.Element => {
                                 </div>}
                             <div className='admin-form-actions'>
                                 <button
+                                    className='btn btn-outline-secondary'
                                     type='button'
                                     onClick={closeDeleteModal}
                                 >
@@ -355,7 +435,7 @@ const AdminUsers = (): JSX.Element => {
                                     />
                                 </button>
                                 <button
-                                    className='admin-danger-button'
+                                    className='btn btn-danger'
                                     disabled={isSaving}
                                     type='button'
                                     onClick={deleteUser}
@@ -369,9 +449,9 @@ const AdminUsers = (): JSX.Element => {
                         </div>
                     </Dialog>
                 </RootPortal>}
-            <section className='admin-page-card'>
-                <div className='admin-table-scroll'>
-                    <table className='admin-table'>
+            <section className='card admin-users-table-card'>
+                <div className='table-responsive'>
+                    <table className='table table-vcenter card-table admin-table'>
                         <thead>
                             <tr>
                                 <th>
@@ -407,18 +487,27 @@ const AdminUsers = (): JSX.Element => {
                             </tr>
                         </thead>
                         <tbody>
-                            {sortedUsers.map((user) => (
+                            {paginatedUsers.map((user) => (
                                 <tr key={user.id}>
                                     <td>
                                         <span className='admin-user-cell'>
                                             <span className='admin-user-avatar'>
-                                                <CompassIcon icon='account-outline'/>
+                                                <IconUserCircle size={18}/>
                                             </span>
                                             {user.username}
                                         </span>
                                     </td>
                                     <td>{user.email || '-'}</td>
-                                    <td>{getUserGroup(user)}</td>
+                                    <td>
+                                        <span className={`badge ${getUserGroup(user) === 'SuperAdmin' ? 'bg-blue-lt' : 'bg-secondary-lt'}`}>
+                                            {getUserGroup(user) === 'SuperAdmin' &&
+                                                <IconShieldLock
+                                                    className='icon'
+                                                    size={14}
+                                                />}
+                                            {getUserGroup(user)}
+                                        </span>
+                                    </td>
                                     <td>{formatDate(user.create_at)}</td>
                                     <td>
                                         <div className='admin-table-actions'>
@@ -427,7 +516,7 @@ const AdminUsers = (): JSX.Element => {
                                                     id: 'AdminUsers.edit-user',
                                                     defaultMessage: 'Edit user',
                                                 })}
-                                                className='admin-icon-button'
+                                                className='btn btn-icon btn-outline-secondary'
                                                 title={intl.formatMessage({
                                                     id: 'AdminUsers.edit-user',
                                                     defaultMessage: 'Edit user',
@@ -435,14 +524,17 @@ const AdminUsers = (): JSX.Element => {
                                                 type='button'
                                                 onClick={() => startEditUser(user)}
                                             >
-                                                <IconEdit size={18}/>
+                                                <IconEdit
+                                                    className='icon'
+                                                    size={18}
+                                                />
                                             </button>
                                             <button
                                                 aria-label={intl.formatMessage({
                                                     id: 'AdminUsers.delete-user',
                                                     defaultMessage: 'Delete user',
                                                 })}
-                                                className='admin-icon-button admin-icon-button-danger'
+                                                className='btn btn-icon btn-outline-danger'
                                                 disabled={user.id === me?.id}
                                                 title={intl.formatMessage({
                                                     id: 'AdminUsers.delete-user',
@@ -451,7 +543,10 @@ const AdminUsers = (): JSX.Element => {
                                                 type='button'
                                                 onClick={() => openDeleteModal(user)}
                                             >
-                                                <IconTrash size={18}/>
+                                                <IconTrash
+                                                    className='icon'
+                                                    size={18}
+                                                />
                                             </button>
                                         </div>
                                     </td>
@@ -474,6 +569,105 @@ const AdminUsers = (): JSX.Element => {
                             />
                         </div>}
                 </div>
+                {!isLoading && sortedUsers.length > 0 &&
+                    <div className='card-footer admin-users-pagination'>
+                        <div className='admin-users-pagination-inner'>
+                            <div className='admin-users-pagination-size'>
+                                <span className='text-secondary'>
+                                    <FormattedMessage
+                                        id='AdminUsers.rows-per-page'
+                                        defaultMessage='Rows per page'
+                                    />
+                                </span>
+                                <select
+                                    aria-label={intl.formatMessage({
+                                        id: 'AdminUsers.rows-per-page',
+                                        defaultMessage: 'Rows per page',
+                                    })}
+                                    className='form-select form-select-sm admin-users-page-size'
+                                    value={pageSize}
+                                    onChange={(event) => {
+                                        setPageSize(Number(event.target.value))
+                                        setCurrentPage(1)
+                                    }}
+                                >
+                                    {PAGE_SIZE_OPTIONS.map((option) => (
+                                        <option
+                                            key={option}
+                                            value={option}
+                                        >
+                                            {option}
+                                        </option>
+                                    ))}
+                                </select>
+                            </div>
+                            <span className='text-secondary admin-users-pagination-summary'>
+                                <FormattedMessage
+                                    id='AdminUsers.pagination-summary'
+                                    defaultMessage='Page {page} of {pages} · {total} users'
+                                    values={{
+                                        page: currentPage,
+                                        pages: totalPages,
+                                        total: sortedUsers.length,
+                                    }}
+                                />
+                            </span>
+                            {totalPages > 1 &&
+                                <ul className='pagination m-0'>
+                                    <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
+                                        <button
+                                            aria-label={intl.formatMessage({
+                                                id: 'AdminUsers.previous-page',
+                                                defaultMessage: 'Previous page',
+                                            })}
+                                            className='page-link'
+                                            disabled={currentPage === 1}
+                                            type='button'
+                                            onClick={() => setCurrentPage((page) => Math.max(1, page - 1))}
+                                        >
+                                            <IconChevronLeft
+                                                className='icon'
+                                                size={18}
+                                            />
+                                        </button>
+                                    </li>
+                                    {visiblePages.map((page, index) => (
+                                        <React.Fragment key={page}>
+                                            {index > 0 && page - visiblePages[index - 1] > 1 &&
+                                                <li className='page-item disabled'>
+                                                    <span className='page-link'>{'...'}</span>
+                                                </li>}
+                                            <li className={`page-item ${page === currentPage ? 'active' : ''}`}>
+                                                <button
+                                                    className='page-link'
+                                                    type='button'
+                                                    onClick={() => setCurrentPage(page)}
+                                                >
+                                                    {page}
+                                                </button>
+                                            </li>
+                                        </React.Fragment>
+                                    ))}
+                                    <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
+                                        <button
+                                            aria-label={intl.formatMessage({
+                                                id: 'AdminUsers.next-page',
+                                                defaultMessage: 'Next page',
+                                            })}
+                                            className='page-link'
+                                            disabled={currentPage === totalPages}
+                                            type='button'
+                                            onClick={() => setCurrentPage((page) => Math.min(totalPages, page + 1))}
+                                        >
+                                            <IconChevronRight
+                                                className='icon'
+                                                size={18}
+                                            />
+                                        </button>
+                                    </li>
+                                </ul>}
+                        </div>
+                    </div>}
             </section>
         </div>
     )

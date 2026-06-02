@@ -168,6 +168,12 @@ const areBoardListsEqual = (previousBoards: Board[], nextBoards: Board[]): boole
     })
 }
 
+const isAdminUser = (user?: {permissions?: string[], roles?: string}): boolean => {
+    return Boolean(user?.roles?.includes('SuperAdmin')) ||
+        Boolean(user?.roles?.includes('system_admin')) ||
+        Boolean(user?.permissions?.includes('manage_system'))
+}
+
 const buildActivityLogsFromHistory = (
     historyBlocks: Block[],
     boardsById: Map<string, Board>,
@@ -517,8 +523,10 @@ const ActivityLogs = (props: Props): JSX.Element => {
             ...(me?.id ? [me.id] : []),
             ...memberUserIds,
             ...logs.map((log) => log.actorId),
-        ])).sort((a, b) => getUserDisplayName(a).localeCompare(getUserDisplayName(b)))
-    }, [getUserDisplayName, logs, me?.id, memberUserIds])
+        ])).
+            filter((userId) => props.adminMode || !isAdminUser(boardUsers[userId])).
+            sort((a, b) => getUserDisplayName(a).localeCompare(getUserDisplayName(b)))
+    }, [boardUsers, getUserDisplayName, logs, me?.id, memberUserIds, props.adminMode])
 
     const formatAuditDate = (timestamp: number): string => {
         const date = [
