@@ -11,7 +11,18 @@ import {TaskBoardPreview} from '../octoClient'
 
 const statusPropertyName = 'Status'
 const dueDatePropertyName = 'Due Date'
+const taskValuePropertyName = 'Task Value'
+const userPropertyName = 'User'
 const storedIconPrefix = 'bb-icon:'
+
+export const taskBoardDefaultStatusColumns = [
+    {color: 'propColorGray', name: 'Backlog'},
+    {color: 'propColorPurple', name: 'Assigned'},
+    {color: 'propColorBlue', name: 'Execution'},
+    {color: 'propColorOrange', name: 'Review'},
+    {color: 'propColorYellow', name: 'Testing'},
+    {color: 'propColorGreen', name: 'Done'},
+]
 
 export function buildTaskBoardFromPreview(preview: TaskBoardPreview, teamId: string): BoardsAndBlocks {
     const board = createBoard()
@@ -25,7 +36,7 @@ export function buildTaskBoardFromPreview(preview: TaskBoardPreview, teamId: str
         id: Utils.createGuid(IDType.BlockID),
         name: statusPropertyName,
         type: 'select',
-        options: preview.columns.map((column) => ({
+        options: taskBoardDefaultStatusColumns.map((column) => ({
             color: column.color || 'propColorBlue',
             id: Utils.createGuid(IDType.BlockID),
             value: column.name,
@@ -37,7 +48,19 @@ export function buildTaskBoardFromPreview(preview: TaskBoardPreview, teamId: str
         type: 'date',
         options: [],
     }
-    board.cardProperties = [statusProperty, dueDateProperty]
+    const taskValueProperty: IPropertyTemplate = {
+        id: Utils.createGuid(IDType.BlockID),
+        name: taskValuePropertyName,
+        type: 'number',
+        options: [],
+    }
+    const userProperty: IPropertyTemplate = {
+        id: Utils.createGuid(IDType.BlockID),
+        name: userPropertyName,
+        type: 'person',
+        options: [],
+    }
+    board.cardProperties = [statusProperty, dueDateProperty, taskValueProperty, userProperty]
 
     const blocks: Block[] = []
     const cards = preview.tasks.map((task, index): Card => {
@@ -59,20 +82,20 @@ export function buildTaskBoardFromPreview(preview: TaskBoardPreview, teamId: str
         return card
     })
 
-    const views = buildViews(preview, board, statusProperty, dueDateProperty, cards)
+    const views = buildViews(preview, board, statusProperty, dueDateProperty, taskValueProperty, userProperty, cards)
     blocks.unshift(...views)
     blocks.push(...cards)
 
     return {boards: [board], blocks}
 }
 
-function buildViews(preview: TaskBoardPreview, board: Board, statusProperty: IPropertyTemplate, dueDateProperty: IPropertyTemplate, cards: Card[]): BoardView[] {
+function buildViews(preview: TaskBoardPreview, board: Board, statusProperty: IPropertyTemplate, dueDateProperty: IPropertyTemplate, taskValueProperty: IPropertyTemplate, userProperty: IPropertyTemplate, cards: Card[]): BoardView[] {
     return preview.views.map((viewType) => {
         const view = createBoardView()
         view.boardId = board.id
         view.parentId = board.id
         view.fields.viewType = viewType as BoardView['fields']['viewType']
-        view.fields.visiblePropertyIds = [statusProperty.id, dueDateProperty.id]
+        view.fields.visiblePropertyIds = [statusProperty.id, dueDateProperty.id, taskValueProperty.id, userProperty.id]
         view.fields.cardOrder = cards.map((card) => card.id)
         view.title = viewTitle(viewType)
         if (viewType === 'table') {
@@ -80,6 +103,8 @@ function buildViews(preview: TaskBoardPreview, board: Board, statusProperty: IPr
                 [Constants.titleColumnId]: 460,
                 [statusProperty.id]: 180,
                 [dueDateProperty.id]: 180,
+                [taskValueProperty.id]: 140,
+                [userProperty.id]: 180,
             }
         }
         if (viewType === 'calendar') {

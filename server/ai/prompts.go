@@ -7,6 +7,8 @@ import (
 
 const defaultTaskBoardColumnGuidance = "Create a task board with planning, execution, review, and done columns."
 const defaultTaskBoardViewGuidance = "Always include these views: board, table, calendar."
+const defaultTaskBoardStatusGuidance = "Use exactly these Status groups: Backlog, Assigned, Execution, Review, Testing, Done."
+const defaultTaskBoardPropertyGuidance = "Use these task board properties: Status as select, Due Date as date, Task Value as number, and User as person."
 
 func createTaskBoardPrompt(command string) string {
 	command = appendDefaultColumnGuidance(command)
@@ -23,7 +25,10 @@ The JSON must match this shape:
   "views": ["board", "table", "calendar"],
   "columns": [
     {"name": "Backlog", "color": "propColorGray"},
-    {"name": "In Progress", "color": "propColorBlue"},
+    {"name": "Assigned", "color": "propColorPurple"},
+    {"name": "Execution", "color": "propColorBlue"},
+    {"name": "Review", "color": "propColorOrange"},
+    {"name": "Testing", "color": "propColorYellow"},
     {"name": "Done", "color": "propColorGreen"}
   ],
   "tasks": [
@@ -34,6 +39,8 @@ The JSON must match this shape:
 Rules:
 - Use only these view values: board, table, calendar, gallery.
 - Always include board, table, and calendar views.
+- Use exactly these Status groups in this order: Backlog, Assigned, Execution, Review, Testing, Done.
+- Use these task board properties: Status as select, Due Date as date, Task Value as number, and User as person.
 - Include 3 to 8 columns.
 - Include enough starter tasks to satisfy the user's requested scope; use up to 120 tasks when the command lists many platforms, categories, or repeated features.
 - If the user gives a list of platforms/categories and a list of features/actions, create tasks for each valid combination instead of summarizing them.
@@ -59,7 +66,7 @@ func appendDefaultColumnGuidance(command string) string {
 	if command == "" || commandHasColumnGuidance(command) {
 		return command
 	}
-	return command + "\n\nAdditional board structure guidance:\n" + defaultTaskBoardColumnGuidance + "\n" + defaultTaskBoardViewGuidance
+	return command + "\n\nAdditional board structure guidance:\n" + defaultTaskBoardColumnGuidance + "\n" + defaultTaskBoardViewGuidance + "\n" + defaultTaskBoardStatusGuidance + "\n" + defaultTaskBoardPropertyGuidance
 }
 
 func commandHasColumnGuidance(command string) bool {
@@ -97,7 +104,10 @@ The JSON must match this shape:
   "views": ["board", "table", "calendar"],
   "columns": [
     {"name": "Backlog", "color": "propColorGray"},
-    {"name": "In Progress", "color": "propColorBlue"},
+    {"name": "Assigned", "color": "propColorPurple"},
+    {"name": "Execution", "color": "propColorBlue"},
+    {"name": "Review", "color": "propColorOrange"},
+    {"name": "Testing", "color": "propColorYellow"},
     {"name": "Done", "color": "propColorGreen"}
   ],
   "tasks": [
@@ -108,6 +118,8 @@ The JSON must match this shape:
 Rules:
 - Use only these view values: board, table, calendar, gallery.
 - Always include board, table, and calendar views.
+- Use exactly these Status groups in this order: Backlog, Assigned, Execution, Review, Testing, Done.
+- Use these task board properties: Status as select, Due Date as date, Task Value as number, and User as person.
 - Include 3 to 8 columns.
 - Include enough starter tasks to satisfy the user's requested scope; use up to 120 tasks when the response lists many platforms, categories, or repeated features.
 - If the source response contains a list of platforms/categories and a list of features/actions, create tasks for each valid combination instead of summarizing them.

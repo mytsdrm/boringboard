@@ -10,7 +10,7 @@ import mutator from '../../mutator'
 import Dialog from '../dialog'
 import Button from '../../widgets/buttons/button'
 import CompassIcon from '../../widgets/icons/compassIcon'
-import {buildTaskBoardFromPreview, taskBoardPreviewIcon, taskBoardTaskIcon} from '../../ai/taskBoardBuilder'
+import {buildTaskBoardFromPreview, taskBoardDefaultStatusColumns, taskBoardPreviewIcon, taskBoardTaskIcon} from '../../ai/taskBoardBuilder'
 import {StoredIcon} from '../icons/storedIcon'
 import {getStoredProjectSystemSettings, ProjectSystemSettings, SYSTEM_SETTINGS_UPDATED_EVENT} from '../../systemSettings'
 
@@ -240,7 +240,7 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
                                         </span>
                                     </div>
                                     <div>
-                                        <strong>{preview.columns.length}</strong>
+                                        <strong>{taskBoardDefaultStatusColumns.length}</strong>
                                         <span>
                                             <FormattedMessage
                                                 id='CreateTaskBoardFromCommand.columns'
@@ -277,7 +277,7 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
                                         />
                                     </span>
                                     <div className='ai-preview-columns'>
-                                        {preview.columns.map((column, index) => (
+                                        {taskBoardDefaultStatusColumns.map((column, index) => (
                                             <div
                                                 className='ai-preview-column'
                                                 key={column.name}
