@@ -16,6 +16,7 @@ type AdminSystemSettings struct {
 type AdminUserRequest struct {
 	Username string `json:"username"`
 	Email    string `json:"email"`
+	Nickname string `json:"nickname"`
 	Password string `json:"password"`
 	Group    string `json:"group"`
 }

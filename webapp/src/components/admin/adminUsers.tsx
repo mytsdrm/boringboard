@@ -23,6 +23,7 @@ type UserFormState = {
     id: string
     username: string
     email: string
+    nickname: string
     password: string
     group: UserGroup
 }
@@ -31,6 +32,7 @@ const emptyForm: UserFormState = {
     email: '',
     group: 'PublicUser',
     id: '',
+    nickname: '',
     password: '',
     username: '',
 }
@@ -89,6 +91,7 @@ const AdminUsers = (): JSX.Element => {
                 const searchableText = [
                     user.username,
                     user.email,
+                    user.nickname,
                     getUserGroup(user),
                 ].join(' ').toLowerCase()
 
@@ -134,6 +137,7 @@ const AdminUsers = (): JSX.Element => {
             email: user.email || '',
             group: getUserGroup(user),
             id: user.id,
+            nickname: user.nickname || '',
             password: '',
             username: user.username,
         })
@@ -165,6 +169,7 @@ const AdminUsers = (): JSX.Element => {
         const payload: AdminUserPayload = {
             email: form.email.trim(),
             group: form.group,
+            nickname: form.nickname.trim(),
             password: form.password,
             username: form.username.trim(),
         }
@@ -315,6 +320,17 @@ const AdminUsers = (): JSX.Element => {
                                     type='email'
                                     value={form.email}
                                     onChange={(event) => setForm({...form, email: event.target.value})}
+                                />
+                            </label>
+                            <label>
+                                <FormattedMessage
+                                    id='AdminUsers.form-display-name'
+                                    defaultMessage='Display name'
+                                />
+                                <input
+                                    className='form-control'
+                                    value={form.nickname}
+                                    onChange={(event) => setForm({...form, nickname: event.target.value})}
                                 />
                             </label>
                             <label>

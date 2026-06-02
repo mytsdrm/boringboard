@@ -434,7 +434,7 @@ const Dashboard = (): JSX.Element => {
         return intl.formatMessage({id: 'Dashboard.time-just-now', defaultMessage: 'Just now'})
     }
 
-    const greetingName = me?.username || intl.formatMessage({
+    const greetingName = me?.nickname || me?.username || intl.formatMessage({
         id: 'Dashboard.default-greeting-name',
         defaultMessage: 'Procrastinator',
     })
@@ -763,36 +763,38 @@ const Dashboard = (): JSX.Element => {
                                 <div className='dashboard-account-error'>
                                     {profileError}
                                 </div>}
-                            <input
-                                type='text'
-                                value={profileForm.username}
-                                placeholder={intl.formatMessage({id: 'Dashboard.profile-username', defaultMessage: 'Username'})}
-                                aria-label={intl.formatMessage({id: 'Dashboard.profile-username', defaultMessage: 'Username'})}
-                                onChange={(e) => {
-                                    setProfileForm({...profileForm, username: e.target.value})
-                                    setProfileError('')
-                                }}
-                            />
-                            <input
-                                type='email'
-                                value={profileForm.email}
-                                placeholder={intl.formatMessage({id: 'Dashboard.profile-email', defaultMessage: 'Email'})}
-                                aria-label={intl.formatMessage({id: 'Dashboard.profile-email', defaultMessage: 'Email'})}
-                                onChange={(e) => {
-                                    setProfileForm({...profileForm, email: e.target.value})
-                                    setProfileError('')
-                                }}
-                            />
-                            <input
-                                type='text'
-                                value={profileForm.nickname}
-                                placeholder={intl.formatMessage({id: 'Dashboard.profile-nickname', defaultMessage: 'Display name'})}
-                                aria-label={intl.formatMessage({id: 'Dashboard.profile-nickname', defaultMessage: 'Display name'})}
-                                onChange={(e) => {
-                                    setProfileForm({...profileForm, nickname: e.target.value})
-                                    setProfileError('')
-                                }}
-                            />
+                            <div className='dashboard-account-fields'>
+                                <input
+                                    type='text'
+                                    value={profileForm.username}
+                                    placeholder={intl.formatMessage({id: 'Dashboard.profile-username', defaultMessage: 'Username'})}
+                                    aria-label={intl.formatMessage({id: 'Dashboard.profile-username', defaultMessage: 'Username'})}
+                                    onChange={(e) => {
+                                        setProfileForm({...profileForm, username: e.target.value})
+                                        setProfileError('')
+                                    }}
+                                />
+                                <input
+                                    type='email'
+                                    value={profileForm.email}
+                                    placeholder={intl.formatMessage({id: 'Dashboard.profile-email', defaultMessage: 'Email'})}
+                                    aria-label={intl.formatMessage({id: 'Dashboard.profile-email', defaultMessage: 'Email'})}
+                                    onChange={(e) => {
+                                        setProfileForm({...profileForm, email: e.target.value})
+                                        setProfileError('')
+                                    }}
+                                />
+                                <input
+                                    type='text'
+                                    value={profileForm.nickname}
+                                    placeholder={intl.formatMessage({id: 'Dashboard.profile-nickname', defaultMessage: 'Display name'})}
+                                    aria-label={intl.formatMessage({id: 'Dashboard.profile-nickname', defaultMessage: 'Display name'})}
+                                    onChange={(e) => {
+                                        setProfileForm({...profileForm, nickname: e.target.value})
+                                        setProfileError('')
+                                    }}
+                                />
+                            </div>
                             <div className='dashboard-account-actions'>
                                 <button
                                     type='button'
@@ -849,28 +851,30 @@ const Dashboard = (): JSX.Element => {
                                         defaultMessage='Password changed.'
                                     />
                                 </div>}
-                            <input
-                                type='password'
-                                value={passwordForm.current}
-                                placeholder={intl.formatMessage({id: 'changePassword.current-password-label', defaultMessage: 'Current password'})}
-                                aria-label={intl.formatMessage({id: 'changePassword.current-password-label', defaultMessage: 'Current password'})}
-                                onChange={(e) => {
-                                    setPasswordForm({...passwordForm, current: e.target.value})
-                                    setPasswordError('')
-                                    setPasswordSucceeded(false)
-                                }}
-                            />
-                            <input
-                                type='password'
-                                value={passwordForm.next}
-                                placeholder={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
-                                aria-label={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
-                                onChange={(e) => {
-                                    setPasswordForm({...passwordForm, next: e.target.value})
-                                    setPasswordError('')
-                                    setPasswordSucceeded(false)
-                                }}
-                            />
+                            <div className='dashboard-account-fields'>
+                                <input
+                                    type='password'
+                                    value={passwordForm.current}
+                                    placeholder={intl.formatMessage({id: 'changePassword.current-password-label', defaultMessage: 'Current password'})}
+                                    aria-label={intl.formatMessage({id: 'changePassword.current-password-label', defaultMessage: 'Current password'})}
+                                    onChange={(e) => {
+                                        setPasswordForm({...passwordForm, current: e.target.value})
+                                        setPasswordError('')
+                                        setPasswordSucceeded(false)
+                                    }}
+                                />
+                                <input
+                                    type='password'
+                                    value={passwordForm.next}
+                                    placeholder={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
+                                    aria-label={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
+                                    onChange={(e) => {
+                                        setPasswordForm({...passwordForm, next: e.target.value})
+                                        setPasswordError('')
+                                        setPasswordSucceeded(false)
+                                    }}
+                                />
+                            </div>
                             <div className='dashboard-account-actions'>
                                 <button
                                     type='button'

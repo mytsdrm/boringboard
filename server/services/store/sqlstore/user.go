@@ -63,6 +63,7 @@ func (s *SQLStore) getUsersByCondition(db sq.BaseRunner, condition interface{}, 
 			"id",
 			"username",
 			"email",
+			"nickname",
 			"password",
 			"mfa_secret",
 			"auth_service",
@@ -131,8 +132,8 @@ func (s *SQLStore) createUser(db sq.BaseRunner, user *model.User) (*model.User, 
 	user.DeleteAt = 0
 
 	query := s.getQueryBuilder(db).Insert(s.tablePrefix+"users").
-		Columns("id", "username", "email", "password", "mfa_secret", "auth_service", "auth_data", "roles", "create_at", "update_at", "delete_at").
-		Values(user.ID, user.Username, user.Email, user.Password, user.MfaSecret, user.AuthService, user.AuthData, user.Roles, user.CreateAt, user.UpdateAt, user.DeleteAt)
+		Columns("id", "username", "email", "nickname", "password", "mfa_secret", "auth_service", "auth_data", "roles", "create_at", "update_at", "delete_at").
+		Values(user.ID, user.Username, user.Email, user.Nickname, user.Password, user.MfaSecret, user.AuthService, user.AuthData, user.Roles, user.CreateAt, user.UpdateAt, user.DeleteAt)
 
 	_, err := query.Exec()
 	return user, err
@@ -145,6 +146,7 @@ func (s *SQLStore) updateUser(db sq.BaseRunner, user *model.User) (*model.User, 
 	query := s.getQueryBuilder(db).Update(s.tablePrefix+"users").
 		Set("username", user.Username).
 		Set("email", user.Email).
+		Set("nickname", user.Nickname).
 		Set("roles", user.Roles).
 		Set("update_at", user.UpdateAt).
 		Where(sq.Eq{"id": user.ID})
@@ -403,6 +405,7 @@ func (s *SQLStore) usersFromRows(rows *sql.Rows) ([]*model.User, error) {
 			&user.ID,
 			&user.Username,
 			&user.Email,
+			&user.Nickname,
 			&user.Password,
 			&user.MfaSecret,
 			&user.AuthService,

@@ -156,27 +156,52 @@
     @at-root {
         .DashboardAccountDialog {
             .dialog {
-                max-width: 520px;
+                max-width: 560px;
+                height: auto;
+                border-radius: 10px;
+            }
+
+            .toolbar {
+                padding: 28px 32px 18px;
+            }
+
+            .dialog-title {
+                color: var(--bb-text);
+                font-size: 22px;
+                font-weight: 850;
+                line-height: 28px;
             }
         }
 
         .dashboard-account-form {
             display: flex;
             flex-direction: column;
-            gap: 14px;
-            padding: 6px 0 0;
+            gap: 18px;
+            padding: 0 32px 32px;
+
+            .dashboard-account-fields {
+                display: flex;
+                flex-direction: column;
+                gap: 12px;
+            }
 
             input {
                 width: 100%;
-                height: 46px;
-                padding: 0 14px;
-                border: 1px solid var(--bb-border);
-                border-radius: 8px;
-                background: var(--bb-dashboard-panel-bg);
+                height: 50px;
+                padding: 0 16px;
+                border: 1px solid #d0d5dd;
+                border-radius: 9px;
+                background: #fff;
                 color: var(--bb-text);
                 font-size: 14px;
-                font-weight: 650;
+                font-weight: 700;
                 line-height: 20px;
+                box-shadow: 0 1px 2px rgb(16 24 40 / 4%);
+
+                &::placeholder {
+                    color: var(--bb-text-muted);
+                    font-weight: 650;
+                }
 
                 &:focus {
                     border-color: color-mix(in srgb, var(--bb-blue-text) 55%, var(--bb-border));
@@ -209,11 +234,12 @@
             display: flex;
             justify-content: flex-end;
             gap: 10px;
-            margin-top: 6px;
+            margin-top: 2px;
 
             button {
-                min-height: 40px;
-                padding: 0 16px;
+                min-height: 42px;
+                min-width: 92px;
+                padding: 0 18px;
                 border: 1px solid var(--bb-blue-text);
                 border-radius: 8px;
                 background: var(--bb-blue-text);
@@ -228,9 +254,27 @@
                 }
 
                 &.secondary {
-                    border-color: var(--bb-border);
+                    border-color: #d0d5dd;
                     background: var(--bb-dashboard-panel-bg);
                     color: var(--bb-text);
+                }
+            }
+        }
+
+        @media screen and (max-width: 560px) {
+            .DashboardAccountDialog {
+                .toolbar {
+                    padding: 24px 20px 16px;
+                }
+            }
+
+            .dashboard-account-form {
+                padding: 0 20px 24px;
+            }
+
+            .dashboard-account-actions {
+                button {
+                    flex: 1 1 0;
                 }
             }
         }

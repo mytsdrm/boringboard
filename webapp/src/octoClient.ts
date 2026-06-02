@@ -35,6 +35,7 @@ export type AdminSystemSettings = {
 export type AdminUserPayload = {
     username: string
     email: string
+    nickname: string
     password?: string
     group: 'SuperAdmin' | 'PublicUser'
 }

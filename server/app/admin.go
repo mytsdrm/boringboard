@@ -47,6 +47,7 @@ func normalizeAdminGroup(group string) string {
 func (a *App) CreateManagedUser(request model.AdminUserRequest) (*model.User, error) {
 	username := strings.TrimSpace(request.Username)
 	email := strings.TrimSpace(request.Email)
+	nickname := strings.TrimSpace(request.Nickname)
 	password := request.Password
 	if username == "" {
 		return nil, model.NewErrBadRequest("username is required")
@@ -75,6 +76,7 @@ func (a *App) CreateManagedUser(request model.AdminUserRequest) (*model.User, er
 		ID:          utils.NewID(utils.IDTypeUser),
 		Username:    username,
 		Email:       email,
+		Nickname:    nickname,
 		Password:    auth.HashPassword(password),
 		MfaSecret:   "",
 		AuthService: a.config.AuthMode,
@@ -96,6 +98,7 @@ func (a *App) UpdateManagedUser(userID string, request model.AdminUserRequest) (
 
 	username := strings.TrimSpace(request.Username)
 	email := strings.TrimSpace(request.Email)
+	nickname := strings.TrimSpace(request.Nickname)
 	if username == "" {
 		return nil, model.NewErrBadRequest("username is required")
 	}
@@ -120,6 +123,7 @@ func (a *App) UpdateManagedUser(userID string, request model.AdminUserRequest) (
 
 	user.Username = username
 	user.Email = email
+	user.Nickname = nickname
 	user.Roles = adminGroupRoles(normalizeAdminGroup(request.Group))
 
 	updatedUser, err := a.store.UpdateUser(user)
