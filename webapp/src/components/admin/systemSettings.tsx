@@ -147,14 +147,10 @@ const SystemSettings = (): JSX.Element => {
                     </div>
                     <div className='admin-settings-field-grid'>
                         <label>
-                            <span>
-                                <FormattedMessage
-                                    id='SystemSettings.app-name'
-                                    defaultMessage='App Name'
-                                />
-                            </span>
                             <input
+                                aria-label='App Name'
                                 onChange={(event) => setSettings({...settings, appName: event.target.value})}
+                                placeholder='App Name'
                                 value={settings.appName}
                             />
                         </label>
@@ -216,13 +212,8 @@ const SystemSettings = (): JSX.Element => {
                     </div>
                     <div className='admin-settings-field-grid'>
                         <label>
-                            <span>
-                                <FormattedMessage
-                                    id='SystemSettings.time-zone'
-                                    defaultMessage='Time zone'
-                                />
-                            </span>
                             <select
+                                aria-label='Time zone'
                                 onChange={(event) => setSettings({...settings, timeZone: event.target.value})}
                                 value={settings.timeZone || DEFAULT_PROJECT_TIME_ZONE}
                             >
