@@ -1,7 +1,8 @@
 .RegistrationLink {
     display: flex;
     flex-direction: column;
-    padding: 5px;
+    gap: 14px;
+    padding: 0 32px 32px;
     color: rgb(var(--center-channel-color-rgb));
     font-weight: normal;
     line-height: normal;
@@ -10,11 +11,18 @@
         display: flex;
         flex-direction: row;
         align-items: center;
-        margin: 0 0 10px;
+        margin: 0;
     }
 
-    > .row:last-child {
-        margin-bottom: 0;
+    .description {
+        color: rgba(var(--center-channel-color-rgb), 0.72);
+        font-size: 14px;
+        font-weight: 600;
+        line-height: 22px;
+    }
+
+    .invite-link-row {
+        gap: 10px;
     }
 
     .spacer {
@@ -22,11 +30,45 @@
     }
 
     a.shareUrl {
-        max-width: 320px;
+        min-width: 0;
+        height: 40px;
+        max-width: 100%;
+        padding: 0 12px;
+        border: 1px solid rgba(var(--center-channel-color-rgb), 0.12);
+        border-radius: 8px;
+        background: rgba(var(--center-channel-color-rgb), 0.03);
+        color: rgb(var(--button-bg-rgb));
         flex-grow: 1;
-        white-space: nowrap;
-        overflow: hidden;
+        font-size: 13px;
+        font-weight: 650;
+        line-height: 40px;
+        text-decoration: none;
         text-overflow: ellipsis;
-        margin-right: 5px;
+        overflow: hidden;
+        white-space: nowrap;
+    }
+
+    .invite-actions {
+        justify-content: flex-end;
+    }
+
+    @media screen and (max-width: 560px) {
+        padding: 0 20px 24px;
+
+        .invite-link-row {
+            align-items: stretch;
+            flex-direction: column;
+        }
+
+        .invite-actions {
+            justify-content: stretch;
+        }
+    }
+}
+
+.RegistrationLinkDialog {
+    .dialog {
+        max-width: 560px;
+        height: auto;
     }
 }

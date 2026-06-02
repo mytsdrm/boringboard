@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React, {useEffect, useState} from 'react'
-import {useIntl} from 'react-intl'
+import {FormattedMessage, useIntl} from 'react-intl'
 
 import {sendFlashMessage} from '../flashMessages'
 import {Utils} from '../../utils'
@@ -9,7 +9,8 @@ import Button from '../../widgets/buttons/button'
 import {useAppDispatch, useAppSelector} from '../../store/hooks'
 import {getCurrentTeam, Team, refreshCurrentTeam, regenerateSignupToken} from '../../store/teams'
 
-import Modal from '../modal'
+import Dialog from '../dialog'
+import RootPortal from '../rootPortal'
 
 import './registrationLink.scss'
 
@@ -47,47 +48,56 @@ const RegistrationLink = (props: Props) => {
     const registrationUrl = `${Utils.getBaseURL(true).replace(/\/$/, '')}/register?t=${signupToken}`
 
     return (
-        <Modal
-            position='bottom-right'
-            onClose={onClose}
-        >
-            <div className='RegistrationLink'>
-                {signupToken && <>
-                    <div className='row'>
-                        {intl.formatMessage({id: 'RegistrationLink.description', defaultMessage: 'Share this link for others to create accounts:'})}
-                    </div>
-                    <div className='row'>
-                        <a
-                            className='shareUrl'
-                            href={registrationUrl}
-                            target='_blank'
-                            rel='noreferrer'
-                        >
-                            {registrationUrl}
-                        </a>
-                        <Button
-                            filled={true}
-                            size='small'
-                            onClick={() => {
-                                Utils.copyTextToClipboard(registrationUrl)
-                                setWasCopied(true)
-                            }}
-                        >
-                            {wasCopied ? intl.formatMessage({id: 'RegistrationLink.copiedLink', defaultMessage: 'Copied!'}) : intl.formatMessage({id: 'RegistrationLink.copyLink', defaultMessage: 'Copy link'})}
-                        </Button>
-                    </div>
-                    <div className='row'>
-                        <Button
-                            onClick={regenerateToken}
-                            emphasis='secondary'
-                            size='small'
-                        >
-                            {intl.formatMessage({id: 'RegistrationLink.regenerateToken', defaultMessage: 'Regenerate token'})}
-                        </Button>
-                    </div>
-                </>}
-            </div>
-        </Modal>
+        <RootPortal>
+            <Dialog
+                size='small'
+                className='RegistrationLinkDialog'
+                title={(
+                    <FormattedMessage
+                        id='Sidebar.invite-users'
+                        defaultMessage='Invite users'
+                    />
+                )}
+                onClose={onClose}
+            >
+                <div className='RegistrationLink'>
+                    {signupToken && <>
+                        <div className='row description'>
+                            {intl.formatMessage({id: 'RegistrationLink.description', defaultMessage: 'Share this link for others to create accounts:'})}
+                        </div>
+                        <div className='row invite-link-row'>
+                            <a
+                                className='shareUrl'
+                                href={registrationUrl}
+                                target='_blank'
+                                rel='noreferrer'
+                            >
+                                {registrationUrl}
+                            </a>
+                            <Button
+                                filled={true}
+                                size='small'
+                                onClick={() => {
+                                    Utils.copyTextToClipboard(registrationUrl)
+                                    setWasCopied(true)
+                                }}
+                            >
+                                {wasCopied ? intl.formatMessage({id: 'RegistrationLink.copiedLink', defaultMessage: 'Copied!'}) : intl.formatMessage({id: 'RegistrationLink.copyLink', defaultMessage: 'Copy link'})}
+                            </Button>
+                        </div>
+                        <div className='row invite-actions'>
+                            <Button
+                                onClick={regenerateToken}
+                                emphasis='secondary'
+                                size='small'
+                            >
+                                {intl.formatMessage({id: 'RegistrationLink.regenerateToken', defaultMessage: 'Regenerate token'})}
+                            </Button>
+                        </div>
+                    </>}
+                </div>
+            </Dialog>
+        </RootPortal>
     )
 }
 

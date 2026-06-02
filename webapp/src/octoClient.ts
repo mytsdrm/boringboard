@@ -39,6 +39,12 @@ export type AdminUserPayload = {
     group: 'SuperAdmin' | 'PublicUser'
 }
 
+export type UserProfilePayload = {
+    username: string
+    email: string
+    nickname: string
+}
+
 //
 // OctoClient is the client interface to the server APIs
 //
@@ -154,6 +160,17 @@ class OctoClient {
             body,
         })
         const json = (await this.getJson(response, {})) as {error?: string}
+        return {code: response.status, json}
+    }
+
+    async updateMyProfile(payload: UserProfilePayload): Promise<{code: number, json: IUser | {error?: string}}> {
+        const path = '/api/v2/users/me/profile'
+        const response = await fetch(this.getBaseURL() + path, {
+            method: 'PUT',
+            headers: this.headers(),
+            body: JSON.stringify(payload),
+        })
+        const json = (await this.getJson(response, {})) as IUser | {error?: string}
         return {code: response.status, json}
     }
 

@@ -17,6 +17,9 @@ import {applyProjectSystemSettings, getStoredProjectSystemSettings, ProjectSyste
 import {Utils} from '../../utils'
 import CompassIcon from '../../widgets/icons/compassIcon'
 import {WSClient} from '../../wsclient'
+import Dialog from '../dialog'
+import RootPortal from '../rootPortal'
+import RegistrationLink from '../sidebar/registrationLink'
 
 import './dashboard.scss'
 
@@ -195,7 +198,18 @@ const Dashboard = (): JSX.Element => {
     const [statsByBoard, setStatsByBoard] = useState<{[boardId: string]: BoardStats}>({})
     const [activities, setActivities] = useState<DashboardActivity[]>([])
     const [projectSettings, setProjectSettings] = useState<ProjectSystemSettings>(getStoredProjectSystemSettings)
+    const [profileModalOpen, setProfileModalOpen] = useState(false)
+    const [passwordModalOpen, setPasswordModalOpen] = useState(false)
+    const [inviteModalOpen, setInviteModalOpen] = useState(false)
+    const [profileForm, setProfileForm] = useState({username: '', email: '', nickname: ''})
+    const [profileError, setProfileError] = useState('')
+    const [profileSaving, setProfileSaving] = useState(false)
+    const [passwordForm, setPasswordForm] = useState({current: '', next: ''})
+    const [passwordError, setPasswordError] = useState('')
+    const [passwordSaving, setPasswordSaving] = useState(false)
+    const [passwordSucceeded, setPasswordSucceeded] = useState(false)
     const cardsSnapshot = useRef<{[cardId: string]: Card}>({})
+    const userMenuRef = useRef<HTMLDetailsElement|null>(null)
     const taskBoards = useMemo(() => boards.filter((board) => !board.isTemplate), [boards])
     const taskBoardsById = useMemo(() => new Map(taskBoards.map((board) => [board.id, board])), [taskBoards])
     const websocketTeamId = currentTeamId || firstTeam?.id || taskBoards[0]?.teamId || ''
@@ -431,6 +445,90 @@ const Dashboard = (): JSX.Element => {
         history.push('/login')
     }
 
+    const closeUserMenu = () => {
+        if (userMenuRef.current) {
+            userMenuRef.current.open = false
+        }
+    }
+
+    const openProfileModal = () => {
+        setProfileForm({
+            email: me?.email || '',
+            nickname: me?.nickname || '',
+            username: me?.username || '',
+        })
+        setProfileError('')
+        setProfileModalOpen(true)
+        closeUserMenu()
+    }
+
+    const openPasswordModal = () => {
+        setPasswordForm({current: '', next: ''})
+        setPasswordError('')
+        setPasswordSucceeded(false)
+        setPasswordModalOpen(true)
+        closeUserMenu()
+    }
+
+    const openInviteModal = () => {
+        setInviteModalOpen(true)
+        closeUserMenu()
+    }
+
+    const saveProfile = async () => {
+        if (!profileForm.username.trim()) {
+            setProfileError(intl.formatMessage({id: 'Dashboard.profile-username-required', defaultMessage: 'Username is required.'}))
+            return
+        }
+
+        setProfileSaving(true)
+        setProfileError('')
+        const response = await octoClient.updateMyProfile({
+            email: profileForm.email.trim(),
+            nickname: profileForm.nickname.trim(),
+            username: profileForm.username.trim(),
+        })
+        setProfileSaving(false)
+
+        if (response.code === 200 && 'id' in response.json) {
+            dispatch(setMe(response.json))
+            setProfileModalOpen(false)
+            return
+        }
+
+        setProfileError(intl.formatMessage(
+            {id: 'Dashboard.profile-save-failed', defaultMessage: 'Profile update failed: {error}'},
+            {error: 'error' in response.json ? response.json.error || response.code : response.code},
+        ))
+    }
+
+    const savePassword = async () => {
+        if (!me) {
+            return
+        }
+        if (!passwordForm.current || !passwordForm.next) {
+            setPasswordError(intl.formatMessage({id: 'changePassword.error-missing-current-new', defaultMessage: 'Please enter your current and new password.'}))
+            return
+        }
+
+        setPasswordSaving(true)
+        setPasswordError('')
+        setPasswordSucceeded(false)
+        const response = await octoClient.changePassword(me.id, passwordForm.current, passwordForm.next)
+        setPasswordSaving(false)
+
+        if (response.code === 200) {
+            setPasswordForm({current: '', next: ''})
+            setPasswordSucceeded(true)
+            return
+        }
+
+        setPasswordError(intl.formatMessage(
+            {id: 'changePassword.error-failed', defaultMessage: 'Change password failed: {error}'},
+            {error: response.json?.error || response.code},
+        ))
+    }
+
     const showBoard = useCallback((boardId: string) => {
         Utils.showBoard(boardId, match, history)
     }, [history, match])
@@ -577,7 +675,10 @@ const Dashboard = (): JSX.Element => {
                     </p>
                 </div>
                 <div className='dashboard-actions'>
-                    <details className='dashboard-user-menu'>
+                    <details
+                        ref={userMenuRef}
+                        className='dashboard-user-menu'
+                    >
                         <summary className='dashboard-greeting'>
                             <span className='dashboard-greeting-icon'>{'😎'}</span>
                             <FormattedMessage
@@ -588,6 +689,36 @@ const Dashboard = (): JSX.Element => {
                             <CompassIcon icon='chevron-down'/>
                         </summary>
                         <div className='dashboard-user-dropdown'>
+                            <button
+                                type='button'
+                                onClick={openInviteModal}
+                            >
+                                <CompassIcon icon='account-plus-outline'/>
+                                <FormattedMessage
+                                    id='Sidebar.invite-users'
+                                    defaultMessage='Invite users'
+                                />
+                            </button>
+                            <button
+                                type='button'
+                                onClick={openProfileModal}
+                            >
+                                <CompassIcon icon='account-outline'/>
+                                <FormattedMessage
+                                    id='Dashboard.profile'
+                                    defaultMessage='Profile'
+                                />
+                            </button>
+                            <button
+                                type='button'
+                                onClick={openPasswordModal}
+                            >
+                                <CompassIcon icon='lock-outline'/>
+                                <FormattedMessage
+                                    id='Sidebar.changePassword'
+                                    defaultMessage='Change password'
+                                />
+                            </button>
                             <button
                                 type='button'
                                 onClick={handleLogout}
@@ -602,6 +733,168 @@ const Dashboard = (): JSX.Element => {
                     </details>
                 </div>
             </div>
+
+            {inviteModalOpen &&
+                <RegistrationLink
+                    onClose={() => setInviteModalOpen(false)}
+                />}
+
+            {profileModalOpen &&
+                <RootPortal>
+                    <Dialog
+                        size='small'
+                        className='DashboardAccountDialog'
+                        title={(
+                            <FormattedMessage
+                                id='Dashboard.profile'
+                                defaultMessage='Profile'
+                            />
+                        )}
+                        onClose={() => setProfileModalOpen(false)}
+                    >
+                        <form
+                            className='dashboard-account-form'
+                            onSubmit={(e) => {
+                                e.preventDefault()
+                                saveProfile()
+                            }}
+                        >
+                            {profileError &&
+                                <div className='dashboard-account-error'>
+                                    {profileError}
+                                </div>}
+                            <input
+                                type='text'
+                                value={profileForm.username}
+                                placeholder={intl.formatMessage({id: 'Dashboard.profile-username', defaultMessage: 'Username'})}
+                                aria-label={intl.formatMessage({id: 'Dashboard.profile-username', defaultMessage: 'Username'})}
+                                onChange={(e) => {
+                                    setProfileForm({...profileForm, username: e.target.value})
+                                    setProfileError('')
+                                }}
+                            />
+                            <input
+                                type='email'
+                                value={profileForm.email}
+                                placeholder={intl.formatMessage({id: 'Dashboard.profile-email', defaultMessage: 'Email'})}
+                                aria-label={intl.formatMessage({id: 'Dashboard.profile-email', defaultMessage: 'Email'})}
+                                onChange={(e) => {
+                                    setProfileForm({...profileForm, email: e.target.value})
+                                    setProfileError('')
+                                }}
+                            />
+                            <input
+                                type='text'
+                                value={profileForm.nickname}
+                                placeholder={intl.formatMessage({id: 'Dashboard.profile-nickname', defaultMessage: 'Display name'})}
+                                aria-label={intl.formatMessage({id: 'Dashboard.profile-nickname', defaultMessage: 'Display name'})}
+                                onChange={(e) => {
+                                    setProfileForm({...profileForm, nickname: e.target.value})
+                                    setProfileError('')
+                                }}
+                            />
+                            <div className='dashboard-account-actions'>
+                                <button
+                                    type='button'
+                                    className='secondary'
+                                    onClick={() => setProfileModalOpen(false)}
+                                >
+                                    <FormattedMessage
+                                        id='Button.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </button>
+                                <button
+                                    type='submit'
+                                    disabled={profileSaving}
+                                >
+                                    <FormattedMessage
+                                        id='Button.save'
+                                        defaultMessage='Save'
+                                    />
+                                </button>
+                            </div>
+                        </form>
+                    </Dialog>
+                </RootPortal>}
+
+            {passwordModalOpen &&
+                <RootPortal>
+                    <Dialog
+                        size='small'
+                        className='DashboardAccountDialog'
+                        title={(
+                            <FormattedMessage
+                                id='Sidebar.changePassword'
+                                defaultMessage='Change password'
+                            />
+                        )}
+                        onClose={() => setPasswordModalOpen(false)}
+                    >
+                        <form
+                            className='dashboard-account-form'
+                            onSubmit={(e) => {
+                                e.preventDefault()
+                                savePassword()
+                            }}
+                        >
+                            {passwordError &&
+                                <div className='dashboard-account-error'>
+                                    {passwordError}
+                                </div>}
+                            {passwordSucceeded &&
+                                <div className='dashboard-account-success'>
+                                    <FormattedMessage
+                                        id='changePassword.success-short'
+                                        defaultMessage='Password changed.'
+                                    />
+                                </div>}
+                            <input
+                                type='password'
+                                value={passwordForm.current}
+                                placeholder={intl.formatMessage({id: 'changePassword.current-password-label', defaultMessage: 'Current password'})}
+                                aria-label={intl.formatMessage({id: 'changePassword.current-password-label', defaultMessage: 'Current password'})}
+                                onChange={(e) => {
+                                    setPasswordForm({...passwordForm, current: e.target.value})
+                                    setPasswordError('')
+                                    setPasswordSucceeded(false)
+                                }}
+                            />
+                            <input
+                                type='password'
+                                value={passwordForm.next}
+                                placeholder={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
+                                aria-label={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
+                                onChange={(e) => {
+                                    setPasswordForm({...passwordForm, next: e.target.value})
+                                    setPasswordError('')
+                                    setPasswordSucceeded(false)
+                                }}
+                            />
+                            <div className='dashboard-account-actions'>
+                                <button
+                                    type='button'
+                                    className='secondary'
+                                    onClick={() => setPasswordModalOpen(false)}
+                                >
+                                    <FormattedMessage
+                                        id='Button.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </button>
+                                <button
+                                    type='submit'
+                                    disabled={passwordSaving}
+                                >
+                                    <FormattedMessage
+                                        id='changePassword.submit-button'
+                                        defaultMessage='Change password'
+                                    />
+                                </button>
+                            </div>
+                        </form>
+                    </Dialog>
+                </RootPortal>}
 
             <section className='dashboard-metric-grid'>
                 <div className='dashboard-metric-card board-count'>

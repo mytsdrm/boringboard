@@ -90,6 +90,12 @@ type UserPreferencesPatch struct {
 	DeletedFields []string `json:"deletedFields"`
 }
 
+type UserProfileRequest struct {
+	Username string `json:"username"`
+	Email    string `json:"email"`
+	Nickname string `json:"nickname"`
+}
+
 type Session struct {
 	ID          string                 `json:"id"`
 	Token       string                 `json:"token"`

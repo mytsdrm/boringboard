@@ -1,6 +1,8 @@
 package app
 
 import (
+	"strings"
+
 	"github.com/mattermost/focalboard/server/model"
 	mmModel "github.com/mattermost/mattermost/server/public/model"
 )
@@ -33,6 +35,38 @@ func (a *App) UpdateUserConfig(userID string, patch model.UserPreferencesPatch) 
 	}
 
 	return updatedPreferences, nil
+}
+
+func (a *App) UpdateUserProfile(userID string, request model.UserProfileRequest) (*model.User, error) {
+	user, err := a.store.GetUserByID(userID)
+	if err != nil {
+		return nil, err
+	}
+
+	username := strings.TrimSpace(request.Username)
+	email := strings.TrimSpace(request.Email)
+	nickname := strings.TrimSpace(request.Nickname)
+	if username == "" {
+		return nil, model.NewErrBadRequest("username is required")
+	}
+
+	if existing, err := a.store.GetUserByUsername(username); err == nil && existing.ID != userID {
+		return nil, model.NewErrBadRequest("username already exists")
+	} else if err != nil && !model.IsErrNotFound(err) {
+		return nil, err
+	}
+	if email != "" {
+		if existing, err := a.store.GetUserByEmail(email); err == nil && existing.ID != userID {
+			return nil, model.NewErrBadRequest("email already exists")
+		} else if err != nil && !model.IsErrNotFound(err) {
+			return nil, err
+		}
+	}
+
+	user.Username = username
+	user.Email = email
+	user.Nickname = nickname
+	return a.store.UpdateUser(user)
 }
 
 func (a *App) GetUserPreferences(userID string) ([]mmModel.Preference, error) {

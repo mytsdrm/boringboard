@@ -15,6 +15,7 @@ func (a *API) registerUsersRoutes(r *mux.Router) {
 	// Users APIs
 	r.HandleFunc("/users", a.sessionRequired(a.handleGetUsersList)).Methods("POST")
 	r.HandleFunc("/users/me", a.sessionRequired(a.handleGetMe)).Methods("GET")
+	r.HandleFunc("/users/me/profile", a.sessionRequired(a.handleUpdateMyProfile)).Methods(http.MethodPut)
 	r.HandleFunc("/users/me/memberships", a.sessionRequired(a.handleGetMyMemberships)).Methods("GET")
 	r.HandleFunc("/users/{userID}", a.sessionRequired(a.handleGetUser)).Methods("GET")
 	r.HandleFunc("/users/{userID}/config", a.sessionRequired(a.handleUpdateUserConfig)).Methods(http.MethodPut)
@@ -200,6 +201,40 @@ func (a *API) handleGetMe(w http.ResponseWriter, r *http.Request) {
 	}
 	jsonBytesResponse(w, http.StatusOK, userData)
 
+	auditRec.AddMeta("userID", user.ID)
+	auditRec.Success()
+}
+
+func (a *API) handleUpdateMyProfile(w http.ResponseWriter, r *http.Request) {
+	requestBody, err := io.ReadAll(r.Body)
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	var request model.UserProfileRequest
+	if err = json.Unmarshal(requestBody, &request); err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	auditRec := a.makeAuditRecord(r, "updateMyProfile", audit.Fail)
+	defer a.audit.LogRecord(audit.LevelModify, auditRec)
+
+	user, err := a.app.UpdateUserProfile(getUserID(r), request)
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	user.Sanitize(map[string]bool{})
+	userData, err := json.Marshal(user)
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	jsonBytesResponse(w, http.StatusOK, userData)
 	auditRec.AddMeta("userID", user.ID)
 	auditRec.Success()
 }
