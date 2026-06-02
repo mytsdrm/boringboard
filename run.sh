@@ -5,6 +5,11 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 cd "$ROOT_DIR"
 
+if [ "$(uname -s)" != "Linux" ]; then
+    echo "This run script can only install system requirements on Linux."
+    exit 1
+fi
+
 if [ -f "$ROOT_DIR/.env" ]; then
     set -a
     # shellcheck disable=SC1091
@@ -18,6 +23,180 @@ PORT="${EXTERNAL_PORT:-${PORT:-8000}}"
 APP_PORT="${APP_PORT:-8001}"
 CHILD_PIDS=()
 CLEANING_UP=0
+
+missing_commands() {
+    local missing=()
+    local command_name
+
+    for command_name in go make git lsof pgrep setsid gcc g++ python3 pkg-config curl; do
+        if ! command -v "$command_name" >/dev/null 2>&1; then
+            missing+=("$command_name")
+        fi
+    done
+
+    printf '%s\n' "${missing[@]}"
+}
+
+install_system_requirements() {
+    local missing
+    local sudo_cmd=""
+
+    missing="$(missing_commands)"
+
+    if [ -z "$missing" ]; then
+        return
+    fi
+
+    if [ "$(id -u)" -ne 0 ]; then
+        if command -v sudo >/dev/null 2>&1; then
+            sudo_cmd="sudo"
+        else
+            echo "sudo is required to install missing system requirements."
+            exit 1
+        fi
+    fi
+
+    echo "Missing system requirement(s):"
+    echo "$missing" | sed 's/^/  - /'
+    echo "Installing missing system requirements..."
+
+    if command -v apt-get >/dev/null 2>&1; then
+        $sudo_cmd apt-get update
+        $sudo_cmd env DEBIAN_FRONTEND=noninteractive apt-get install -y \
+            build-essential \
+            curl \
+            git \
+            golang-go \
+            lsof \
+            make \
+            pkg-config \
+            procps \
+            python3 \
+            util-linux
+    elif command -v dnf >/dev/null 2>&1; then
+        $sudo_cmd dnf install -y \
+            gcc \
+            gcc-c++ \
+            curl \
+            git \
+            golang \
+            lsof \
+            make \
+            pkgconf-pkg-config \
+            procps-ng \
+            python3 \
+            util-linux
+    elif command -v yum >/dev/null 2>&1; then
+        $sudo_cmd yum install -y \
+            gcc \
+            gcc-c++ \
+            curl \
+            git \
+            golang \
+            lsof \
+            make \
+            pkgconfig \
+            procps-ng \
+            python3 \
+            util-linux
+    elif command -v pacman >/dev/null 2>&1; then
+        $sudo_cmd pacman -Sy --needed --noconfirm \
+            base-devel \
+            curl \
+            git \
+            go \
+            lsof \
+            make \
+            pkgconf \
+            procps-ng \
+            python \
+            util-linux
+    elif command -v zypper >/dev/null 2>&1; then
+        $sudo_cmd zypper --non-interactive install \
+            gcc \
+            gcc-c++ \
+            curl \
+            git \
+            go \
+            lsof \
+            make \
+            pkg-config \
+            procps \
+            python3 \
+            util-linux
+    elif command -v apk >/dev/null 2>&1; then
+        $sudo_cmd apk add \
+            build-base \
+            curl \
+            git \
+            go \
+            lsof \
+            make \
+            pkgconf \
+            procps \
+            python3 \
+            util-linux
+    else
+        echo "Unsupported Linux package manager. Install these manually and rerun:"
+        echo "$missing" | sed 's/^/  - /'
+        exit 1
+    fi
+
+    missing="$(missing_commands)"
+    if [ -n "$missing" ]; then
+        echo "Some system requirements are still missing after install:"
+        echo "$missing" | sed 's/^/  - /'
+        exit 1
+    fi
+}
+
+load_nvm() {
+    export NVM_DIR="${NVM_DIR:-$HOME/.nvm}"
+
+    if [ -s "$NVM_DIR/nvm.sh" ]; then
+        # shellcheck disable=SC1091
+        source "$NVM_DIR/nvm.sh"
+    fi
+}
+
+node_version_to_use() {
+    if [ -n "${NODE_VERSION:-}" ]; then
+        echo "$NODE_VERSION"
+    elif [ -f "$ROOT_DIR/.nvmrc" ]; then
+        tr -d '[:space:]' < "$ROOT_DIR/.nvmrc"
+    elif [ -f "$ROOT_DIR/webapp/.nvmrc" ]; then
+        tr -d '[:space:]' < "$ROOT_DIR/webapp/.nvmrc"
+    else
+        echo "20"
+    fi
+}
+
+install_node_with_nvm() {
+    local node_version
+    node_version="$(node_version_to_use)"
+
+    load_nvm
+
+    if ! command -v nvm >/dev/null 2>&1; then
+        echo "Installing nvm..."
+        curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.40.3/install.sh | bash
+        load_nvm
+    fi
+
+    if ! command -v nvm >/dev/null 2>&1; then
+        echo "nvm installation failed. Please install nvm manually and rerun this script."
+        exit 1
+    fi
+
+    echo "Using Node.js $node_version via nvm..."
+    nvm install "$node_version"
+    nvm use "$node_version"
+
+    if ! command -v node >/dev/null 2>&1 || ! command -v npm >/dev/null 2>&1; then
+        echo "Node.js/npm are still unavailable after nvm setup."
+        exit 1
+    fi
+}
 
 cleanup_port() {
     local port="$1"
@@ -45,13 +224,20 @@ track_pid() {
     CHILD_PIDS+=("$1")
 }
 
+run_tracked() {
+    setsid "$@" &
+    track_pid "$!"
+}
+
 terminate_process_tree() {
     local pid="$1"
     local signal="$2"
 
-    if ! kill -0 "$pid" 2>/dev/null; then
+    if ! kill -0 "$pid" 2>/dev/null && ! kill -0 "-$pid" 2>/dev/null; then
         return
     fi
+
+    kill "-$signal" "-$pid" 2>/dev/null || true
 
     local child_pids
     if command -v pgrep >/dev/null 2>&1; then
@@ -100,14 +286,11 @@ cleanup() {
     exit "$status"
 }
 
-if ! command -v go >/dev/null 2>&1; then
-    echo "Go is required to run BoringBoard locally."
-    exit 1
-fi
+install_system_requirements
+install_node_with_nvm
 
-if ! command -v npm >/dev/null 2>&1; then
-    echo "npm is required to build the BoringBoard web app."
-    exit 1
+if command -v go >/dev/null 2>&1; then
+    export PATH="$(go env GOPATH)/bin:$PATH"
 fi
 
 if [ ! -d "$ROOT_DIR/webapp/node_modules" ]; then
@@ -136,6 +319,17 @@ watch_server_without_modd() {
     local last_signature=""
     local server_pid=""
 
+    cleanup_watched_server() {
+        if [ -n "$server_pid" ]; then
+            terminate_process_tree "$server_pid" TERM
+            sleep 1
+            terminate_process_tree "$server_pid" KILL
+            wait "$server_pid" 2>/dev/null || true
+        fi
+    }
+
+    trap cleanup_watched_server EXIT INT TERM
+
     while true; do
         local current_signature
         current_signature="$(server_signature)"
@@ -143,12 +337,12 @@ watch_server_without_modd() {
         if [ "$current_signature" != "$last_signature" ]; then
             if [ -n "$server_pid" ]; then
                 echo "Restarting BoringBoard server..."
-                kill "$server_pid" 2>/dev/null || true
+                terminate_process_tree "$server_pid" TERM
                 wait "$server_pid" 2>/dev/null || true
             fi
 
             if make server; then
-                ./bin/focalboard-server -port "$APP_PORT" $FOCALBOARDSERVER_ARGS &
+                setsid ./bin/focalboard-server -port "$APP_PORT" $FOCALBOARDSERVER_ARGS &
                 server_pid="$!"
                 last_signature="$current_signature"
             else
@@ -164,12 +358,9 @@ if command -v modd >/dev/null 2>&1; then
     export FOCALBOARDSERVER_ARGS="-port $APP_PORT $FOCALBOARDSERVER_ARGS"
     echo "Starting BoringBoard in development watch mode..."
     echo "Open http://localhost:$PORT"
-    make watch &
-    WATCH_PID="$!"
-    track_pid "$WATCH_PID"
-    start_proxy &
-    PROXY_PID="$!"
-    track_pid "$PROXY_PID"
+    run_tracked make watch
+    run_tracked env PUBLIC_PORT="$PORT" BACKEND_PORT="$APP_PORT" WATCH_DIR="$ROOT_DIR/webapp/pack" node "$ROOT_DIR/scripts/dev-reload-proxy.js"
+    PROXY_PID="${CHILD_PIDS[$((${#CHILD_PIDS[@]} - 1))]}"
     wait "$PROXY_PID"
     exit $?
 fi
@@ -182,18 +373,12 @@ make webapp
 
 echo "Starting BoringBoard..."
 echo "Open http://localhost:$PORT"
-watch_server_without_modd &
-SERVER_WATCH_PID="$!"
-track_pid "$SERVER_WATCH_PID"
+export ROOT_DIR APP_PORT FOCALBOARDSERVER_ARGS
+export -f server_signature terminate_process_tree watch_server_without_modd
+run_tracked bash -c 'cd "$ROOT_DIR" && watch_server_without_modd'
 
-(
-    cd "$ROOT_DIR/webapp"
-    npm run watchdev
-) &
-WEBAPP_WATCH_PID="$!"
-track_pid "$WEBAPP_WATCH_PID"
+run_tracked bash -c 'cd "$1/webapp" && npm run watchdev' bash "$ROOT_DIR"
 
-start_proxy &
-PROXY_PID="$!"
-track_pid "$PROXY_PID"
+run_tracked env PUBLIC_PORT="$PORT" BACKEND_PORT="$APP_PORT" WATCH_DIR="$ROOT_DIR/webapp/pack" node "$ROOT_DIR/scripts/dev-reload-proxy.js"
+PROXY_PID="${CHILD_PIDS[$((${#CHILD_PIDS[@]} - 1))]}"
 wait "$PROXY_PID"
