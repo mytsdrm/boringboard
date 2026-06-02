@@ -227,7 +227,7 @@ func (a *API) handlePatchBoardsAndBlocks(w http.ResponseWriter, r *http.Request)
 			return
 		}
 
-		if !a.permissions.HasPermissionToBoard(userID, boardID, model.PermissionManageBoardProperties) {
+		if !a.hasPermissionToManageTaskBoardProperties(userID, boardID) {
 			a.errorResponse(w, r, model.NewErrPermission("access denied to modifying board properties"))
 			return
 		}

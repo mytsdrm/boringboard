@@ -1,20 +1,34 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
+import {useEffect, useState} from 'react'
+
 import {useAppSelector} from '../store/hooks'
 import {getMyBoardMembership, getCurrentBoardId, getBoard} from '../store/boards'
 import {getCurrentTeam} from '../store/teams'
 import {Permission} from '../constants'
 import {MemberRole} from '../blocks/board'
-import {getStoredProjectSystemSettings} from '../systemSettings'
+import {getStoredProjectSystemSettings, ProjectSystemSettings, SYSTEM_SETTINGS_UPDATED_EVENT} from '../systemSettings'
 
 export const useHasPermissions = (teamId: string, boardId: string, permissions: Permission[]): boolean => {
+    const member = useAppSelector(getMyBoardMembership(boardId))
+    const board = useAppSelector(getBoard(boardId))
+    const [projectSettings, setProjectSettings] = useState<ProjectSystemSettings>(getStoredProjectSystemSettings)
+
+    useEffect(() => {
+        const handleSystemSettingsUpdated = (event: Event) => {
+            setProjectSettings((event as CustomEvent<ProjectSystemSettings>).detail || getStoredProjectSystemSettings())
+        }
+
+        window.addEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
+        return () => {
+            window.removeEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
+        }
+    }, [])
+
     if (!boardId || !teamId) {
         return false
     }
-
-    const member = useAppSelector(getMyBoardMembership(boardId))
-    const board = useAppSelector(getBoard(boardId))
 
     if (!board) {
         return false
@@ -28,13 +42,17 @@ export const useHasPermissions = (teamId: string, boardId: string, permissions: 
     const editorPermissions = [Permission.ManageBoardCards, Permission.ManageBoardProperties]
     const commenterPermissions = [Permission.CommentBoardCards]
     const viewerPermissions = [Permission.ViewBoard]
-    const projectSettings = getStoredProjectSystemSettings()
     const invitedUserSharePermissions = [Permission.ShareBoard]
     const canInvitedUserShare = projectSettings.taskBoards.enableInvitedUserShare && member && !member.synthetic && !member.schemeAdmin
+    const isInvitedNonAdminMember = member && !member.synthetic && !member.schemeAdmin
+    const canInvitedUserEditBoardProperties = projectSettings.taskBoards.enableInvitedUserEditProperty
 
     for (const permission of permissions) {
         if (invitedUserSharePermissions.includes(permission) && canInvitedUserShare) {
             return true
+        }
+        if (permission === Permission.ManageBoardProperties && isInvitedNonAdminMember && !canInvitedUserEditBoardProperties) {
+            continue
         }
         if (adminPermissions.includes(permission) && member.schemeAdmin) {
             return true

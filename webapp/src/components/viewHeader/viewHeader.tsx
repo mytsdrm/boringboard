@@ -148,7 +148,7 @@ const ViewHeader = (props: Props) => {
 
             <div className='octo-spacer'/>
 
-            {!props.readonly && canEditBoardProperties &&
+            {!props.readonly &&
             <>
                 {/* Card properties */}
 
