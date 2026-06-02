@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 import {useEffect} from 'react'
 
+import {getStoredBranding} from '../../branding'
 import {Utils} from '../../utils'
 import {getCurrentBoard} from '../../store/boards'
 import {getCurrentView} from '../../store/views'
@@ -12,7 +13,16 @@ const SetWindowTitleAndIcon = (): null => {
     const activeView = useAppSelector(getCurrentView)
 
     useEffect(() => {
-        Utils.setFavicon(board?.icon)
+        if (board?.icon) {
+            Utils.setFavicon(board.icon)
+            return
+        }
+
+        const link = document.createElement('link') as HTMLLinkElement
+        document.querySelectorAll("link[rel*='icon']").forEach((node) => node.remove())
+        link.rel = 'shortcut icon'
+        link.href = getStoredBranding().logo
+        document.getElementsByTagName('head')[0].appendChild(link)
     }, [board?.icon])
 
     useEffect(() => {
@@ -23,7 +33,7 @@ const SetWindowTitleAndIcon = (): null => {
             }
             document.title = title
         } else {
-            document.title = 'BoringBoard'
+            document.title = getStoredBranding().appName
         }
     }, [board?.title, activeView?.title])
 

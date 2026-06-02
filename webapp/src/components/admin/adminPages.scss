@@ -253,6 +253,7 @@
     .admin-settings-checkbox {
         display: flex;
         align-items: center;
+        flex-direction: row;
         gap: 10px;
     }
 
@@ -278,9 +279,9 @@
 
     .admin-settings-form {
         display: grid;
-        grid-template-columns: repeat(2, minmax(0, 1fr));
-        gap: 18px;
-        padding: 22px;
+        grid-template-columns: 1fr;
+        gap: 24px;
+        padding: 24px;
 
         label {
             display: flex;
@@ -315,11 +316,146 @@
         }
     }
 
+    .admin-settings-section {
+        display: grid;
+        grid-template-columns: minmax(180px, 240px) minmax(0, 1fr);
+        gap: 24px;
+        padding-bottom: 24px;
+        border-bottom: 1px solid var(--bb-border);
+
+        &:last-of-type {
+            padding-bottom: 0;
+            border-bottom: 0;
+        }
+    }
+
+    .admin-settings-section-header {
+        h2 {
+            margin: 0;
+            color: var(--bb-text);
+            font-size: 18px;
+            font-weight: 850;
+            line-height: 26px;
+        }
+
+        p {
+            max-width: 320px;
+            margin: 8px 0 0;
+            color: var(--bb-text-muted);
+            font-size: 13px;
+            font-weight: 650;
+            line-height: 21px;
+        }
+    }
+
+    .admin-settings-field-grid {
+        display: grid;
+        grid-template-columns: minmax(260px, 1fr);
+        gap: 18px;
+        min-width: 0;
+        max-width: 760px;
+    }
+
+    .admin-settings-label {
+        color: var(--bb-text-muted);
+        font-size: 12px;
+        font-weight: 850;
+        letter-spacing: 0.04em;
+        line-height: 18px;
+        text-transform: uppercase;
+    }
+
+    .admin-logo-upload {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .admin-logo-upload-body {
+        display: flex;
+        align-items: center;
+        flex-direction: row-reverse;
+        justify-content: flex-end;
+        gap: 14px;
+        min-width: 0;
+        min-height: 72px;
+        padding: 12px;
+        border: 1px solid var(--bb-border);
+        border-radius: 10px;
+        background: var(--bb-dashboard-panel-bg);
+    }
+
+    .admin-logo-preview {
+        display: flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: 54px;
+        height: 54px;
+        border: 1px solid #d0d5dd;
+        border-radius: 8px;
+        background: #fff;
+
+        img {
+            max-width: 42px;
+            max-height: 42px;
+            object-fit: contain;
+        }
+    }
+
+    .admin-logo-upload-actions {
+        display: flex;
+        align-items: center;
+        flex-wrap: wrap;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .admin-logo-upload-button,
+    .admin-logo-reset-button {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        min-height: 38px;
+        padding: 0 14px;
+        border: 1px solid var(--bb-border);
+        border-radius: 8px;
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 800;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+
+    .admin-logo-upload-button {
+        color: var(--bb-blue-text);
+        border-color: color-mix(in srgb, var(--bb-blue-text) 28%, #d0d5dd);
+        background: var(--bb-blue-soft);
+
+        &:hover,
+        &:focus {
+            border-color: color-mix(in srgb, var(--bb-blue-text) 42%, #d0d5dd);
+            background: color-mix(in srgb, var(--bb-blue-soft) 72%, #fff);
+        }
+
+        input {
+            display: none;
+        }
+    }
+
+    .admin-logo-reset-button {
+        color: var(--bb-text);
+        background: #fff;
+    }
+
     .admin-ai-settings {
-        grid-column: 1 / -1;
+        grid-column: 2;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
+        max-width: 760px;
+        margin-top: 16px;
     }
 
     .admin-page-actions {
@@ -420,8 +556,15 @@
         }
 
         .admin-settings-form,
+        .admin-settings-section,
+        .admin-settings-field-grid,
         .admin-ai-settings {
             grid-template-columns: 1fr;
+        }
+
+        .admin-ai-settings {
+            grid-column: 1;
+            padding-left: 0;
         }
 
         .admin-form-actions {

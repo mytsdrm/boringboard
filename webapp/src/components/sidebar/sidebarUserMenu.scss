@@ -21,21 +21,25 @@
                 box-shadow: 0 0 0 1px rgba(18, 98, 255, 0.16);
             }
 
+            .brand-logo {
+                width: 28px;
+                height: 28px;
+                margin-right: 8px;
+                object-fit: contain;
+            }
+
             .brand-name {
                 display: inline-flex;
                 align-items: center;
+                max-width: 150px;
                 height: 32px;
+                overflow: hidden;
+                color: #031454;
                 font-weight: 800;
                 letter-spacing: 0;
                 line-height: 32px;
-            }
-
-            .brand-name-boring {
-                color: #031454;
-            }
-
-            .brand-name-board {
-                color: #1262ff;
+                text-overflow: ellipsis;
+                white-space: nowrap;
             }
         }
 

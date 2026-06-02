@@ -1,13 +1,14 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
 import {useHistory} from 'react-router-dom'
 
 import {Constants} from '../../constants'
 import octoClient from '../../octoClient'
 import {IUser} from '../../user'
+import {BRANDING_UPDATED_EVENT, getStoredBranding, SystemBranding} from '../../branding'
 import FocalboardLogoIcon from '../../widgets/icons/focalboard_logo'
 import Menu from '../../widgets/menu'
 import MenuWrapper from '../../widgets/menuWrapper'
@@ -26,8 +27,20 @@ const SidebarUserMenu = () => {
     const history = useHistory()
     const [showRegistrationLinkDialog, setShowRegistrationLinkDialog] = useState(false)
     const [showAboutDialog, setShowAboutDialog] = useState(false)
+    const [branding, setBranding] = useState<SystemBranding>(getStoredBranding)
     const user = useAppSelector<IUser|null>(getMe)
     const intl = useIntl()
+
+    useEffect(() => {
+        const handleBrandingUpdated = (event: Event) => {
+            setBranding((event as CustomEvent<SystemBranding>).detail || getStoredBranding())
+        }
+
+        window.addEventListener(BRANDING_UPDATED_EVENT, handleBrandingUpdated)
+        return () => {
+            window.removeEventListener(BRANDING_UPDATED_EVENT, handleBrandingUpdated)
+        }
+    }, [])
 
     return (
         <div className='SidebarUserMenu'>
@@ -35,10 +48,17 @@ const SidebarUserMenu = () => {
                 <MenuWrapper>
                     <div className='logo'>
                         <div className='logo-title'>
-                            <FocalboardLogoIcon/>
+                            {branding.logo ? (
+                                <img
+                                    className='brand-logo'
+                                    src={branding.logo}
+                                    alt={branding.appName}
+                                />
+                            ) : (
+                                <FocalboardLogoIcon/>
+                            )}
                             <span className='brand-name'>
-                                <span className='brand-name-boring'>{'Boring'}</span>
-                                <span className='brand-name-board'>{'Board'}</span>
+                                {branding.appName}
                             </span>
                             <div className='versionFrame'>
                                 <div
@@ -112,8 +132,8 @@ const SidebarUserMenu = () => {
                     >
                         <div className='about-boringboard'>
                             <img
-                                src='/static/boringboard-logo.webp'
-                                alt='BoringBoard'
+                                src={branding.logo}
+                                alt={branding.appName}
                             />
                             <p>
                                 <FormattedMessage
