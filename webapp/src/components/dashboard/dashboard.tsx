@@ -20,6 +20,7 @@ import {WSClient} from '../../wsclient'
 import Dialog from '../dialog'
 import RootPortal from '../rootPortal'
 import RegistrationLink from '../sidebar/registrationLink'
+import {StoredIcon} from '../icons/storedIcon'
 
 import './dashboard.scss'
 
@@ -1026,7 +1027,7 @@ const Dashboard = (): JSX.Element => {
                                 type='button'
                                 onClick={() => showBoard(board.id)}
                             >
-                                <span className='dashboard-board-icon'>{board.icon || <CompassIcon icon='product-boards'/>}</span>
+                                <span className='dashboard-board-icon'>{board.icon ? <StoredIcon icon={board.icon}/> : <CompassIcon icon='product-boards'/>}</span>
                                 <span className='dashboard-board-name'>{board.title}</span>
                                 <span className='dashboard-time-pill'>{formatRelativeTime(statsByBoard[board.id]?.latestActivityAt || board.updateAt || board.createAt)}</span>
                             </button>

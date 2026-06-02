@@ -7,6 +7,7 @@ import {Board} from '../blocks/board'
 
 import mutator from '../mutator'
 
+import {StoredIcon} from './icons/storedIcon'
 import IconSelector from './iconSelector'
 
 type Props = {
@@ -33,7 +34,7 @@ const BoardIconSelector = React.memo((props: Props) => {
     if (props.readonly) {
         className += ' readonly'
     }
-    const iconElement = <div className={className}><span>{board.icon}</span></div>
+    const iconElement = <div className={className}><StoredIcon icon={board.icon}/></div>
 
     return (
         <IconSelector

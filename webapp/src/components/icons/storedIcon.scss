@@ -1,0 +1,27 @@
+.StoredIcon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1em;
+    height: 1em;
+    min-width: 1em;
+    line-height: 1;
+    vertical-align: -0.125em;
+
+    svg,
+    img {
+        display: block;
+        width: 1em;
+        height: 1em;
+        flex: 0 0 auto;
+    }
+}
+
+.StoredIcon--library {
+    color: currentColor;
+}
+
+.StoredIcon--emoji {
+    overflow: hidden;
+    text-align: center;
+}

@@ -22,6 +22,7 @@ import Tooltip from '../../widgets/tooltip'
 import ConfirmationDialogBox, {ConfirmationDialogBoxProps} from '../confirmationDialogBox'
 import TelemetryClient, {TelemetryActions, TelemetryCategory} from '../../telemetry/telemetryClient'
 import CardActionsMenu from '../cardActionsMenu/cardActionsMenu'
+import {StoredIcon} from '../icons/storedIcon'
 
 import {useColumnResize} from './tableColumnResizeContext'
 
@@ -168,7 +169,7 @@ const TableRow = (props: Props) => {
                 ref={(ref) => columnResize.updateRef(card.id, Constants.titleColumnId, ref)}
             >
                 <div className='octo-icontitle'>
-                    <div className='octo-icon'>{card.fields.icon}</div>
+                    {card.fields.icon ? <div className='octo-icon'><StoredIcon icon={card.fields.icon}/></div> : undefined}
                     <Editable
                         ref={titleRef}
                         value={title}

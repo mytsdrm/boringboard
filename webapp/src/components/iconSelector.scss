@@ -33,5 +33,64 @@
         span {
             display: block;
         }
+
+        .StoredIcon {
+            overflow: visible;
+        }
+    }
+
+    .IconSelector__pickers {
+        width: 368px;
+        max-width: calc(100vw - 32px);
+        padding: 12px;
+        border: 1px solid rgba(var(--center-channel-color-rgb), 0.1);
+        border-radius: 10px;
+        background: rgb(var(--center-channel-bg-rgb));
+        color: rgb(var(--center-channel-color-rgb));
+        box-shadow: 0 16px 40px rgba(0, 0, 0, 0.16);
+
+        .EmojiPicker {
+            overflow: hidden;
+            border: 1px solid rgba(var(--center-channel-color-rgb), 0.12);
+            border-radius: 8px;
+        }
+    }
+
+    .IconSelector__pickerTabs {
+        display: inline-flex;
+        width: 100%;
+        padding: 4px;
+        margin-bottom: 12px;
+        border: 1px solid rgba(var(--center-channel-color-rgb), 0.12);
+        border-radius: 10px;
+        background: rgba(var(--center-channel-color-rgb), 0.04);
+        gap: 4px;
+    }
+
+    .IconSelector__pickerTab {
+        flex: 1 1 0;
+        height: 32px;
+        padding: 0 12px;
+        border: 0;
+        border-radius: 8px;
+        background: transparent;
+        color: rgba(var(--center-channel-color-rgb), 0.72);
+        cursor: pointer;
+        font-size: 13px;
+        font-weight: 600;
+
+        &:hover {
+            color: rgb(var(--center-channel-color-rgb));
+        }
+
+        &.active {
+            background: color-mix(in srgb, rgb(var(--button-bg-rgb)) 10%, rgb(var(--center-channel-bg-rgb)));
+            color: rgb(var(--button-bg-rgb));
+            box-shadow: inset 0 0 0 1px rgba(var(--button-bg-rgb), 0.18), 0 1px 3px rgba(0, 0, 0, 0.08);
+        }
+    }
+
+    .IconSelector__pickerPanel {
+        min-height: 372px;
     }
 }

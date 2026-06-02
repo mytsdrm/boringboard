@@ -6,6 +6,7 @@ import {BlockIcons} from '../blockIcons'
 import {Card} from '../blocks/card'
 import mutator from '../mutator'
 
+import {StoredIcon} from './icons/storedIcon'
 import IconSelector from './iconSelector'
 
 type Props = {
@@ -32,7 +33,7 @@ const BlockIconSelector = (props: Props) => {
     if (props.readonly) {
         className += ' readonly'
     }
-    const iconElement = <div className={className}><span>{block.fields.icon}</span></div>
+    const iconElement = <div className={className}><StoredIcon icon={block.fields.icon}/></div>
 
     return (
         <IconSelector

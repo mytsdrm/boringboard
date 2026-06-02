@@ -10,20 +10,21 @@
     padding: 15px 16px 14px;
     background: var(--bb-card-bg);
     border: 1px solid var(--bb-border-strong);
-    box-shadow:
-        0 1px 0 color-mix(in srgb, var(--bb-card-bg) 96%, transparent) inset,
+    box-shadow: 0 1px 0 color-mix(in srgb, var(--bb-card-bg) 96%, transparent)
+        inset,
         0 8px 16px var(--bb-shadow);
 
     cursor: pointer;
     color: var(--bb-text);
 
-    transition: background 120ms ease-out 0s, border-color 120ms ease-out 0s, box-shadow 120ms ease-out 0s;
+    transition: background 120ms ease-out 0s, border-color 120ms ease-out 0s,
+        box-shadow 120ms ease-out 0s;
 
     &:hover {
         background: var(--bb-card-hover-bg);
         border-color: rgba(var(--button-bg-rgb), 0.42);
-        box-shadow:
-            0 1px 0 color-mix(in srgb, var(--bb-card-bg) 94%, transparent) inset,
+        box-shadow: 0 1px 0
+            color-mix(in srgb, var(--bb-card-bg) 94%, transparent) inset,
             0 12px 22px var(--bb-shadow);
 
         .optionsMenu {
@@ -105,7 +106,7 @@
         padding: 2px 8px;
         border-radius: 6px;
         color: var(--bb-text-muted);
-        font-size: 11px;
+        font-size: 0.6rem;
         line-height: 17px;
         font-weight: 800;
         letter-spacing: 0;
