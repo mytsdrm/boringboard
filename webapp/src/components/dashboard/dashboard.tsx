@@ -451,11 +451,26 @@ const Dashboard = (): JSX.Element => {
         }
     }
 
-    const openProfileModal = () => {
+    const currentUserIsAdmin = Boolean(me?.roles?.includes('SuperAdmin')) ||
+        Boolean(me?.roles?.includes('system_admin')) ||
+        Boolean(me?.permissions?.includes('manage_system'))
+
+    const openProfileModal = async () => {
+        let profileUser = me
+        const freshMe = await octoClient.getMe()
+        if (freshMe) {
+            profileUser = freshMe
+            dispatch(setMe(freshMe))
+        }
+        if (currentUserIsAdmin && profileUser?.id && !profileUser.email) {
+            const adminUsers = await octoClient.getAdminUsers()
+            profileUser = adminUsers.find((user) => user.id === profileUser?.id) || profileUser
+        }
+
         setProfileForm({
-            email: me?.email || '',
-            nickname: me?.nickname || '',
-            username: me?.username || '',
+            email: profileUser?.email || '',
+            nickname: profileUser?.nickname || '',
+            username: profileUser?.username || '',
         })
         setProfileError('')
         setProfileModalOpen(true)
