@@ -38,6 +38,8 @@ Rules:
 - Include 0 to 12 starter tasks.
 - Every task column must match one returned column name.
 - Use only these colors: propColorGray, propColorBrown, propColorOrange, propColorYellow, propColorGreen, propColorBlue, propColorPurple, propColorPink, propColorRed.
+- When tasks belong to a platform, product, tool, app, or domain entity, include that name at the start of the task title so BoringBoard can choose a meaningful icon. Example: "Facebook - Login", not just "Login".
+- Prefer specific, recognizable nouns in task titles over generic labels.
 - Do not assume a fixed software workflow unless the command asks for one.
 - Generate suggestions only. Do not claim anything has been created.
 
@@ -103,6 +105,8 @@ Rules:
 - Include 0 to 12 starter tasks.
 - Every task column must match one returned column name.
 - Use only these colors: propColorGray, propColorBrown, propColorOrange, propColorYellow, propColorGreen, propColorBlue, propColorPurple, propColorPink, propColorRed.
+- When tasks belong to a platform, product, tool, app, or domain entity, include that name at the start of the task title so BoringBoard can choose a meaningful icon. Example: "Facebook - Login", not just "Login".
+- Prefer specific, recognizable nouns in task titles over generic labels.
 
 Response to convert:
 %s`, content)

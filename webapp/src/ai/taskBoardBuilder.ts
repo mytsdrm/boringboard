@@ -11,13 +11,14 @@ import {TaskBoardPreview} from '../octoClient'
 
 const statusPropertyName = 'Status'
 const dueDatePropertyName = 'Due Date'
+const storedIconPrefix = 'bb-icon:'
 
 export function buildTaskBoardFromPreview(preview: TaskBoardPreview, teamId: string): BoardsAndBlocks {
     const board = createBoard()
     board.teamId = teamId
     board.title = preview.title
     board.description = preview.description
-    board.icon = boardIcon(preview)
+    board.icon = taskBoardPreviewIcon(preview)
     board.showDescription = Boolean(preview.description)
 
     const statusProperty: IPropertyTemplate = {
@@ -44,7 +45,7 @@ export function buildTaskBoardFromPreview(preview: TaskBoardPreview, teamId: str
         card.boardId = board.id
         card.parentId = board.id
         card.title = task.title
-        card.fields.icon = taskIcon(task.title)
+        card.fields.icon = taskBoardTaskIcon(task.title)
         card.fields.properties[dueDateProperty.id] = dueDateValue(index)
         if (task.description) {
             const descriptionBlock = createBlock()
@@ -111,63 +112,109 @@ function dueDateValue(index: number): string {
     return JSON.stringify({from: dueDate.getTime()})
 }
 
-function boardIcon(preview: TaskBoardPreview): string {
+export function taskBoardPreviewIcon(preview: TaskBoardPreview): string {
     const text = `${preview.title} ${preview.description}`.toLowerCase()
     if (text.includes('android') || text.includes('mobile') || text.includes('device')) {
-        return '📱'
+        return icon('brand-android')
     }
     if (text.includes('automation') || text.includes('ai')) {
-        return '⚙️'
+        return icon('ops-zap')
     }
     if (text.includes('launch')) {
-        return '🚀'
+        return icon('ops-rocket')
     }
-    return '📋'
+    return icon('work-board')
 }
 
-function taskIcon(title: string): string {
+export function taskBoardTaskIcon(title: string): string {
     const text = title.toLowerCase()
+    const platformIcon = taskPlatformIcon(text)
+    if (platformIcon) {
+        return platformIcon
+    }
+
     if (text.includes('register') || text.includes('sign up')) {
-        return '📝'
+        return icon('action-edit')
     }
     if (text.includes('login') || text.includes('log in')) {
-        return '🔐'
+        return icon('action-login')
     }
     if (text.includes('logout') || text.includes('log out')) {
-        return '🚪'
+        return icon('action-logout')
     }
     if (text.includes('media') || text.includes('image') || text.includes('video')) {
-        return '🖼️'
+        return icon('action-media')
     }
     if (text.includes('post')) {
-        return '✍️'
+        return icon('action-post')
     }
     if (text.includes('repost') || text.includes('share')) {
-        return '🔁'
+        return icon('action-repost')
     }
     if (text.includes('dislike')) {
         return '👎'
     }
     if (text.includes('like')) {
-        return '👍'
+        return icon('action-like')
     }
     if (text.includes('subscribe')) {
-        return '🔔'
+        return icon('work-bell')
     }
     if (text.includes('follow')) {
-        return '➕'
+        return icon('action-follow')
     }
     if (text.includes('report')) {
-        return '🚩'
+        return icon('action-report')
     }
     if (text.includes('surfing') || text.includes('flow')) {
-        return '🧭'
+        return icon('action-globe')
     }
     if (text.includes('test') || text.includes('qa') || text.includes('review')) {
-        return '✅'
+        return icon('ops-test')
     }
     if (text.includes('setup') || text.includes('infrastructure') || text.includes('automation')) {
-        return '🛠️'
+        return icon('ops-wrench')
     }
-    return '📌'
+    return icon('work-task')
+}
+
+function taskPlatformIcon(text: string): string {
+    if (text.includes('facebook')) {
+        return icon('brand-facebook')
+    }
+    if (text.includes('twitter') || text.includes('x -') || text.includes('x/')) {
+        return icon('brand-twitter-x')
+    }
+    if (text.includes('instagram thread') || text.includes('threads')) {
+        return icon('brand-threads')
+    }
+    if (text.includes('instagram')) {
+        return icon('brand-instagram')
+    }
+    if (text.includes('tiktok') || text.includes('tik tok')) {
+        return icon('brand-tiktok')
+    }
+    if (text.includes('youtube') || text.includes('you tube')) {
+        return icon('brand-youtube')
+    }
+    if (text.includes('android') || text.includes('device farm')) {
+        return icon('brand-android')
+    }
+    if (text.includes('github')) {
+        return icon('brand-github')
+    }
+    if (text.includes('gitlab')) {
+        return icon('brand-gitlab')
+    }
+    if (text.includes('docker')) {
+        return icon('brand-docker')
+    }
+    if (text.includes('kubernetes')) {
+        return icon('tech-kubernetes')
+    }
+    return ''
+}
+
+function icon(id: string): string {
+    return `${storedIconPrefix}${id}`
 }

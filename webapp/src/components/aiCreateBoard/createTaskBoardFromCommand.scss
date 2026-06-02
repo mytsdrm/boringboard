@@ -191,6 +191,26 @@
     }
 
     .ai-preview-heading {
+        display: grid;
+        grid-template-columns: 54px minmax(0, 1fr);
+        align-items: flex-start;
+        gap: 12px;
+
+        .ai-preview-board-icon {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 46px;
+            height: 46px;
+            margin-top: 22px;
+            border: 1px solid rgba(var(--button-bg-rgb), 0.18);
+            border-radius: 12px;
+            background: color-mix(in srgb, rgba(var(--button-bg-rgb), 0.12) 80%, rgb(var(--center-channel-bg-rgb)));
+            color: rgb(var(--button-bg-rgb));
+            font-size: 24px;
+            box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+        }
+
         .ai-preview-title-input {
             width: 100%;
             margin: 4px 0 6px;
@@ -342,15 +362,36 @@
         border-radius: 8px;
         background: rgb(var(--center-channel-bg-rgb));
 
-        strong {
-            overflow: hidden;
-            color: var(--bb-text);
-            font-size: 13px;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+        .ai-preview-task-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
+
+            > span {
+                display: inline-flex;
+                align-items: center;
+                justify-content: center;
+                flex: 0 0 auto;
+                width: 24px;
+                height: 24px;
+                padding: 0;
+                border-radius: 7px;
+                background: rgba(var(--button-bg-rgb), 0.08);
+                color: rgb(var(--button-bg-rgb));
+                font-size: 15px;
+            }
+
+            strong {
+                overflow: hidden;
+                color: var(--bb-text);
+                font-size: 13px;
+                text-overflow: ellipsis;
+                white-space: nowrap;
+            }
         }
 
-        span {
+        > span {
             width: fit-content;
             max-width: 100%;
             overflow: hidden;
@@ -472,6 +513,14 @@
         .ai-preview-metrics,
         .ai-preview-tasks {
             grid-template-columns: 1fr;
+        }
+
+        .ai-preview-heading {
+            grid-template-columns: 1fr;
+
+            .ai-preview-board-icon {
+                margin-top: 0;
+            }
         }
 
         .ai-command-loader {

@@ -10,7 +10,8 @@ import mutator from '../../mutator'
 import Dialog from '../dialog'
 import Button from '../../widgets/buttons/button'
 import CompassIcon from '../../widgets/icons/compassIcon'
-import {buildTaskBoardFromPreview} from '../../ai/taskBoardBuilder'
+import {buildTaskBoardFromPreview, taskBoardPreviewIcon, taskBoardTaskIcon} from '../../ai/taskBoardBuilder'
+import {StoredIcon} from '../icons/storedIcon'
 
 import './createTaskBoardFromCommand.scss'
 
@@ -198,6 +199,9 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
                         {preview &&
                             <div className='ai-preview'>
                                 <div className='ai-preview-heading'>
+                                    <div className='ai-preview-board-icon'>
+                                        <StoredIcon icon={taskBoardPreviewIcon(preview)}/>
+                                    </div>
                                     <div>
                                         <span className='ai-preview-kicker'>
                                             <FormattedMessage
@@ -295,7 +299,12 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
                                                 className='ai-preview-task'
                                                 key={`${task.column}-${task.title}`}
                                             >
-                                                <strong>{task.title}</strong>
+                                                <div className='ai-preview-task-title'>
+                                                    <span>
+                                                        <StoredIcon icon={taskBoardTaskIcon(task.title)}/>
+                                                    </span>
+                                                    <strong>{task.title}</strong>
+                                                </div>
                                                 <span>{task.column}</span>
                                             </div>
                                         ))}
