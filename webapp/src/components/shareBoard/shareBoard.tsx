@@ -97,6 +97,10 @@ function isLastAdmin(members: BoardMember[]) {
     return true
 }
 
+function isAdminUser(user: IUser) {
+    return Boolean(user.permissions?.includes('manage_system') || user.permissions?.includes('manage_team'))
+}
+
 export default function ShareBoardDialog(props: Props): JSX.Element {
     const [wasCopiedPublic, setWasCopiedPublic] = useState(false)
     const [wasCopiedInternal, setWasCopiedInternal] = useState(false)
@@ -361,7 +365,7 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
                                 loadOptions={async (inputValue: string) => {
                                     const result = []
                                     const users = await client.searchTeamUsers(inputValue) || []
-                                    result.push(...users)
+                                    result.push(...users.filter((user) => !isAdminUser(user)))
                                     return result
                                 }}
                                 components={{DropdownIndicator: () => null, IndicatorSeparator: () => null}}
