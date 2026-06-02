@@ -154,6 +154,20 @@ const getHistoryPreviousBlock = (historyById: Map<string, Block[]>, block: Block
     return historyById.get(block.id)?.find((historyBlock) => historyBlock.updateAt < block.updateAt)
 }
 
+const areBoardListsEqual = (previousBoards: Board[], nextBoards: Board[]): boolean => {
+    if (previousBoards.length !== nextBoards.length) {
+        return false
+    }
+
+    return previousBoards.every((board, index) => {
+        const nextBoard = nextBoards[index]
+        return nextBoard &&
+            board.id === nextBoard.id &&
+            board.updateAt === nextBoard.updateAt &&
+            board.title === nextBoard.title
+    })
+}
+
 const buildActivityLogsFromHistory = (
     historyBlocks: Block[],
     boardsById: Map<string, Board>,
@@ -244,6 +258,9 @@ const ActivityLogs = (props: Props): JSX.Element => {
         }
         return boards.filter((board) => !board.isTemplate)
     }, [adminBoards, boards, props.adminMode])
+    const taskBoardKey = useMemo(() => {
+        return taskBoards.map((board) => `${board.id}:${board.updateAt}:${board.title}`).join('|')
+    }, [taskBoards])
     const boardsById = useMemo(() => new Map(taskBoards.map((board) => [board.id, board])), [taskBoards])
     const websocketTeamId = currentTeamId || firstTeam?.id || taskBoards[0]?.teamId || ''
     const currentPageCursor = pageCursors[pageIndex] || 0
@@ -349,7 +366,9 @@ const ActivityLogs = (props: Props): JSX.Element => {
                 props.adminMode ? octoClient.getAdminUsers() : octoClient.getTeamUsers(true),
             ])
             if (props.adminMode) {
-                setAdminBoards(nextAdminBoards)
+                setAdminBoards((previousBoards) => {
+                    return areBoardListsEqual(previousBoards, nextAdminBoards) ? previousBoards : nextAdminBoards
+                })
             }
             const effectiveBoardsById = new Map((props.adminMode ? nextAdminBoards : taskBoards).map((board) => [board.id, board]))
 
@@ -360,8 +379,9 @@ const ActivityLogs = (props: Props): JSX.Element => {
 
             let historyBlocks: Block[] = []
             if (websocketTeamId) {
+                const historyLimit = props.adminMode ? 50 : ACTIVITY_LOG_HISTORY_PAGE_LIMIT
                 historyBlocks = props.adminMode ?
-                    await octoClient.getAdminActivityBlocks(websocketTeamId, ACTIVITY_LOG_HISTORY_PAGE_LIMIT, requestBefore, startDateAfter) :
+                    await octoClient.getAdminActivityBlocks(websocketTeamId, historyLimit, requestBefore, startDateAfter) :
                     await octoClient.getDashboardActivityBlocks(websocketTeamId, ACTIVITY_LOG_HISTORY_PAGE_LIMIT, requestBefore, startDateAfter)
             }
             if (canceled) {
@@ -412,7 +432,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
         return () => {
             canceled = true
         }
-    }, [boardsById, dispatch, pageIndex, props.adminMode, requestBefore, selectedUserId, startDateAfter, taskBoards, websocketTeamId])
+    }, [dispatch, me?.id, pageIndex, props.adminMode, requestBefore, selectedUserId, startDateAfter, taskBoardKey, websocketTeamId])
 
     useWebsockets(websocketTeamId, (wsClient) => {
         const incrementalBlockUpdate = (_: WSClient, blocks: Block[]) => {
