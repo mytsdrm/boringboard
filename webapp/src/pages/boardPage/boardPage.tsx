@@ -1,6 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React, {useEffect, useState, useMemo, useCallback} from 'react'
+import React, {useEffect, useState, useCallback} from 'react'
 import {batch} from 'react-redux'
 import {FormattedMessage, useIntl} from 'react-intl'
 import {useRouteMatch, useHistory} from 'react-router-dom'
@@ -99,13 +99,6 @@ const BoardPage = (props: Props): JSX.Element => {
         dispatch(setTeam(teamId))
     }, [teamId])
 
-    const loadAction: (boardId: string) => any = useMemo(() => {
-        if (props.readonly) {
-            return initialReadOnlyLoad
-        }
-        return initialLoad
-    }, [props.readonly])
-
     useWebsockets(teamId, (wsClient) => {
         const incrementalBlockUpdate = (_: WSClient, blocks: Block[]) => {
             const teamBlocks = blocks
@@ -143,7 +136,15 @@ const BoardPage = (props: Props): JSX.Element => {
         }
 
         const dispatchLoadAction = () => {
-            dispatch(loadAction(match.params.boardId))
+            if (props.readonly && match.params.boardId) {
+                dispatch(initialReadOnlyLoad(match.params.boardId))
+                return
+            }
+            if (match.params.boardId) {
+                dispatch(loadBoardData(match.params.boardId))
+                return
+            }
+            dispatch(initialLoad())
         }
 
         Utils.log('useWEbsocket adding onChange handler')
@@ -170,7 +171,7 @@ const BoardPage = (props: Props): JSX.Element => {
             wsClient.removeOnChange(incrementalBoardMemberUpdate, 'boardMembers')
             wsClient.removeOnReconnect(dispatchLoadAction)
         }
-    }, [me?.id, activeBoardId])
+    }, [me?.id, activeBoardId, match.params.boardId, props.readonly])
 
     const onConfirmJoin = async () => {
         if (me) {
@@ -215,8 +216,6 @@ const BoardPage = (props: Props): JSX.Element => {
     }, [])
 
     useEffect(() => {
-        dispatch(loadAction(match.params.boardId))
-
         if (match.params.boardId) {
             // set the active board
             dispatch(setCurrentBoard(match.params.boardId))
@@ -230,7 +229,19 @@ const BoardPage = (props: Props): JSX.Element => {
                 }
             }
         }
-    }, [teamId, match.params.boardId, viewId, me?.id])
+    }, [match.params.boardId, viewId])
+
+    useEffect(() => {
+        if (!props.readonly) {
+            dispatch(initialLoad())
+        }
+    }, [teamId, me?.id, props.readonly])
+
+    useEffect(() => {
+        if (props.readonly && match.params.boardId) {
+            dispatch(initialReadOnlyLoad(match.params.boardId))
+        }
+    }, [match.params.boardId, props.readonly])
 
     useEffect(() => {
         if (match.params.boardId && !props.readonly && me) {
