@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React, {useEffect, useState} from 'react'
-import {FormattedMessage} from 'react-intl'
+import {FormattedMessage, useIntl} from 'react-intl'
 
 import {applySystemBranding, getBrandingFromSettings} from '../../branding'
 import octoClient, {AdminSystemSettings} from '../../octoClient'
@@ -11,7 +11,19 @@ import './adminPages.scss'
 
 const PROVIDERS = ['OpenAI', 'Gemini', 'Ollama']
 
-const defaultProviderHints: {[key: string]: string} = {
+const providerLabelIds: {[key: string]: string} = {
+    Gemini: 'SystemSettings.provider-gemini',
+    Ollama: 'SystemSettings.provider-ollama',
+    OpenAI: 'SystemSettings.provider-openai',
+}
+
+const defaultProviderHintIds: {[key: string]: string} = {
+    Gemini: 'SystemSettings.provider-gemini-hint',
+    Ollama: 'SystemSettings.provider-ollama-hint',
+    OpenAI: 'SystemSettings.provider-openai-hint',
+}
+
+const defaultProviderHintMessages: {[key: string]: string} = {
     Gemini: 'Model: gemini-1.5-flash',
     Ollama: 'Endpoint: http://localhost:11434',
     OpenAI: 'Model: gpt-4o-mini',
@@ -57,6 +69,7 @@ const getTimeZoneOptions = (selectedTimeZone: string): string[] => {
 }
 
 const SystemSettings = (): JSX.Element => {
+    const intl = useIntl()
     const [settings, setSettings] = useState<AdminSystemSettings>(defaultSettings)
     const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
     const branding = getBrandingFromSettings(settings)
@@ -106,11 +119,20 @@ const SystemSettings = (): JSX.Element => {
         }
         reader.readAsDataURL(file)
     }
-    let saveButtonText = 'Save'
+    let saveButtonText = intl.formatMessage({
+        id: 'SystemSettings.save',
+        defaultMessage: 'Save',
+    })
     if (saveState === 'saving') {
-        saveButtonText = 'Saving...'
+        saveButtonText = intl.formatMessage({
+            id: 'SystemSettings.saving',
+            defaultMessage: 'Saving...',
+        })
     } else if (saveState === 'saved') {
-        saveButtonText = 'Saved'
+        saveButtonText = intl.formatMessage({
+            id: 'SystemSettings.saved',
+            defaultMessage: 'Saved',
+        })
     }
 
     return (
@@ -148,9 +170,15 @@ const SystemSettings = (): JSX.Element => {
                     <div className='admin-settings-field-grid'>
                         <label>
                             <input
-                                aria-label='App Name'
+                                aria-label={intl.formatMessage({
+                                    id: 'SystemSettings.app-name',
+                                    defaultMessage: 'App Name',
+                                })}
                                 onChange={(event) => setSettings({...settings, appName: event.target.value})}
-                                placeholder='App Name'
+                                placeholder={intl.formatMessage({
+                                    id: 'SystemSettings.app-name',
+                                    defaultMessage: 'App Name',
+                                })}
                                 value={settings.appName}
                             />
                         </label>
@@ -213,7 +241,10 @@ const SystemSettings = (): JSX.Element => {
                     <div className='admin-settings-field-grid'>
                         <label>
                             <select
-                                aria-label='Time zone'
+                                aria-label={intl.formatMessage({
+                                    id: 'SystemSettings.time-zone',
+                                    defaultMessage: 'Time zone',
+                                })}
                                 onChange={(event) => setSettings({...settings, timeZone: event.target.value})}
                                 value={settings.timeZone || DEFAULT_PROJECT_TIME_ZONE}
                             >
@@ -276,11 +307,19 @@ const SystemSettings = (): JSX.Element => {
                                                 key={provider}
                                                 value={provider}
                                             >
-                                                {provider}
+                                                {intl.formatMessage({
+                                                    id: providerLabelIds[provider],
+                                                    defaultMessage: provider,
+                                                })}
                                             </option>
                                         ))}
                                     </select>
-                                    <small>{defaultProviderHints[settings.ai.provider]}</small>
+                                    <small>
+                                        {intl.formatMessage({
+                                            id: defaultProviderHintIds[settings.ai.provider],
+                                            defaultMessage: defaultProviderHintMessages[settings.ai.provider],
+                                        })}
+                                    </small>
                                 </label>
                                 <label>
                                     <span>
