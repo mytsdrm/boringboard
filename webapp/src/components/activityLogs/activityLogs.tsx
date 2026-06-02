@@ -165,7 +165,7 @@ const buildActivityLogsFromHistory = (
     })
     historyById.forEach((blocks) => blocks.sort((a, b) => b.updateAt - a.updateAt))
 
-    return historyBlocks.reduce<ActivityLog[]>((result, block) => {
+    const logs = historyBlocks.reduce<ActivityLog[]>((result, block) => {
         const board = boardsById.get(block.boardId)
         if (!board) {
             return result
@@ -187,9 +187,38 @@ const buildActivityLogsFromHistory = (
 
         return result
     }, [])
+
+    const specificEventKeys = new Set(logs.
+        filter((log) => log.action !== 'updated').
+        map((log) => `${log.actorId}:${log.boardId}:${log.cardId}:${log.timestamp}`))
+    const seenLogKeys = new Set<string>()
+
+    return logs.filter((log) => {
+        const eventKey = `${log.actorId}:${log.boardId}:${log.cardId}:${log.timestamp}`
+        if (log.action === 'updated' && specificEventKeys.has(eventKey)) {
+            return false
+        }
+
+        const logKey = [
+            eventKey,
+            log.action,
+            log.fromValue || '',
+            log.toValue || '',
+            log.cardTitle,
+        ].join(':')
+        if (seenLogKeys.has(logKey)) {
+            return false
+        }
+        seenLogKeys.add(logKey)
+        return true
+    })
 }
 
-const ActivityLogs = (): JSX.Element => {
+type Props = {
+    adminMode?: boolean
+}
+
+const ActivityLogs = (props: Props): JSX.Element => {
     const intl = useIntl()
     const dispatch = useAppDispatch()
     const boards = useAppSelector(getMySortedBoards)
@@ -208,7 +237,13 @@ const ActivityLogs = (): JSX.Element => {
     const [startDate, setStartDate] = useState('')
     const [endDate, setEndDate] = useState('')
     const cardsSnapshot = useRef<{[cardId: string]: Card}>({})
-    const taskBoards = useMemo(() => boards.filter((board) => !board.isTemplate), [boards])
+    const [adminBoards, setAdminBoards] = useState<Board[]>([])
+    const taskBoards = useMemo(() => {
+        if (props.adminMode) {
+            return adminBoards
+        }
+        return boards.filter((board) => !board.isTemplate)
+    }, [adminBoards, boards, props.adminMode])
     const boardsById = useMemo(() => new Map(taskBoards.map((board) => [board.id, board])), [taskBoards])
     const websocketTeamId = currentTeamId || firstTeam?.id || taskBoards[0]?.teamId || ''
     const currentPageCursor = pageCursors[pageIndex] || 0
@@ -294,8 +329,9 @@ const ActivityLogs = (): JSX.Element => {
 
         async function loadLogs() {
             setIsLoading(true)
-            const [entries, teamUsers] = await Promise.all([
-                Promise.all(taskBoards.map(async (board) => {
+            const [nextAdminBoards, entries, teamUsers] = await Promise.all([
+                props.adminMode && websocketTeamId ? octoClient.getAdminBoards(websocketTeamId) : Promise.resolve([]),
+                props.adminMode ? Promise.resolve([]) : Promise.all(taskBoards.map(async (board) => {
                     const [blocks, members] = await Promise.all([
                         octoClient.getAllBlocks(board.id),
                         octoClient.getBoardMembers(board.teamId, board.id),
@@ -310,18 +346,30 @@ const ActivityLogs = (): JSX.Element => {
 
                     return {cards, userIds, users}
                 })),
-                octoClient.getTeamUsers(true),
+                props.adminMode ? octoClient.getAdminUsers() : octoClient.getTeamUsers(true),
             ])
+            if (props.adminMode) {
+                setAdminBoards(nextAdminBoards)
+            }
+            const effectiveBoardsById = new Map((props.adminMode ? nextAdminBoards : taskBoards).map((board) => [board.id, board]))
 
             const nextCardsSnapshot = {...cardsSnapshot.current}
             entries.flatMap((entry) => entry.cards).forEach((card) => {
                 nextCardsSnapshot[card.id] = card
             })
 
-            const historyBlocks = websocketTeamId ? await octoClient.getDashboardActivityBlocks(websocketTeamId, ACTIVITY_LOG_HISTORY_PAGE_LIMIT, requestBefore, startDateAfter) : []
+            let historyBlocks: Block[] = []
+            if (websocketTeamId) {
+                historyBlocks = props.adminMode ?
+                    await octoClient.getAdminActivityBlocks(websocketTeamId, ACTIVITY_LOG_HISTORY_PAGE_LIMIT, requestBefore, startDateAfter) :
+                    await octoClient.getDashboardActivityBlocks(websocketTeamId, ACTIVITY_LOG_HISTORY_PAGE_LIMIT, requestBefore, startDateAfter)
+            }
             if (canceled) {
                 return
             }
+            historyBlocks.filter((block) => block.type === 'card').forEach((block) => {
+                nextCardsSnapshot[block.id] = block as Card
+            })
 
             const nextUsers = [...entries.flatMap((entry) => entry.users), ...teamUsers]
             if (nextUsers.length > 0) {
@@ -338,7 +386,7 @@ const ActivityLogs = (): JSX.Element => {
             teamUsers.forEach((user) => nextMemberUserIds.add(user.id))
             setMemberUserIds(Array.from(nextMemberUserIds))
 
-            const pageLogs = buildActivityLogsFromHistory(historyBlocks, boardsById, nextCardsSnapshot).
+            const pageLogs = buildActivityLogsFromHistory(historyBlocks, effectiveBoardsById, nextCardsSnapshot).
                 filter((log) => !selectedUserId || log.actorId === selectedUserId).
                 sort((a, b) => b.timestamp - a.timestamp)
             const currentLogs = pageLogs.slice(0, ACTIVITY_LOG_PAGE_SIZE)
@@ -364,7 +412,7 @@ const ActivityLogs = (): JSX.Element => {
         return () => {
             canceled = true
         }
-    }, [boardsById, dispatch, pageIndex, requestBefore, selectedUserId, startDateAfter, taskBoards, websocketTeamId])
+    }, [boardsById, dispatch, pageIndex, props.adminMode, requestBefore, selectedUserId, startDateAfter, taskBoards, websocketTeamId])
 
     useWebsockets(websocketTeamId, (wsClient) => {
         const incrementalBlockUpdate = (_: WSClient, blocks: Block[]) => {
@@ -563,10 +611,17 @@ const ActivityLogs = (): JSX.Element => {
                     />
                 </h1>
                 <p>
-                    <FormattedMessage
-                        id='ActivityLogs.description'
-                        defaultMessage='Recent board activity related to your Task Boards.'
-                    />
+                    {props.adminMode ? (
+                        <FormattedMessage
+                            id='ActivityLogs.admin-description'
+                            defaultMessage='Recent board activity from all registered users.'
+                        />
+                    ) : (
+                        <FormattedMessage
+                            id='ActivityLogs.description'
+                            defaultMessage='Recent board activity related to your Task Boards.'
+                        />
+                    )}
                 </p>
             </div>
 

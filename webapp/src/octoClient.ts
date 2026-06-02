@@ -19,6 +19,25 @@ import {BoardsCloudLimits} from './boardsCloudLimits'
 import {TopBoardResponse} from './insights'
 import {BoardSiteStatistics} from './statistics'
 
+export type AdminAISettings = {
+    enabled: boolean
+    provider: string
+    apiKey: string
+}
+
+export type AdminSystemSettings = {
+    appName: string
+    logo: string
+    ai: AdminAISettings
+}
+
+export type AdminUserPayload = {
+    username: string
+    email: string
+    password?: string
+    group: 'SuperAdmin' | 'PublicUser'
+}
+
 //
 // OctoClient is the client interface to the server APIs
 //
@@ -318,6 +337,90 @@ class OctoClient {
             path += `&after=${encodeURIComponent(afterUpdateAt)}`
         }
         return this.getBlocksWithPath(path)
+    }
+
+    async getAdminActivityBlocks(teamID: string, limit: number, beforeUpdateAt = 0, afterUpdateAt = 0): Promise<Block[]> {
+        let path = `/api/v2/teams/${teamID}/dashboard/activity/all?limit=${encodeURIComponent(limit)}`
+        if (beforeUpdateAt > 0) {
+            path += `&before=${encodeURIComponent(beforeUpdateAt)}`
+        }
+        if (afterUpdateAt > 0) {
+            path += `&after=${encodeURIComponent(afterUpdateAt)}`
+        }
+        return this.getBlocksWithPath(path)
+    }
+
+    async getAdminBoards(teamID: string): Promise<Board[]> {
+        const path = `/api/v2/admin/boards?teamID=${encodeURIComponent(teamID)}`
+        return this.getBoardsWithPath(path)
+    }
+
+    async getAdminUsers(): Promise<IUser[]> {
+        const path = '/api/v2/admin/users'
+        const response = await fetch(this.getBaseURL() + path, {headers: this.headers()})
+        if (response.status !== 200) {
+            return []
+        }
+        return (await this.getJson(response, [])) as IUser[]
+    }
+
+    async createAdminUser(payload: AdminUserPayload): Promise<IUser | null> {
+        const response = await fetch(this.getBaseURL() + '/api/v2/admin/users', {
+            body: JSON.stringify(payload),
+            headers: this.headers(),
+            method: 'POST',
+        })
+        if (response.status !== 201) {
+            return null
+        }
+        return (await this.getJson(response, null)) as IUser | null
+    }
+
+    async updateAdminUser(userID: string, payload: AdminUserPayload): Promise<IUser | null> {
+        const response = await fetch(this.getBaseURL() + `/api/v2/admin/users/${encodeURIComponent(userID)}`, {
+            body: JSON.stringify(payload),
+            headers: this.headers(),
+            method: 'PUT',
+        })
+        if (response.status !== 200) {
+            return null
+        }
+        return (await this.getJson(response, null)) as IUser | null
+    }
+
+    async deleteAdminUser(userID: string): Promise<boolean> {
+        const response = await fetch(this.getBaseURL() + `/api/v2/admin/users/${encodeURIComponent(userID)}`, {
+            headers: this.headers(),
+            method: 'DELETE',
+        })
+        return response.status === 200
+    }
+
+    async getAdminSystemSettings(): Promise<AdminSystemSettings> {
+        const path = '/api/v2/admin/system-settings'
+        const response = await fetch(this.getBaseURL() + path, {headers: this.headers()})
+        return this.getJson<AdminSystemSettings>(response, {
+            appName: 'BoringBoard',
+            logo: '',
+            ai: {
+                apiKey: '',
+                enabled: false,
+                provider: 'OpenAI',
+            },
+        })
+    }
+
+    async saveAdminSystemSettings(settings: AdminSystemSettings): Promise<AdminSystemSettings | null> {
+        const path = '/api/v2/admin/system-settings'
+        const response = await fetch(this.getBaseURL() + path, {
+            body: JSON.stringify(settings),
+            headers: this.headers(),
+            method: 'PUT',
+        })
+        if (response.status !== 200) {
+            return null
+        }
+        return this.getJson<AdminSystemSettings>(response, settings)
     }
 
     private async getBlocksWithPath(path: string): Promise<Block[]> {

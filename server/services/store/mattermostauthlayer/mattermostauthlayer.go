@@ -123,6 +123,10 @@ func (s *MattermostAuthLayer) UpdateUser(user *model.User) (*model.User, error) 
 	return nil, store.NewNotSupportedError("no update allowed from focalboard, update it using mattermost")
 }
 
+func (s *MattermostAuthLayer) DeleteUser(userID string) error {
+	return store.NewNotSupportedError("no user deletion allowed from focalboard, delete it using mattermost")
+}
+
 func (s *MattermostAuthLayer) UpdateUserPassword(username, password string) error {
 	return store.NewNotSupportedError("no update allowed from focalboard, update it using mattermost")
 }

@@ -57,7 +57,9 @@ type Props = {
     activeBoardId?: string
     activityLogsActive?: boolean
     dashboardActive?: boolean
+    systemSettingsActive?: boolean
     templatesActive?: boolean
+    usersActive?: boolean
     onBoardTemplateSelectorOpen: () => void
     onBoardTemplateSelectorClose?: () => void
 }
@@ -81,6 +83,7 @@ const Sidebar = (props: Props) => {
     const me = useAppSelector<IUser|null>(getMe)
     const activeViewID = useAppSelector(getCurrentViewId)
     const currentBoard = useAppSelector(getCurrentBoard)
+    const isSystemAdmin = Boolean(me?.roles && Utils.isSystemAdmin(me.roles)) || Boolean(me?.permissions?.includes('manage_system'))
 
     useEffect(() => {
         const categoryOnChangeHandler = (_: WSClient, categories: Category[]) => {
@@ -389,6 +392,40 @@ const Sidebar = (props: Props) => {
                     />
                 </span>
             </div>
+
+            {isSystemAdmin &&
+                <div
+                    className={`octo-sidebar-dashboard-item${props.usersActive ? ' active' : ''}`}
+                    onClick={() => {
+                        history.push('/users')
+                        hideSidebar()
+                    }}
+                >
+                    <CompassIcon icon='account-multiple-outline'/>
+                    <span className='active-text'>
+                        <FormattedMessage
+                            id='Sidebar.users'
+                            defaultMessage='Users'
+                        />
+                    </span>
+                </div>}
+
+            {isSystemAdmin &&
+                <div
+                    className={`octo-sidebar-dashboard-item${props.systemSettingsActive ? ' active' : ''}`}
+                    onClick={() => {
+                        history.push('/system-settings')
+                        hideSidebar()
+                    }}
+                >
+                    <CompassIcon icon='cog-outline'/>
+                    <span className='active-text'>
+                        <FormattedMessage
+                            id='Sidebar.system-settings'
+                            defaultMessage='System Settings'
+                        />
+                    </span>
+                </div>}
 
             <div
                 className={`octo-sidebar-dashboard-item${props.activityLogsActive ? ' active' : ''}`}

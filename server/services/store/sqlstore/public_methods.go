@@ -143,6 +143,30 @@ func (s *SQLStore) CreateUser(user *model.User) (*model.User, error) {
 
 }
 
+func (s *SQLStore) DeleteUser(userID string) error {
+	if s.dbType == model.SqliteDBType {
+		return s.deleteUser(s.db, userID)
+	}
+	tx, txErr := s.db.BeginTx(context.Background(), nil)
+	if txErr != nil {
+		return txErr
+	}
+	err := s.deleteUser(tx, userID)
+	if err != nil {
+		if rollbackErr := tx.Rollback(); rollbackErr != nil {
+			s.logger.Error("transaction rollback error", mlog.Err(rollbackErr), mlog.String("methodName", "DeleteUser"))
+		}
+		return err
+	}
+
+	if err := tx.Commit(); err != nil {
+		return err
+	}
+
+	return nil
+
+}
+
 func (s *SQLStore) DeleteBlock(blockID string, modifiedBy string) error {
 	if s.dbType == model.SqliteDBType {
 		return s.deleteBlock(s.db, blockID, modifiedBy)

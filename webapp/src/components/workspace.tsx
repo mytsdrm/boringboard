@@ -36,14 +36,18 @@ import GuestNoBoards from './guestNoBoards'
 import Sidebar from './sidebar/sidebar'
 import Dashboard from './dashboard/dashboard'
 import ActivityLogs from './activityLogs/activityLogs'
+import AdminUsers from './admin/adminUsers'
+import SystemSettings from './admin/systemSettings'
 
 import './workspace.scss'
 
 type Props = {
     readonly: boolean
     dashboard?: boolean
+    systemSettings?: boolean
     activityLogs?: boolean
     templates?: boolean
+    users?: boolean
 }
 
 function CenterContent(props: Props) {
@@ -63,6 +67,7 @@ function CenterContent(props: Props) {
     const dispatch = useAppDispatch()
     const me = useAppSelector<IUser|null>(getMe)
     const hiddenBoardIDs = useAppSelector(getHiddenBoardIDs)
+    const isSystemAdmin = Boolean(me?.roles && Utils.isSystemAdmin(me.roles)) || Boolean(me?.permissions?.includes('manage_system'))
 
     const isBoardHidden = () => {
         return hiddenBoardIDs.includes(board.id)
@@ -119,8 +124,16 @@ function CenterContent(props: Props) {
         return <Dashboard/>
     }
 
+    if (props.users) {
+        return <AdminUsers/>
+    }
+
+    if (props.systemSettings) {
+        return <SystemSettings/>
+    }
+
     if (props.activityLogs) {
-        return <ActivityLogs/>
+        return <ActivityLogs adminMode={isSystemAdmin}/>
     }
 
     if (match.params.channelId) {
@@ -195,10 +208,12 @@ const Workspace = (props: Props) => {
                 <Sidebar
                     onBoardTemplateSelectorOpen={openBoardTemplateSelector}
                     onBoardTemplateSelectorClose={closeBoardTemplateSelector}
-                    activeBoardId={(props.activityLogs || props.dashboard || props.templates) ? undefined : board?.id}
+                    activeBoardId={(props.activityLogs || props.dashboard || props.systemSettings || props.templates || props.users) ? undefined : board?.id}
                     activityLogsActive={props.activityLogs || false}
                     dashboardActive={props.dashboard || false}
+                    systemSettingsActive={props.systemSettings || false}
                     templatesActive={props.templates || false}
+                    usersActive={props.users || false}
                 />
             }
             <div className='mainFrame'>
@@ -213,7 +228,9 @@ const Workspace = (props: Props) => {
                     readonly={props.readonly}
                     activityLogs={props.activityLogs || false}
                     dashboard={props.dashboard || false}
+                    systemSettings={props.systemSettings || false}
                     templates={props.templates || false}
+                    users={props.users || false}
                 />
             </div>
             {boardTemplateSelectorOpen &&

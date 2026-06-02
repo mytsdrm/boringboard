@@ -17,6 +17,19 @@ func (a *App) GetDashboardActivityBlocks(userID, teamID string, limit uint64, be
 		return nil, err
 	}
 
+	return a.getActivityBlocksForBoards(boards, limit, beforeUpdateAt, afterUpdateAt)
+}
+
+func (a *App) GetAdminActivityBlocks(teamID string, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.Block, error) {
+	boards, err := a.GetAdminBoards(teamID)
+	if err != nil {
+		return nil, err
+	}
+
+	return a.getActivityBlocksForBoards(boards, limit, beforeUpdateAt, afterUpdateAt)
+}
+
+func (a *App) getActivityBlocksForBoards(boards []*model.Board, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.Block, error) {
 	if limit == 0 {
 		limit = 20
 	}

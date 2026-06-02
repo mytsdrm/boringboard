@@ -62,6 +62,8 @@ type Store interface {
 	GetUserByUsername(username string) (*model.User, error)
 	CreateUser(user *model.User) (*model.User, error)
 	UpdateUser(user *model.User) (*model.User, error)
+	// @withTransaction
+	DeleteUser(userID string) error
 	UpdateUserPassword(username, password string) error
 	UpdateUserPasswordByID(userID, password string) error
 	GetUsersByTeam(teamID string, asGuestID string, showEmail, showName bool) ([]*model.User, error)

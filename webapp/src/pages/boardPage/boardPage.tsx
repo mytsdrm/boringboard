@@ -66,7 +66,9 @@ type Props = {
     new?: boolean
     activityLogs?: boolean
     dashboard?: boolean
+    systemSettings?: boolean
     templates?: boolean
+    users?: boolean
 }
 
 const BoardPage = (props: Props): JSX.Element => {
@@ -285,7 +287,7 @@ const BoardPage = (props: Props): JSX.Element => {
 
             {!showJoinBoardDialog &&
                 <div className='BoardPage'>
-                    {!props.new && !props.activityLogs && !props.dashboard && !props.templates && <TeamToBoardAndViewRedirect/>}
+                    {!props.new && !props.activityLogs && !props.dashboard && !props.systemSettings && !props.templates && !props.users && <TeamToBoardAndViewRedirect/>}
                     <BackwardCompatibilityQueryParamsRedirect/>
                     <SetWindowTitleAndIcon/>
                     <UndoRedoHotKeys/>
@@ -324,7 +326,9 @@ const BoardPage = (props: Props): JSX.Element => {
                             readonly={props.readonly || false}
                             activityLogs={props.activityLogs || false}
                             dashboard={props.dashboard || false}
+                            systemSettings={props.systemSettings || false}
                             templates={props.templates || false}
+                            users={props.users || false}
                         />
                     }
                 </div>

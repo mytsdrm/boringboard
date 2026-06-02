@@ -166,6 +166,165 @@ func (s *SQLStore) updateUser(db sq.BaseRunner, user *model.User) (*model.User, 
 	return user, nil
 }
 
+func (s *SQLStore) deleteUser(db sq.BaseRunner, userID string) error {
+	if _, err := s.getUserByID(db, userID); err != nil {
+		return err
+	}
+
+	ownedBoardIDs, err := s.getUserOwnedBoardIDs(db, userID)
+	if err != nil {
+		return err
+	}
+	relatedBlockIDs, err := s.getUserRelatedBlockIDs(db, userID, ownedBoardIDs)
+	if err != nil {
+		return err
+	}
+
+	if len(relatedBlockIDs) > 0 {
+		if _, err := s.getQueryBuilder(db).
+			Delete(s.tablePrefix + "subscriptions").
+			Where(sq.Eq{"block_id": relatedBlockIDs}).
+			Exec(); err != nil {
+			return err
+		}
+		if _, err := s.getQueryBuilder(db).
+			Delete(s.tablePrefix + "notification_hints").
+			Where(sq.Eq{"block_id": relatedBlockIDs}).
+			Exec(); err != nil {
+			return err
+		}
+		if _, err := s.getQueryBuilder(db).
+			Delete(s.tablePrefix + "blocks_history").
+			Where(sq.Eq{"id": relatedBlockIDs}).
+			Exec(); err != nil {
+			return err
+		}
+		if _, err := s.getQueryBuilder(db).
+			Delete(s.tablePrefix + "blocks").
+			Where(sq.Eq{"id": relatedBlockIDs}).
+			Exec(); err != nil {
+			return err
+		}
+	}
+
+	if len(ownedBoardIDs) > 0 {
+		if _, err := s.getQueryBuilder(db).
+			Delete(s.tablePrefix + "sharing").
+			Where(sq.Eq{"id": ownedBoardIDs}).
+			Exec(); err != nil {
+			return err
+		}
+		if _, err := s.getQueryBuilder(db).
+			Delete(s.tablePrefix + "category_boards").
+			Where(sq.Eq{"board_id": ownedBoardIDs}).
+			Exec(); err != nil {
+			return err
+		}
+		if _, err := s.getQueryBuilder(db).
+			Delete(s.tablePrefix + "board_members_history").
+			Where(sq.Eq{"board_id": ownedBoardIDs}).
+			Exec(); err != nil {
+			return err
+		}
+		if _, err := s.getQueryBuilder(db).
+			Delete(s.tablePrefix + "board_members").
+			Where(sq.Eq{"board_id": ownedBoardIDs}).
+			Exec(); err != nil {
+			return err
+		}
+		if _, err := s.getQueryBuilder(db).
+			Delete(s.tablePrefix + "boards_history").
+			Where(sq.Eq{"id": ownedBoardIDs}).
+			Exec(); err != nil {
+			return err
+		}
+		if _, err := s.getQueryBuilder(db).
+			Delete(s.tablePrefix + "boards").
+			Where(sq.Eq{"id": ownedBoardIDs}).
+			Exec(); err != nil {
+			return err
+		}
+	}
+
+	deleteQueries := []sq.DeleteBuilder{
+		s.getQueryBuilder(db).Delete(s.tablePrefix + "sessions").Where(sq.Eq{"user_id": userID}),
+		s.getQueryBuilder(db).Delete(s.tablePrefix + "preferences").Where(sq.Eq{"userid": userID}),
+		s.getQueryBuilder(db).Delete(s.tablePrefix + "subscriptions").Where(sq.Eq{"subscriber_id": userID}),
+		s.getQueryBuilder(db).Delete(s.tablePrefix + "notification_hints").Where(sq.Eq{"modified_by_id": userID}),
+		s.getQueryBuilder(db).Delete(s.tablePrefix + "category_boards").Where(sq.Eq{"user_id": userID}),
+		s.getQueryBuilder(db).Delete(s.tablePrefix + "categories").Where(sq.Eq{"user_id": userID}),
+		s.getQueryBuilder(db).Delete(s.tablePrefix + "board_members_history").Where(sq.Eq{"user_id": userID}),
+		s.getQueryBuilder(db).Delete(s.tablePrefix + "board_members").Where(sq.Eq{"user_id": userID}),
+		s.getQueryBuilder(db).Delete(s.tablePrefix + "users").Where(sq.Eq{"id": userID}),
+	}
+	for _, query := range deleteQueries {
+		if _, err := query.Exec(); err != nil {
+			return err
+		}
+	}
+
+	return nil
+}
+
+func (s *SQLStore) getUserOwnedBoardIDs(db sq.BaseRunner, userID string) ([]string, error) {
+	query := s.getQueryBuilder(db).
+		Select("id").
+		From(s.tablePrefix + "boards").
+		Where(sq.Eq{"created_by": userID})
+
+	rows, err := query.Query()
+	if err != nil {
+		return nil, err
+	}
+	defer s.CloseRows(rows)
+
+	boardIDs := []string{}
+	for rows.Next() {
+		var boardID string
+		if err := rows.Scan(&boardID); err != nil {
+			return nil, err
+		}
+		boardIDs = append(boardIDs, boardID)
+	}
+	return boardIDs, nil
+}
+
+func (s *SQLStore) getUserRelatedBlockIDs(db sq.BaseRunner, userID string, boardIDs []string) ([]string, error) {
+	conditions := sq.Or{
+		sq.Eq{"created_by": userID},
+		sq.Eq{"modified_by": userID},
+	}
+	if len(boardIDs) > 0 {
+		conditions = append(conditions, sq.Eq{"board_id": boardIDs})
+	}
+
+	query := s.getQueryBuilder(db).
+		Select("id").
+		From(s.tablePrefix + "blocks").
+		Where(conditions)
+
+	rows, err := query.Query()
+	if err != nil {
+		return nil, err
+	}
+	defer s.CloseRows(rows)
+
+	blockIDsByID := map[string]bool{}
+	for rows.Next() {
+		var blockID string
+		if err := rows.Scan(&blockID); err != nil {
+			return nil, err
+		}
+		blockIDsByID[blockID] = true
+	}
+
+	blockIDs := make([]string, 0, len(blockIDsByID))
+	for blockID := range blockIDsByID {
+		blockIDs = append(blockIDs, blockID)
+	}
+	return blockIDs, nil
+}
+
 func (s *SQLStore) updateUserPassword(db sq.BaseRunner, username, password string) error {
 	now := utils.GetMillis()
 
