@@ -21,9 +21,11 @@ import {getClientConfig, setClientConfig} from '../store/clientConfig'
 
 import wsClient, {WSClient} from '../wsclient'
 import {ClientConfig} from '../config/clientConfig'
+import {AdminSystemSettings} from '../octoClient'
 import {Utils} from '../utils'
 import {IUser} from '../user'
 import propsRegistry from '../properties'
+import {applyProjectSystemSettings} from '../systemSettings'
 
 import {getMe} from '../store/users'
 
@@ -89,6 +91,11 @@ function CenterContent(props: Props) {
         }
         wsClient.addOnConfigChange(onConfigChangeHandler)
 
+        const onSystemSettingsChangeHandler = (_: WSClient, settings: AdminSystemSettings) => {
+            applyProjectSystemSettings(settings)
+        }
+        wsClient.addOnSystemSettingsChange(onSystemSettingsChangeHandler)
+
         const onCardLimitTimestampChangeHandler = (_: WSClient, timestamp: number) => {
             dispatch(setLimitTimestamp({timestamp, templates}))
             if (cardLimitTimestamp > timestamp) {
@@ -99,6 +106,7 @@ function CenterContent(props: Props) {
 
         return () => {
             wsClient.removeOnConfigChange(onConfigChangeHandler)
+            wsClient.removeOnSystemSettingsChange(onSystemSettingsChangeHandler)
         }
     }, [cardLimitTimestamp, match.params.boardId, templates])
 

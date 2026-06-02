@@ -10,6 +10,10 @@ const SYSTEM_SETTINGS_STORAGE_KEY = 'boringboardSystemSettings'
 
 export type ProjectSystemSettings = {
     timeZone: string
+    taskBoards: {
+        enableInvitedUserEditProperty: boolean
+        enableInvitedUserShare: boolean
+    }
 }
 
 const isValidTimeZone = (timeZone: string): boolean => {
@@ -25,8 +29,12 @@ const normalizeTimeZone = (timeZone?: string): string => {
     return isValidTimeZone(nextTimeZone) ? nextTimeZone : DEFAULT_PROJECT_TIME_ZONE
 }
 
-export const getProjectSettingsFromSystemSettings = (settings?: Pick<AdminSystemSettings, 'timeZone'>): ProjectSystemSettings => {
+export const getProjectSettingsFromSystemSettings = (settings?: Pick<AdminSystemSettings, 'timeZone' | 'taskBoards'>): ProjectSystemSettings => {
     return {
+        taskBoards: {
+            enableInvitedUserEditProperty: settings?.taskBoards?.enableInvitedUserEditProperty || false,
+            enableInvitedUserShare: settings?.taskBoards?.enableInvitedUserShare ?? true,
+        },
         timeZone: normalizeTimeZone(settings?.timeZone),
     }
 }
@@ -44,7 +52,7 @@ export const getStoredProjectSystemSettings = (): ProjectSystemSettings => {
     }
 }
 
-export const applyProjectSystemSettings = (settings?: Pick<AdminSystemSettings, 'timeZone'>): ProjectSystemSettings => {
+export const applyProjectSystemSettings = (settings?: Pick<AdminSystemSettings, 'timeZone' | 'taskBoards'>): ProjectSystemSettings => {
     const projectSettings = getProjectSettingsFromSystemSettings(settings)
     window.localStorage.setItem(SYSTEM_SETTINGS_STORAGE_KEY, JSON.stringify(projectSettings))
     window.dispatchEvent(new CustomEvent<ProjectSystemSettings>(SYSTEM_SETTINGS_UPDATED_EVENT, {detail: projectSettings}))

@@ -398,6 +398,10 @@ func (pa *PluginAdapter) BroadcastConfigChange(pluginConfig model.ClientConfig) 
 	pa.sendMessageToAll(websocketActionUpdateConfig, utils.StructToMap(pluginConfig))
 }
 
+func (pa *PluginAdapter) BroadcastSystemSettingsChange(settings model.AdminSystemSettings) {
+	pa.sendMessageToAll(websocketActionUpdateSystemSettings, utils.StructToMap(settings))
+}
+
 // sendUserMessageSkipCluster sends the message to specific users.
 func (pa *PluginAdapter) sendUserMessageSkipCluster(event string, payload map[string]interface{}, userIDs ...string) {
 	for _, userID := range userIDs {

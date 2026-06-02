@@ -23,6 +23,7 @@ import {getVisibleAndHiddenGroups} from '../boardUtils'
 import TelemetryClient, {TelemetryCategory, TelemetryActions} from '../../../webapp/src/telemetry/telemetryClient'
 
 import {getClientConfig} from '../store/clientConfig'
+import {getMyBoardMembership} from '../store/boards'
 
 import './centerPanel.scss'
 
@@ -40,6 +41,7 @@ import {
 import {UserConfigPatch} from '../user'
 
 import octoClient from '../octoClient'
+import {applyProjectSystemSettings, getStoredProjectSystemSettings, ProjectSystemSettings, SYSTEM_SETTINGS_UPDATED_EVENT} from '../systemSettings'
 
 import ShareBoardButton from './shareBoard/shareBoardButton'
 import ShareBoardLoginButton from './shareBoard/shareBoardLoginButton'
@@ -80,6 +82,7 @@ const CenterPanel = (props: Props) => {
     const [selectedCardIds, setSelectedCardIds] = useState<string[]>([])
     const [cardIdToFocusOnRender, setCardIdToFocusOnRender] = useState('')
     const [showHiddenCardCountNotification, setShowHiddenCardCountNotification] = useState(false)
+    const [projectSettings, setProjectSettings] = useState<ProjectSystemSettings>(getStoredProjectSystemSettings)
 
     const onboardingTourStarted = useAppSelector(getOnboardingTourStarted)
     const onboardingTourCategory = useAppSelector(getOnboardingTourCategory)
@@ -96,6 +99,26 @@ const CenterPanel = (props: Props) => {
     // https://stackoverflow.com/a/58579462
     useEffect(() => {
         TelemetryClient.trackEvent(TelemetryCategory, TelemetryActions.ViewBoard, {board: props.board.id, view: props.activeView.id, viewType: props.activeView.fields.viewType})
+    }, [])
+
+    useEffect(() => {
+        let canceled = false
+        async function loadSystemSettings() {
+            const nextSettings = await octoClient.getSystemSettings()
+            if (!canceled) {
+                setProjectSettings(applyProjectSystemSettings(nextSettings))
+            }
+        }
+        const handleSystemSettingsUpdated = (event: Event) => {
+            setProjectSettings((event as CustomEvent<ProjectSystemSettings>).detail || getStoredProjectSystemSettings())
+        }
+
+        window.addEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
+        loadSystemSettings()
+        return () => {
+            canceled = true
+            window.removeEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
+        }
     }, [])
 
     useHotkeys('esc', (e: KeyboardEvent) => {
@@ -363,10 +386,12 @@ const CenterPanel = (props: Props) => {
         setShowHiddenCardCountNotification(show)
     }, [showHiddenCardCountNotification])
 
-    const showShareButton = !props.readonly && me?.id !== 'single-user'
-    const showShareLoginButton = props.readonly && me?.id !== 'single-user'
-
     const {groupByProperty, activeView, board, views, cards} = props
+    const myBoardMembership = useAppSelector(getMyBoardMembership(board.id))
+    const canShareAsBoardAdmin = Boolean(myBoardMembership?.schemeAdmin)
+    const canShareAsInvitedUser = Boolean(projectSettings.taskBoards.enableInvitedUserShare && myBoardMembership && !myBoardMembership.synthetic && !myBoardMembership.schemeAdmin)
+    const showShareButton = !props.readonly && me?.id !== 'single-user' && (canShareAsBoardAdmin || canShareAsInvitedUser)
+    const showShareLoginButton = props.readonly && me?.id !== 'single-user'
 
     const getUserDisplayName = (boardGroup: BoardGroup) => {
         const user = boardUsers[boardGroup.option.id]

@@ -8,6 +8,7 @@ import {Block} from './blocks/block'
 import {Board, BoardMember} from './blocks/board'
 import {OctoUtils} from './octoUtils'
 import {BoardCategoryWebsocketData, Category} from './store/sidebar'
+import {AdminSystemSettings} from './octoClient'
 
 // These are outgoing commands to the server
 type WSCommand = {
@@ -29,6 +30,7 @@ export type WSMessage = {
     member?: BoardMember
     timestamp?: number
     categoryOrder?: string[]
+    settings?: AdminSystemSettings
 }
 
 export const ACTION_UPDATE_BOARD = 'UPDATE_BOARD'
@@ -41,6 +43,7 @@ export const ACTION_SUBSCRIBE_TEAM = 'SUBSCRIBE_TEAM'
 export const ACTION_UNSUBSCRIBE_TEAM = 'UNSUBSCRIBE_TEAM'
 export const ACTION_UNSUBSCRIBE_BLOCKS = 'UNSUBSCRIBE_BLOCKS'
 export const ACTION_UPDATE_CLIENT_CONFIG = 'UPDATE_CLIENT_CONFIG'
+export const ACTION_UPDATE_SYSTEM_SETTINGS = 'UPDATE_SYSTEM_SETTINGS'
 export const ACTION_UPDATE_CATEGORY = 'UPDATE_CATEGORY'
 export const ACTION_UPDATE_BOARD_CATEGORY = 'UPDATE_BOARD_CATEGORY'
 export const ACTION_UPDATE_SUBSCRIPTION = 'UPDATE_SUBSCRIPTION'
@@ -78,6 +81,7 @@ type OnReconnectHandler = (client: WSClient) => void
 type OnStateChangeHandler = (client: WSClient, state: 'init' | 'open' | 'close') => void
 type OnErrorHandler = (client: WSClient, e: Event) => void
 type OnConfigChangeHandler = (client: WSClient, clientConfig: ClientConfig) => void
+type OnSystemSettingsChangeHandler = (client: WSClient, settings: AdminSystemSettings) => void
 type OnCardLimitTimestampChangeHandler = (client: WSClient, timestamp: number) => void
 type FollowChangeHandler = (client: WSClient, subscription: Subscription) => void
 
@@ -122,6 +126,7 @@ class WSClient {
     onChange: ChangeHandlers = {Block: [], Category: [], BoardCategory: [], Board: [], BoardMember: [], CategoryReorder: []}
     onError: OnErrorHandler[] = []
     onConfigChange: OnConfigChangeHandler[] = []
+    onSystemSettingsChange: OnSystemSettingsChangeHandler[] = []
     onCardLimitTimestampChange: OnCardLimitTimestampChangeHandler[] = []
     onFollowBlock: FollowChangeHandler = () => {}
     onUnfollowBlock: FollowChangeHandler = () => {}
@@ -315,6 +320,17 @@ class WSClient {
         }
     }
 
+    addOnSystemSettingsChange(handler: OnSystemSettingsChangeHandler): void {
+        this.onSystemSettingsChange.push(handler)
+    }
+
+    removeOnSystemSettingsChange(handler: OnSystemSettingsChangeHandler): void {
+        const index = this.onSystemSettingsChange.indexOf(handler)
+        if (index !== -1) {
+            this.onSystemSettingsChange.splice(index, 1)
+        }
+    }
+
     addOnCardLimitTimestampChange(handler: OnCardLimitTimestampChangeHandler): void {
         this.onCardLimitTimestampChange.push(handler)
     }
@@ -489,6 +505,9 @@ class WSClient {
                 case ACTION_REORDER_CATEGORIES:
                     this.updateHandler(message)
                     break
+                case ACTION_UPDATE_SYSTEM_SETTINGS:
+                    this.updateSystemSettingsHandler(message)
+                    break
                 default:
                     Utils.logError(`Unexpected action: ${message.action}`)
                 }
@@ -526,6 +545,16 @@ class WSClient {
     updateClientConfigHandler(config: ClientConfig): void {
         for (const handler of this.onConfigChange) {
             handler(this, config)
+        }
+    }
+
+    updateSystemSettingsHandler(message: WSMessage): void {
+        if (!message.settings) {
+            return
+        }
+
+        for (const handler of this.onSystemSettingsChange) {
+            handler(this, message.settings)
         }
     }
 

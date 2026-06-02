@@ -16,6 +16,7 @@ const (
 	websocketActionDeleteMember             = "DELETE_MEMBER"
 	websocketActionUpdateBlock              = "UPDATE_BLOCK"
 	websocketActionUpdateConfig             = "UPDATE_CLIENT_CONFIG"
+	websocketActionUpdateSystemSettings     = "UPDATE_SYSTEM_SETTINGS"
 	websocketActionUpdateCategory           = "UPDATE_CATEGORY"
 	websocketActionUpdateCategoryBoard      = "UPDATE_BOARD_CATEGORY"
 	websocketActionUpdateSubscription       = "UPDATE_SUBSCRIPTION"
@@ -37,6 +38,7 @@ type Adapter interface {
 	BroadcastMemberChange(teamID, boardID string, member *model.BoardMember)
 	BroadcastMemberDelete(teamID, boardID, userID string)
 	BroadcastConfigChange(clientConfig model.ClientConfig)
+	BroadcastSystemSettingsChange(settings model.AdminSystemSettings)
 	BroadcastCategoryChange(category model.Category)
 	BroadcastCategoryBoardChange(teamID, userID string, blockCategory []*model.BoardCategoryWebsocketData)
 	BroadcastCardLimitTimestampChange(cardLimitTimestamp int64)

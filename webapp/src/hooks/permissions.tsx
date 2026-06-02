@@ -6,6 +6,7 @@ import {getMyBoardMembership, getCurrentBoardId, getBoard} from '../store/boards
 import {getCurrentTeam} from '../store/teams'
 import {Permission} from '../constants'
 import {MemberRole} from '../blocks/board'
+import {getStoredProjectSystemSettings} from '../systemSettings'
 
 export const useHasPermissions = (teamId: string, boardId: string, permissions: Permission[]): boolean => {
     if (!boardId || !teamId) {
@@ -27,8 +28,14 @@ export const useHasPermissions = (teamId: string, boardId: string, permissions: 
     const editorPermissions = [Permission.ManageBoardCards, Permission.ManageBoardProperties]
     const commenterPermissions = [Permission.CommentBoardCards]
     const viewerPermissions = [Permission.ViewBoard]
+    const projectSettings = getStoredProjectSystemSettings()
+    const invitedUserSharePermissions = [Permission.ShareBoard]
+    const canInvitedUserShare = projectSettings.taskBoards.enableInvitedUserShare && member && !member.synthetic && !member.schemeAdmin
 
     for (const permission of permissions) {
+        if (invitedUserSharePermissions.includes(permission) && canInvitedUserShare) {
+            return true
+        }
         if (adminPermissions.includes(permission) && member.schemeAdmin) {
             return true
         }

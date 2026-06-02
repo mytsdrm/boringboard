@@ -464,7 +464,7 @@ class OctoClient {
             },
             taskBoards: {
                 enableInvitedUserEditProperty: false,
-                enableInvitedUserShare: false,
+                enableInvitedUserShare: true,
             },
         })
     }
@@ -497,7 +497,7 @@ class OctoClient {
             },
             taskBoards: {
                 enableInvitedUserEditProperty: false,
-                enableInvitedUserShare: false,
+                enableInvitedUserShare: true,
             },
         })
     }

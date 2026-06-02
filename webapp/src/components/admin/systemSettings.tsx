@@ -41,7 +41,7 @@ const defaultSettings: AdminSystemSettings = {
     },
     taskBoards: {
         enableInvitedUserEditProperty: false,
-        enableInvitedUserShare: false,
+        enableInvitedUserShare: true,
     },
 }
 

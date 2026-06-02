@@ -681,6 +681,29 @@ func (ws *Server) BroadcastConfigChange(clientConfig model.ClientConfig) {
 	}
 }
 
+func (ws *Server) BroadcastSystemSettingsChange(settings model.AdminSystemSettings) {
+	message := UpdateSystemSettings{
+		Action:   websocketActionUpdateSystemSettings,
+		Settings: settings,
+	}
+
+	listeners := ws.listeners
+	ws.logger.Debug("broadcasting system settings change to listener(s)",
+		mlog.Int("listener_count", len(listeners)),
+	)
+
+	for listener := range listeners {
+		ws.logger.Debug("Broadcast system settings change",
+			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
+		)
+		err := listener.WriteJSON(message)
+		if err != nil {
+			ws.logger.Error("broadcast system settings error", mlog.Err(err))
+			listener.conn.Close()
+		}
+	}
+}
+
 func (ws *Server) BroadcastBoardChange(teamID string, board *model.Board) {
 	message := UpdateBoardMsg{
 		Action: websocketActionUpdateBoard,

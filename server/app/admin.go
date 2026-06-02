@@ -23,7 +23,7 @@ func defaultAdminSystemSettings() model.AdminSystemSettings {
 			OllamaEndpoint: "http://localhost:11434",
 		},
 		TaskBoards: model.AdminTaskBoardSettings{
-			EnableInvitedUserShare:        false,
+			EnableInvitedUserShare:        true,
 			EnableInvitedUserEditProperty: false,
 		},
 	}
@@ -205,5 +205,13 @@ func (a *App) SaveAdminSystemSettings(settings model.AdminSystemSettings) (model
 	if err != nil {
 		return settings, err
 	}
-	return settings, a.store.SetSystemSetting(adminSystemSettingsKey, string(data))
+	if err := a.store.SetSystemSetting(adminSystemSettingsKey, string(data)); err != nil {
+		return settings, err
+	}
+
+	broadcastSettings := settings
+	broadcastSettings.AI.APIKey = ""
+	a.wsAdapter.BroadcastSystemSettingsChange(broadcastSettings)
+
+	return settings, nil
 }

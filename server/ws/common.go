@@ -45,6 +45,12 @@ type UpdateClientConfig struct {
 	ClientConfig model.ClientConfig `json:"clientconfig"`
 }
 
+// UpdateSystemSettings is sent when system settings change.
+type UpdateSystemSettings struct {
+	Action   string                    `json:"action"`
+	Settings model.AdminSystemSettings `json:"settings"`
+}
+
 // UpdateClientConfig is sent on block updates.
 type UpdateCardLimitTimestamp struct {
 	Action    string `json:"action"`

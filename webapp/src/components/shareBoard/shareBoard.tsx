@@ -340,7 +340,7 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
                         onClose: () => setShowLinkChannelConfirmation(null),
                     }}
                 />}
-                <BoardPermissionGate permissions={[Permission.ManageBoardRoles]}>
+                <BoardPermissionGate permissions={[Permission.ShareBoard]}>
                     <div className='share-input__container'>
                         <div className='share-input'>
                             <SearchIcon/>
