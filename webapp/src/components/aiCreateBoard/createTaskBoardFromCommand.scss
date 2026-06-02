@@ -1,0 +1,423 @@
+.CreateTaskBoardFromCommand {
+    margin-bottom: 12px;
+
+    .ai-open-button {
+        width: 100%;
+        justify-content: flex-start;
+        padding-left: 14px;
+        border-color: rgba(var(--button-bg-rgb), 0.32);
+        background: color-mix(in srgb, rgba(var(--button-bg-rgb), 0.1) 72%, rgb(var(--center-channel-bg-rgb)));
+        color: rgb(var(--button-bg-rgb));
+        font-weight: 700;
+    }
+
+    &.sidebar-ai-create {
+        margin: 4px 0;
+
+        .ai-open-button {
+            width: 100%;
+            height: 36px;
+            justify-content: flex-start;
+            padding: 0 10px;
+            border: 0;
+            background: transparent;
+            box-shadow: none;
+            color: rgba(var(--sidebar-text-rgb), 0.64);
+            font-size: 13px;
+            font-weight: 600;
+
+            span {
+                order: 1;
+            }
+
+            .CompassIcon {
+                order: 2;
+                margin-right: 0;
+                margin-left: auto;
+                color: rgba(var(--button-bg-rgb), 0.9);
+            }
+
+            &:hover {
+                background-color: rgba(var(--sidebar-text-rgb), 0.08);
+                color: rgb(var(--sidebar-text-rgb));
+
+                .CompassIcon {
+                    color: rgb(var(--button-bg-rgb));
+                }
+            }
+        }
+    }
+}
+
+.CreateTaskBoardFromCommandModal {
+    .dialog {
+        width: min(920px, calc(100vw - 40px));
+        max-height: min(840px, calc(100vh - 40px));
+        height: auto;
+        overflow: hidden;
+    }
+
+    .dialog > .toolbar {
+        position: static;
+        top: auto;
+        right: auto;
+        align-items: flex-start;
+        width: 100%;
+        padding: 28px 32px 18px;
+    }
+
+    .toolbar--right {
+        margin-right: -8px;
+    }
+
+    .dialog-title {
+        color: var(--bb-text);
+        font-size: 22px;
+        font-weight: 850;
+        line-height: 28px;
+    }
+
+    .dialog-subtitle {
+        max-width: 640px;
+        color: var(--bb-text-muted);
+        font-size: 13px;
+        line-height: 19px;
+    }
+
+    .ai-command-provider-meta {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        margin-top: 10px;
+
+        span {
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            min-height: 28px;
+            padding: 5px 9px;
+            border: 1px solid var(--bb-border);
+            border-radius: 999px;
+            background: var(--bb-panel-bg-soft);
+            color: var(--bb-text-muted);
+            font-size: 12px;
+            line-height: 1;
+        }
+
+        strong {
+            color: var(--bb-text);
+            font-weight: 800;
+        }
+    }
+
+    .ai-command-modal-body {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        gap: 14px;
+        min-height: 0;
+        padding: 0 32px 20px;
+        overflow: auto;
+    }
+
+    .ai-command-input-area {
+        textarea {
+            width: 100%;
+            height: 156px;
+            resize: none;
+            padding: 13px 14px;
+            border: 1px solid var(--bb-border-strong);
+            border-radius: 8px;
+            background: rgb(var(--center-channel-bg-rgb));
+            color: var(--bb-text);
+            font: inherit;
+            line-height: 20px;
+
+            &:focus {
+                border-color: rgba(var(--button-bg-rgb), 0.64);
+                box-shadow: 0 0 0 3px rgba(var(--button-bg-rgb), 0.14);
+                outline: 0;
+            }
+        }
+    }
+
+    .ai-command-error {
+        padding: 10px 12px;
+        border: 1px solid rgba(210, 75, 75, 0.26);
+        border-radius: 8px;
+        background: rgba(210, 75, 75, 0.08);
+        color: #d24b4b;
+        font-size: 13px;
+        font-weight: 700;
+    }
+
+    .ai-preview {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+        padding: 16px;
+        border: 1px solid var(--bb-border);
+        border-radius: 8px;
+        background: var(--bb-panel-bg-soft);
+    }
+
+    .ai-preview-heading {
+        h3 {
+            margin: 4px 0 6px;
+            color: var(--bb-text);
+            font-size: 20px;
+            font-weight: 850;
+            line-height: 26px;
+        }
+
+        p {
+            margin: 0;
+            color: var(--bb-text-muted);
+            font-size: 13px;
+            line-height: 19px;
+        }
+    }
+
+    .ai-preview-kicker,
+    .ai-preview-section > span {
+        color: var(--bb-text-subtle);
+        font-size: 11px;
+        font-weight: 850;
+        letter-spacing: 0;
+        text-transform: none;
+    }
+
+    .ai-preview-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 10px;
+
+        > div {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            min-height: 56px;
+            padding: 12px;
+            border: 1px solid var(--bb-border);
+            border-radius: 8px;
+            background: rgb(var(--center-channel-bg-rgb));
+        }
+
+        strong {
+            color: rgb(var(--button-bg-rgb));
+            font-size: 22px;
+            font-weight: 850;
+            line-height: 1;
+        }
+
+        span {
+            color: var(--bb-text-muted);
+            font-size: 12px;
+            font-weight: 700;
+            text-align: right;
+        }
+    }
+
+    .ai-preview-section {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+    }
+
+    .ai-preview-pills,
+    .ai-preview-columns {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+
+    .ai-preview-pills strong {
+        padding: 6px 10px;
+        border-radius: 8px;
+        background: var(--bb-blue-soft);
+        color: var(--bb-blue-text);
+        font-size: 12px;
+    }
+
+    .ai-preview-column {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        min-height: 34px;
+        padding: 7px 10px;
+        border: 1px solid var(--bb-border);
+        border-radius: 8px;
+        background: rgb(var(--center-channel-bg-rgb));
+
+        span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 20px;
+            height: 20px;
+            border-radius: 999px;
+            background: rgba(var(--button-bg-rgb), 0.12);
+            color: rgb(var(--button-bg-rgb));
+            font-size: 11px;
+            font-weight: 850;
+        }
+
+        strong {
+            color: var(--bb-text);
+            font-size: 12px;
+        }
+    }
+
+    .ai-preview-tasks {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 8px;
+        max-height: 240px;
+        overflow: auto;
+
+        em {
+            color: var(--bb-text-muted);
+            font-size: 13px;
+        }
+    }
+
+    .ai-preview-task {
+        display: flex;
+        flex-direction: column;
+        gap: 6px;
+        min-width: 0;
+        padding: 10px 11px;
+        border: 1px solid var(--bb-border);
+        border-radius: 8px;
+        background: rgb(var(--center-channel-bg-rgb));
+
+        strong {
+            overflow: hidden;
+            color: var(--bb-text);
+            font-size: 13px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        span {
+            width: fit-content;
+            max-width: 100%;
+            overflow: hidden;
+            padding: 3px 7px;
+            border-radius: 999px;
+            background: color-mix(in srgb, var(--bb-panel-bg-soft) 84%, rgba(var(--button-bg-rgb), 0.12));
+            color: var(--bb-text-muted);
+            font-size: 11px;
+            font-weight: 700;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
+    .ai-preview-actions {
+        display: flex;
+        align-items: center;
+        justify-content: flex-end;
+        gap: 12px;
+        padding: 16px 32px 24px;
+        border-top: 1px solid var(--bb-border);
+        background: rgb(var(--center-channel-bg-rgb));
+
+        button {
+            display: inline-flex;
+            align-items: center;
+            min-width: 148px;
+            height: 42px;
+            justify-content: center;
+            gap: 8px;
+            border-radius: 8px;
+            font-weight: 750;
+            line-height: 1;
+
+            > span {
+                display: inline-flex;
+                align-items: center;
+                line-height: 1;
+            }
+
+            .CompassIcon {
+                flex: 0 0 auto;
+                width: 17px;
+                height: 17px;
+                margin: 0;
+                font-size: 17px;
+                line-height: 17px;
+            }
+        }
+
+        .ai-action-cancel {
+            min-width: 112px;
+            border: 1px solid rgba(220, 38, 38, 0.32);
+            background: rgba(220, 38, 38, 0.06);
+            color: #b42318;
+
+            &:hover {
+                background: rgba(220, 38, 38, 0.12);
+                color: #991b1b;
+            }
+        }
+
+        .ai-action-generate {
+            background: rgb(var(--button-bg-rgb));
+            color: #fff;
+
+            &:hover {
+                background: color-mix(in srgb, rgb(var(--button-bg-rgb)) 88%, #000);
+            }
+        }
+
+        .ai-action-create {
+            background: #16a34a;
+            color: #fff;
+
+            &:hover {
+                background: #15803d;
+            }
+
+            &:disabled,
+            &:disabled:hover {
+                background: #86efac;
+                color: rgba(255, 255, 255, 0.92);
+                opacity: 0.72;
+            }
+        }
+    }
+}
+
+@media screen and (max-width: 767px) {
+    .CreateTaskBoardFromCommandModal {
+        .dialog {
+            width: calc(100vw - 24px);
+            max-height: calc(100vh - 24px);
+        }
+
+        .dialog > .toolbar {
+            padding: 20px 20px 16px;
+        }
+
+        .ai-command-modal-body {
+            padding: 0 20px 18px;
+        }
+
+        .ai-command-input-area,
+        .ai-preview-metrics,
+        .ai-preview-tasks {
+            grid-template-columns: 1fr;
+        }
+
+        .ai-command-input-area button,
+        .ai-preview-actions button {
+            width: 100%;
+        }
+
+        .ai-preview-actions {
+            flex-direction: column-reverse;
+            padding: 14px 20px 20px;
+        }
+    }
+}

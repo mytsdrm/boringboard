@@ -22,8 +22,10 @@ import {BoardSiteStatistics} from './statistics'
 export type AdminAISettings = {
     enabled: boolean
     provider: string
+    model: string
     apiKey: string
     ollamaEndpoint: string
+    anythingLLMEndpoint: string
 }
 
 export type AdminTaskBoardSettings = {
@@ -37,6 +39,25 @@ export type AdminSystemSettings = {
     timeZone: string
     ai: AdminAISettings
     taskBoards: AdminTaskBoardSettings
+}
+
+export type TaskBoardColumnPreview = {
+    name: string
+    color: string
+}
+
+export type TaskBoardTaskPreview = {
+    title: string
+    description: string
+    column: string
+}
+
+export type TaskBoardPreview = {
+    title: string
+    description: string
+    views: string[]
+    columns: TaskBoardColumnPreview[]
+    tasks: TaskBoardTaskPreview[]
 }
 
 export type AdminUserPayload = {
@@ -58,6 +79,10 @@ export type TablePDFPayload = {
     headers: string[]
     rows: string[][]
     title: string
+}
+
+export type OllamaModelListResponse = {
+    models: string[]
 }
 
 //
@@ -459,7 +484,9 @@ class OctoClient {
             ai: {
                 apiKey: '',
                 enabled: false,
+                model: 'gpt-4o-mini',
                 ollamaEndpoint: 'http://localhost:11434',
+                anythingLLMEndpoint: 'http://localhost:3001/api/v1',
                 provider: 'OpenAI',
             },
             taskBoards: {
@@ -492,7 +519,9 @@ class OctoClient {
             ai: {
                 apiKey: '',
                 enabled: false,
+                model: 'gpt-4o-mini',
                 ollamaEndpoint: 'http://localhost:11434',
+                anythingLLMEndpoint: 'http://localhost:3001/api/v1',
                 provider: 'OpenAI',
             },
             taskBoards: {
@@ -500,6 +529,47 @@ class OctoClient {
                 enableInvitedUserShare: true,
             },
         })
+    }
+
+    async createTaskBoardPreview(command: string): Promise<TaskBoardPreview | null> {
+        const path = '/api/v2/ai/task-board/preview'
+        const response = await fetch(this.getBaseURL() + path, {
+            body: JSON.stringify({command}),
+            headers: this.headers(),
+            method: 'POST',
+        })
+        if (response.status !== 200) {
+            return null
+        }
+        return this.getJson<TaskBoardPreview | null>(response, null)
+    }
+
+    async getOllamaModels(endpoint: string): Promise<string[]> {
+        const path = '/api/v2/admin/ai/ollama/models'
+        const response = await fetch(this.getBaseURL() + path, {
+            body: JSON.stringify({endpoint}),
+            headers: this.headers(),
+            method: 'POST',
+        })
+        if (response.status !== 200) {
+            return []
+        }
+        const modelResponse = await this.getJson<OllamaModelListResponse>(response, {models: []})
+        return modelResponse.models || []
+    }
+
+    async getAIProviderModels(provider: string, apiKey: string, ollamaEndpoint: string, anythingLLMEndpoint: string): Promise<string[]> {
+        const path = '/api/v2/admin/ai/models'
+        const response = await fetch(this.getBaseURL() + path, {
+            body: JSON.stringify({apiKey, anythingLLMEndpoint, ollamaEndpoint, provider}),
+            headers: this.headers(),
+            method: 'POST',
+        })
+        if (response.status !== 200) {
+            return []
+        }
+        const modelResponse = await this.getJson<OllamaModelListResponse>(response, {models: []})
+        return modelResponse.models || []
     }
 
     private async getBlocksWithPath(path: string): Promise<Block[]> {

@@ -3,7 +3,7 @@
 import React, {useCallback, useEffect, useState} from 'react'
 import {FormattedMessage} from 'react-intl'
 import {DragDropContext, Droppable, DropResult} from 'react-beautiful-dnd'
-import {useHistory} from 'react-router-dom'
+import {useHistory, useRouteMatch} from 'react-router-dom'
 
 import {getActiveThemeName, loadTheme} from '../../theme'
 import IconButton from '../../widgets/buttons/iconButton'
@@ -49,6 +49,8 @@ import mutator from '../../mutator'
 
 import {Board} from '../../blocks/board'
 
+import CreateTaskBoardFromCommand from '../aiCreateBoard/createTaskBoardFromCommand'
+
 import SidebarCategory from './sidebarCategory'
 import SidebarSettingsMenu from './sidebarSettingsMenu'
 import SidebarUserMenu from './sidebarUserMenu'
@@ -76,7 +78,9 @@ const Sidebar = (props: Props) => {
     const [isHidden, setHidden] = useState(false)
     const [userHidden, setUserHidden] = useState(false)
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions())
+    const [aiEnabled, setAIEnabled] = useState(false)
     const history = useHistory()
+    const match = useRouteMatch<{boardId: string, viewId?: string, cardId?: string, teamId?: string}>()
     const boards = useAppSelector(getMySortedBoards)
     const dispatch = useAppDispatch()
     const sidebarCategories = useAppSelector<CategoryBoards[]>(getSidebarCategories)
@@ -114,6 +118,20 @@ const Sidebar = (props: Props) => {
 
     useEffect(() => {
         loadTheme()
+    }, [])
+
+    useEffect(() => {
+        let canceled = false
+        async function loadSystemSettings() {
+            const settings = await octoClient.getSystemSettings()
+            if (!canceled) {
+                setAIEnabled(Boolean(settings.ai?.enabled))
+            }
+        }
+        loadSystemSettings()
+        return () => {
+            canceled = true
+        }
     }, [])
 
     useEffect(() => {
@@ -352,6 +370,11 @@ const Sidebar = (props: Props) => {
         return sortedBoards
     }
 
+    const showBoard = async (boardId: string) => {
+        Utils.showBoard(boardId, match, history)
+        hideSidebar()
+    }
+
     return (
         <div className='Sidebar octo-sidebar'>
             <div className='octo-sidebar-header'>
@@ -497,6 +520,19 @@ const Sidebar = (props: Props) => {
             </DragDropContext>
 
             <div className='octo-spacer'/>
+
+            {aiEnabled &&
+                <CreateTaskBoardFromCommand
+                    className='sidebar-ai-create'
+                    teamId={team?.id || Constants.globalTeamId}
+                    onCreated={showBoard}
+                    triggerLabel={(
+                        <FormattedMessage
+                            id='Sidebar.add-board-ai'
+                            defaultMessage='+ Add Task Board with AI'
+                        />
+                    )}
+                />}
 
             <div
                 className='add-board'

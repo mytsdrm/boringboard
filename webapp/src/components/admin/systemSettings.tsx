@@ -9,24 +9,38 @@ import {applyProjectSystemSettings, DEFAULT_PROJECT_TIME_ZONE} from '../../syste
 
 import './adminPages.scss'
 
-const PROVIDERS = ['OpenAI', 'Gemini', 'Ollama']
+const PROVIDERS = ['OpenAI', 'Gemini', 'Ollama', 'Cline', 'Anything LLM']
+
+const providerModelOptions: {[key: string]: string[]} = {
+    'Anything LLM': ['anythingllm'],
+    Cline: ['anthropic/claude-sonnet-4-6', 'openai/gpt-4o', 'google/gemini-2.5-pro', 'deepseek/deepseek-chat', 'minimax/minimax-m2.5'],
+    Gemini: ['gemini-1.5-flash', 'gemini-1.5-pro', 'gemini-2.0-flash'],
+    Ollama: ['llama3.1'],
+    OpenAI: ['gpt-4o-mini', 'gpt-4o', 'gpt-4-turbo'],
+}
 
 const providerLabelIds: {[key: string]: string} = {
+    'Anything LLM': 'SystemSettings.provider-anythingllm',
+    Cline: 'SystemSettings.provider-cline',
     Gemini: 'SystemSettings.provider-gemini',
     Ollama: 'SystemSettings.provider-ollama',
     OpenAI: 'SystemSettings.provider-openai',
 }
 
 const defaultProviderHintIds: {[key: string]: string} = {
+    'Anything LLM': 'SystemSettings.provider-anythingllm-hint',
+    Cline: 'SystemSettings.provider-cline-hint',
     Gemini: 'SystemSettings.provider-gemini-hint',
     Ollama: 'SystemSettings.provider-ollama-hint',
     OpenAI: 'SystemSettings.provider-openai-hint',
 }
 
 const defaultProviderHintMessages: {[key: string]: string} = {
-    Gemini: 'Model: gemini-1.5-flash',
-    Ollama: 'Endpoint: http://localhost:11434',
-    OpenAI: 'Model: gpt-4o-mini',
+    'Anything LLM': 'OpenAI-compatible AnythingLLM endpoint',
+    Cline: 'OpenAI-compatible Cline endpoint',
+    Gemini: 'Gemini hosted model',
+    Ollama: 'Loaded from Ollama endpoint',
+    OpenAI: 'OpenAI hosted model',
 }
 
 const defaultSettings: AdminSystemSettings = {
@@ -36,7 +50,9 @@ const defaultSettings: AdminSystemSettings = {
     ai: {
         apiKey: '',
         enabled: false,
+        model: providerModelOptions.OpenAI[0],
         ollamaEndpoint: 'http://localhost:11434',
+        anythingLLMEndpoint: 'http://localhost:3001/api/v1',
         provider: 'OpenAI',
     },
     taskBoards: {
@@ -89,6 +105,10 @@ const mergeWithDefaultSettings = (settings: AdminSystemSettings): AdminSystemSet
 const SystemSettings = (): JSX.Element => {
     const intl = useIntl()
     const [settings, setSettings] = useState<AdminSystemSettings>(defaultSettings)
+    const [ollamaModels, setOllamaModels] = useState<string[]>(providerModelOptions.Ollama)
+    const [providerModels, setProviderModels] = useState<{[key: string]: string[]}>({})
+    const [isLoadingOllamaModels, setIsLoadingOllamaModels] = useState(false)
+    const [isLoadingProviderModels, setIsLoadingProviderModels] = useState(false)
     const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
     const [saveError, setSaveError] = useState('')
     const branding = getBrandingFromSettings(settings)
@@ -110,6 +130,79 @@ const SystemSettings = (): JSX.Element => {
         }
     }, [])
 
+    useEffect(() => {
+        let canceled = false
+        async function loadOllamaModels() {
+            if (settings.ai.provider !== 'Ollama' || !settings.ai.enabled) {
+                return
+            }
+            setIsLoadingOllamaModels(true)
+            const models = await octoClient.getOllamaModels(settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint)
+            if (!canceled) {
+                const nextModels = models.length > 0 ? models : providerModelOptions.Ollama
+                setOllamaModels(nextModels)
+                setSettings((currentSettings) => {
+                    if (currentSettings.ai.provider !== 'Ollama') {
+                        return currentSettings
+                    }
+                    if (nextModels.includes(currentSettings.ai.model)) {
+                        return currentSettings
+                    }
+                    return {...currentSettings, ai: {...currentSettings.ai, model: nextModels[0]}}
+                })
+                setIsLoadingOllamaModels(false)
+            }
+        }
+        loadOllamaModels()
+        return () => {
+            canceled = true
+        }
+    }, [settings.ai.enabled, settings.ai.ollamaEndpoint, settings.ai.provider])
+
+    useEffect(() => {
+        let canceled = false
+        const provider = settings.ai.provider
+        const apiKey = settings.ai.apiKey.trim()
+
+        if (!settings.ai.enabled || provider === 'Ollama' || !apiKey) {
+            setIsLoadingProviderModels(false)
+            return () => {
+                canceled = true
+            }
+        }
+
+        setIsLoadingProviderModels(true)
+        const timeout = window.setTimeout(async () => {
+            const models = await octoClient.getAIProviderModels(
+                provider,
+                apiKey,
+                settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint,
+                settings.ai.anythingLLMEndpoint || defaultSettings.ai.anythingLLMEndpoint,
+            )
+            if (canceled) {
+                return
+            }
+            setProviderModels((currentModels) => ({...currentModels, [provider]: models}))
+            if (models.length > 0) {
+                setSettings((currentSettings) => {
+                    if (currentSettings.ai.provider !== provider) {
+                        return currentSettings
+                    }
+                    if (models.includes(currentSettings.ai.model)) {
+                        return currentSettings
+                    }
+                    return {...currentSettings, ai: {...currentSettings.ai, model: models[0]}}
+                })
+            }
+            setIsLoadingProviderModels(false)
+        }, 500)
+
+        return () => {
+            canceled = true
+            window.clearTimeout(timeout)
+        }
+    }, [settings.ai.anythingLLMEndpoint, settings.ai.apiKey, settings.ai.enabled, settings.ai.ollamaEndpoint, settings.ai.provider])
+
     const saveSettings = async () => {
         if (settings.ai.enabled && settings.ai.provider !== 'Ollama' && !settings.ai.apiKey.trim()) {
             setSaveError(intl.formatMessage({
@@ -121,12 +214,15 @@ const SystemSettings = (): JSX.Element => {
 
         setSaveError('')
         setSaveState('saving')
+        const aiSettings = settings.ai.enabled ? {
+            ...settings.ai,
+            anythingLLMEndpoint: settings.ai.anythingLLMEndpoint || defaultSettings.ai.anythingLLMEndpoint,
+            model: settings.ai.model || providerModelOptions[settings.ai.provider]?.[0] || defaultSettings.ai.model,
+            ollamaEndpoint: settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint,
+        } : defaultSettings.ai
         const saved = await octoClient.saveAdminSystemSettings({
             ...settings,
-            ai: {
-                ...settings.ai,
-                ollamaEndpoint: settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint,
-            },
+            ai: aiSettings,
             taskBoards: {
                 ...defaultSettings.taskBoards,
                 ...settings.taskBoards,
@@ -148,6 +244,27 @@ const SystemSettings = (): JSX.Element => {
         }
     }
     const timeZoneOptions = getTimeZoneOptions(settings.timeZone)
+    const modelOptions = settings.ai.provider === 'Ollama' ? ollamaModels : (providerModels[settings.ai.provider] || [])
+    const canShowModelSelect = settings.ai.provider === 'Ollama' || modelOptions.length > 0
+    const updateAIProvider = (provider: string) => {
+        const model = provider === 'Ollama' ? (ollamaModels[0] || providerModelOptions.Ollama[0]) : providerModelOptions[provider][0]
+        setProviderModels({})
+        setIsLoadingProviderModels(false)
+        setSettings({...settings, ai: {...settings.ai, apiKey: '', model, provider}})
+    }
+    const updateAIApiKey = (apiKey: string) => {
+        setProviderModels((currentModels) => {
+            const remainingModels = {...currentModels}
+            delete remainingModels[settings.ai.provider]
+            return remainingModels
+        })
+        setSettings({...settings, ai: {...settings.ai, apiKey}})
+    }
+    const updateAIEnabled = (enabled: boolean) => {
+        setProviderModels({})
+        setIsLoadingProviderModels(false)
+        setSettings({...settings, ai: enabled ? {...settings.ai, enabled} : defaultSettings.ai})
+    }
     const uploadLogo = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
         if (!file) {
@@ -180,7 +297,7 @@ const SystemSettings = (): JSX.Element => {
     }
 
     return (
-        <div className='AdminPage'>
+        <div className='AdminPage admin-system-settings-page'>
             <div className='admin-page-header'>
                 <div className='admin-page-eyebrow'>
                     <FormattedMessage
@@ -196,256 +313,323 @@ const SystemSettings = (): JSX.Element => {
                 </h1>
             </div>
             <section className='admin-page-card admin-settings-form'>
-                <div className='admin-settings-section admin-settings-branding'>
-                    <div className='admin-settings-section-header'>
-                        <h2>
-                            <FormattedMessage
-                                id='SystemSettings.branding-title'
-                                defaultMessage='Branding'
-                            />
-                        </h2>
-                        <p>
-                            <FormattedMessage
-                                id='SystemSettings.branding-description'
-                                defaultMessage='Update the app name and logo used across the workspace.'
-                            />
-                        </p>
-                    </div>
-                    <div className='admin-settings-field-grid'>
-                        <label>
-                            <input
-                                aria-label={intl.formatMessage({
-                                    id: 'SystemSettings.app-name',
-                                    defaultMessage: 'App Name',
-                                })}
-                                onChange={(event) => setSettings({...settings, appName: event.target.value})}
-                                placeholder={intl.formatMessage({
-                                    id: 'SystemSettings.app-name',
-                                    defaultMessage: 'App Name',
-                                })}
-                                value={settings.appName}
-                            />
-                        </label>
-                        <div className='admin-logo-upload'>
-                            <span className='admin-settings-label'>
+                <div className='admin-settings-scroll'>
+                    <div className='admin-settings-section admin-settings-branding'>
+                        <div className='admin-settings-section-header'>
+                            <h2>
                                 <FormattedMessage
-                                    id='SystemSettings.logo'
-                                    defaultMessage='Logo'
+                                    id='SystemSettings.branding-title'
+                                    defaultMessage='Branding'
                                 />
-                            </span>
-                            <div className='admin-logo-upload-body'>
-                                <div className='admin-logo-preview'>
-                                    <img
-                                        src={branding.logo}
-                                        alt={branding.appName}
+                            </h2>
+                            <p>
+                                <FormattedMessage
+                                    id='SystemSettings.branding-description'
+                                    defaultMessage='Update the app name and logo used across the workspace.'
+                                />
+                            </p>
+                        </div>
+                        <div className='admin-settings-field-grid'>
+                            <label>
+                                <input
+                                    aria-label={intl.formatMessage({
+                                        id: 'SystemSettings.app-name',
+                                        defaultMessage: 'App Name',
+                                    })}
+                                    onChange={(event) => setSettings({...settings, appName: event.target.value})}
+                                    placeholder={intl.formatMessage({
+                                        id: 'SystemSettings.app-name',
+                                        defaultMessage: 'App Name',
+                                    })}
+                                    value={settings.appName}
+                                />
+                            </label>
+                            <div className='admin-logo-upload'>
+                                <span className='admin-settings-label'>
+                                    <FormattedMessage
+                                        id='SystemSettings.logo'
+                                        defaultMessage='Logo'
                                     />
-                                </div>
-                                <div className='admin-logo-upload-actions'>
-                                    <label className='admin-logo-upload-button'>
-                                        <input
-                                            accept='image/*'
-                                            type='file'
-                                            onChange={uploadLogo}
+                                </span>
+                                <div className='admin-logo-upload-body'>
+                                    <div className='admin-logo-preview'>
+                                        <img
+                                            src={branding.logo}
+                                            alt={branding.appName}
                                         />
-                                        <FormattedMessage
-                                            id='SystemSettings.upload-logo'
-                                            defaultMessage='Upload logo'
-                                        />
-                                    </label>
-                                    <button
-                                        className='admin-logo-reset-button'
-                                        type='button'
-                                        onClick={() => setSettings({...settings, logo: defaultSettings.logo})}
-                                    >
-                                        <FormattedMessage
-                                            id='SystemSettings.reset-logo'
-                                            defaultMessage='Reset'
-                                        />
-                                    </button>
+                                    </div>
+                                    <div className='admin-logo-upload-actions'>
+                                        <label className='admin-logo-upload-button'>
+                                            <input
+                                                accept='image/*'
+                                                type='file'
+                                                onChange={uploadLogo}
+                                            />
+                                            <FormattedMessage
+                                                id='SystemSettings.upload-logo'
+                                                defaultMessage='Upload logo'
+                                            />
+                                        </label>
+                                        <button
+                                            className='admin-logo-reset-button'
+                                            type='button'
+                                            onClick={() => setSettings({...settings, logo: defaultSettings.logo})}
+                                        >
+                                            <FormattedMessage
+                                                id='SystemSettings.reset-logo'
+                                                defaultMessage='Reset'
+                                            />
+                                        </button>
+                                    </div>
                                 </div>
                             </div>
                         </div>
                     </div>
-                </div>
-                <div className='admin-settings-section'>
-                    <div className='admin-settings-section-header'>
-                        <h2>
-                            <FormattedMessage
-                                id='SystemSettings.time-zone'
-                                defaultMessage='Time zone'
-                            />
-                        </h2>
-                        <p>
-                            <FormattedMessage
-                                id='SystemSettings.time-zone-description'
-                                defaultMessage='Choose the timezone used for project dates and activity logs.'
-                            />
-                        </p>
-                    </div>
-                    <div className='admin-settings-field-grid'>
-                        <label>
-                            <select
-                                aria-label={intl.formatMessage({
-                                    id: 'SystemSettings.time-zone',
-                                    defaultMessage: 'Time zone',
-                                })}
-                                onChange={(event) => setSettings({...settings, timeZone: event.target.value})}
-                                value={settings.timeZone || DEFAULT_PROJECT_TIME_ZONE}
-                            >
-                                {timeZoneOptions.map((timeZone) => (
-                                    <option
-                                        key={timeZone}
-                                        value={timeZone}
-                                    >
-                                        {timeZone}
-                                    </option>
-                                ))}
-                            </select>
-                        </label>
-                    </div>
-                </div>
-                <div className='admin-settings-section'>
-                    <div className='admin-settings-section-header'>
-                        <h2>
-                            <FormattedMessage
-                                id='SystemSettings.ai-title'
-                                defaultMessage='AI'
-                            />
-                        </h2>
-                        <p>
-                            <FormattedMessage
-                                id='SystemSettings.ai-description'
-                                defaultMessage='Configure optional AI provider access.'
-                            />
-                        </p>
-                    </div>
-                    <div className='admin-ai-controls'>
-                        <label className='admin-settings-checkbox'>
-                            <input
-                                checked={settings.ai.enabled}
-                                onChange={(event) => setSettings({...settings, ai: {...settings.ai, enabled: event.target.checked}})}
-                                type='checkbox'
-                            />
-                            <span>
+                    <div className='admin-settings-section'>
+                        <div className='admin-settings-section-header'>
+                            <h2>
                                 <FormattedMessage
-                                    id='SystemSettings.enable-ai'
-                                    defaultMessage='Enable AI'
+                                    id='SystemSettings.time-zone'
+                                    defaultMessage='Time zone'
                                 />
-                            </span>
-                        </label>
-                        {settings.ai.enabled &&
-                            <div className='admin-ai-settings'>
-                                <label>
-                                    <span>
-                                        <FormattedMessage
-                                            id='SystemSettings.provider'
-                                            defaultMessage='Provider'
-                                        />
-                                    </span>
-                                    <select
-                                        onChange={(event) => setSettings({...settings, ai: {...settings.ai, provider: event.target.value}})}
-                                        value={settings.ai.provider}
-                                    >
-                                        {PROVIDERS.map((provider) => (
-                                            <option
-                                                key={provider}
-                                                value={provider}
-                                            >
-                                                {intl.formatMessage({
-                                                    id: providerLabelIds[provider],
-                                                    defaultMessage: provider,
-                                                })}
-                                            </option>
-                                        ))}
-                                    </select>
-                                    <small>
-                                        {intl.formatMessage({
-                                            id: defaultProviderHintIds[settings.ai.provider],
-                                            defaultMessage: defaultProviderHintMessages[settings.ai.provider],
-                                        })}
-                                    </small>
-                                </label>
-                                <label>
-                                    <span>
-                                        <FormattedMessage
-                                            id='SystemSettings.api-key'
-                                            defaultMessage='Api Key'
-                                        />
-                                    </span>
-                                    <input
-                                        aria-required={settings.ai.enabled && settings.ai.provider !== 'Ollama'}
-                                        onChange={(event) => setSettings({...settings, ai: {...settings.ai, apiKey: event.target.value}})}
-                                        required={settings.ai.enabled && settings.ai.provider !== 'Ollama'}
-                                        type='password'
-                                        value={settings.ai.apiKey}
+                            </h2>
+                            <p>
+                                <FormattedMessage
+                                    id='SystemSettings.time-zone-description'
+                                    defaultMessage='Choose the timezone used for project dates and activity logs.'
+                                />
+                            </p>
+                        </div>
+                        <div className='admin-settings-field-grid'>
+                            <label>
+                                <select
+                                    aria-label={intl.formatMessage({
+                                        id: 'SystemSettings.time-zone',
+                                        defaultMessage: 'Time zone',
+                                    })}
+                                    onChange={(event) => setSettings({...settings, timeZone: event.target.value})}
+                                    value={settings.timeZone || DEFAULT_PROJECT_TIME_ZONE}
+                                >
+                                    {timeZoneOptions.map((timeZone) => (
+                                        <option
+                                            key={timeZone}
+                                            value={timeZone}
+                                        >
+                                            {timeZone}
+                                        </option>
+                                    ))}
+                                </select>
+                            </label>
+                        </div>
+                    </div>
+                    <div className='admin-settings-section'>
+                        <div className='admin-settings-section-header'>
+                            <h2>
+                                <FormattedMessage
+                                    id='SystemSettings.ai-title'
+                                    defaultMessage='AI'
+                                />
+                            </h2>
+                            <p>
+                                <FormattedMessage
+                                    id='SystemSettings.ai-description'
+                                    defaultMessage='Configure optional AI provider access.'
+                                />
+                            </p>
+                        </div>
+                        <div className='admin-ai-controls'>
+                            <label className='admin-settings-checkbox'>
+                                <input
+                                    checked={settings.ai.enabled}
+                                    onChange={(event) => updateAIEnabled(event.target.checked)}
+                                    type='checkbox'
+                                />
+                                <span>
+                                    <FormattedMessage
+                                        id='SystemSettings.enable-ai'
+                                        defaultMessage='Enable AI'
                                     />
-                                </label>
-                                {settings.ai.provider === 'Ollama' &&
-                                    <label className='admin-ai-ollama-endpoint'>
+                                </span>
+                            </label>
+                            {settings.ai.enabled &&
+                                <div className='admin-ai-settings'>
+                                    <label>
                                         <span>
                                             <FormattedMessage
-                                                id='SystemSettings.ollama-endpoint'
-                                                defaultMessage='Endpoint server'
+                                                id='SystemSettings.provider'
+                                                defaultMessage='Provider'
+                                            />
+                                        </span>
+                                        <select
+                                            onChange={(event) => updateAIProvider(event.target.value)}
+                                            value={settings.ai.provider}
+                                        >
+                                            {PROVIDERS.map((provider) => (
+                                                <option
+                                                    key={provider}
+                                                    value={provider}
+                                                >
+                                                    {intl.formatMessage({
+                                                        id: providerLabelIds[provider],
+                                                        defaultMessage: provider,
+                                                    })}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        <small>
+                                            {intl.formatMessage({
+                                                id: defaultProviderHintIds[settings.ai.provider],
+                                                defaultMessage: defaultProviderHintMessages[settings.ai.provider],
+                                            })}
+                                        </small>
+                                    </label>
+                                    {canShowModelSelect &&
+                                    <label>
+                                        <span>
+                                            <FormattedMessage
+                                                id='SystemSettings.model'
+                                                defaultMessage='Model'
+                                            />
+                                        </span>
+                                        <select
+                                            onChange={(event) => setSettings({...settings, ai: {...settings.ai, model: event.target.value}})}
+                                            value={settings.ai.model || modelOptions[0]}
+                                        >
+                                            {modelOptions.map((model) => (
+                                                <option
+                                                    key={model}
+                                                    value={model}
+                                                >
+                                                    {model}
+                                                </option>
+                                            ))}
+                                        </select>
+                                        {settings.ai.provider === 'Ollama' &&
+                                            <small>
+                                                {isLoadingOllamaModels ? (
+                                                    <FormattedMessage
+                                                        id='SystemSettings.loading-models'
+                                                        defaultMessage='Loading models from endpoint...'
+                                                    />
+                                                ) : (
+                                                    <FormattedMessage
+                                                        id='SystemSettings.ollama-models-hint'
+                                                        defaultMessage='Models are loaded from the Ollama endpoint.'
+                                                    />
+                                                )}
+                                            </small>}
+                                    </label>}
+                                    {!canShowModelSelect && settings.ai.provider !== 'Ollama' &&
+                                    <div className='admin-ai-model-status'>
+                                        {isLoadingProviderModels ? (
+                                            <FormattedMessage
+                                                id='SystemSettings.validating-api-key'
+                                                defaultMessage='Validating API key and loading models...'
+                                            />
+                                        ) : (
+                                            <FormattedMessage
+                                                id='SystemSettings.valid-api-key-required'
+                                                defaultMessage='Enter a valid API key to load model options.'
+                                            />
+                                        )}
+                                    </div>}
+                                    <label>
+                                        <span>
+                                            <FormattedMessage
+                                                id='SystemSettings.api-key'
+                                                defaultMessage='Api Key'
                                             />
                                         </span>
                                         <input
-                                            onChange={(event) => setSettings({...settings, ai: {...settings.ai, ollamaEndpoint: event.target.value}})}
-                                            placeholder={defaultSettings.ai.ollamaEndpoint}
-                                            required={settings.ai.provider === 'Ollama'}
-                                            value={settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint}
+                                            aria-required={settings.ai.enabled && settings.ai.provider !== 'Ollama'}
+                                            onChange={(event) => updateAIApiKey(event.target.value)}
+                                            required={settings.ai.enabled && settings.ai.provider !== 'Ollama'}
+                                            type='password'
+                                            value={settings.ai.apiKey}
                                         />
-                                    </label>}
-                            </div>}
+                                    </label>
+                                    {settings.ai.provider === 'Ollama' &&
+                                        <label className='admin-ai-ollama-endpoint'>
+                                            <span>
+                                                <FormattedMessage
+                                                    id='SystemSettings.ollama-endpoint'
+                                                    defaultMessage='Endpoint server'
+                                                />
+                                            </span>
+                                            <input
+                                                onChange={(event) => setSettings({...settings, ai: {...settings.ai, ollamaEndpoint: event.target.value}})}
+                                                placeholder={defaultSettings.ai.ollamaEndpoint}
+                                                required={settings.ai.provider === 'Ollama'}
+                                                value={settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint}
+                                            />
+                                        </label>}
+                                    {settings.ai.provider === 'Anything LLM' &&
+                                        <label className='admin-ai-anythingllm-endpoint'>
+                                            <span>
+                                                <FormattedMessage
+                                                    id='SystemSettings.anythingllm-endpoint'
+                                                    defaultMessage='Anything LLM endpoint'
+                                                />
+                                            </span>
+                                            <input
+                                                onChange={(event) => setSettings({...settings, ai: {...settings.ai, anythingLLMEndpoint: event.target.value}})}
+                                                placeholder={defaultSettings.ai.anythingLLMEndpoint}
+                                                required={settings.ai.provider === 'Anything LLM'}
+                                                value={settings.ai.anythingLLMEndpoint || defaultSettings.ai.anythingLLMEndpoint}
+                                            />
+                                        </label>}
+                                </div>}
+                        </div>
                     </div>
-                </div>
-                <div className='admin-settings-section'>
-                    <div className='admin-settings-section-header'>
-                        <h2>
-                            <FormattedMessage
-                                id='SystemSettings.task-boards-title'
-                                defaultMessage='Task Boards'
-                            />
-                        </h2>
-                    </div>
-                    <div className='admin-task-board-controls'>
-                        <label className='admin-settings-checkbox'>
-                            <input
-                                checked={settings.taskBoards.enableInvitedUserShare}
-                                onChange={(event) => setSettings({
-                                    ...settings,
-                                    taskBoards: {
-                                        ...settings.taskBoards,
-                                        enableInvitedUserShare: event.target.checked,
-                                    },
-                                })}
-                                type='checkbox'
-                            />
-                            <span>
+                    <div className='admin-settings-section'>
+                        <div className='admin-settings-section-header'>
+                            <h2>
                                 <FormattedMessage
-                                    id='SystemSettings.enable-invited-user-share'
-                                    defaultMessage='Enable Invited user to share task board'
+                                    id='SystemSettings.task-boards-title'
+                                    defaultMessage='Task Boards'
                                 />
-                            </span>
-                        </label>
-                        <label className='admin-settings-checkbox'>
-                            <input
-                                checked={settings.taskBoards.enableInvitedUserEditProperty}
-                                onChange={(event) => setSettings({
-                                    ...settings,
-                                    taskBoards: {
-                                        ...settings.taskBoards,
-                                        enableInvitedUserEditProperty: event.target.checked,
-                                    },
-                                })}
-                                type='checkbox'
-                            />
-                            <span>
-                                <FormattedMessage
-                                    id='SystemSettings.enable-invited-user-edit-property'
-                                    defaultMessage='Enable Invited to edit task board property'
+                            </h2>
+                        </div>
+                        <div className='admin-task-board-controls'>
+                            <label className='admin-settings-checkbox'>
+                                <input
+                                    checked={settings.taskBoards.enableInvitedUserShare}
+                                    onChange={(event) => setSettings({
+                                        ...settings,
+                                        taskBoards: {
+                                            ...settings.taskBoards,
+                                            enableInvitedUserShare: event.target.checked,
+                                        },
+                                    })}
+                                    type='checkbox'
                                 />
-                            </span>
-                        </label>
+                                <span>
+                                    <FormattedMessage
+                                        id='SystemSettings.enable-invited-user-share'
+                                        defaultMessage='Enable Invited user to share task board'
+                                    />
+                                </span>
+                            </label>
+                            <label className='admin-settings-checkbox'>
+                                <input
+                                    checked={settings.taskBoards.enableInvitedUserEditProperty}
+                                    onChange={(event) => setSettings({
+                                        ...settings,
+                                        taskBoards: {
+                                            ...settings.taskBoards,
+                                            enableInvitedUserEditProperty: event.target.checked,
+                                        },
+                                    })}
+                                    type='checkbox'
+                                />
+                                <span>
+                                    <FormattedMessage
+                                        id='SystemSettings.enable-invited-user-edit-property'
+                                        defaultMessage='Enable Invited to edit task board property'
+                                    />
+                                </span>
+                            </label>
+                        </div>
                     </div>
                 </div>
                 {saveError &&

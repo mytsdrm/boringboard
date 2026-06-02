@@ -2,6 +2,7 @@ package app
 
 import (
 	"encoding/json"
+	"os"
 	"strings"
 
 	"github.com/mattermost/focalboard/server/model"
@@ -17,16 +18,26 @@ func defaultAdminSystemSettings() model.AdminSystemSettings {
 		Logo:     "",
 		TimeZone: "Asia/Jakarta",
 		AI: model.AdminAISettings{
-			Enabled:        false,
-			Provider:       "OpenAI",
-			APIKey:         "",
-			OllamaEndpoint: "http://localhost:11434",
+			Enabled:             false,
+			Provider:            "OpenAI",
+			Model:               "gpt-4o-mini",
+			APIKey:              "",
+			OllamaEndpoint:      envOrDefault("BORINGBOARD_AI_OLLAMA_ENDPOINT", "http://localhost:11434"),
+			AnythingLLMEndpoint: envOrDefault("BORINGBOARD_AI_ANYTHINGLLM_ENDPOINT", "http://localhost:3001/api/v1"),
 		},
 		TaskBoards: model.AdminTaskBoardSettings{
 			EnableInvitedUserShare:        true,
 			EnableInvitedUserEditProperty: false,
 		},
 	}
+}
+
+func envOrDefault(key string, defaultValue string) string {
+	value := strings.TrimSpace(os.Getenv(key))
+	if value == "" {
+		return defaultValue
+	}
+	return value
 }
 
 func (a *App) GetRegisteredUsers() ([]*model.User, error) {
@@ -191,8 +202,14 @@ func (a *App) SaveAdminSystemSettings(settings model.AdminSystemSettings) (model
 	if settings.AI.Provider == "" {
 		settings.AI.Provider = defaultAdminSystemSettings().AI.Provider
 	}
+	if settings.AI.Model == "" {
+		settings.AI.Model = defaultAIModel(settings.AI.Provider)
+	}
 	if settings.AI.OllamaEndpoint == "" {
 		settings.AI.OllamaEndpoint = defaultAdminSystemSettings().AI.OllamaEndpoint
+	}
+	if settings.AI.AnythingLLMEndpoint == "" {
+		settings.AI.AnythingLLMEndpoint = defaultAdminSystemSettings().AI.AnythingLLMEndpoint
 	}
 	if settings.AI.Enabled && settings.AI.Provider != "Ollama" && strings.TrimSpace(settings.AI.APIKey) == "" {
 		return settings, model.NewErrBadRequest("api key is required")
@@ -214,4 +231,19 @@ func (a *App) SaveAdminSystemSettings(settings model.AdminSystemSettings) (model
 	a.wsAdapter.BroadcastSystemSettingsChange(broadcastSettings)
 
 	return settings, nil
+}
+
+func defaultAIModel(provider string) string {
+	switch provider {
+	case "Cline":
+		return "anthropic/claude-sonnet-4-6"
+	case "Anything LLM":
+		return "anythingllm"
+	case "Gemini":
+		return "gemini-1.5-flash"
+	case "Ollama":
+		return "llama3.1"
+	default:
+		return "gpt-4o-mini"
+	}
 }

@@ -96,6 +96,7 @@ func (a *API) RegisterRoutes(r *mux.Router) {
 	a.registerAdminDashboardRoutes(apiv2)
 	a.registerComplianceRoutes(apiv2)
 	a.registerPrintRoutes(apiv2)
+	a.registerAIRoutes(apiv2)
 
 	// V3 routes
 	a.registerCardsRoutes(apiv2)

@@ -91,3 +91,4 @@ server/**/*.coverage
 AGENTS.MD
 AGENT.MD
 merge.sh
+SETTING.md
