@@ -1,5 +1,5 @@
 .AdminPage {
-    --admin-content-width: min(100%, 1440px);
+    --admin-content-width: 100%;
 
     display: flex;
     flex: 1 1 auto;
@@ -277,10 +277,9 @@
     }
 
     .admin-settings-form {
-        display: flex;
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 18px;
-        max-width: 760px;
         padding: 22px;
 
         label {
@@ -317,6 +316,7 @@
     }
 
     .admin-ai-settings {
+        grid-column: 1 / -1;
         display: grid;
         grid-template-columns: repeat(2, minmax(0, 1fr));
         gap: 16px;
@@ -324,6 +324,7 @@
 
     .admin-page-actions {
         display: flex;
+        grid-column: 1 / -1;
         justify-content: flex-end;
 
         button {
@@ -415,6 +416,11 @@
         }
 
         .admin-user-form {
+            grid-template-columns: 1fr;
+        }
+
+        .admin-settings-form,
+        .admin-ai-settings {
             grid-template-columns: 1fr;
         }
 

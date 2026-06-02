@@ -89,3 +89,4 @@ docker/certs
 docker/data
 server/**/*.coverage
 AGENTS.MD
+AGENT.MD
