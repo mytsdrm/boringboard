@@ -33,6 +33,7 @@ const taskBoardViewOptions = [
 
 const defaultTaskBoardViews = taskBoardViewOptions.map((view) => view.value)
 const languageOptions: TaskBoardPreviewLanguage[] = ['English', 'Indonesia']
+const defaultTaskBoardLanguage: TaskBoardPreviewLanguage = 'English'
 const statusColorOptions = [
     {value: 'propColorGray', label: 'Gray'},
     {value: 'propColorPurple', label: 'Purple'},
@@ -47,6 +48,10 @@ const statusColorOptions = [
 const defaultTaskBoardStatuses: TaskBoardColumnPreview[] = taskBoardDefaultStatusColumns.map((status) => ({...status}))
 const maxTaskBoardStatuses = 12
 
+const normalizeTaskBoardLanguage = (language?: string): TaskBoardPreviewLanguage => {
+    return language === 'Indonesia' ? 'Indonesia' : defaultTaskBoardLanguage
+}
+
 const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
     const intl = useIntl()
     const [command, setCommand] = useState('')
@@ -57,7 +62,7 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
     const [isOpen, setIsOpen] = useState(false)
     const [aiSettings, setAISettings] = useState<AdminAISettings|null>(getStoredProjectSystemSettings().ai)
     const [selectedViews, setSelectedViews] = useState<string[]>(defaultTaskBoardViews)
-    const [language, setLanguage] = useState<TaskBoardPreviewLanguage>('English')
+    const [language, setLanguage] = useState<TaskBoardPreviewLanguage>(normalizeTaskBoardLanguage(aiSettings?.outputLanguagePreference))
     const [statusOptions, setStatusOptions] = useState<TaskBoardColumnPreview[]>(defaultTaskBoardStatuses)
     const [selectedStatusNames, setSelectedStatusNames] = useState<string[]>(defaultTaskBoardStatuses.map((status) => status.name))
     const [newStatusName, setNewStatusName] = useState('')
@@ -70,12 +75,15 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
             const settings = await octoClient.getSystemSettings()
             if (!canceled) {
                 setAISettings(settings.ai)
+                setLanguage(normalizeTaskBoardLanguage(settings.ai.outputLanguagePreference))
             }
         }
 
         const handleSystemSettingsUpdated = (event: Event) => {
             const settings = (event as CustomEvent<ProjectSystemSettings>).detail
-            setAISettings(settings?.ai || getStoredProjectSystemSettings().ai)
+            const nextAISettings = settings?.ai || getStoredProjectSystemSettings().ai
+            setAISettings(nextAISettings)
+            setLanguage(normalizeTaskBoardLanguage(nextAISettings.outputLanguagePreference))
         }
 
         window.addEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
@@ -99,7 +107,7 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
         setPreview(null)
         setError('')
         setSelectedViews(defaultTaskBoardViews)
-        setLanguage('English')
+        setLanguage(normalizeTaskBoardLanguage(aiSettings?.outputLanguagePreference))
         setStatusOptions(defaultTaskBoardStatuses)
         setSelectedStatusNames(defaultTaskBoardStatuses.map((status) => status.name))
         setNewStatusName('')

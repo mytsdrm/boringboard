@@ -19,6 +19,8 @@ import {BoardsCloudLimits} from './boardsCloudLimits'
 import {TopBoardResponse} from './insights'
 import {BoardSiteStatistics} from './statistics'
 
+export type TaskBoardPreviewLanguage = 'English' | 'Indonesia'
+
 export type AdminAISettings = {
     enabled: boolean
     provider: string
@@ -26,6 +28,7 @@ export type AdminAISettings = {
     apiKey: string
     ollamaEndpoint: string
     anythingLLMEndpoint: string
+    outputLanguagePreference: TaskBoardPreviewLanguage
 }
 
 export type AdminTaskBoardSettings = {
@@ -66,8 +69,6 @@ export type TaskBoardPreview = {
     columns: TaskBoardColumnPreview[]
     tasks: TaskBoardTaskPreview[]
 }
-
-export type TaskBoardPreviewLanguage = 'English' | 'Indonesia'
 
 export type AdminUserPayload = {
     username: string
@@ -581,6 +582,7 @@ class OctoClient {
                 model: 'gpt-4o-mini',
                 ollamaEndpoint: 'http://localhost:11434',
                 anythingLLMEndpoint: 'http://localhost:3001/api/v1',
+                outputLanguagePreference: 'English',
                 provider: 'OpenAI',
             },
             taskBoards: {
@@ -616,6 +618,7 @@ class OctoClient {
                 model: 'gpt-4o-mini',
                 ollamaEndpoint: 'http://localhost:11434',
                 anythingLLMEndpoint: 'http://localhost:3001/api/v1',
+                outputLanguagePreference: 'English',
                 provider: 'OpenAI',
             },
             taskBoards: {

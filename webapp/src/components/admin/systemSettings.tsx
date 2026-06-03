@@ -4,12 +4,13 @@ import React, {useEffect, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
 
 import {applySystemBranding, getBrandingFromSettings} from '../../branding'
-import octoClient, {AdminSystemSettings} from '../../octoClient'
+import octoClient, {AdminSystemSettings, TaskBoardPreviewLanguage} from '../../octoClient'
 import {applyProjectSystemSettings, DEFAULT_PROJECT_TIME_ZONE} from '../../systemSettings'
 
 import './adminPages.scss'
 
 const PROVIDERS = ['OpenAI', 'Gemini', 'Ollama', 'Cline', 'Anything LLM']
+const OUTPUT_LANGUAGE_OPTIONS: TaskBoardPreviewLanguage[] = ['English', 'Indonesia']
 
 const providerModelOptions: {[key: string]: string[]} = {
     'Anything LLM': ['anythingllm'],
@@ -53,6 +54,7 @@ const defaultSettings: AdminSystemSettings = {
         model: providerModelOptions.OpenAI[0],
         ollamaEndpoint: 'http://localhost:11434',
         anythingLLMEndpoint: 'http://localhost:3001/api/v1',
+        outputLanguagePreference: 'English',
         provider: 'OpenAI',
     },
     taskBoards: {
@@ -95,12 +97,17 @@ const mergeWithDefaultSettings = (settings: AdminSystemSettings): AdminSystemSet
     ai: {
         ...defaultSettings.ai,
         ...(settings.ai || {}),
+        outputLanguagePreference: normalizeOutputLanguagePreference(settings.ai?.outputLanguagePreference),
     },
     taskBoards: {
         ...defaultSettings.taskBoards,
         ...(settings.taskBoards || {}),
     },
 })
+
+const normalizeOutputLanguagePreference = (language?: string): TaskBoardPreviewLanguage => {
+    return language === 'Indonesia' ? 'Indonesia' : 'English'
+}
 
 const SystemSettings = (): JSX.Element => {
     const intl = useIntl()
@@ -219,6 +226,7 @@ const SystemSettings = (): JSX.Element => {
             anythingLLMEndpoint: settings.ai.anythingLLMEndpoint || defaultSettings.ai.anythingLLMEndpoint,
             model: settings.ai.model || providerModelOptions[settings.ai.provider]?.[0] || defaultSettings.ai.model,
             ollamaEndpoint: settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint,
+            outputLanguagePreference: normalizeOutputLanguagePreference(settings.ai.outputLanguagePreference),
         } : defaultSettings.ai
         const saved = await octoClient.saveAdminSystemSettings({
             ...settings,
@@ -547,6 +555,27 @@ const SystemSettings = (): JSX.Element => {
                                             type='password'
                                             value={settings.ai.apiKey}
                                         />
+                                    </label>
+                                    <label>
+                                        <span>
+                                            <FormattedMessage
+                                                id='SystemSettings.output-language-preference'
+                                                defaultMessage='Output Language Preference'
+                                            />
+                                        </span>
+                                        <select
+                                            onChange={(event) => setSettings({...settings, ai: {...settings.ai, outputLanguagePreference: normalizeOutputLanguagePreference(event.target.value)}})}
+                                            value={settings.ai.outputLanguagePreference || defaultSettings.ai.outputLanguagePreference}
+                                        >
+                                            {OUTPUT_LANGUAGE_OPTIONS.map((language) => (
+                                                <option
+                                                    key={language}
+                                                    value={language}
+                                                >
+                                                    {language}
+                                                </option>
+                                            ))}
+                                        </select>
                                     </label>
                                     {settings.ai.provider === 'Ollama' &&
                                         <label className='admin-ai-ollama-endpoint'>

@@ -25,9 +25,14 @@ func (s *Service) GenerateTaskBoardPreview(options GenerateTaskBoardPreviewOptio
 		return TaskBoardPreview{}, err
 	}
 
+	language := strings.TrimSpace(options.Language)
+	if language == "" {
+		language = options.Settings.AI.OutputLanguagePreference
+	}
+
 	content, err := selectedProvider.GenerateJSON(providerRequest{
 		Settings: options.Settings.AI,
-		Prompt:   createTaskBoardPrompt(strings.TrimSpace(options.Command), options.Views, options.Language, options.Statuses),
+		Prompt:   createTaskBoardPrompt(strings.TrimSpace(options.Command), options.Views, language, options.Statuses),
 	})
 	if err != nil {
 		return TaskBoardPreview{}, err

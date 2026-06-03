@@ -14,6 +14,7 @@ const DEFAULT_AI_SETTINGS: AdminAISettings = {
     enabled: false,
     model: 'gpt-4o-mini',
     ollamaEndpoint: 'http://localhost:11434',
+    outputLanguagePreference: 'English',
     provider: 'OpenAI',
 }
 
