@@ -2,6 +2,8 @@
 // See LICENSE.txt for license information.
 import {IntlShape} from 'react-intl'
 
+import {Card} from '../../blocks/card'
+import {IPropertyTemplate} from '../../blocks/board'
 import {Options} from '../../components/calculations/options'
 import {PropertyType, PropertyTypeEnum} from '../types'
 
@@ -12,6 +14,18 @@ export default class NumberProperty extends PropertyType {
     name = 'Number'
     type = 'number' as PropertyTypeEnum
     displayName = (intl: IntlShape) => intl.formatMessage({id: 'PropertyType.Number', defaultMessage: 'Number'})
+    displayValue = (value: string | string[] | undefined, _card: Card, _template: IPropertyTemplate, intl: IntlShape): string => {
+        if (!value || Array.isArray(value)) {
+            return ''
+        }
+
+        const numberValue = Number(value)
+        if (!Number.isFinite(numberValue)) {
+            return value
+        }
+
+        return intl.formatNumber(numberValue, {maximumFractionDigits: 20})
+    }
     calculationOptions = [Options.none, Options.count, Options.countEmpty,
         Options.countNotEmpty, Options.percentEmpty, Options.percentNotEmpty,
         Options.countValue, Options.countUniqueValue, Options.sum,

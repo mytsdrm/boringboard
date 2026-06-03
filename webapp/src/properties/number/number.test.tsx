@@ -69,4 +69,41 @@ describe('properties/number', () => {
 
         expect(mockedMutator.changePropertyValue).toHaveBeenCalledWith(board.id, card, propertyTemplate.id, `${value}`)
     })
+
+    it('should format readonly number values', () => {
+        const propertyValue = '1234567.89'
+        card.fields.properties[propertyTemplate.id] = propertyValue
+
+        render(
+            wrapIntl(
+                <NumberEditor
+                    {...baseProps}
+                    propertyValue={propertyValue}
+                    readOnly={true}
+                />,
+            ),
+        )
+
+        expect(screen.getByText('1,234,567.89')).toBeTruthy()
+    })
+
+    it('should format editable number values until focused', () => {
+        const propertyValue = '1234567.89'
+        card.fields.properties[propertyTemplate.id] = propertyValue
+
+        render(
+            wrapIntl(
+                <NumberEditor
+                    {...baseProps}
+                    propertyValue={propertyValue}
+                />,
+            ),
+        )
+
+        const input = screen.getByRole('textbox') as HTMLInputElement
+        expect(input.value).toBe('1,234,567.89')
+
+        userEvent.click(input)
+        expect(input.value).toBe(propertyValue)
+    })
 })

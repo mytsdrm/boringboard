@@ -8,6 +8,7 @@ import userEvent from '@testing-library/user-event'
 
 import {TestBlockFactory} from '../../test/testBlockFactory'
 import {wrapIntl} from '../../testUtils'
+import {IPropertyTemplate} from '../../blocks/board'
 
 import {TableCalculationOptions} from '../table/calculation/tableCalculationOptions'
 
@@ -141,6 +142,38 @@ describe('components/calculations/Calculation', () => {
         )
 
         expect(container).toMatchSnapshot()
+    })
+
+    test('should format number calculation values', () => {
+        const numberProperty: IPropertyTemplate = {
+            id: 'number_property',
+            name: '',
+            type: 'number',
+            options: [],
+        }
+        const numberCard = TestBlockFactory.createCard(board)
+        numberCard.fields.properties.number_property = '25000'
+        const numberCard2 = TestBlockFactory.createCard(board)
+        numberCard2.fields.properties.number_property = '65000'
+
+        const {container} = render(
+            <Wrapper>
+                <Calculation
+                    class={'fooClass'}
+                    value={'sum'}
+                    menuOpen={false}
+                    onMenuClose={() => {}}
+                    onMenuOpen={() => {}}
+                    onChange={() => {}}
+                    cards={[numberCard, numberCard2]}
+                    hovered={true}
+                    property={numberProperty}
+                    optionsComponent={TableCalculationOptions}
+                />
+            </Wrapper>,
+        )
+
+        expect(container.querySelector('.calculationValue')?.textContent).toBe('90,000')
     })
 
     test('should match snapshot - option change', () => {

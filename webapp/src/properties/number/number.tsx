@@ -10,7 +10,7 @@ const Number = (props: PropertyProps): JSX.Element => {
     return (
         <BaseTextEditor
             {...props}
-            validator={() => props.propertyValue === '' || !isNaN(parseInt(props.propertyValue as string, 10))}
+            validator={(value) => value === '' || globalThis.Number.isFinite(globalThis.Number(value))}
         />
     )
 }

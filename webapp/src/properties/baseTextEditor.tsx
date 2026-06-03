@@ -10,7 +10,7 @@ import Editable from '../widgets/editable'
 
 import {PropertyProps} from './types'
 
-const BaseTextEditor = (props: PropertyProps & {validator: () => boolean, spellCheck?: boolean}): JSX.Element => {
+const BaseTextEditor = (props: PropertyProps & {validator: (value: string) => boolean, spellCheck?: boolean}): JSX.Element => {
     const [value, setValue] = useState(props.card.fields.properties[props.propertyTemplate.id || ''] || '')
     const onCancel = useCallback(() => setValue(props.propertyValue || ''), [props.propertyValue])
 
@@ -37,11 +37,13 @@ const BaseTextEditor = (props: PropertyProps & {validator: () => boolean, spellC
     }, [])
 
     if (!props.readOnly) {
+        const displayValue = props.property.displayValue(value, props.card, props.propertyTemplate, intl)
         return (
             <Editable
                 className={props.property.valueClassName(props.readOnly)}
                 placeholderText={emptyDisplayValue}
                 value={value.toString()}
+                displayValue={Array.isArray(displayValue) ? displayValue.join('|') : displayValue}
                 autoExpand={true}
                 onChange={setValue}
                 onSave={saveTextProperty}
@@ -51,7 +53,7 @@ const BaseTextEditor = (props: PropertyProps & {validator: () => boolean, spellC
             />
         )
     }
-    return <div className={props.property.valueClassName(true)}>{props.propertyValue}</div>
+    return <div className={props.property.valueClassName(true)}>{props.property.displayValue(props.propertyValue, props.card, props.propertyTemplate, intl)}</div>
 }
 
 export default BaseTextEditor

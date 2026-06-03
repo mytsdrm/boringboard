@@ -33,11 +33,29 @@ type Props = {
     prefix?: React.ReactNode
 }
 
+const formatCalculationValue = (value: string, property: IPropertyTemplate, intl: ReturnType<typeof useIntl>): string => {
+    if (property.type !== 'number') {
+        return value
+    }
+
+    const formatNumber = (rawValue: string) => {
+        const numberValue = Number(rawValue)
+        return Number.isFinite(numberValue) ? intl.formatNumber(numberValue, {maximumFractionDigits: 20}) : rawValue
+    }
+
+    if (value.includes(' - ')) {
+        return value.split(' - ').map(formatNumber).join(' - ')
+    }
+
+    return formatNumber(value)
+}
+
 const Calculation = (props: Props): JSX.Element => {
     const value = props.value || Options.none.value
     const valueOption = Options[value]
     const intl = useIntl()
     const columnResize = useColumnResize()
+    const calculationValue = Calculations[value] ? Calculations[value](props.cards, props.property, intl) : ''
 
     const option = (
         <props.optionsComponent
@@ -84,7 +102,7 @@ const Calculation = (props: Props): JSX.Element => {
             {
                 value !== Options.none.value &&
                 <span className='calculationValue'>
-                    {Calculations[value] ? Calculations[value](props.cards, props.property, intl) : ''}
+                    {formatCalculationValue(calculationValue, props.property, intl)}
                 </span>
             }
 

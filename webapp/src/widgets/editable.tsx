@@ -1,12 +1,13 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React, {forwardRef, useImperativeHandle, useLayoutEffect, useRef} from 'react'
+import React, {forwardRef, useImperativeHandle, useLayoutEffect, useRef, useState} from 'react'
 
 import './editable.scss'
 
 export type EditableProps = {
     onChange: (value: string) => void
     value?: string
+    displayValue?: string
     placeholderText?: string
     className?: string
     saveOnEsc?: boolean
@@ -44,6 +45,7 @@ export function useEditable(
     focusableRef: React.Ref<Focusable>,
     elementRef: React.RefObject<ElementType>): ElementProps {
     const saveOnBlur = useRef<boolean>(true)
+    const [isFocused, setIsFocused] = useState(false)
 
     const save = (saveType: 'onEnter'|'onEsc'|'onBlur'): void => {
         if (props.validator && !props.validator(props.value || '')) {
@@ -81,7 +83,8 @@ export function useEditable(
         saveOnBlur.current = true
     }
 
-    const {value, onChange, className, placeholderText, readonly} = props
+    const {value, displayValue, onChange, className, placeholderText, readonly} = props
+    const shownValue = !isFocused && displayValue !== undefined ? displayValue : value
     let error = false
     if (props.validator) {
         error = !props.validator(value || '')
@@ -92,9 +95,12 @@ export function useEditable(
         onChange: (e: React.ChangeEvent<ElementType>) => {
             onChange(e.target.value)
         },
-        value,
-        title: value,
-        onBlur: () => save('onBlur'),
+        value: shownValue,
+        title: shownValue,
+        onBlur: () => {
+            setIsFocused(false)
+            save('onBlur')
+        },
         onKeyDown: (e: React.KeyboardEvent<HTMLTextAreaElement|HTMLInputElement>): void => {
             if (e.keyCode === 27 && !(e.metaKey || e.ctrlKey) && !e.shiftKey && !e.altKey) { // ESC
                 e.preventDefault()
@@ -112,7 +118,10 @@ export function useEditable(
         },
         readOnly: readonly,
         spellCheck: props.spellCheck,
-        onFocus: props.onFocus,
+        onFocus: () => {
+            setIsFocused(true)
+            props.onFocus?.()
+        },
     }
 }
 
