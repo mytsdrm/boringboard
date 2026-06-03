@@ -34,6 +34,10 @@ func (a *API) handleCreateTaskBoardPreview(w http.ResponseWriter, r *http.Reques
 		a.errorResponse(w, r, model.NewErrPermission("access denied to ai task board preview"))
 		return
 	}
+	if !aiEnabledForUser(settings.AI, userID, a.permissions.HasPermissionTo(userID, model.PermissionManageSystem)) {
+		a.errorResponse(w, r, model.NewErrPermission("access denied to ai task board preview"))
+		return
+	}
 
 	var request ai.CreateTaskBoardRequest
 	if err = json.NewDecoder(r.Body).Decode(&request); err != nil {
@@ -74,6 +78,21 @@ func (a *API) handleCreateTaskBoardPreview(w http.ResponseWriter, r *http.Reques
 		return
 	}
 	jsonBytesResponse(w, http.StatusOK, data)
+}
+
+func aiEnabledForUser(settings model.AdminAISettings, userID string, isSystemAdmin bool) bool {
+	if !settings.Enabled {
+		return false
+	}
+	if isSystemAdmin || settings.EnableForAllUsers {
+		return true
+	}
+	for _, enabledUserID := range settings.EnabledUserIDs {
+		if enabledUserID == userID {
+			return true
+		}
+	}
+	return false
 }
 
 func (a *API) handleListProviderModels(w http.ResponseWriter, r *http.Request) {

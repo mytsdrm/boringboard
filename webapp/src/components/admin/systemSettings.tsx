@@ -6,6 +6,7 @@ import {FormattedMessage, useIntl} from 'react-intl'
 import {applySystemBranding, getBrandingFromSettings} from '../../branding'
 import octoClient, {AdminSystemSettings, TaskBoardPreviewLanguage} from '../../octoClient'
 import {applyProjectSystemSettings, DEFAULT_PROJECT_TIME_ZONE} from '../../systemSettings'
+import {IUser} from '../../user'
 
 import './adminPages.scss'
 
@@ -55,6 +56,8 @@ const defaultSettings: AdminSystemSettings = {
         ollamaEndpoint: 'http://localhost:11434',
         anythingLLMEndpoint: 'http://localhost:3001/api/v1',
         outputLanguagePreference: 'English',
+        enableForAllUsers: true,
+        enabledUserIds: [],
         provider: 'OpenAI',
     },
     taskBoards: {
@@ -97,6 +100,8 @@ const mergeWithDefaultSettings = (settings: AdminSystemSettings): AdminSystemSet
     ai: {
         ...defaultSettings.ai,
         ...(settings.ai || {}),
+        enableForAllUsers: settings.ai?.enableForAllUsers ?? defaultSettings.ai.enableForAllUsers,
+        enabledUserIds: Array.isArray(settings.ai?.enabledUserIds) ? settings.ai.enabledUserIds : defaultSettings.ai.enabledUserIds,
         outputLanguagePreference: normalizeOutputLanguagePreference(settings.ai?.outputLanguagePreference),
     },
     taskBoards: {
@@ -109,6 +114,10 @@ const normalizeOutputLanguagePreference = (language?: string): TaskBoardPreviewL
     return language === 'Indonesia' ? 'Indonesia' : 'English'
 }
 
+const userDisplayName = (user: IUser): string => {
+    return user.nickname || user.username || user.email
+}
+
 const SystemSettings = (): JSX.Element => {
     const intl = useIntl()
     const [settings, setSettings] = useState<AdminSystemSettings>(defaultSettings)
@@ -116,6 +125,7 @@ const SystemSettings = (): JSX.Element => {
     const [providerModels, setProviderModels] = useState<{[key: string]: string[]}>({})
     const [isLoadingOllamaModels, setIsLoadingOllamaModels] = useState(false)
     const [isLoadingProviderModels, setIsLoadingProviderModels] = useState(false)
+    const [registeredUsers, setRegisteredUsers] = useState<IUser[]>([])
     const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
     const [saveError, setSaveError] = useState('')
     const branding = getBrandingFromSettings(settings)
@@ -132,6 +142,20 @@ const SystemSettings = (): JSX.Element => {
             }
         }
         loadSettings()
+        return () => {
+            canceled = true
+        }
+    }, [])
+
+    useEffect(() => {
+        let canceled = false
+        async function loadRegisteredUsers() {
+            const users = await octoClient.getAdminUsers()
+            if (!canceled) {
+                setRegisteredUsers(users.sort((a, b) => userDisplayName(a).localeCompare(userDisplayName(b))))
+            }
+        }
+        loadRegisteredUsers()
         return () => {
             canceled = true
         }
@@ -224,6 +248,8 @@ const SystemSettings = (): JSX.Element => {
         const aiSettings = settings.ai.enabled ? {
             ...settings.ai,
             anythingLLMEndpoint: settings.ai.anythingLLMEndpoint || defaultSettings.ai.anythingLLMEndpoint,
+            enableForAllUsers: settings.ai.enableForAllUsers ?? defaultSettings.ai.enableForAllUsers,
+            enabledUserIds: settings.ai.enableForAllUsers ? [] : settings.ai.enabledUserIds,
             model: settings.ai.model || providerModelOptions[settings.ai.provider]?.[0] || defaultSettings.ai.model,
             ollamaEndpoint: settings.ai.ollamaEndpoint || defaultSettings.ai.ollamaEndpoint,
             outputLanguagePreference: normalizeOutputLanguagePreference(settings.ai.outputLanguagePreference),
@@ -272,6 +298,13 @@ const SystemSettings = (): JSX.Element => {
         setProviderModels({})
         setIsLoadingProviderModels(false)
         setSettings({...settings, ai: enabled ? {...settings.ai, enabled} : defaultSettings.ai})
+    }
+    const updateAIEnabledFor = (value: string) => {
+        if (value === 'all') {
+            setSettings({...settings, ai: {...settings.ai, enableForAllUsers: true, enabledUserIds: []}})
+            return
+        }
+        setSettings({...settings, ai: {...settings.ai, enableForAllUsers: false, enabledUserIds: [value]}})
     }
     const uploadLogo = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
@@ -573,6 +606,33 @@ const SystemSettings = (): JSX.Element => {
                                                     value={language}
                                                 >
                                                     {language}
+                                                </option>
+                                            ))}
+                                        </select>
+                                    </label>
+                                    <label>
+                                        <span>
+                                            <FormattedMessage
+                                                id='SystemSettings.enable-ai-for'
+                                                defaultMessage='Enable for'
+                                            />
+                                        </span>
+                                        <select
+                                            onChange={(event) => updateAIEnabledFor(event.target.value)}
+                                            value={settings.ai.enableForAllUsers ? 'all' : (settings.ai.enabledUserIds[0] || 'all')}
+                                        >
+                                            <option value='all'>
+                                                {intl.formatMessage({
+                                                    id: 'SystemSettings.enable-ai-for-all-users',
+                                                    defaultMessage: 'All User',
+                                                })}
+                                            </option>
+                                            {registeredUsers.map((user) => (
+                                                <option
+                                                    key={user.id}
+                                                    value={user.id}
+                                                >
+                                                    {userDisplayName(user)}
                                                 </option>
                                             ))}
                                         </select>

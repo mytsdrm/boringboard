@@ -12,6 +12,8 @@ const DEFAULT_AI_SETTINGS: AdminAISettings = {
     anythingLLMEndpoint: 'http://localhost:3001/api/v1',
     apiKey: '',
     enabled: false,
+    enableForAllUsers: true,
+    enabledUserIds: [],
     model: 'gpt-4o-mini',
     ollamaEndpoint: 'http://localhost:11434',
     outputLanguagePreference: 'English',

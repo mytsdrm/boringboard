@@ -41,7 +41,7 @@ import {Constants} from '../../constants'
 import {getMe} from '../../store/users'
 import {getCurrentViewId} from '../../store/views'
 
-import octoClient from '../../octoClient'
+import octoClient, {AdminAISettings} from '../../octoClient'
 import {getStoredProjectSystemSettings, ProjectSystemSettings, SYSTEM_SETTINGS_UPDATED_EVENT} from '../../systemSettings'
 
 import {useWebsockets} from '../../hooks/websockets'
@@ -75,11 +75,24 @@ function getWindowDimensions() {
     }
 }
 
+function canUseAIForTaskBoard(aiSettings: AdminAISettings, user: IUser|null, isSystemAdmin: boolean): boolean {
+    if (!aiSettings.enabled) {
+        return false
+    }
+    if (isSystemAdmin) {
+        return true
+    }
+    if (aiSettings.enableForAllUsers ?? true) {
+        return true
+    }
+    return Boolean(user?.id && aiSettings.enabledUserIds?.includes(user.id))
+}
+
 const Sidebar = (props: Props) => {
     const [isHidden, setHidden] = useState(false)
     const [userHidden, setUserHidden] = useState(false)
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions())
-    const [aiEnabled, setAIEnabled] = useState(getStoredProjectSystemSettings().ai.enabled)
+    const [aiSettings, setAISettings] = useState<AdminAISettings>(getStoredProjectSystemSettings().ai)
     const history = useHistory()
     const match = useRouteMatch<{boardId: string, viewId?: string, cardId?: string, teamId?: string}>()
     const boards = useAppSelector(getMySortedBoards)
@@ -126,13 +139,13 @@ const Sidebar = (props: Props) => {
         async function loadSystemSettings() {
             const settings = await octoClient.getSystemSettings()
             if (!canceled) {
-                setAIEnabled(Boolean(settings.ai?.enabled))
+                setAISettings(settings.ai)
             }
         }
 
         const handleSystemSettingsUpdated = (event: Event) => {
             const settings = (event as CustomEvent<ProjectSystemSettings>).detail
-            setAIEnabled(Boolean(settings?.ai?.enabled))
+            setAISettings(settings?.ai || getStoredProjectSystemSettings().ai)
         }
 
         window.addEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
@@ -383,6 +396,7 @@ const Sidebar = (props: Props) => {
         Utils.showBoard(boardId, match, history)
         hideSidebar()
     }
+    const aiEnabled = canUseAIForTaskBoard(aiSettings, me, isSystemAdmin)
 
     return (
         <div className='Sidebar octo-sidebar'>

@@ -25,6 +25,8 @@ func defaultAdminSystemSettings() model.AdminSystemSettings {
 			OllamaEndpoint:           envOrDefault("BORINGBOARD_AI_OLLAMA_ENDPOINT", "http://localhost:11434"),
 			AnythingLLMEndpoint:      envOrDefault("BORINGBOARD_AI_ANYTHINGLLM_ENDPOINT", "http://localhost:3001/api/v1"),
 			OutputLanguagePreference: "English",
+			EnableForAllUsers:        true,
+			EnabledUserIDs:           []string{},
 		},
 		TaskBoards: model.AdminTaskBoardSettings{
 			EnableInvitedUserShare:        true,
@@ -211,6 +213,12 @@ func (a *App) SaveAdminSystemSettings(settings model.AdminSystemSettings) (model
 	}
 	if settings.AI.AnythingLLMEndpoint == "" {
 		settings.AI.AnythingLLMEndpoint = defaultAdminSystemSettings().AI.AnythingLLMEndpoint
+	}
+	if settings.AI.OutputLanguagePreference == "" {
+		settings.AI.OutputLanguagePreference = defaultAdminSystemSettings().AI.OutputLanguagePreference
+	}
+	if !settings.AI.EnableForAllUsers && len(settings.AI.EnabledUserIDs) == 0 {
+		settings.AI.EnableForAllUsers = true
 	}
 	if settings.AI.Enabled && settings.AI.Provider != "Ollama" && strings.TrimSpace(settings.AI.APIKey) == "" {
 		return settings, model.NewErrBadRequest("api key is required")

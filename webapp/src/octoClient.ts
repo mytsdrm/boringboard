@@ -29,6 +29,8 @@ export type AdminAISettings = {
     ollamaEndpoint: string
     anythingLLMEndpoint: string
     outputLanguagePreference: TaskBoardPreviewLanguage
+    enableForAllUsers: boolean
+    enabledUserIds: string[]
 }
 
 export type AdminTaskBoardSettings = {
@@ -583,6 +585,8 @@ class OctoClient {
                 ollamaEndpoint: 'http://localhost:11434',
                 anythingLLMEndpoint: 'http://localhost:3001/api/v1',
                 outputLanguagePreference: 'English',
+                enableForAllUsers: true,
+                enabledUserIds: [],
                 provider: 'OpenAI',
             },
             taskBoards: {
@@ -619,6 +623,8 @@ class OctoClient {
                 ollamaEndpoint: 'http://localhost:11434',
                 anythingLLMEndpoint: 'http://localhost:3001/api/v1',
                 outputLanguagePreference: 'English',
+                enableForAllUsers: true,
+                enabledUserIds: [],
                 provider: 'OpenAI',
             },
             taskBoards: {

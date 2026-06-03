@@ -1,13 +1,15 @@
 package model
 
 type AdminAISettings struct {
-	Enabled                  bool   `json:"enabled"`
-	Provider                 string `json:"provider"`
-	Model                    string `json:"model"`
-	APIKey                   string `json:"apiKey"`
-	OllamaEndpoint           string `json:"ollamaEndpoint"`
-	AnythingLLMEndpoint      string `json:"anythingLLMEndpoint"`
-	OutputLanguagePreference string `json:"outputLanguagePreference"`
+	Enabled                  bool     `json:"enabled"`
+	Provider                 string   `json:"provider"`
+	Model                    string   `json:"model"`
+	APIKey                   string   `json:"apiKey"`
+	OllamaEndpoint           string   `json:"ollamaEndpoint"`
+	AnythingLLMEndpoint      string   `json:"anythingLLMEndpoint"`
+	OutputLanguagePreference string   `json:"outputLanguagePreference"`
+	EnableForAllUsers        bool     `json:"enableForAllUsers"`
+	EnabledUserIDs           []string `json:"enabledUserIds"`
 }
 
 type AdminTaskBoardSettings struct {
