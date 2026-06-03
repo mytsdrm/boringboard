@@ -24,6 +24,19 @@ import './styles/_markdown.scss'
 import store from './store'
 import WithWebSockets from './components/withWebSockets'
 
+declare const DISABLE_BROWSER_CONSOLE_LOGS: boolean
+
+if (DISABLE_BROWSER_CONSOLE_LOGS) {
+    const noop = () => undefined
+    const browserConsole = window.console as unknown as Record<string, () => void>
+    browserConsole.debug = noop
+    browserConsole.error = noop
+    browserConsole.info = noop
+    browserConsole.log = noop
+    browserConsole.trace = noop
+    browserConsole.warn = noop
+}
+
 emojiMartStore.setHandlers({getter: UserSettings.getEmojiMartSetting, setter: UserSettings.setEmojiMartSetting})
 importNativeAppSettings()
 

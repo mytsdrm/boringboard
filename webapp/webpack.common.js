@@ -5,6 +5,7 @@ const path = require('path');
 const tsTransformer = require('@formatjs/ts-transformer');
 const CopyPlugin = require('copy-webpack-plugin');
 var HtmlWebpackPlugin = require('html-webpack-plugin');
+const webpack = require('webpack');
 
 const outpath = path.resolve(__dirname, 'pack');
 
@@ -102,6 +103,9 @@ function makeCommonConfig() {
                 filename: 'index.html',
                 publicPath: '{{.BaseURL}}/',
                 hash: true,
+            }),
+            new webpack.DefinePlugin({
+                DISABLE_BROWSER_CONSOLE_LOGS: JSON.stringify(process.env.DISABLE_BROWSER_CONSOLE_LOGS === 'true'),
             }),
         ],
         entry: ['./src/main.tsx', './src/userSettings.ts'],

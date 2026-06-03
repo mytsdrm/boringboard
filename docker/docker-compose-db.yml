@@ -3,6 +3,8 @@ services:
     build:
       context: ../
       dockerfile: docker/Dockerfile
+      args:
+        DISABLE_BROWSER_CONSOLE_LOGS: "true"
     container_name: boringboard
     depends_on:
       - focalboard-db
