@@ -24,7 +24,7 @@ func TestParseTaskBoardPreviewCoercesNestedPreview(t *testing.T) {
 		}
 	}`
 
-	preview, err := parseTaskBoardPreview(content)
+	preview, err := parseTaskBoardPreview(content, nil, nil)
 	if err != nil {
 		t.Fatalf("expected preview, got %v", err)
 	}
@@ -39,7 +39,7 @@ func TestParseTaskBoardPreviewCoercesNestedPreview(t *testing.T) {
 	}
 }
 
-func TestNormalizePreviewAlwaysIncludesDefaultViews(t *testing.T) {
+func TestNormalizePreviewUsesDefaultViews(t *testing.T) {
 	preview, err := normalizePreview(TaskBoardPreview{
 		Title: "Android Farm",
 		Views: []string{"gallery"},
@@ -47,14 +47,60 @@ func TestNormalizePreviewAlwaysIncludesDefaultViews(t *testing.T) {
 			{Name: "Planning"},
 			{Name: "Done"},
 		},
+	}, nil, nil)
+	if err != nil {
+		t.Fatalf("expected preview, got %v", err)
+	}
+
+	expectedViews := []string{"board", "calendar", "table", "gallery"}
+	if strings.Join(preview.Views, ",") != strings.Join(expectedViews, ",") {
+		t.Fatalf("expected default views %v, got %v", expectedViews, preview.Views)
+	}
+}
+
+func TestNormalizePreviewUsesRequestedViews(t *testing.T) {
+	preview, err := normalizePreview(TaskBoardPreview{
+		Title: "Android Farm",
+		Views: []string{"board", "table", "calendar", "gallery"},
+		Columns: []TaskBoardColumnPreview{
+			{Name: "Planning"},
+			{Name: "Done"},
+		},
+	}, []string{"table", "gallery"}, nil)
+	if err != nil {
+		t.Fatalf("expected preview, got %v", err)
+	}
+
+	expectedViews := []string{"table", "gallery"}
+	if strings.Join(preview.Views, ",") != strings.Join(expectedViews, ",") {
+		t.Fatalf("expected requested views %v, got %v", expectedViews, preview.Views)
+	}
+}
+
+func TestNormalizePreviewUsesRequestedColumns(t *testing.T) {
+	preview, err := normalizePreview(TaskBoardPreview{
+		Title: "Android Farm",
+		Views: []string{"board"},
+		Columns: []TaskBoardColumnPreview{
+			{Name: "Planning"},
+			{Name: "Done"},
+		},
+		Tasks: []TaskBoardTaskPreview{
+			{Title: "Run tests", Column: "Planning"},
+		},
+	}, nil, []TaskBoardColumnPreview{
+		{Name: "Backlog", Color: "propColorGray"},
+		{Name: "QA", Color: "propColorPink"},
 	})
 	if err != nil {
 		t.Fatalf("expected preview, got %v", err)
 	}
 
-	expectedViews := []string{"board", "table", "calendar", "gallery"}
-	if strings.Join(preview.Views, ",") != strings.Join(expectedViews, ",") {
-		t.Fatalf("expected default views %v, got %v", expectedViews, preview.Views)
+	if len(preview.Columns) != 2 || preview.Columns[1].Name != "QA" || preview.Columns[1].Color != "propColorPink" {
+		t.Fatalf("expected requested columns, got %v", preview.Columns)
+	}
+	if preview.Tasks[0].Column != "Backlog" {
+		t.Fatalf("expected unknown task column to fall back to first requested column, got %q", preview.Tasks[0].Column)
 	}
 }
 

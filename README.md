@@ -43,7 +43,7 @@ BORINGBOARD_AI_GEMINI_ENDPOINT="https://generativelanguage.googleapis.com/v1beta
 BORINGBOARD_AI_OLLAMA_ENDPOINT="http://localhost:11434"
 BORINGBOARD_AI_CLINE_ENDPOINT="https://api.cline.bot/api/v1"
 BORINGBOARD_AI_ANYTHINGLLM_ENDPOINT="http://localhost:3001/api/v1"
-BORINGBOARD_AI_GENERATE_TIMEOUT_SECONDS="180"
+BORINGBOARD_AI_TIMEOUT="180"
 ```
 
 Run the local development script:

@@ -11,7 +11,10 @@ const (
 )
 
 type CreateTaskBoardRequest struct {
-	Command string `json:"command"`
+	Command  string                   `json:"command"`
+	Views    []string                 `json:"views"`
+	Language string                   `json:"language"`
+	Statuses []TaskBoardColumnPreview `json:"statuses"`
 }
 
 type OllamaModelListRequest struct {
@@ -50,6 +53,9 @@ type TaskBoardPreview struct {
 
 type GenerateTaskBoardPreviewOptions struct {
 	Command  string
+	Views    []string
+	Language string
+	Statuses []TaskBoardColumnPreview
 	Settings model.AdminSystemSettings
 }
 

@@ -32,11 +32,12 @@ export function buildTaskBoardFromPreview(preview: TaskBoardPreview, teamId: str
     board.icon = taskBoardPreviewIcon(preview)
     board.showDescription = Boolean(preview.description)
 
+    const statusColumns = preview.columns.length > 0 ? preview.columns : taskBoardDefaultStatusColumns
     const statusProperty: IPropertyTemplate = {
         id: Utils.createGuid(IDType.BlockID),
         name: statusPropertyName,
         type: 'select',
-        options: taskBoardDefaultStatusColumns.map((column) => ({
+        options: statusColumns.map((column) => ({
             color: column.color || 'propColorBlue',
             id: Utils.createGuid(IDType.BlockID),
             value: column.name,

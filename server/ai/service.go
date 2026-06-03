@@ -27,13 +27,13 @@ func (s *Service) GenerateTaskBoardPreview(options GenerateTaskBoardPreviewOptio
 
 	content, err := selectedProvider.GenerateJSON(providerRequest{
 		Settings: options.Settings.AI,
-		Prompt:   createTaskBoardPrompt(strings.TrimSpace(options.Command)),
+		Prompt:   createTaskBoardPrompt(strings.TrimSpace(options.Command), options.Views, options.Language, options.Statuses),
 	})
 	if err != nil {
 		return TaskBoardPreview{}, err
 	}
 
-	preview, err := parseTaskBoardPreview(content)
+	preview, err := parseTaskBoardPreview(content, options.Views, options.Statuses)
 	if err == nil {
 		return preview, nil
 	}
@@ -41,14 +41,14 @@ func (s *Service) GenerateTaskBoardPreview(options GenerateTaskBoardPreviewOptio
 	return TaskBoardPreview{}, err
 }
 
-func parseTaskBoardPreview(content string) (TaskBoardPreview, error) {
+func parseTaskBoardPreview(content string, requestedViews []string, requestedColumns []TaskBoardColumnPreview) (TaskBoardPreview, error) {
 	jsonContent := []byte(extractJSONObject(content))
 	var preview TaskBoardPreview
 	if err := json.Unmarshal(jsonContent, &preview); err != nil {
 		return TaskBoardPreview{}, invalidPreviewError(content, "could not parse json")
 	}
 
-	normalizedPreview, err := normalizePreview(preview)
+	normalizedPreview, err := normalizePreview(preview, requestedViews, requestedColumns)
 	if err == nil {
 		return normalizedPreview, nil
 	}
@@ -58,7 +58,7 @@ func parseTaskBoardPreview(content string) (TaskBoardPreview, error) {
 		return TaskBoardPreview{}, invalidPreviewError(content, "could not parse flexible json")
 	}
 
-	normalizedPreview, err = normalizePreview(coerceTaskBoardPreview(genericPreview))
+	normalizedPreview, err = normalizePreview(coerceTaskBoardPreview(genericPreview), requestedViews, requestedColumns)
 	if err != nil {
 		return TaskBoardPreview{}, invalidPreviewError(content, "missing usable title or columns")
 	}

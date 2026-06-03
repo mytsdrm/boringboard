@@ -67,6 +67,8 @@ export type TaskBoardPreview = {
     tasks: TaskBoardTaskPreview[]
 }
 
+export type TaskBoardPreviewLanguage = 'English' | 'Indonesia'
+
 export type AdminUserPayload = {
     username: string
     email: string
@@ -623,10 +625,10 @@ class OctoClient {
         })
     }
 
-    async createTaskBoardPreview(command: string): Promise<TaskBoardPreview | null> {
+    async createTaskBoardPreview(command: string, views: string[], language: TaskBoardPreviewLanguage, statuses: TaskBoardColumnPreview[]): Promise<TaskBoardPreview | null> {
         const path = '/api/v2/ai/task-board/preview'
         const response = await fetch(this.getBaseURL() + path, {
-            body: JSON.stringify({command}),
+            body: JSON.stringify({command, language, statuses, views}),
             headers: this.headers(),
             method: 'POST',
         })

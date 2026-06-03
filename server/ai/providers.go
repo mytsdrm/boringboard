@@ -508,7 +508,7 @@ func envOrDefault(key string, defaultValue string) string {
 }
 
 func generateTimeout() time.Duration {
-	timeoutString := strings.TrimSpace(os.Getenv("BORINGBOARD_AI_GENERATE_TIMEOUT_SECONDS"))
+	timeoutString := strings.TrimSpace(os.Getenv("BORINGBOARD_AI_TIMEOUT"))
 	if timeoutString == "" {
 		return defaultGenerateTimeoutSeconds * time.Second
 	}

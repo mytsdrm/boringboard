@@ -43,6 +43,9 @@ func (a *API) handleCreateTaskBoardPreview(w http.ResponseWriter, r *http.Reques
 
 	preview, err := ai.NewService().GenerateTaskBoardPreview(ai.GenerateTaskBoardPreviewOptions{
 		Command:  request.Command,
+		Views:    request.Views,
+		Language: request.Language,
+		Statuses: request.Statuses,
 		Settings: settings,
 	})
 	if err != nil {

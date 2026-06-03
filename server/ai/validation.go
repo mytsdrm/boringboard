@@ -12,11 +12,11 @@ const (
 	maxColumnNameLength  = 40
 	maxTaskTitleLength   = 140
 	maxTaskDescription   = 500
-	maxColumns           = 8
-	maxTasks             = 120
+	maxColumns           = 12
+	maxTasks             = 300
 )
 
-var defaultTaskBoardViews = []string{"board", "table", "calendar"}
+var defaultTaskBoardViews = []string{"board", "calendar", "table", "gallery"}
 
 var (
 	ErrAIIsDisabled     = errors.New("ai is disabled")
@@ -36,53 +36,39 @@ func validateCommand(command string) error {
 	return nil
 }
 
-func normalizePreview(preview TaskBoardPreview) (TaskBoardPreview, error) {
+func normalizePreview(preview TaskBoardPreview, requestedViews []string, requestedColumns []TaskBoardColumnPreview) (TaskBoardPreview, error) {
 	preview.Title = trimTo(strings.TrimSpace(preview.Title), maxTitleLength)
 	preview.Description = trimTo(strings.TrimSpace(preview.Description), maxDescriptionLength)
 	if preview.Title == "" {
 		return TaskBoardPreview{}, ErrInvalidAIPreview
 	}
 
-	normalizedColumns := []TaskBoardColumnPreview{}
-	seenColumns := map[string]bool{}
-	for _, column := range preview.Columns {
-		name := trimTo(strings.TrimSpace(column.Name), maxColumnNameLength)
-		if name == "" {
-			continue
-		}
-		key := strings.ToLower(name)
-		if seenColumns[key] {
-			continue
-		}
-		seenColumns[key] = true
-		normalizedColumns = append(normalizedColumns, TaskBoardColumnPreview{
-			Name:  name,
-			Color: normalizeColor(column.Color),
-		})
-		if len(normalizedColumns) >= maxColumns {
-			break
-		}
+	normalizedColumns, hasRequestedColumns := normalizeColumns(requestedColumns)
+	if !hasRequestedColumns {
+		normalizedColumns, _ = normalizeColumns(preview.Columns)
 	}
 	if len(normalizedColumns) == 0 {
 		return TaskBoardPreview{}, ErrInvalidAIPreview
 	}
 	preview.Columns = normalizedColumns
 
-	normalizedViews := append([]string{}, defaultTaskBoardViews...)
+	normalizedViews, hasRequestedViews := normalizeRequestedViews(requestedViews)
 	seenViews := map[string]bool{}
 	for _, view := range normalizedViews {
 		seenViews[view] = true
 	}
-	for _, view := range preview.Views {
-		view = strings.ToLower(strings.TrimSpace(view))
-		if view != "board" && view != "table" && view != "calendar" && view != "gallery" {
-			continue
+	if !hasRequestedViews {
+		for _, view := range preview.Views {
+			view = strings.ToLower(strings.TrimSpace(view))
+			if view != "board" && view != "table" && view != "calendar" && view != "gallery" {
+				continue
+			}
+			if seenViews[view] {
+				continue
+			}
+			seenViews[view] = true
+			normalizedViews = append(normalizedViews, view)
 		}
-		if seenViews[view] {
-			continue
-		}
-		seenViews[view] = true
-		normalizedViews = append(normalizedViews, view)
 	}
 	preview.Views = normalizedViews
 
@@ -113,6 +99,50 @@ func normalizePreview(preview TaskBoardPreview) (TaskBoardPreview, error) {
 	preview.Tasks = normalizedTasks
 
 	return preview, nil
+}
+
+func normalizeRequestedViews(views []string) ([]string, bool) {
+	normalizedViews := []string{}
+	seenViews := map[string]bool{}
+	for _, view := range views {
+		view = strings.ToLower(strings.TrimSpace(view))
+		if view != "board" && view != "table" && view != "calendar" && view != "gallery" {
+			continue
+		}
+		if seenViews[view] {
+			continue
+		}
+		seenViews[view] = true
+		normalizedViews = append(normalizedViews, view)
+	}
+	if len(normalizedViews) == 0 {
+		return append([]string{}, defaultTaskBoardViews...), false
+	}
+	return normalizedViews, true
+}
+
+func normalizeColumns(columns []TaskBoardColumnPreview) ([]TaskBoardColumnPreview, bool) {
+	normalizedColumns := []TaskBoardColumnPreview{}
+	seenColumns := map[string]bool{}
+	for _, column := range columns {
+		name := trimTo(strings.TrimSpace(column.Name), maxColumnNameLength)
+		if name == "" {
+			continue
+		}
+		key := strings.ToLower(name)
+		if seenColumns[key] {
+			continue
+		}
+		seenColumns[key] = true
+		normalizedColumns = append(normalizedColumns, TaskBoardColumnPreview{
+			Name:  name,
+			Color: normalizeColor(column.Color),
+		})
+		if len(normalizedColumns) >= maxColumns {
+			break
+		}
+	}
+	return normalizedColumns, len(normalizedColumns) > 0
 }
 
 func trimTo(value string, maxLength int) string {
