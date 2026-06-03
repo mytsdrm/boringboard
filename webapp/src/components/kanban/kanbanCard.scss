@@ -51,6 +51,7 @@
     .octo-tooltip {
         display: flex;
         max-width: 100%;
+        margin-left: 1.8rem;
     }
 
     .octo-propertyvalue {
@@ -98,6 +99,9 @@
             max-height: 100px;
             -webkit-line-clamp: 5;
             -webkit-box-orient: vertical; // stylelint-disable-line
+            font-weight: normal;
+            border-bottom: 1px solid #999;
+            padding-bottom: 0.2rem;
         }
     }
 
