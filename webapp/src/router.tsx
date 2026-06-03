@@ -118,6 +118,42 @@ const FocalboardRouter = (props: Props): JSX.Element => {
                 </FBRoute>
                 <FBRoute
                     loginRequired={true}
+                    path='/reminders'
+                >
+                    <BoardPage adminModule='reminder'/>
+                </FBRoute>
+                <FBRoute
+                    loginRequired={true}
+                    path='/announcements'
+                >
+                    <BoardPage adminModule='announcement'/>
+                </FBRoute>
+                <FBRoute
+                    loginRequired={true}
+                    path='/reports'
+                >
+                    <BoardPage adminModule='reports'/>
+                </FBRoute>
+                <FBRoute
+                    loginRequired={true}
+                    path='/audit-log'
+                >
+                    <BoardPage adminModule='auditLog'/>
+                </FBRoute>
+                <FBRoute
+                    loginRequired={true}
+                    path='/notifications'
+                >
+                    <BoardPage adminModule='notifications'/>
+                </FBRoute>
+                <FBRoute
+                    loginRequired={true}
+                    path='/calendar'
+                >
+                    <BoardPage adminModule='calendar'/>
+                </FBRoute>
+                <FBRoute
+                    loginRequired={true}
                     path='/activity-logs'
                 >
                     <BoardPage activityLogs={true}/>

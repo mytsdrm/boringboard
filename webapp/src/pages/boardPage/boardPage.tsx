@@ -6,6 +6,7 @@ import {FormattedMessage, useIntl} from 'react-intl'
 import {useRouteMatch, useHistory} from 'react-router-dom'
 
 import Workspace from '../../components/workspace'
+import {AdminModuleKey} from '../../components/admin/adminModulePage'
 import VersionMessage from '../../components/messages/versionMessage'
 import octoClient from '../../octoClient'
 import {Subscription, WSClient} from '../../wsclient'
@@ -69,6 +70,7 @@ type Props = {
     systemSettings?: boolean
     templates?: boolean
     users?: boolean
+    adminModule?: AdminModuleKey
 }
 
 const BoardPage = (props: Props): JSX.Element => {
@@ -298,7 +300,7 @@ const BoardPage = (props: Props): JSX.Element => {
 
             {!showJoinBoardDialog &&
                 <div className='BoardPage'>
-                    {!props.new && !props.activityLogs && !props.dashboard && !props.systemSettings && !props.templates && !props.users && <TeamToBoardAndViewRedirect/>}
+                    {!props.new && !props.activityLogs && !props.dashboard && !props.systemSettings && !props.templates && !props.users && !props.adminModule && <TeamToBoardAndViewRedirect/>}
                     <BackwardCompatibilityQueryParamsRedirect/>
                     <SetWindowTitleAndIcon/>
                     <UndoRedoHotKeys/>
@@ -340,6 +342,7 @@ const BoardPage = (props: Props): JSX.Element => {
                             systemSettings={props.systemSettings || false}
                             templates={props.templates || false}
                             users={props.users || false}
+                            adminModule={props.adminModule}
                         />
                     }
                 </div>

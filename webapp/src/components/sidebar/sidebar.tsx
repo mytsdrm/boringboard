@@ -41,7 +41,7 @@ import {Constants} from '../../constants'
 import {getMe} from '../../store/users'
 import {getCurrentViewId} from '../../store/views'
 
-import octoClient, {AdminAISettings} from '../../octoClient'
+import octoClient, {AdminAISettings, AdminModuleSettings} from '../../octoClient'
 import {getStoredProjectSystemSettings, ProjectSystemSettings, SYSTEM_SETTINGS_UPDATED_EVENT} from '../../systemSettings'
 
 import {useWebsockets} from '../../hooks/websockets'
@@ -51,6 +51,7 @@ import mutator from '../../mutator'
 import {Board} from '../../blocks/board'
 
 import CreateTaskBoardFromCommand from '../aiCreateBoard/createTaskBoardFromCommand'
+import {AdminModuleKey} from '../admin/adminModulePage'
 
 import SidebarCategory from './sidebarCategory'
 import SidebarSettingsMenu from './sidebarSettingsMenu'
@@ -63,9 +64,25 @@ type Props = {
     systemSettingsActive?: boolean
     templatesActive?: boolean
     usersActive?: boolean
+    adminModuleActive?: AdminModuleKey
     onBoardTemplateSelectorOpen: () => void
     onBoardTemplateSelectorClose?: () => void
 }
+
+const adminModuleMenuItems: Array<{
+    key: AdminModuleKey
+    path: string
+    icon: string
+    labelId: string
+    label: string
+}> = [
+    {key: 'reminder', path: '/reminders', icon: 'clock-outline', labelId: 'Sidebar.module-reminder', label: 'Reminder'},
+    {key: 'announcement', path: '/announcements', icon: 'bullhorn-outline', labelId: 'Sidebar.module-announcement', label: 'Announcement'},
+    {key: 'reports', path: '/reports', icon: 'chart-bar', labelId: 'Sidebar.module-reports', label: 'Reports'},
+    {key: 'auditLog', path: '/audit-log', icon: 'clipboard-text-clock-outline', labelId: 'Sidebar.module-audit-log', label: 'Audit Log'},
+    {key: 'notifications', path: '/notifications', icon: 'bell-outline', labelId: 'Sidebar.module-notifications', label: 'Notifications'},
+    {key: 'calendar', path: '/calendar', icon: 'calendar-outline', labelId: 'Sidebar.module-calendar', label: 'Calendar'},
+]
 
 function getWindowDimensions() {
     const {innerWidth: width, innerHeight: height} = window
@@ -93,6 +110,7 @@ const Sidebar = (props: Props) => {
     const [userHidden, setUserHidden] = useState(false)
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions())
     const [aiSettings, setAISettings] = useState<AdminAISettings>(getStoredProjectSystemSettings().ai)
+    const [moduleSettings, setModuleSettings] = useState<AdminModuleSettings>(getStoredProjectSystemSettings().modules)
     const history = useHistory()
     const match = useRouteMatch<{boardId: string, viewId?: string, cardId?: string, teamId?: string}>()
     const boards = useAppSelector(getMySortedBoards)
@@ -140,12 +158,14 @@ const Sidebar = (props: Props) => {
             const settings = await octoClient.getSystemSettings()
             if (!canceled) {
                 setAISettings(settings.ai)
+                setModuleSettings(settings.modules || getStoredProjectSystemSettings().modules)
             }
         }
 
         const handleSystemSettingsUpdated = (event: Event) => {
             const settings = (event as CustomEvent<ProjectSystemSettings>).detail
             setAISettings(settings?.ai || getStoredProjectSystemSettings().ai)
+            setModuleSettings(settings?.modules || getStoredProjectSystemSettings().modules)
         }
 
         window.addEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
@@ -472,6 +492,25 @@ const Sidebar = (props: Props) => {
                         />
                     </span>
                 </div>}
+
+            {isSystemAdmin && adminModuleMenuItems.filter((item) => moduleSettings[item.key]).map((item) => (
+                <div
+                    className={`octo-sidebar-dashboard-item${props.adminModuleActive === item.key ? ' active' : ''}`}
+                    key={item.key}
+                    onClick={() => {
+                        history.push(item.path)
+                        hideSidebar()
+                    }}
+                >
+                    <CompassIcon icon={item.icon}/>
+                    <span className='active-text'>
+                        <FormattedMessage
+                            id={item.labelId}
+                            defaultMessage={item.label}
+                        />
+                    </span>
+                </div>
+            ))}
 
             <div
                 className={`octo-sidebar-dashboard-item${props.activityLogsActive ? ' active' : ''}`}

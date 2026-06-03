@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {AdminAISettings, AdminSystemSettings} from './octoClient'
+import {AdminAISettings, AdminModuleSettings, AdminSystemSettings} from './octoClient'
 
 export const DEFAULT_PROJECT_TIME_ZONE = 'Asia/Jakarta'
 export const SYSTEM_SETTINGS_UPDATED_EVENT = 'boringboard-system-settings-updated'
@@ -20,8 +20,18 @@ const DEFAULT_AI_SETTINGS: AdminAISettings = {
     provider: 'OpenAI',
 }
 
+const DEFAULT_MODULE_SETTINGS: AdminModuleSettings = {
+    announcement: false,
+    auditLog: false,
+    calendar: false,
+    notifications: false,
+    reminder: false,
+    reports: false,
+}
+
 export type ProjectSystemSettings = {
     ai: AdminAISettings
+    modules: AdminModuleSettings
     timeZone: string
     taskBoards: {
         enableInvitedUserEditProperty: boolean
@@ -42,12 +52,16 @@ const normalizeTimeZone = (timeZone?: string): string => {
     return isValidTimeZone(nextTimeZone) ? nextTimeZone : DEFAULT_PROJECT_TIME_ZONE
 }
 
-export const getProjectSettingsFromSystemSettings = (settings?: Pick<AdminSystemSettings, 'ai' | 'timeZone' | 'taskBoards'>): ProjectSystemSettings => {
+export const getProjectSettingsFromSystemSettings = (settings?: Pick<AdminSystemSettings, 'ai' | 'timeZone' | 'taskBoards' | 'modules'>): ProjectSystemSettings => {
     return {
         ai: {
             ...DEFAULT_AI_SETTINGS,
             ...(settings?.ai || {}),
             apiKey: '',
+        },
+        modules: {
+            ...DEFAULT_MODULE_SETTINGS,
+            ...(settings?.modules || {}),
         },
         taskBoards: {
             enableInvitedUserEditProperty: settings?.taskBoards?.enableInvitedUserEditProperty || false,
@@ -70,7 +84,7 @@ export const getStoredProjectSystemSettings = (): ProjectSystemSettings => {
     }
 }
 
-export const applyProjectSystemSettings = (settings?: Pick<AdminSystemSettings, 'ai' | 'timeZone' | 'taskBoards'>): ProjectSystemSettings => {
+export const applyProjectSystemSettings = (settings?: Pick<AdminSystemSettings, 'ai' | 'timeZone' | 'taskBoards' | 'modules'>): ProjectSystemSettings => {
     const projectSettings = getProjectSettingsFromSystemSettings(settings)
     window.localStorage.setItem(SYSTEM_SETTINGS_STORAGE_KEY, JSON.stringify(projectSettings))
     window.dispatchEvent(new CustomEvent<ProjectSystemSettings>(SYSTEM_SETTINGS_UPDATED_EVENT, {detail: projectSettings}))

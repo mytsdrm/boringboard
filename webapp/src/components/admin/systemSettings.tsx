@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
 
 import {applySystemBranding, getBrandingFromSettings} from '../../branding'
-import octoClient, {AdminSystemSettings, TaskBoardPreviewLanguage} from '../../octoClient'
+import octoClient, {AdminModuleSettings, AdminSystemSettings, TaskBoardPreviewLanguage} from '../../octoClient'
 import {applyProjectSystemSettings, DEFAULT_PROJECT_TIME_ZONE} from '../../systemSettings'
 import {IUser} from '../../user'
 
@@ -12,6 +12,58 @@ import './adminPages.scss'
 
 const PROVIDERS = ['OpenAI', 'Gemini', 'Ollama', 'Cline', 'Anything LLM']
 const OUTPUT_LANGUAGE_OPTIONS: TaskBoardPreviewLanguage[] = ['English', 'Indonesia']
+type SettingsTab = 'general' | 'modules'
+
+const MODULE_OPTIONS: Array<{
+    key: keyof AdminModuleSettings
+    labelId: string
+    label: string
+    descriptionId: string
+    description: string
+}> = [
+    {
+        key: 'reminder',
+        labelId: 'SystemSettings.module-reminder',
+        label: 'Reminder',
+        descriptionId: 'SystemSettings.module-reminder-description',
+        description: 'Show the Reminder admin menu.',
+    },
+    {
+        key: 'announcement',
+        labelId: 'SystemSettings.module-announcement',
+        label: 'Announcement',
+        descriptionId: 'SystemSettings.module-announcement-description',
+        description: 'Show the Announcement admin menu.',
+    },
+    {
+        key: 'reports',
+        labelId: 'SystemSettings.module-reports',
+        label: 'Reports',
+        descriptionId: 'SystemSettings.module-reports-description',
+        description: 'Show the Reports admin menu.',
+    },
+    {
+        key: 'auditLog',
+        labelId: 'SystemSettings.module-audit-log',
+        label: 'Audit Log',
+        descriptionId: 'SystemSettings.module-audit-log-description',
+        description: 'Show the Audit Log admin menu.',
+    },
+    {
+        key: 'notifications',
+        labelId: 'SystemSettings.module-notifications',
+        label: 'Notifications',
+        descriptionId: 'SystemSettings.module-notifications-description',
+        description: 'Show the Notifications admin menu.',
+    },
+    {
+        key: 'calendar',
+        labelId: 'SystemSettings.module-calendar',
+        label: 'Calendar',
+        descriptionId: 'SystemSettings.module-calendar-description',
+        description: 'Show the Calendar admin menu.',
+    },
+]
 
 const providerModelOptions: {[key: string]: string[]} = {
     'Anything LLM': ['anythingllm'],
@@ -64,6 +116,14 @@ const defaultSettings: AdminSystemSettings = {
         enableInvitedUserEditProperty: false,
         enableInvitedUserShare: true,
     },
+    modules: {
+        announcement: false,
+        auditLog: false,
+        calendar: false,
+        notifications: false,
+        reminder: false,
+        reports: false,
+    },
 }
 
 const fallbackTimeZones = [
@@ -108,6 +168,10 @@ const mergeWithDefaultSettings = (settings: AdminSystemSettings): AdminSystemSet
         ...defaultSettings.taskBoards,
         ...(settings.taskBoards || {}),
     },
+    modules: {
+        ...defaultSettings.modules,
+        ...(settings.modules || {}),
+    },
 })
 
 const normalizeOutputLanguagePreference = (language?: string): TaskBoardPreviewLanguage => {
@@ -121,6 +185,7 @@ const userDisplayName = (user: IUser): string => {
 const SystemSettings = (): JSX.Element => {
     const intl = useIntl()
     const [settings, setSettings] = useState<AdminSystemSettings>(defaultSettings)
+    const [activeTab, setActiveTab] = useState<SettingsTab>('general')
     const [ollamaModels, setOllamaModels] = useState<string[]>(providerModelOptions.Ollama)
     const [providerModels, setProviderModels] = useState<{[key: string]: string[]}>({})
     const [isLoadingOllamaModels, setIsLoadingOllamaModels] = useState(false)
@@ -261,6 +326,10 @@ const SystemSettings = (): JSX.Element => {
                 ...defaultSettings.taskBoards,
                 ...settings.taskBoards,
             },
+            modules: {
+                ...defaultSettings.modules,
+                ...settings.modules,
+            },
         })
         if (saved) {
             const mergedSettings = mergeWithDefaultSettings(saved)
@@ -305,6 +374,15 @@ const SystemSettings = (): JSX.Element => {
             return
         }
         setSettings({...settings, ai: {...settings.ai, enableForAllUsers: false, enabledUserIds: [value]}})
+    }
+    const updateModuleEnabled = (key: keyof AdminModuleSettings, enabled: boolean) => {
+        setSettings({
+            ...settings,
+            modules: {
+                ...settings.modules,
+                [key]: enabled,
+            },
+        })
     }
     const uploadLogo = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
@@ -354,145 +432,180 @@ const SystemSettings = (): JSX.Element => {
                 </h1>
             </div>
             <section className='admin-page-card admin-settings-form'>
+                <div
+                    className='admin-settings-tabs'
+                    role='tablist'
+                    aria-label={intl.formatMessage({
+                        id: 'SystemSettings.tabs-label',
+                        defaultMessage: 'System settings sections',
+                    })}
+                >
+                    <button
+                        aria-selected={activeTab === 'general'}
+                        className={activeTab === 'general' ? 'active' : ''}
+                        onClick={() => setActiveTab('general')}
+                        role='tab'
+                        type='button'
+                    >
+                        <FormattedMessage
+                            id='SystemSettings.tab-general'
+                            defaultMessage='General'
+                        />
+                    </button>
+                    <button
+                        aria-selected={activeTab === 'modules'}
+                        className={activeTab === 'modules' ? 'active' : ''}
+                        onClick={() => setActiveTab('modules')}
+                        role='tab'
+                        type='button'
+                    >
+                        <FormattedMessage
+                            id='SystemSettings.tab-modules'
+                            defaultMessage='Modules'
+                        />
+                    </button>
+                </div>
                 <div className='admin-settings-scroll'>
-                    <div className='admin-settings-section admin-settings-branding'>
-                        <div className='admin-settings-section-header'>
-                            <h2>
-                                <FormattedMessage
-                                    id='SystemSettings.branding-title'
-                                    defaultMessage='Branding'
-                                />
-                            </h2>
-                            <p>
-                                <FormattedMessage
-                                    id='SystemSettings.branding-description'
-                                    defaultMessage='Update the app name and logo used across the workspace.'
-                                />
-                            </p>
-                        </div>
-                        <div className='admin-settings-field-grid'>
-                            <label>
-                                <input
-                                    aria-label={intl.formatMessage({
-                                        id: 'SystemSettings.app-name',
-                                        defaultMessage: 'App Name',
-                                    })}
-                                    onChange={(event) => setSettings({...settings, appName: event.target.value})}
-                                    placeholder={intl.formatMessage({
-                                        id: 'SystemSettings.app-name',
-                                        defaultMessage: 'App Name',
-                                    })}
-                                    value={settings.appName}
-                                />
-                            </label>
-                            <div className='admin-logo-upload'>
-                                <span className='admin-settings-label'>
+                    {activeTab === 'general' &&
+                    <>
+                        <div className='admin-settings-section admin-settings-branding'>
+                            <div className='admin-settings-section-header'>
+                                <h2>
                                     <FormattedMessage
-                                        id='SystemSettings.logo'
-                                        defaultMessage='Logo'
+                                        id='SystemSettings.branding-title'
+                                        defaultMessage='Branding'
                                     />
-                                </span>
-                                <div className='admin-logo-upload-body'>
-                                    <div className='admin-logo-preview'>
-                                        <img
-                                            src={branding.logo}
-                                            alt={branding.appName}
+                                </h2>
+                                <p>
+                                    <FormattedMessage
+                                        id='SystemSettings.branding-description'
+                                        defaultMessage='Update the app name and logo used across the workspace.'
+                                    />
+                                </p>
+                            </div>
+                            <div className='admin-settings-field-grid'>
+                                <label>
+                                    <input
+                                        aria-label={intl.formatMessage({
+                                            id: 'SystemSettings.app-name',
+                                            defaultMessage: 'App Name',
+                                        })}
+                                        onChange={(event) => setSettings({...settings, appName: event.target.value})}
+                                        placeholder={intl.formatMessage({
+                                            id: 'SystemSettings.app-name',
+                                            defaultMessage: 'App Name',
+                                        })}
+                                        value={settings.appName}
+                                    />
+                                </label>
+                                <div className='admin-logo-upload'>
+                                    <span className='admin-settings-label'>
+                                        <FormattedMessage
+                                            id='SystemSettings.logo'
+                                            defaultMessage='Logo'
                                         />
-                                    </div>
-                                    <div className='admin-logo-upload-actions'>
-                                        <label className='admin-logo-upload-button'>
-                                            <input
-                                                accept='image/*'
-                                                type='file'
-                                                onChange={uploadLogo}
+                                    </span>
+                                    <div className='admin-logo-upload-body'>
+                                        <div className='admin-logo-preview'>
+                                            <img
+                                                src={branding.logo}
+                                                alt={branding.appName}
                                             />
-                                            <FormattedMessage
-                                                id='SystemSettings.upload-logo'
-                                                defaultMessage='Upload logo'
-                                            />
-                                        </label>
-                                        <button
-                                            className='admin-logo-reset-button'
-                                            type='button'
-                                            onClick={() => setSettings({...settings, logo: defaultSettings.logo})}
-                                        >
-                                            <FormattedMessage
-                                                id='SystemSettings.reset-logo'
-                                                defaultMessage='Reset'
-                                            />
-                                        </button>
+                                        </div>
+                                        <div className='admin-logo-upload-actions'>
+                                            <label className='admin-logo-upload-button'>
+                                                <input
+                                                    accept='image/*'
+                                                    type='file'
+                                                    onChange={uploadLogo}
+                                                />
+                                                <FormattedMessage
+                                                    id='SystemSettings.upload-logo'
+                                                    defaultMessage='Upload logo'
+                                                />
+                                            </label>
+                                            <button
+                                                className='admin-logo-reset-button'
+                                                type='button'
+                                                onClick={() => setSettings({...settings, logo: defaultSettings.logo})}
+                                            >
+                                                <FormattedMessage
+                                                    id='SystemSettings.reset-logo'
+                                                    defaultMessage='Reset'
+                                                />
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
                         </div>
-                    </div>
-                    <div className='admin-settings-section'>
-                        <div className='admin-settings-section-header'>
-                            <h2>
-                                <FormattedMessage
-                                    id='SystemSettings.time-zone'
-                                    defaultMessage='Time zone'
-                                />
-                            </h2>
-                            <p>
-                                <FormattedMessage
-                                    id='SystemSettings.time-zone-description'
-                                    defaultMessage='Choose the timezone used for project dates and activity logs.'
-                                />
-                            </p>
-                        </div>
-                        <div className='admin-settings-field-grid'>
-                            <label>
-                                <select
-                                    aria-label={intl.formatMessage({
-                                        id: 'SystemSettings.time-zone',
-                                        defaultMessage: 'Time zone',
-                                    })}
-                                    onChange={(event) => setSettings({...settings, timeZone: event.target.value})}
-                                    value={settings.timeZone || DEFAULT_PROJECT_TIME_ZONE}
-                                >
-                                    {timeZoneOptions.map((timeZone) => (
-                                        <option
-                                            key={timeZone}
-                                            value={timeZone}
-                                        >
-                                            {timeZone}
-                                        </option>
-                                    ))}
-                                </select>
-                            </label>
-                        </div>
-                    </div>
-                    <div className='admin-settings-section'>
-                        <div className='admin-settings-section-header'>
-                            <h2>
-                                <FormattedMessage
-                                    id='SystemSettings.ai-title'
-                                    defaultMessage='AI'
-                                />
-                            </h2>
-                            <p>
-                                <FormattedMessage
-                                    id='SystemSettings.ai-description'
-                                    defaultMessage='Configure optional AI provider access.'
-                                />
-                            </p>
-                        </div>
-                        <div className='admin-ai-controls'>
-                            <label className='admin-settings-checkbox'>
-                                <input
-                                    checked={settings.ai.enabled}
-                                    onChange={(event) => updateAIEnabled(event.target.checked)}
-                                    type='checkbox'
-                                />
-                                <span>
+                        <div className='admin-settings-section'>
+                            <div className='admin-settings-section-header'>
+                                <h2>
                                     <FormattedMessage
-                                        id='SystemSettings.enable-ai'
-                                        defaultMessage='Enable AI'
+                                        id='SystemSettings.time-zone'
+                                        defaultMessage='Time zone'
                                     />
-                                </span>
-                            </label>
-                            {settings.ai.enabled &&
+                                </h2>
+                                <p>
+                                    <FormattedMessage
+                                        id='SystemSettings.time-zone-description'
+                                        defaultMessage='Choose the timezone used for project dates and activity logs.'
+                                    />
+                                </p>
+                            </div>
+                            <div className='admin-settings-field-grid'>
+                                <label>
+                                    <select
+                                        aria-label={intl.formatMessage({
+                                            id: 'SystemSettings.time-zone',
+                                            defaultMessage: 'Time zone',
+                                        })}
+                                        onChange={(event) => setSettings({...settings, timeZone: event.target.value})}
+                                        value={settings.timeZone || DEFAULT_PROJECT_TIME_ZONE}
+                                    >
+                                        {timeZoneOptions.map((timeZone) => (
+                                            <option
+                                                key={timeZone}
+                                                value={timeZone}
+                                            >
+                                                {timeZone}
+                                            </option>
+                                        ))}
+                                    </select>
+                                </label>
+                            </div>
+                        </div>
+                        <div className='admin-settings-section'>
+                            <div className='admin-settings-section-header'>
+                                <h2>
+                                    <FormattedMessage
+                                        id='SystemSettings.ai-title'
+                                        defaultMessage='AI'
+                                    />
+                                </h2>
+                                <p>
+                                    <FormattedMessage
+                                        id='SystemSettings.ai-description'
+                                        defaultMessage='Configure optional AI provider access.'
+                                    />
+                                </p>
+                            </div>
+                            <div className='admin-ai-controls'>
+                                <label className='admin-settings-checkbox'>
+                                    <input
+                                        checked={settings.ai.enabled}
+                                        onChange={(event) => updateAIEnabled(event.target.checked)}
+                                        type='checkbox'
+                                    />
+                                    <span>
+                                        <FormattedMessage
+                                            id='SystemSettings.enable-ai'
+                                            defaultMessage='Enable AI'
+                                        />
+                                    </span>
+                                </label>
+                                {settings.ai.enabled &&
                                 <div className='admin-ai-settings'>
                                     <label>
                                         <span>
@@ -668,58 +781,104 @@ const SystemSettings = (): JSX.Element => {
                                             />
                                         </label>}
                                 </div>}
+                            </div>
                         </div>
-                    </div>
-                    <div className='admin-settings-section'>
+                        <div className='admin-settings-section'>
+                            <div className='admin-settings-section-header'>
+                                <h2>
+                                    <FormattedMessage
+                                        id='SystemSettings.task-boards-title'
+                                        defaultMessage='Task Boards'
+                                    />
+                                </h2>
+                            </div>
+                            <div className='admin-task-board-controls'>
+                                <label className='admin-settings-checkbox'>
+                                    <input
+                                        checked={settings.taskBoards.enableInvitedUserShare}
+                                        onChange={(event) => setSettings({
+                                            ...settings,
+                                            taskBoards: {
+                                                ...settings.taskBoards,
+                                                enableInvitedUserShare: event.target.checked,
+                                            },
+                                        })}
+                                        type='checkbox'
+                                    />
+                                    <span>
+                                        <FormattedMessage
+                                            id='SystemSettings.enable-invited-user-share'
+                                            defaultMessage='Enable Invited user to share task board'
+                                        />
+                                    </span>
+                                </label>
+                                <label className='admin-settings-checkbox'>
+                                    <input
+                                        checked={settings.taskBoards.enableInvitedUserEditProperty}
+                                        onChange={(event) => setSettings({
+                                            ...settings,
+                                            taskBoards: {
+                                                ...settings.taskBoards,
+                                                enableInvitedUserEditProperty: event.target.checked,
+                                            },
+                                        })}
+                                        type='checkbox'
+                                    />
+                                    <span>
+                                        <FormattedMessage
+                                            id='SystemSettings.enable-invited-user-edit-property'
+                                            defaultMessage='Enable Invited to edit task board property'
+                                        />
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </>}
+                    {activeTab === 'modules' &&
+                    <div className='admin-settings-section admin-settings-modules-section'>
                         <div className='admin-settings-section-header'>
                             <h2>
                                 <FormattedMessage
-                                    id='SystemSettings.task-boards-title'
-                                    defaultMessage='Task Boards'
+                                    id='SystemSettings.modules-title'
+                                    defaultMessage='Admin Modules'
                                 />
                             </h2>
-                        </div>
-                        <div className='admin-task-board-controls'>
-                            <label className='admin-settings-checkbox'>
-                                <input
-                                    checked={settings.taskBoards.enableInvitedUserShare}
-                                    onChange={(event) => setSettings({
-                                        ...settings,
-                                        taskBoards: {
-                                            ...settings.taskBoards,
-                                            enableInvitedUserShare: event.target.checked,
-                                        },
-                                    })}
-                                    type='checkbox'
+                            <p>
+                                <FormattedMessage
+                                    id='SystemSettings.modules-description'
+                                    defaultMessage='Enable optional modules to show their admin menus in the sidebar.'
                                 />
-                                <span>
-                                    <FormattedMessage
-                                        id='SystemSettings.enable-invited-user-share'
-                                        defaultMessage='Enable Invited user to share task board'
-                                    />
-                                </span>
-                            </label>
-                            <label className='admin-settings-checkbox'>
-                                <input
-                                    checked={settings.taskBoards.enableInvitedUserEditProperty}
-                                    onChange={(event) => setSettings({
-                                        ...settings,
-                                        taskBoards: {
-                                            ...settings.taskBoards,
-                                            enableInvitedUserEditProperty: event.target.checked,
-                                        },
-                                    })}
-                                    type='checkbox'
-                                />
-                                <span>
-                                    <FormattedMessage
-                                        id='SystemSettings.enable-invited-user-edit-property'
-                                        defaultMessage='Enable Invited to edit task board property'
-                                    />
-                                </span>
-                            </label>
+                            </p>
                         </div>
-                    </div>
+                        <div className='admin-module-controls'>
+                            {MODULE_OPTIONS.map((moduleOption) => (
+                                <label
+                                    className='admin-settings-checkbox admin-module-toggle'
+                                    key={moduleOption.key}
+                                >
+                                    <input
+                                        checked={settings.modules[moduleOption.key]}
+                                        onChange={(event) => updateModuleEnabled(moduleOption.key, event.target.checked)}
+                                        type='checkbox'
+                                    />
+                                    <span>
+                                        <strong>
+                                            <FormattedMessage
+                                                id={moduleOption.labelId}
+                                                defaultMessage={moduleOption.label}
+                                            />
+                                        </strong>
+                                        <small>
+                                            <FormattedMessage
+                                                id={moduleOption.descriptionId}
+                                                defaultMessage={moduleOption.description}
+                                            />
+                                        </small>
+                                    </span>
+                                </label>
+                            ))}
+                        </div>
+                    </div>}
                 </div>
                 {saveError &&
                     <div className='admin-settings-error'>

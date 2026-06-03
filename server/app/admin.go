@@ -32,6 +32,14 @@ func defaultAdminSystemSettings() model.AdminSystemSettings {
 			EnableInvitedUserShare:        true,
 			EnableInvitedUserEditProperty: false,
 		},
+		Modules: model.AdminModuleSettings{
+			Reminder:      false,
+			Announcement:  false,
+			Reports:       false,
+			AuditLog:      false,
+			Notifications: false,
+			Calendar:      false,
+		},
 	}
 }
 

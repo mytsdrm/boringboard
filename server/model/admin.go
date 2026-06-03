@@ -17,12 +17,22 @@ type AdminTaskBoardSettings struct {
 	EnableInvitedUserEditProperty bool `json:"enableInvitedUserEditProperty"`
 }
 
+type AdminModuleSettings struct {
+	Reminder      bool `json:"reminder"`
+	Announcement  bool `json:"announcement"`
+	Reports       bool `json:"reports"`
+	AuditLog      bool `json:"auditLog"`
+	Notifications bool `json:"notifications"`
+	Calendar      bool `json:"calendar"`
+}
+
 type AdminSystemSettings struct {
 	AppName    string                 `json:"appName"`
 	Logo       string                 `json:"logo"`
 	TimeZone   string                 `json:"timeZone"`
 	AI         AdminAISettings        `json:"ai"`
 	TaskBoards AdminTaskBoardSettings `json:"taskBoards"`
+	Modules    AdminModuleSettings    `json:"modules"`
 }
 
 type AdminUserRequest struct {

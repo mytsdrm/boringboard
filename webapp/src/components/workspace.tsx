@@ -41,6 +41,8 @@ import Dashboard from './dashboard/dashboard'
 import ActivityLogs from './activityLogs/activityLogs'
 import AdminUsers from './admin/adminUsers'
 import SystemSettings from './admin/systemSettings'
+import AdminModulePage, {AdminModuleKey} from './admin/adminModulePage'
+import AdminReminders from './admin/adminReminders'
 
 import './workspace.scss'
 
@@ -51,6 +53,7 @@ type Props = {
     activityLogs?: boolean
     templates?: boolean
     users?: boolean
+    adminModule?: AdminModuleKey
 }
 
 function CenterContent(props: Props) {
@@ -117,13 +120,13 @@ function CenterContent(props: Props) {
     }, [cardLimitTimestamp, match.params.boardId, templates])
 
     useEffect(() => {
-        if ((props.users || props.systemSettings) && me && !isSystemAdmin) {
+        if ((props.users || props.systemSettings || props.adminModule) && me && !isSystemAdmin) {
             history.replace('/dashboard')
         }
-    }, [props.users, props.systemSettings, me, isSystemAdmin, history])
+    }, [props.users, props.systemSettings, props.adminModule, me, isSystemAdmin, history])
 
     useEffect(() => {
-        if (!match.params.boardId || props.readonly || props.dashboard || props.activityLogs || props.systemSettings || props.templates || props.users) {
+        if (!match.params.boardId || props.readonly || props.dashboard || props.activityLogs || props.systemSettings || props.templates || props.users || props.adminModule) {
             return
         }
 
@@ -133,7 +136,7 @@ function CenterContent(props: Props) {
 
         retriedBoardLoads.current.add(match.params.boardId)
         dispatch(loadBoardData(match.params.boardId))
-    }, [match.params.boardId, props.readonly, props.dashboard, props.activityLogs, props.systemSettings, props.templates, props.users, isLoading, board, activeView, views.length, dispatch])
+    }, [match.params.boardId, props.readonly, props.dashboard, props.activityLogs, props.systemSettings, props.templates, props.users, props.adminModule, isLoading, board, activeView, views.length, dispatch])
 
     const templateSelector = (
         <BoardTemplateSelector
@@ -169,6 +172,16 @@ function CenterContent(props: Props) {
             return null
         }
         return <SystemSettings/>
+    }
+
+    if (props.adminModule) {
+        if (!me || !isSystemAdmin) {
+            return null
+        }
+        if (props.adminModule === 'reminder') {
+            return <AdminReminders/>
+        }
+        return <AdminModulePage moduleKey={props.adminModule}/>
     }
 
     if (props.activityLogs) {
@@ -266,9 +279,10 @@ const Workspace = (props: Props) => {
                 <Sidebar
                     onBoardTemplateSelectorOpen={openBoardTemplateSelector}
                     onBoardTemplateSelectorClose={closeBoardTemplateSelector}
-                    activeBoardId={(props.activityLogs || props.dashboard || props.systemSettings || props.templates || props.users) ? undefined : (match.params.boardId || board?.id)}
+                    activeBoardId={(props.activityLogs || props.dashboard || props.systemSettings || props.templates || props.users || props.adminModule) ? undefined : (match.params.boardId || board?.id)}
                     activityLogsActive={props.activityLogs || false}
                     dashboardActive={props.dashboard || false}
+                    adminModuleActive={props.adminModule}
                     systemSettingsActive={props.systemSettings || false}
                     templatesActive={props.templates || false}
                     usersActive={props.users || false}
@@ -289,6 +303,7 @@ const Workspace = (props: Props) => {
                     systemSettings={props.systemSettings || false}
                     templates={props.templates || false}
                     users={props.users || false}
+                    adminModule={props.adminModule}
                 />
             </div>
             {boardTemplateSelectorOpen &&

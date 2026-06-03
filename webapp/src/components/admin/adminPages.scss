@@ -19,6 +19,13 @@
         overflow: hidden;
     }
 
+    &.admin-reminders-page {
+        --admin-content-width: 100%;
+
+        padding: 32px 32px 48px;
+        overflow: hidden;
+    }
+
     .admin-page-header {
         flex: 0 0 auto;
         width: var(--admin-content-width);
@@ -138,6 +145,15 @@
         margin: 0 auto;
     }
 
+    .admin-reminders-table-card {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        width: var(--admin-content-width);
+        min-height: 0;
+        margin: 0 auto;
+    }
+
     .admin-users-table-card > .table-module-content {
         display: flex;
         flex: 1 1 auto;
@@ -145,7 +161,20 @@
         min-height: 0;
     }
 
+    .admin-reminders-table-card > .table-module-content {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-height: 0;
+    }
+
     .admin-users-table-card .table-module-content > .table-responsive {
+        flex: 1 1 auto;
+        min-height: 0;
+        overflow: auto;
+    }
+
+    .admin-reminders-table-card .table-module-content > .table-responsive {
         flex: 1 1 auto;
         min-height: 0;
         overflow: auto;
@@ -216,6 +245,31 @@
         overflow: hidden;
     }
 
+    &.admin-module-page {
+        --admin-content-width: min(100%, 860px);
+    }
+
+    .admin-module-card {
+        padding: 28px;
+
+        h2 {
+            margin: 0 0 8px;
+            color: var(--bb-text);
+            font-size: 22px;
+            font-weight: 850;
+            line-height: 30px;
+        }
+
+        p {
+            max-width: 620px;
+            margin: 0;
+            color: var(--bb-text-muted);
+            font-size: 14px;
+            font-weight: 650;
+            line-height: 22px;
+        }
+    }
+
     .admin-user-form {
         display: grid;
         grid-template-columns: 1.2fr 1.4fr 1fr 0.9fr auto;
@@ -247,6 +301,89 @@
             letter-spacing: 0;
             text-transform: none;
         }
+    }
+
+    .admin-reminder-metrics {
+        display: grid;
+        grid-template-columns: repeat(3, minmax(0, 1fr));
+        gap: 14px;
+        width: var(--admin-content-width);
+        margin: -8px auto 18px;
+    }
+
+    .admin-reminder-metric {
+        min-width: 0;
+        padding: 16px;
+        border: 1px solid var(--bb-border);
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bb-dashboard-panel-bg) 96%, transparent);
+        box-shadow: 0 10px 26px var(--bb-shadow-soft);
+
+        strong {
+            display: block;
+            color: var(--bb-text);
+            font-size: 28px;
+            font-weight: 850;
+            line-height: 34px;
+        }
+
+        span {
+            display: block;
+            margin-top: 2px;
+            color: var(--bb-text-muted);
+            font-size: 12px;
+            font-weight: 850;
+            letter-spacing: 0.04em;
+            line-height: 18px;
+            text-transform: uppercase;
+        }
+    }
+
+    .admin-reminder-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: end;
+        gap: 14px;
+        padding: 18px;
+
+        label {
+            display: flex;
+            flex-direction: column;
+            gap: 7px;
+            color: var(--bb-text-muted);
+            font-size: 11px;
+            font-weight: 850;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+
+        input,
+        select,
+        textarea {
+            width: 100%;
+            min-height: 40px;
+            padding: 0 12px;
+            color: var(--bb-text);
+            border: 1px solid var(--bb-border);
+            border-radius: 8px;
+            background: var(--bb-dashboard-panel-bg);
+            font-size: 14px;
+            font-weight: 650;
+            letter-spacing: 0;
+            text-transform: none;
+        }
+
+        textarea {
+            min-height: 86px;
+            padding-top: 10px;
+            padding-bottom: 10px;
+            resize: vertical;
+        }
+    }
+
+    .admin-reminder-form-wide,
+    .admin-reminder-form-actions {
+        grid-column: 1 / -1;
     }
 
     .admin-form-error {
@@ -311,6 +448,7 @@
     }
 
     .admin-user-cell,
+    .admin-reminder-title-cell,
     .admin-settings-checkbox {
         display: flex;
         align-items: center;
@@ -328,6 +466,69 @@
         border-radius: 50%;
         background: #fff;
         color: #475467;
+    }
+
+    .admin-reminder-icon {
+        display: inline-flex;
+        flex: 0 0 auto;
+        align-items: center;
+        justify-content: center;
+        width: 32px;
+        height: 32px;
+        border-radius: 8px;
+        background: var(--bb-blue-soft);
+        color: var(--bb-blue-text);
+    }
+
+    .admin-reminder-title-cell {
+        align-items: flex-start;
+
+        > span:last-child {
+            display: flex;
+            flex-direction: column;
+            gap: 3px;
+            min-width: 0;
+        }
+
+        strong {
+            color: var(--bb-text);
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 20px;
+        }
+
+        small {
+            max-width: 520px;
+            color: var(--bb-text-muted);
+            font-size: 12px;
+            font-weight: 650;
+            line-height: 18px;
+            white-space: normal;
+        }
+    }
+
+    .admin-reminder-schedule {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+
+        strong {
+            color: var(--bb-text);
+            font-size: 13px;
+            font-weight: 750;
+            line-height: 18px;
+        }
+
+        small {
+            color: var(--bb-text-muted);
+            font-size: 12px;
+            font-weight: 650;
+            line-height: 18px;
+        }
+    }
+
+    .admin-reminders-table {
+        min-width: 1080px;
     }
 
     .admin-page-empty {
@@ -375,6 +576,32 @@
             font-weight: 650;
             letter-spacing: 0;
             text-transform: none;
+        }
+    }
+
+    .admin-settings-tabs {
+        display: flex;
+        flex: 0 0 auto;
+        gap: 8px;
+        padding: 16px 24px 0;
+        border-bottom: 1px solid var(--bb-border);
+        background: color-mix(in srgb, var(--bb-dashboard-panel-bg) 96%, transparent);
+
+        button {
+            min-height: 42px;
+            padding: 0 16px;
+            color: var(--bb-text-muted);
+            border: 0;
+            border-bottom: 3px solid transparent;
+            background: transparent;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 850;
+
+            &.active {
+                color: var(--bb-blue-text);
+                border-bottom-color: var(--bb-blue-text);
+            }
         }
     }
 
@@ -523,7 +750,8 @@
     }
 
     .admin-ai-controls,
-    .admin-task-board-controls {
+    .admin-task-board-controls,
+    .admin-module-controls {
         display: flex;
         align-items: flex-start;
         flex-direction: column;
@@ -534,6 +762,15 @@
 
     .admin-task-board-controls {
         gap: 2px;
+    }
+
+    .admin-module-controls {
+        gap: 10px;
+    }
+
+    .admin-settings-modules-section {
+        padding-bottom: 0;
+        border-bottom: 0;
     }
 
     .admin-ai-settings {
@@ -564,7 +801,8 @@
     }
 
     .admin-ai-controls .admin-settings-checkbox,
-    .admin-task-board-controls .admin-settings-checkbox {
+    .admin-task-board-controls .admin-settings-checkbox,
+    .admin-module-controls .admin-settings-checkbox {
         display: inline-flex;
         align-items: center;
         flex-direction: row;
@@ -580,6 +818,28 @@
         span {
             letter-spacing: 0;
             text-transform: none;
+        }
+    }
+
+    .admin-module-toggle {
+        width: 100%;
+
+        > span {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            min-width: 0;
+        }
+
+        strong {
+            color: var(--bb-text);
+            font-size: 14px;
+            font-weight: 800;
+            line-height: 20px;
+        }
+
+        small {
+            line-height: 18px;
         }
     }
 
@@ -669,7 +929,12 @@
                 width: auto;
             }
 
-            label:not(.admin-users-search) {
+            .admin-reminders-search {
+                flex: 1 0 220px;
+                width: auto;
+            }
+
+            label:not(.admin-users-search):not(.admin-reminders-search) {
                 flex: 0 0 150px;
                 width: auto;
             }
@@ -693,6 +958,10 @@
             grid-template-columns: 1fr;
         }
 
+        .admin-reminder-form {
+            grid-template-columns: 1fr;
+        }
+
         .admin-settings-form,
         .admin-settings-section,
         .admin-settings-field-grid,
@@ -710,17 +979,23 @@
             flex-direction: column;
             gap: 12px;
         }
+
+        .admin-reminder-metrics {
+            grid-template-columns: 1fr;
+        }
     }
 }
 
-.admin-user-dialog {
+.admin-user-dialog,
+.admin-reminder-dialog {
     .dialog {
-        width: min(560px, calc(100vw - 40px));
-        max-width: 560px;
+        width: min(680px, calc(100vw - 40px));
+        max-width: 680px;
         border-radius: 12px;
     }
 
-    .admin-user-form {
+    .admin-user-form,
+    .admin-reminder-form {
         display: flex;
         flex-direction: column;
         align-items: stretch;
@@ -739,8 +1014,14 @@
         }
 
         input,
-        select {
+        select,
+        textarea {
             width: 100%;
+        }
+
+        textarea {
+            min-height: 92px;
+            resize: vertical;
         }
 
         .admin-user-checkbox {
@@ -793,6 +1074,33 @@
                 cursor: not-allowed;
                 opacity: 0.6;
             }
+        }
+    }
+}
+
+.admin-user-dialog {
+    .dialog {
+        width: min(560px, calc(100vw - 40px));
+        max-width: 560px;
+    }
+}
+
+.admin-reminder-dialog {
+    .admin-reminder-form {
+        display: grid;
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+        align-items: end;
+        gap: 16px;
+
+        .admin-reminder-form-wide,
+        .admin-reminder-form-actions {
+            grid-column: 1 / -1;
+        }
+    }
+
+    @media (max-width: 640px) {
+        .admin-reminder-form {
+            grid-template-columns: 1fr;
         }
     }
 }

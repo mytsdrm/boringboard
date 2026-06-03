@@ -38,12 +38,22 @@ export type AdminTaskBoardSettings = {
     enableInvitedUserEditProperty: boolean
 }
 
+export type AdminModuleSettings = {
+    reminder: boolean
+    announcement: boolean
+    reports: boolean
+    auditLog: boolean
+    notifications: boolean
+    calendar: boolean
+}
+
 export type AdminSystemSettings = {
     appName: string
     logo: string
     timeZone: string
     ai: AdminAISettings
     taskBoards: AdminTaskBoardSettings
+    modules: AdminModuleSettings
 }
 
 export type BoardMemberActivityEntry = {
@@ -599,6 +609,14 @@ class OctoClient {
                 enableInvitedUserEditProperty: false,
                 enableInvitedUserShare: true,
             },
+            modules: {
+                announcement: false,
+                auditLog: false,
+                calendar: false,
+                notifications: false,
+                reminder: false,
+                reports: false,
+            },
         })
     }
 
@@ -636,6 +654,14 @@ class OctoClient {
             taskBoards: {
                 enableInvitedUserEditProperty: false,
                 enableInvitedUserShare: true,
+            },
+            modules: {
+                announcement: false,
+                auditLog: false,
+                calendar: false,
+                notifications: false,
+                reminder: false,
+                reports: false,
             },
         })
     }

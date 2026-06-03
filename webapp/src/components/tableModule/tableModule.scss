@@ -22,7 +22,8 @@
         gap: 16px;
         min-width: 0;
 
-        .admin-users-search {
+        .admin-users-search,
+        .admin-reminders-search {
             display: block;
             width: min(420px, 100%);
             min-width: 0;
@@ -180,7 +181,8 @@
             width: 100%;
         }
 
-        .table-module-toolbar-left .admin-users-search {
+        .table-module-toolbar-left .admin-users-search,
+        .table-module-toolbar-left .admin-reminders-search {
             width: 100%;
         }
 
