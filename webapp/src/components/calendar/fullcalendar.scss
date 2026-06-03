@@ -1,4 +1,4 @@
-@import '../../styles/z-index';
+@import "../../styles/z-index";
 
 .CalendarContainer {
     flex: 1 1 auto;
@@ -46,6 +46,7 @@
     .octo-tooltip {
         display: flex;
         max-width: 100%;
+        margin-left: 1.4rem;
     }
 
     .octo-propertyvalue {
@@ -53,7 +54,7 @@
         white-space: nowrap;
         text-overflow: ellipsis;
 
-        input[value=''] {
+        input[value=""] {
             display: none;
         }
 
@@ -234,7 +235,7 @@
         padding: 4px 6px;
 
         &:hover::before {
-            content: '';
+            content: "";
             position: absolute;
             left: 0;
             top: 0;
@@ -261,6 +262,7 @@
         text-overflow: ellipsis;
         -webkit-line-clamp: 5;
         -webkit-box-orient: vertical; // stylelint-disable-line
+        font-weight: normal;
     }
 
     .fc-day-sat,
