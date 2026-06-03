@@ -5,10 +5,10 @@ import {FormattedMessage, useIntl} from 'react-intl'
 import {useHistory, useRouteMatch} from 'react-router-dom'
 
 import {Block} from '../../blocks/block'
-import {Board, IPropertyTemplate} from '../../blocks/board'
+import {Board, BoardMember, IPropertyTemplate} from '../../blocks/board'
 import {Card} from '../../blocks/card'
 import {useWebsockets} from '../../hooks/websockets'
-import octoClient from '../../octoClient'
+import octoClient, {BoardMemberActivityEntry} from '../../octoClient'
 import {getMySortedBoards, updateBoards} from '../../store/boards'
 import {useAppDispatch, useAppSelector} from '../../store/hooks'
 import {getCurrentTeamId, getFirstTeam} from '../../store/teams'
@@ -30,7 +30,25 @@ type BoardStats = {
     latestActivityAt: number
 }
 
-type DashboardActivityAction = 'created' | 'deleted' | 'renamed' | 'moved' | 'edited' | 'updated'
+type DashboardActivityAction =
+    'created' |
+    'deleted' |
+    'renamed' |
+    'moved' |
+    'edited' |
+    'updated' |
+    'comment-added' |
+    'comment-deleted' |
+    'content-added' |
+    'content-deleted' |
+    'property-changed' |
+    'assigned-person' |
+    'unassigned-person' |
+    'invited-admin' |
+    'invited-editor' |
+    'invited-commenter' |
+    'invited-viewer' |
+    'invited-member'
 
 type DashboardActivity = {
     id: string
@@ -42,6 +60,7 @@ type DashboardActivity = {
     cardTitle: string
     fromValue?: string
     propertyName?: string
+    propertyType?: string
     timestamp: number
     toValue?: string
 }
@@ -80,18 +99,26 @@ const getPropertyValueLabel = (property: IPropertyTemplate, value: string | stri
     }).join(', ')
 }
 
+const getChangedProperty = (board: Board, card: Card, previousCard?: Card): IPropertyTemplate | null => {
+    if (!previousCard) {
+        return null
+    }
+
+    return board.cardProperties.find((property) => {
+        const oldValue = JSON.stringify(previousCard.fields.properties[property.id] || '')
+        const newValue = JSON.stringify(card.fields.properties[property.id] || '')
+        return oldValue !== newValue
+    }) || null
+}
+
 const getMoveDetails = (board: Board, card: Card, previousCard?: Card): Pick<DashboardActivity, 'fromValue' | 'propertyName' | 'toValue'> | null => {
     if (!previousCard) {
         return null
     }
 
-    const changedProperty = board.cardProperties.find((property) => {
-        const oldValue = JSON.stringify(previousCard.fields.properties[property.id] || '')
-        const newValue = JSON.stringify(card.fields.properties[property.id] || '')
-        return oldValue !== newValue && property.options.length > 0
-    })
+    const changedProperty = getChangedProperty(board, card, previousCard)
 
-    if (!changedProperty) {
+    if (!changedProperty || changedProperty.options.length === 0) {
         return null
     }
 
@@ -100,6 +127,13 @@ const getMoveDetails = (board: Board, card: Card, previousCard?: Card): Pick<Das
         propertyName: changedProperty.name,
         toValue: getPropertyValueLabel(changedProperty, card.fields.properties[changedProperty.id]),
     }
+}
+
+const valueCount = (value: string | string[] | undefined): number => {
+    if (!value) {
+        return 0
+    }
+    return Array.isArray(value) ? value.length : 1
 }
 
 const getActivityAction = (board: Board, card: Card, previousCard?: Card): DashboardActivityAction => {
@@ -119,6 +153,21 @@ const getActivityAction = (board: Board, card: Card, previousCard?: Card): Dashb
         return 'moved'
     }
 
+    const changedProperty = getChangedProperty(board, card, previousCard)
+    if (changedProperty) {
+        if (changedProperty.type === 'person' || changedProperty.type === 'multiPerson') {
+            const previousCount = valueCount(previousCard?.fields.properties[changedProperty.id])
+            const nextCount = valueCount(card.fields.properties[changedProperty.id])
+            if (nextCount > previousCount) {
+                return 'assigned-person'
+            }
+            if (nextCount < previousCount) {
+                return 'unassigned-person'
+            }
+        }
+        return 'property-changed'
+    }
+
     return 'updated'
 }
 
@@ -131,6 +180,7 @@ const createDashboardActivity = (
 ): DashboardActivity => {
     const timestamp = sourceBlock?.updateAt || card.updateAt || Date.now()
     const moveDetails = action === 'moved' ? getMoveDetails(board, card, previousCard) : null
+    const changedProperty = moveDetails ? null : getChangedProperty(board, card, previousCard)
 
     return {
         action,
@@ -139,12 +189,84 @@ const createDashboardActivity = (
         boardTitle: board.title,
         cardId: card.id,
         cardTitle: card.title || previousCard?.title || '',
-        fromValue: moveDetails?.fromValue,
+        fromValue: moveDetails?.fromValue || (changedProperty ? getPropertyValueLabel(changedProperty, previousCard?.fields.properties[changedProperty.id]) : undefined),
         id: `${sourceBlock?.id || card.id}-${timestamp}-${action}`,
-        propertyName: moveDetails?.propertyName,
+        propertyName: moveDetails?.propertyName || changedProperty?.name,
+        propertyType: changedProperty?.type,
         timestamp,
-        toValue: moveDetails?.toValue,
+        toValue: moveDetails?.toValue || (changedProperty ? getPropertyValueLabel(changedProperty, card.fields.properties[changedProperty.id]) : undefined),
     }
+}
+
+const getMemberInviteAction = (role: string): DashboardActivityAction => {
+    switch (role) {
+    case 'admin':
+        return 'invited-admin'
+    case 'editor':
+        return 'invited-editor'
+    case 'commenter':
+        return 'invited-commenter'
+    case 'viewer':
+        return 'invited-viewer'
+    default:
+        return 'invited-member'
+    }
+}
+
+const getMemberRole = (member: BoardMember): string => {
+    if (member.schemeAdmin) {
+        return 'admin'
+    }
+    if (member.schemeEditor) {
+        return 'editor'
+    }
+    if (member.schemeCommenter) {
+        return 'commenter'
+    }
+    if (member.schemeViewer) {
+        return 'viewer'
+    }
+    return 'member'
+}
+
+const createMemberInviteActivity = (member: BoardMember, board: Board): DashboardActivity => {
+    const timestamp = Date.now()
+    const action = getMemberInviteAction(getMemberRole(member))
+
+    return {
+        action,
+        actorId: member.userId,
+        boardId: board.id,
+        boardTitle: board.title,
+        cardId: member.userId,
+        cardTitle: '',
+        id: `${board.id}-${member.userId}-${timestamp}-${action}`,
+        timestamp,
+    }
+}
+
+const createMemberInviteActivityFromHistory = (entry: BoardMemberActivityEntry, board: Board): DashboardActivity => {
+    const timestamp = new Date(entry.insertAt).getTime()
+    const action = getMemberInviteAction(entry.action)
+
+    return {
+        action,
+        actorId: entry.userId,
+        boardId: board.id,
+        boardTitle: board.title,
+        cardId: entry.userId,
+        cardTitle: '',
+        id: `${board.id}-${entry.userId}-${timestamp}-${action}`,
+        timestamp,
+    }
+}
+
+const isRealBoardMember = (member: BoardMember): boolean => {
+    return Boolean(!member.synthetic && (member.schemeAdmin || member.schemeEditor || member.schemeCommenter || member.schemeViewer))
+}
+
+const isMemberInviteHistoryAction = (action: string): boolean => {
+    return ['admin', 'editor', 'commenter', 'viewer', 'created'].includes(action)
 }
 
 const getHistoryPreviousBlock = (historyById: Map<string, Block[]>, block: Block): Block | undefined => {
@@ -175,10 +297,32 @@ const buildActivitiesFromHistory = (
             return result
         }
 
+        if (block.type === 'comment') {
+            const parentCard = cardsById[block.parentId]
+            if (parentCard) {
+                const previousComment = getHistoryPreviousBlock(historyById, block)
+                let action: DashboardActivityAction = 'comment-added'
+                if (block.deleteAt !== 0) {
+                    action = 'comment-deleted'
+                } else if (previousComment) {
+                    action = 'edited'
+                }
+                result.push(createDashboardActivity(parentCard, board, action, parentCard, block))
+            }
+            return result
+        }
+
         if (isCardContentBlock(block)) {
             const parentCard = cardsById[block.parentId]
             if (parentCard) {
-                result.push(createDashboardActivity(parentCard, board, 'edited', parentCard, block))
+                const previousContent = getHistoryPreviousBlock(historyById, block)
+                let action: DashboardActivityAction = 'edited'
+                if (block.deleteAt !== 0) {
+                    action = 'content-deleted'
+                } else if (!previousContent) {
+                    action = 'content-added'
+                }
+                result.push(createDashboardActivity(parentCard, board, action, parentCard, block))
             }
         }
 
@@ -324,12 +468,25 @@ const Dashboard = (): JSX.Element => {
                 })
             })
 
-            const historyBlocks = websocketTeamId ? await octoClient.getDashboardActivityBlocks(websocketTeamId, DASHBOARD_ACTIVITY_HISTORY_LIMIT) : []
+            const [historyBlocks, memberHistoryEntries] = websocketTeamId ? await Promise.all([
+                octoClient.getDashboardActivityBlocks(websocketTeamId, DASHBOARD_ACTIVITY_HISTORY_LIMIT),
+                octoClient.getDashboardMemberActivity(websocketTeamId, DASHBOARD_ACTIVITY_HISTORY_LIMIT),
+            ]) : [[], [] as BoardMemberActivityEntry[]]
             if (canceled) {
                 return
             }
 
-            const seededActivities = buildActivitiesFromHistory(historyBlocks, taskBoardsById, nextCardsSnapshot)
+            const memberHistoryActivities = memberHistoryEntries.reduce<DashboardActivity[]>((result, entry) => {
+                const board = taskBoardsById.get(entry.boardId)
+                if (board && isMemberInviteHistoryAction(entry.action)) {
+                    result.push(createMemberInviteActivityFromHistory(entry, board))
+                }
+                return result
+            }, [])
+            const seededActivities = [
+                ...buildActivitiesFromHistory(historyBlocks, taskBoardsById, nextCardsSnapshot),
+                ...memberHistoryActivities,
+            ]
             const nextActivities = seededActivities.
                 sort((a, b) => b.timestamp - a.timestamp).
                 slice(0, DASHBOARD_ACTIVITY_LIMIT)
@@ -353,7 +510,7 @@ const Dashboard = (): JSX.Element => {
             const cardUpdates = blocks.
                 filter((block) => block.type === 'card' && !block.fields.isTemplate) as Card[]
             const boardIds = cardUpdates.map((block) => block.boardId)
-            const contentUpdates = blocks.filter(isCardContentBlock)
+            const contentUpdates = blocks.filter((block) => block.type === 'comment' || isCardContentBlock(block))
 
             if (boardIds.length > 0) {
                 refreshBoardCardStats(boardIds)
@@ -381,7 +538,13 @@ const Dashboard = (): JSX.Element => {
                 const board = taskBoardsById.get(block.boardId)
                 const parentCard = cardsSnapshot.current[block.parentId]
                 if (board && parentCard) {
-                    nextActivities.push(createDashboardActivity(parentCard, board, 'edited', parentCard, block))
+                    if (block.type === 'comment') {
+                        const action: DashboardActivityAction = block.deleteAt === 0 ? 'comment-added' : 'comment-deleted'
+                        nextActivities.push(createDashboardActivity(parentCard, board, action, parentCard, block))
+                    } else {
+                        const action: DashboardActivityAction = block.deleteAt === 0 ? 'edited' : 'content-deleted'
+                        nextActivities.push(createDashboardActivity(parentCard, board, action, parentCard, block))
+                    }
                 }
             })
 
@@ -409,14 +572,64 @@ const Dashboard = (): JSX.Element => {
             dispatch(updateBoards(updatedBoards))
         }
 
+        const incrementalBoardMemberUpdate = async (_: WSClient, members: BoardMember[]) => {
+            const nextActivities = members.reduce<DashboardActivity[]>((result, member) => {
+                const board = taskBoardsById.get(member.boardId)
+                if (!board || !isRealBoardMember(member)) {
+                    return result
+                }
+
+                result.push(createMemberInviteActivity(member, board))
+                return result
+            }, [])
+
+            if (nextActivities.length === 0) {
+                return
+            }
+
+            const userIdsByTeamId = new Map<string, Set<string>>()
+            nextActivities.forEach((activity) => {
+                const board = taskBoardsById.get(activity.boardId)
+                if (!board || boardUsers[activity.actorId]) {
+                    return
+                }
+                userIdsByTeamId.set(board.teamId, userIdsByTeamId.get(board.teamId) || new Set<string>())
+                userIdsByTeamId.get(board.teamId)?.add(activity.actorId)
+            })
+            const nextUsers = (await Promise.all(Array.from(userIdsByTeamId.entries()).map(([teamId, userIds]) => (
+                octoClient.getTeamUsersList(Array.from(userIds), teamId)
+            )))).flat()
+            if (nextUsers.length > 0) {
+                dispatch(addBoardUsers(nextUsers))
+            }
+
+            setActivities((previousActivities) => {
+                const seen = new Set<string>()
+                const mergedActivities = [...nextActivities, ...previousActivities].
+                    filter((activity) => {
+                        if (seen.has(activity.id)) {
+                            return false
+                        }
+                        seen.add(activity.id)
+                        return true
+                    }).
+                    sort((a, b) => b.timestamp - a.timestamp).
+                    slice(0, DASHBOARD_ACTIVITY_LIMIT)
+                dashboardCache.activities = mergedActivities
+                return mergedActivities
+            })
+        }
+
         wsClient.addOnChange(incrementalBlockUpdate, 'block')
         wsClient.addOnChange(incrementalBoardUpdate, 'board')
+        wsClient.addOnChange(incrementalBoardMemberUpdate, 'boardMembers')
 
         return () => {
             wsClient.removeOnChange(incrementalBlockUpdate, 'block')
             wsClient.removeOnChange(incrementalBoardUpdate, 'board')
+            wsClient.removeOnChange(incrementalBoardMemberUpdate, 'boardMembers')
         }
-    }, [dispatch, refreshBoardCardStats, taskBoardsById])
+    }, [boardUsers, dispatch, refreshBoardCardStats, taskBoardsById])
 
     const totalTasks = useMemo(() => {
         return taskBoards.reduce((result, board) => {
@@ -577,6 +790,16 @@ const Dashboard = (): JSX.Element => {
         })
     }, [boardUsers, intl, me])
 
+    const getActivityValueDisplay = useCallback((activity: DashboardActivity, value?: string): string => {
+        if (!value) {
+            return ''
+        }
+        if (activity.propertyType !== 'person' && activity.propertyType !== 'multiPerson') {
+            return value
+        }
+        return value.split(',').map((userId) => getUserDisplayName(userId.trim())).join(', ')
+    }, [getUserDisplayName])
+
     const formatAuditDate = (timestamp: number): string => {
         const date = [
             intl.formatDate(timestamp, {
@@ -615,12 +838,15 @@ const Dashboard = (): JSX.Element => {
                 id: 'Dashboard.empty-value',
                 defaultMessage: 'Empty',
             }),
-            property: activity.propertyName || '',
-            source: activity.fromValue || intl.formatMessage({
+            property: activity.propertyName || intl.formatMessage({
+                id: 'ActivityLogs.unknown-property',
+                defaultMessage: 'a property',
+            }),
+            source: getActivityValueDisplay(activity, activity.fromValue) || intl.formatMessage({
                 id: 'Dashboard.empty-value',
                 defaultMessage: 'Empty',
             }),
-            target: activity.toValue || intl.formatMessage({
+            target: getActivityValueDisplay(activity, activity.toValue) || intl.formatMessage({
                 id: 'Dashboard.empty-value',
                 defaultMessage: 'Empty',
             }),
@@ -669,6 +895,102 @@ const Dashboard = (): JSX.Element => {
                 <FormattedMessage
                     id='Dashboard.activity-edited'
                     defaultMessage='<b>{user}</b> edited content in <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'comment-added':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-comment-added'
+                    defaultMessage='<b>{user}</b> commented on <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'comment-deleted':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-comment-deleted'
+                    defaultMessage='<b>{user}</b> deleted a comment on <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'content-added':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-content-added'
+                    defaultMessage='<b>{user}</b> added content to <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'content-deleted':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-content-deleted'
+                    defaultMessage='<b>{user}</b> deleted content from <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'property-changed':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-property-changed'
+                    defaultMessage='<b>{user}</b> changed <b>{property}</b> on <b>{card}</b> from <b>{source}</b> to <b>{target}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'assigned-person':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-assigned-person'
+                    defaultMessage='<b>{user}</b> assigned <b>{target}</b> to <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'unassigned-person':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-unassigned-person'
+                    defaultMessage='<b>{user}</b> removed <b>{source}</b> from <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'invited-admin':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-invited-admin'
+                    defaultMessage='<b>{user}</b> was invited as an admin to <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'invited-editor':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-invited-editor'
+                    defaultMessage='<b>{user}</b> was invited as an editor to <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'invited-commenter':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-invited-commenter'
+                    defaultMessage='<b>{user}</b> was invited as a commenter to <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'invited-viewer':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-invited-viewer'
+                    defaultMessage='<b>{user}</b> was invited as a viewer to <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'invited-member':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-invited-member'
+                    defaultMessage='<b>{user}</b> was invited to <b>{board}</b>'
                     values={values}
                 />
             )
