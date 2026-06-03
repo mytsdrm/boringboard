@@ -121,6 +121,10 @@ const getChangedProperty = (board: Board, card: Card, previousCard?: Card): IPro
 }
 
 const getMoveDetails = (board: Board, card: Card, previousCard?: Card): Pick<ActivityLog, 'fromValue' | 'propertyName' | 'toValue'> | null => {
+    if (!previousCard) {
+        return null
+    }
+
     const changedProperty = getChangedProperty(board, card, previousCard)
 
     if (!changedProperty || changedProperty.options.length === 0) {
