@@ -25,6 +25,7 @@ import {updateView} from '../../store/views'
 import BoardPermissionGate from '../permissions/boardPermissionGate'
 import HiddenCardCount from '../../components/hiddenCardCount/hiddenCardCount'
 import {useHasCurrentBoardPermissions} from '../../hooks/permissions'
+import {useCanEditCardInStatusScope} from '../../hooks/statusScope'
 
 import KanbanCard from './kanbanCard'
 import KanbanColumn from './kanbanColumn'
@@ -63,6 +64,7 @@ const Kanban = (props: Props) => {
     const [isScrolled, setIsScrolled] = useState(false)
     const [viewHeaderOffset, setViewHeaderOffset] = useState(0)
     const canEditCards = useHasCurrentBoardPermissions([Permission.ManageBoardCards])
+    const canEditCard = useCanEditCardInStatusScope(board, canEditCards, props.readonly)
     const cardsReadonly = props.readonly || !canEditCards
 
     useEffect(() => {
@@ -146,6 +148,9 @@ const Kanban = (props: Props) => {
                     return acc
                 }, {})
                 const draggedCards: Card[] = draggedCardIds.map((o: string) => cardsById[o]).filter((c) => c)
+                if (!draggedCards.every((draggedCard) => canEditCard(draggedCard, optionId))) {
+                    return
+                }
                 const description = draggedCards.length > 1 ? `drag ${draggedCards.length} cards` : 'drag card'
                 const optimisticCards = draggedCards.map((draggedCard) => {
                     const nextCard = createCard(draggedCard)
@@ -193,7 +198,7 @@ const Kanban = (props: Props) => {
 
             await mutator.changeViewVisibleOptionIds(props.board.id, activeView.id, activeView.fields.visibleOptionIds, visibleOptionIdsRearranged)
         }
-    }, [activeView, cards, dispatch, groupByProperty, orderAfterMoveToColumn, props.board.id, props.selectedCardIds, visibleGroups])
+    }, [activeView, canEditCard, cards, dispatch, groupByProperty, orderAfterMoveToColumn, props.board.id, props.selectedCardIds, visibleGroups])
 
     const onDropToCard = useCallback(async (srcCard: Card, dstCard: Card) => {
         if (srcCard.id === dstCard.id || !groupByProperty) {
@@ -213,6 +218,9 @@ const Kanban = (props: Props) => {
             return acc
         }, {})
         const draggedCards: Card[] = draggedCardIds.map((o: string) => cardsById[o]).filter((c) => c)
+        if (!draggedCards.every((draggedCard) => canEditCard(draggedCard, optionId as string | undefined))) {
+            return
+        }
         let cardOrder = cards.map((o) => o.id)
         const isDraggingDown = cardOrder.indexOf(srcCard.id) <= cardOrder.indexOf(dstCard.id)
         cardOrder = cardOrder.filter((id) => !draggedCardIds.includes(id))
@@ -247,7 +255,7 @@ const Kanban = (props: Props) => {
             await Promise.all(awaits)
             await mutator.changeViewCardOrder(props.board.id, activeView.id, activeView.fields.cardOrder, cardOrder, description)
         })
-    }, [activeView, cards, dispatch, groupByProperty, props.board.id, props.selectedCardIds])
+    }, [activeView, canEditCard, cards, dispatch, groupByProperty, props.board.id, props.selectedCardIds])
 
     const [showCalculationsMenu, setShowCalculationsMenu] = useState<Map<string, boolean>>(new Map<string, boolean>())
     const toggleOptions = (templateId: string, show: boolean) => {
@@ -345,7 +353,7 @@ const Kanban = (props: Props) => {
                                 visiblePropertyTemplates={visiblePropertyTemplates}
                                 visibleBadges={visibleBadges}
                                 key={card.id}
-                                readonly={cardsReadonly}
+                                readonly={cardsReadonly || !canEditCard(card)}
                                 isSelected={props.selectedCardIds.includes(card.id)}
                                 onClick={props.onCardClicked}
                                 onDrop={onDropToCard}

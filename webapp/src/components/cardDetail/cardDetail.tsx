@@ -27,6 +27,7 @@ import {updateCards, setCurrent as setCurrentCard} from '../../store/cards'
 import {updateContents} from '../../store/contents'
 import {Permission} from '../../constants'
 import {useHasCurrentBoardPermissions} from '../../hooks/permissions'
+import {useCanEditCardInStatusScope} from '../../hooks/statusScope'
 import BlocksEditor from '../blocksEditor/blocksEditor'
 import {BlockData} from '../blocksEditor/blocks/types'
 import {ClientConfig} from '../../config/clientConfig'
@@ -110,6 +111,7 @@ const CardDetail = (props: Props): JSX.Element|null => {
         }
     }, [card.title, title])
     const canEditBoardCards = useHasCurrentBoardPermissions([Permission.ManageBoardCards])
+    const canEditCurrentCard = useCanEditCardInStatusScope(props.board, canEditBoardCards, props.readonly || limited)(card)
     const canCommentBoardCards = useHasCurrentBoardPermissions([Permission.CommentBoardCards])
 
     const saveTitleRef = useRef<() => void>(saveTitle)
@@ -199,9 +201,9 @@ const CardDetail = (props: Props): JSX.Element|null => {
                 <BlockIconSelector
                     block={card}
                     size='l'
-                    readonly={props.readonly || !canEditBoardCards || limited}
+                    readonly={!canEditCurrentCard || limited}
                 />
-                {!props.readonly && canEditBoardCards && !card.fields.icon &&
+                {canEditCurrentCard && !card.fields.icon &&
                     <div className='add-buttons'>
                         <Button
                             emphasis='default'
@@ -229,7 +231,7 @@ const CardDetail = (props: Props): JSX.Element|null => {
                     saveOnEsc={true}
                     onSave={saveTitle}
                     onCancel={() => setTitle(props.card.title)}
-                    readonly={props.readonly || !canEditBoardCards || limited}
+                    readonly={!canEditCurrentCard || limited}
                     spellCheck={true}
                 />
 
@@ -287,7 +289,7 @@ const CardDetail = (props: Props): JSX.Element|null => {
                     cards={props.cards}
                     activeView={props.activeView}
                     views={props.views}
-                    readonly={props.readonly}
+                    readonly={props.readonly || !canEditCurrentCard}
                 />}
 
                 {attachments.length !== 0 && <Fragment>
@@ -315,7 +317,7 @@ const CardDetail = (props: Props): JSX.Element|null => {
             {/* Content blocks */}
 
             {!limited && <div className='CardDetail CardDetail--fullwidth content-blocks'>
-                {newBoardsEditor && (
+                {newBoardsEditor && canEditCurrentCard && (
                     <BlocksEditor
                         boardId={card.boardId}
                         blocks={blocks}
@@ -384,14 +386,14 @@ const CardDetail = (props: Props): JSX.Element|null => {
                             }
                         }}
                     />)}
-                {!newBoardsEditor && (
+                {(!newBoardsEditor || !canEditCurrentCard) && (
                     <CardDetailProvider card={card}>
                         <CardDetailContents
                             card={props.card}
                             contents={props.contents}
-                            readonly={props.readonly || !canEditBoardCards}
+                            readonly={!canEditCurrentCard}
                         />
-                        {!props.readonly && canEditBoardCards && <CardDetailContentsMenu/>}
+                        {canEditCurrentCard && <CardDetailContentsMenu/>}
                     </CardDetailProvider>)}
             </div>}
         </>

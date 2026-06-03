@@ -274,11 +274,31 @@ func (a *API) handlePostBlocks(w http.ResponseWriter, r *http.Request) {
 			a.errorResponse(w, r, model.NewErrPermission("access denied to make board changes"))
 			return
 		}
+		incomingBlockIDs := map[string]bool{}
+		for _, block := range blocks {
+			incomingBlockIDs[block.ID] = true
+		}
+		for _, block := range blocks {
+			if block.Type == model.TypeCard || !incomingBlockIDs[block.ParentID] {
+				if err := a.requireBlockStatusScope(userID, boardID, nil, block); err != nil {
+					a.errorResponse(w, r, err)
+					return
+				}
+			}
+		}
 	}
 	if hasComments {
 		if !a.permissions.HasPermissionToBoard(userID, boardID, model.PermissionCommentBoardCards) {
 			a.errorResponse(w, r, model.NewErrPermission("access denied to post card comments"))
 			return
+		}
+		for _, block := range blocks {
+			if block.Type == model.TypeComment {
+				if err := a.requireBlockStatusScope(userID, boardID, nil, block); err != nil {
+					a.errorResponse(w, r, err)
+					return
+				}
+			}
 		}
 	}
 
@@ -382,6 +402,10 @@ func (a *API) handleDeleteBlock(w http.ResponseWriter, r *http.Request) {
 	if block.BoardID != boardID {
 		message := fmt.Sprintf("block ID=%s on BoardID=%s", block.ID, boardID)
 		a.errorResponse(w, r, model.NewErrNotFound(message))
+		return
+	}
+	if err = a.requireBlockStatusScope(userID, boardID, block, nil); err != nil {
+		a.errorResponse(w, r, err)
 		return
 	}
 
@@ -566,6 +590,10 @@ func (a *API) handlePatchBlock(w http.ResponseWriter, r *http.Request) {
 		a.errorResponse(w, r, err)
 		return
 	}
+	if err = a.requireBlockStatusScope(userID, boardID, block, patchedBlock(block, patch)); err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
 
 	auditRec := a.makeAuditRecord(r, "patchBlock", audit.Fail)
 	defer a.audit.LogRecord(audit.LevelModify, auditRec)
@@ -647,7 +675,7 @@ func (a *API) handlePatchBlocks(w http.ResponseWriter, r *http.Request) {
 		auditRec.AddMeta("block_"+strconv.FormatInt(int64(i), 10), patches.BlockIDs[i])
 	}
 
-	for _, blockID := range patches.BlockIDs {
+	for i, blockID := range patches.BlockIDs {
 		var block *model.Block
 		block, err = a.app.GetBlockByID(blockID)
 		if err != nil {
@@ -657,6 +685,12 @@ func (a *API) handlePatchBlocks(w http.ResponseWriter, r *http.Request) {
 		if !a.permissions.HasPermissionToBoard(userID, block.BoardID, model.PermissionManageBoardCards) {
 			a.errorResponse(w, r, model.NewErrPermission("access denied to make board changesa"))
 			return
+		}
+		if i < len(patches.BlockPatches) {
+			if err = a.requireBlockStatusScope(userID, block.BoardID, block, patchedBlock(block, &patches.BlockPatches[i])); err != nil {
+				a.errorResponse(w, r, err)
+				return
+			}
 		}
 	}
 
@@ -744,6 +778,10 @@ func (a *API) handleDuplicateBlock(w http.ResponseWriter, r *http.Request) {
 	} else {
 		if !a.permissions.HasPermissionToBoard(userID, boardID, model.PermissionManageBoardCards) {
 			a.errorResponse(w, r, model.NewErrPermission("access denied to modify board cards"))
+			return
+		}
+		if err = a.requireBlockStatusScope(userID, boardID, block, block); err != nil {
+			a.errorResponse(w, r, err)
 			return
 		}
 	}

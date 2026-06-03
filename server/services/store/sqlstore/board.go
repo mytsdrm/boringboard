@@ -78,6 +78,8 @@ var boardMemberFields = []string{
 	"BM.scheme_editor",
 	"BM.scheme_commenter",
 	"BM.scheme_viewer",
+	"COALESCE(BM.status_scope_enabled, false)",
+	"COALESCE(BM.status_scope_option_ids, '[]')",
 }
 
 func (s *SQLStore) boardsFromRows(rows *sql.Rows) ([]*model.Board, error) {
@@ -135,6 +137,7 @@ func (s *SQLStore) boardMembersFromRows(rows *sql.Rows) ([]*model.BoardMember, e
 
 	for rows.Next() {
 		var boardMember model.BoardMember
+		var statusScopeOptionIDs string
 
 		err := rows.Scan(
 			&boardMember.MinimumRole,
@@ -145,9 +148,14 @@ func (s *SQLStore) boardMembersFromRows(rows *sql.Rows) ([]*model.BoardMember, e
 			&boardMember.SchemeEditor,
 			&boardMember.SchemeCommenter,
 			&boardMember.SchemeViewer,
+			&boardMember.StatusScopeEnabled,
+			&statusScopeOptionIDs,
 		)
 		if err != nil {
 			return nil, err
+		}
+		if err := json.Unmarshal([]byte(statusScopeOptionIDs), &boardMember.StatusScopeOptionIDs); err != nil {
+			boardMember.StatusScopeOptionIDs = []string{}
 		}
 
 		boardMembers = append(boardMembers, &boardMember)
@@ -500,14 +508,21 @@ func (s *SQLStore) insertBoardWithAdmin(db sq.BaseRunner, board *model.Board, us
 }
 
 func (s *SQLStore) saveMember(db sq.BaseRunner, bm *model.BoardMember) (*model.BoardMember, error) {
+	statusScopeOptionIDs, err := json.Marshal(bm.StatusScopeOptionIDs)
+	if err != nil {
+		return nil, err
+	}
+
 	queryValues := map[string]interface{}{
-		"board_id":         bm.BoardID,
-		"user_id":          bm.UserID,
-		"roles":            "",
-		"scheme_admin":     bm.SchemeAdmin,
-		"scheme_editor":    bm.SchemeEditor,
-		"scheme_commenter": bm.SchemeCommenter,
-		"scheme_viewer":    bm.SchemeViewer,
+		"board_id":                bm.BoardID,
+		"user_id":                 bm.UserID,
+		"roles":                   "",
+		"scheme_admin":            bm.SchemeAdmin,
+		"scheme_editor":           bm.SchemeEditor,
+		"scheme_commenter":        bm.SchemeCommenter,
+		"scheme_viewer":           bm.SchemeViewer,
+		"status_scope_enabled":    bm.StatusScopeEnabled,
+		"status_scope_option_ids": string(statusScopeOptionIDs),
 	}
 
 	oldMember, err := s.getMemberForBoard(db, bm.BoardID, bm.UserID)
@@ -521,13 +536,15 @@ func (s *SQLStore) saveMember(db sq.BaseRunner, bm *model.BoardMember) (*model.B
 
 	if s.dbType == model.MysqlDBType {
 		query = query.Suffix(
-			"ON DUPLICATE KEY UPDATE scheme_admin = ?, scheme_editor = ?, scheme_commenter = ?, scheme_viewer = ?",
-			bm.SchemeAdmin, bm.SchemeEditor, bm.SchemeCommenter, bm.SchemeViewer)
+			"ON DUPLICATE KEY UPDATE scheme_admin = ?, scheme_editor = ?, scheme_commenter = ?, scheme_viewer = ?, status_scope_enabled = ?, status_scope_option_ids = ?",
+			bm.SchemeAdmin, bm.SchemeEditor, bm.SchemeCommenter, bm.SchemeViewer, bm.StatusScopeEnabled, string(statusScopeOptionIDs))
 	} else {
 		query = query.Suffix(
 			`ON CONFLICT (board_id, user_id)
              DO UPDATE SET scheme_admin = EXCLUDED.scheme_admin, scheme_editor = EXCLUDED.scheme_editor,
-			   scheme_commenter = EXCLUDED.scheme_commenter, scheme_viewer = EXCLUDED.scheme_viewer`,
+			   scheme_commenter = EXCLUDED.scheme_commenter, scheme_viewer = EXCLUDED.scheme_viewer,
+			   status_scope_enabled = EXCLUDED.status_scope_enabled,
+			   status_scope_option_ids = EXCLUDED.status_scope_option_ids`,
 		)
 	}
 

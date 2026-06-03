@@ -226,6 +226,13 @@
             align-items: center;
         }
 
+        .user-item__actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            white-space: nowrap;
+        }
+
         .user-item__button {
             background: transparent;
             border: 0;
@@ -238,6 +245,11 @@
             &:hover {
                 text-decoration: underline;
             }
+        }
+
+        .user-item__scope-button {
+            color: rgba(var(--center-channel-color-rgb), 0.72);
+            font-size: 12px;
         }
 
         .Menu {

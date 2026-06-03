@@ -10,7 +10,7 @@ import Menu from '../../widgets/menu'
 import CheckIcon from '../../widgets/icons/check'
 import CompassIcon from '../../widgets/icons/compassIcon'
 
-import {BoardMember, MemberRole} from '../../blocks/board'
+import {BoardMember, MemberRole, NoStatusScopeOptionId} from '../../blocks/board'
 import {IUser} from '../../user'
 import {Utils} from '../../utils'
 import {Permission} from '../../constants'
@@ -28,6 +28,7 @@ type Props = {
     teammateNameDisplay: string
     onDeleteBoardMember: (member: BoardMember) => void
     onUpdateBoardMember: (member: BoardMember, permission: string) => void
+    onUpdateBoardMemberScope: (member: BoardMember, statusScopeEnabled: boolean, statusScopeOptionIds: string[]) => void
 }
 
 const UserPermissionsRow = (props: Props): JSX.Element => {
@@ -48,6 +49,26 @@ const UserPermissionsRow = (props: Props): JSX.Element => {
     }
 
     const menuWrapperRef = useRef<HTMLDivElement>(null)
+    const statusProperty = board.cardProperties.find((property) => property.type === 'select')
+    const scopeOptions = [
+        {
+            id: NoStatusScopeOptionId,
+            value: intl.formatMessage({id: 'BoardMember.no-status-scope', defaultMessage: 'No Status'}),
+        },
+        ...(statusProperty?.options || []),
+    ]
+    const scopedOptionIds = member.statusScopeOptionIds || []
+    const canShowStatusScope = Boolean(statusProperty && !member.schemeAdmin && (member.schemeEditor || member.schemeCommenter))
+    const scopeDisplay = member.statusScopeEnabled && scopedOptionIds.length > 0 ?
+        intl.formatMessage(
+            {id: 'BoardMember.status-scope-count', defaultMessage: '{count, plural, one {# status} other {# statuses}}'},
+            {count: scopedOptionIds.length},
+        ) :
+        intl.formatMessage({id: 'BoardMember.status-scope-all', defaultMessage: 'All statuses'})
+    const updateScopeOption = (optionId: string) => {
+        const nextOptionIds = scopedOptionIds.includes(optionId) ? scopedOptionIds.filter((currentOptionId) => currentOptionId !== optionId) : [...scopedOptionIds, optionId]
+        props.onUpdateBoardMemberScope(member, nextOptionIds.length > 0, nextOptionIds)
+    }
 
     return (
         <div
@@ -63,7 +84,7 @@ const UserPermissionsRow = (props: Props): JSX.Element => {
                     <AdminBadge permissions={user.permissions}/>
                 </div>
             </div>
-            <div>
+            <div className='user-item__actions'>
                 <BoardPermissionGate permissions={[Permission.ManageBoardRoles]}>
                     <MenuWrapper>
                         <button className='user-item__button'>
@@ -123,6 +144,41 @@ const UserPermissionsRow = (props: Props): JSX.Element => {
                 >
                     {displayRole}
                 </BoardPermissionGate>
+                {canShowStatusScope &&
+                    <BoardPermissionGate permissions={[Permission.ManageBoardRoles]}>
+                        <MenuWrapper>
+                            <button className='user-item__button user-item__scope-button'>
+                                {scopeDisplay}
+                                <CompassIcon
+                                    icon='chevron-down'
+                                    className='CompassIcon'
+                                />
+                            </button>
+                            <Menu
+                                position='left'
+                                parentRef={menuWrapperRef}
+                            >
+                                <Menu.Text
+                                    id='all-statuses'
+                                    check={true}
+                                    icon={member.statusScopeEnabled ? <div className='empty-icon'/> : <CheckIcon/>}
+                                    name={intl.formatMessage({id: 'BoardMember.status-scope-all', defaultMessage: 'All statuses'})}
+                                    onClick={() => props.onUpdateBoardMemberScope(member, false, [])}
+                                />
+                                <Menu.Separator/>
+                                {scopeOptions.map((option) => (
+                                    <Menu.Text
+                                        id={`status-scope-${option.id}`}
+                                        key={option.id}
+                                        check={true}
+                                        icon={member.statusScopeEnabled && scopedOptionIds.includes(option.id) ? <CheckIcon/> : <div className='empty-icon'/>}
+                                        name={option.value}
+                                        onClick={() => updateScopeOption(option.id)}
+                                    />
+                                ))}
+                            </Menu>
+                        </MenuWrapper>
+                    </BoardPermissionGate>}
             </div>
         </div>
     )

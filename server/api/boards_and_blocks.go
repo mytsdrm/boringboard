@@ -254,7 +254,7 @@ func (a *API) handlePatchBoardsAndBlocks(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
-	for _, blockID := range pbab.BlockIDs {
+	for i, blockID := range pbab.BlockIDs {
 		block, err2 := a.app.GetBlockByID(blockID)
 		if err2 != nil {
 			a.errorResponse(w, r, err2)
@@ -269,6 +269,12 @@ func (a *API) handlePatchBoardsAndBlocks(w http.ResponseWriter, r *http.Request)
 		if !a.permissions.HasPermissionToBoard(userID, block.BoardID, model.PermissionManageBoardCards) {
 			a.errorResponse(w, r, model.NewErrPermission("access denied to modifying cards"))
 			return
+		}
+		if i < len(pbab.BlockPatches) {
+			if err2 = a.requireBlockStatusScope(userID, block.BoardID, block, patchedBlock(block, pbab.BlockPatches[i])); err2 != nil {
+				a.errorResponse(w, r, err2)
+				return
+			}
 		}
 	}
 
@@ -380,6 +386,10 @@ func (a *API) handleDeleteBoardsAndBlocks(w http.ResponseWriter, r *http.Request
 
 		if !a.permissions.HasPermissionToBoard(userID, block.BoardID, model.PermissionManageBoardCards) {
 			a.errorResponse(w, r, model.NewErrPermission("access denied to modifying cards"))
+			return
+		}
+		if err2 = a.requireBlockStatusScope(userID, block.BoardID, block, nil); err2 != nil {
+			a.errorResponse(w, r, err2)
 			return
 		}
 	}

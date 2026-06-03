@@ -21,6 +21,7 @@ type Props = {
     addCard: (groupByOptionId?: string) => Promise<void>
     onCardClicked: (e: React.MouseEvent, card: Card) => void
     onDrop: (srcCard: Card, dstCard: Card) => void
+    canEditCard?: (card: Card) => boolean
 }
 
 const TableRows = (props: Props): JSX.Element => {
@@ -49,7 +50,7 @@ const TableRows = (props: Props): JSX.Element => {
                         isLastCard={idx === (cards.length - 1)}
                         onClick={onClickRow}
                         showCard={props.showCard}
-                        readonly={props.readonly}
+                        readonly={props.readonly || (props.canEditCard ? !props.canEditCard(card) : false)}
                         onDrop={props.onDrop}
                     />)
             })}

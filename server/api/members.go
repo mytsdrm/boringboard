@@ -156,12 +156,14 @@ func (a *API) handleAddMember(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newBoardMember := &model.BoardMember{
-		UserID:          reqBoardMember.UserID,
-		BoardID:         boardID,
-		SchemeEditor:    reqBoardMember.SchemeEditor,
-		SchemeAdmin:     reqBoardMember.SchemeAdmin,
-		SchemeViewer:    reqBoardMember.SchemeViewer,
-		SchemeCommenter: reqBoardMember.SchemeCommenter,
+		UserID:               reqBoardMember.UserID,
+		BoardID:              boardID,
+		SchemeEditor:         reqBoardMember.SchemeEditor,
+		SchemeAdmin:          reqBoardMember.SchemeAdmin,
+		SchemeViewer:         reqBoardMember.SchemeViewer,
+		SchemeCommenter:      reqBoardMember.SchemeCommenter,
+		StatusScopeEnabled:   reqBoardMember.StatusScopeEnabled,
+		StatusScopeOptionIDs: reqBoardMember.StatusScopeOptionIDs,
 	}
 
 	auditRec := a.makeAuditRecord(r, "addMember", audit.Fail)
@@ -426,12 +428,14 @@ func (a *API) handleUpdateMember(w http.ResponseWriter, r *http.Request) {
 	}
 
 	newBoardMember := &model.BoardMember{
-		UserID:          paramsUserID,
-		BoardID:         boardID,
-		SchemeAdmin:     reqBoardMember.SchemeAdmin,
-		SchemeEditor:    reqBoardMember.SchemeEditor,
-		SchemeCommenter: reqBoardMember.SchemeCommenter,
-		SchemeViewer:    reqBoardMember.SchemeViewer,
+		UserID:               paramsUserID,
+		BoardID:              boardID,
+		SchemeAdmin:          reqBoardMember.SchemeAdmin,
+		SchemeEditor:         reqBoardMember.SchemeEditor,
+		SchemeCommenter:      reqBoardMember.SchemeCommenter,
+		SchemeViewer:         reqBoardMember.SchemeViewer,
+		StatusScopeEnabled:   reqBoardMember.StatusScopeEnabled,
+		StatusScopeOptionIDs: reqBoardMember.StatusScopeOptionIDs,
 	}
 
 	isGuest, err := a.userIsGuest(paramsUserID)

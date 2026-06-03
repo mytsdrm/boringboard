@@ -86,6 +86,10 @@ func (a *API) handleCreateCard(w http.ResponseWriter, r *http.Request) {
 		a.errorResponse(w, r, model.NewErrPermission("access denied to create card"))
 		return
 	}
+	if err = a.requireCardStatusScope(userID, boardID, nil, newCard); err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
 
 	if newCard.BoardID != "" && newCard.BoardID != boardID {
 		a.errorResponse(w, r, model.ErrBoardIDMismatch)
@@ -291,6 +295,17 @@ func (a *API) handlePatchCard(w http.ResponseWriter, r *http.Request) {
 	var patch *model.CardPatch
 	if err = json.Unmarshal(requestBody, &patch); err != nil {
 		a.errorResponse(w, r, model.NewErrBadRequest(err.Error()))
+		return
+	}
+	targetCard := *card
+	targetProperties := map[string]any{}
+	for propertyID, propertyValue := range card.Properties {
+		targetProperties[propertyID] = propertyValue
+	}
+	targetCard.Properties = targetProperties
+	patch.Patch(&targetCard)
+	if err = a.requireCardStatusScope(userID, card.BoardID, card, &targetCard); err != nil {
+		a.errorResponse(w, r, err)
 		return
 	}
 

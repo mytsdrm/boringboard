@@ -13,6 +13,7 @@ import {Utils} from '../../utils'
 import {useAppDispatch} from '../../store/hooks'
 import {updateView} from '../../store/views'
 import {useHasCurrentBoardPermissions} from '../../hooks/permissions'
+import {useCanEditCardInStatusScope} from '../../hooks/statusScope'
 
 import BoardPermissionGate from '../permissions/boardPermissionGate'
 
@@ -48,6 +49,7 @@ const Table = (props: Props): JSX.Element => {
     const isManualSort = activeView.fields.sortOptions?.length === 0
     const canEditBoardProperties = useHasCurrentBoardPermissions([Permission.ManageBoardProperties])
     const canEditCards = useHasCurrentBoardPermissions([Permission.ManageBoardCards])
+    const canEditCard = useCanEditCardInStatusScope(board, canEditCards, props.readonly)
     const dispatch = useAppDispatch()
 
     const resizeColumn = useCallback(async (columnId: string, width: number) => {
@@ -119,6 +121,9 @@ const Table = (props: Props): JSX.Element => {
                 return acc
             }, {})
             const draggedCards: Card[] = draggedCardIds.map((o: string) => cardsById[o])
+            if (!draggedCards.every((draggedCard) => canEditCard(draggedCard, groupID))) {
+                return
+            }
 
             mutator.performAsUndoGroup(async () => {
                 // Update properties of dragged cards
@@ -164,7 +169,7 @@ const Table = (props: Props): JSX.Element => {
                 await mutator.changeViewCardOrder(board.id, activeView.id, activeView.fields.cardOrder, cardOrder, description)
             })
         }
-    }, [activeView, cards, props.selectedCardIds, groupByProperty])
+    }, [activeView, canEditCard, cards, props.selectedCardIds, groupByProperty])
 
     const propertyNameChanged = useCallback(async (option: IPropertyOption, text: string): Promise<void> => {
         await mutator.changePropertyOptionValue(board.id, board.cardProperties, groupByProperty!, option, text)
@@ -208,6 +213,7 @@ const Table = (props: Props): JSX.Element => {
                                     onDropToGroupHeader={onDropToGroupHeader}
                                     onDropToCard={onDropToCard}
                                     onDropToGroup={onDropToGroup}
+                                    canEditCard={canEditCard}
                                 />)
                         })
                             }
@@ -225,6 +231,7 @@ const Table = (props: Props): JSX.Element => {
                                 addCard={props.addCard}
                                 onCardClicked={props.onCardClicked}
                                 onDrop={onDropToCard}
+                                canEditCard={canEditCard}
                             />
                             }
                         </div>

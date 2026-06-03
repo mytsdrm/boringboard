@@ -71,6 +71,8 @@ describe('src/components/shareBoard/userPermissionsRow', () => {
         jest.clearAllMocks()
     })
 
+    const noopUpdateBoardMemberScope = () => {}
+
     test('should match snapshot', async () => {
         let container: Element | undefined
         const store = mockStateStore([thunk], state)
@@ -85,6 +87,7 @@ describe('src/components/shareBoard/userPermissionsRow', () => {
                             teammateNameDisplay={'test'}
                             onDeleteBoardMember={() => {}}
                             onUpdateBoardMember={() => {}}
+                            onUpdateBoardMemberScope={noopUpdateBoardMemberScope}
                         />
                     </ReduxProvider>),
                 {wrapper: MemoryRouter},
@@ -116,6 +119,7 @@ describe('src/components/shareBoard/userPermissionsRow', () => {
                             teammateNameDisplay={'test'}
                             onDeleteBoardMember={() => {}}
                             onUpdateBoardMember={() => {}}
+                            onUpdateBoardMemberScope={noopUpdateBoardMemberScope}
                         />
                     </ReduxProvider>),
                 {wrapper: MemoryRouter},
@@ -144,6 +148,7 @@ describe('src/components/shareBoard/userPermissionsRow', () => {
                             teammateNameDisplay={'test'}
                             onDeleteBoardMember={() => {}}
                             onUpdateBoardMember={() => {}}
+                            onUpdateBoardMemberScope={noopUpdateBoardMemberScope}
                         />
                     </ReduxProvider>),
                 {wrapper: MemoryRouter},
@@ -182,6 +187,7 @@ describe('src/components/shareBoard/userPermissionsRow', () => {
                             teammateNameDisplay={'test'}
                             onDeleteBoardMember={() => {}}
                             onUpdateBoardMember={() => {}}
+                            onUpdateBoardMemberScope={noopUpdateBoardMemberScope}
                         />
                     </ReduxProvider>),
                 {wrapper: MemoryRouter},

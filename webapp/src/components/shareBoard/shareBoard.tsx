@@ -197,6 +197,8 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
             boardId: member.boardId,
             userId: member.userId,
             roles: member.roles,
+            statusScopeEnabled: member.statusScopeEnabled,
+            statusScopeOptionIds: member.statusScopeOptionIds || [],
         } as BoardMember
 
         switch (newPermission) {
@@ -206,6 +208,8 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
             }
             newMember.schemeAdmin = true
             newMember.schemeEditor = true
+            newMember.statusScopeEnabled = false
+            newMember.statusScopeOptionIds = []
             break
         case MemberRole.Editor:
             if (!member.schemeAdmin && member.schemeEditor) {
@@ -235,6 +239,15 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
             return
         }
 
+        mutator.updateBoardMember(newMember, member)
+    }
+
+    const onUpdateBoardMemberScope = (member: BoardMember, statusScopeEnabled: boolean, statusScopeOptionIds: string[]) => {
+        const newMember = {
+            ...member,
+            statusScopeEnabled,
+            statusScopeOptionIds,
+        } as BoardMember
         mutator.updateBoardMember(newMember, member)
     }
 
@@ -406,6 +419,7 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
                                 teammateNameDisplay={me?.props?.teammateNameDisplay || clientConfig.teammateNameDisplay}
                                 onDeleteBoardMember={onDeleteBoardMember}
                                 onUpdateBoardMember={onUpdateBoardMember}
+                                onUpdateBoardMemberScope={onUpdateBoardMemberScope}
                                 isMe={user.id === me?.id}
                             />
                         )

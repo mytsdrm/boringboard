@@ -12,6 +12,7 @@ const BoardTypeOpen = 'O'
 const BoardTypePrivate = 'P'
 const boardTypes = [BoardTypeOpen, BoardTypePrivate]
 type BoardTypes = typeof boardTypes[number]
+const NoStatusScopeOptionId = '__no_status__'
 
 enum MemberRole {
     Viewer = 'viewer',
@@ -69,6 +70,8 @@ type BoardMember = {
     schemeCommenter: boolean
     schemeViewer: boolean
     synthetic: boolean
+    statusScopeEnabled?: boolean
+    statusScopeOptionIds?: string[]
 }
 
 type BoardsAndBlocks = {
@@ -328,6 +331,7 @@ export {
     BoardTypeOpen,
     BoardTypePrivate,
     MemberRole,
+    NoStatusScopeOptionId,
     createPatchesFromBoards,
     createPatchesFromBoardsAndBlocks,
     createCardPropertiesPatches,

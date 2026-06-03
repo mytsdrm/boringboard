@@ -28,6 +28,7 @@ type Props = {
     onDropToGroupHeader: (srcOption: IPropertyOption, dstOption?: IPropertyOption) => void
     onDropToCard: (srcCard: Card, dstCard: Card) => void
     onDropToGroup: (srcCard: Card, groupID: string, dstCardID: string) => void
+    canEditCard: (card: Card) => boolean
 }
 
 const TableGroup = (props: Props): JSX.Element => {
@@ -81,6 +82,7 @@ const TableGroup = (props: Props): JSX.Element => {
                 addCard={props.addCard}
                 onCardClicked={props.onCardClicked}
                 onDrop={props.onDropToCard}
+                canEditCard={props.canEditCard}
             />}
         </div>
     )
