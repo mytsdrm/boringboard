@@ -535,12 +535,9 @@ func (s *SQLStore) saveMember(db sq.BaseRunner, bm *model.BoardMember) (*model.B
 		return nil, err
 	}
 
-	memberHistoryAction := "created"
-	if bm.SchemeCommenter && !bm.SchemeEditor && !bm.SchemeAdmin {
-		memberHistoryAction = "commenter"
-	}
+	memberHistoryAction := memberHistoryActionForRole(bm)
 	shouldAddMemberHistory := oldMember == nil ||
-		(memberHistoryAction == "commenter" && !oldMember.SchemeCommenter)
+		(memberHistoryAction != memberHistoryActionForRole(oldMember))
 
 	if shouldAddMemberHistory {
 		addToMembersHistory := s.getQueryBuilder(db).
@@ -554,6 +551,25 @@ func (s *SQLStore) saveMember(db sq.BaseRunner, bm *model.BoardMember) (*model.B
 	}
 
 	return bm, nil
+}
+
+func memberHistoryActionForRole(bm *model.BoardMember) string {
+	if bm == nil {
+		return "created"
+	}
+	if bm.SchemeAdmin {
+		return "admin"
+	}
+	if bm.SchemeEditor {
+		return "editor"
+	}
+	if bm.SchemeCommenter {
+		return "commenter"
+	}
+	if bm.SchemeViewer {
+		return "viewer"
+	}
+	return "created"
 }
 
 func (s *SQLStore) deleteMember(db sq.BaseRunner, boardID, userID string) error {

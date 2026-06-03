@@ -69,7 +69,7 @@ func (a *API) handleGetDashboardMemberActivity(w http.ResponseWriter, r *http.Re
 	teamID := mux.Vars(r)["teamID"]
 	afterUpdateAt, beforeUpdateAt, limit := parseDashboardActivityQuery(r)
 
-	entries, err := a.app.GetDashboardCommenterInviteActivity(userID, teamID, limit, beforeUpdateAt, afterUpdateAt)
+	entries, err := a.app.GetDashboardMemberInviteActivity(userID, teamID, limit, beforeUpdateAt, afterUpdateAt)
 	if err != nil {
 		a.errorResponse(w, r, err)
 		return
@@ -94,7 +94,7 @@ func (a *API) handleGetDashboardAllMemberActivity(w http.ResponseWriter, r *http
 	teamID := mux.Vars(r)["teamID"]
 	afterUpdateAt, beforeUpdateAt, limit := parseDashboardActivityQuery(r)
 
-	entries, err := a.app.GetAdminCommenterInviteActivity(teamID, limit, beforeUpdateAt, afterUpdateAt)
+	entries, err := a.app.GetAdminMemberInviteActivity(teamID, limit, beforeUpdateAt, afterUpdateAt)
 	if err != nil {
 		a.errorResponse(w, r, err)
 		return

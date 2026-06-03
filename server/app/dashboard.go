@@ -29,25 +29,25 @@ func (a *App) GetAdminActivityBlocks(teamID string, limit uint64, beforeUpdateAt
 	return a.getActivityBlocksForBoards(boards, limit, beforeUpdateAt, afterUpdateAt)
 }
 
-func (a *App) GetDashboardCommenterInviteActivity(userID, teamID string, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.BoardMemberHistoryEntry, error) {
+func (a *App) GetDashboardMemberInviteActivity(userID, teamID string, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.BoardMemberHistoryEntry, error) {
 	boards, err := a.store.GetBoardsForUserAndTeam(userID, teamID, true)
 	if err != nil {
 		return nil, err
 	}
 
-	return a.getCommenterInviteActivityForBoards(boards, limit, beforeUpdateAt, afterUpdateAt)
+	return a.getMemberInviteActivityForBoards(boards, limit, beforeUpdateAt, afterUpdateAt)
 }
 
-func (a *App) GetAdminCommenterInviteActivity(teamID string, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.BoardMemberHistoryEntry, error) {
+func (a *App) GetAdminMemberInviteActivity(teamID string, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.BoardMemberHistoryEntry, error) {
 	boards, err := a.GetAdminBoards(teamID)
 	if err != nil {
 		return nil, err
 	}
 
-	return a.getCommenterInviteActivityForBoards(boards, limit, beforeUpdateAt, afterUpdateAt)
+	return a.getMemberInviteActivityForBoards(boards, limit, beforeUpdateAt, afterUpdateAt)
 }
 
-func (a *App) getCommenterInviteActivityForBoards(boards []*model.Board, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.BoardMemberHistoryEntry, error) {
+func (a *App) getMemberInviteActivityForBoards(boards []*model.Board, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.BoardMemberHistoryEntry, error) {
 	if limit == 0 {
 		limit = 20
 	}
@@ -60,7 +60,7 @@ func (a *App) getCommenterInviteActivityForBoards(boards []*model.Board, limit u
 		}
 
 		for _, member := range members {
-			if !member.SchemeCommenter || member.SchemeEditor || member.SchemeAdmin || member.Synthetic {
+			if member.Synthetic {
 				continue
 			}
 
@@ -70,8 +70,11 @@ func (a *App) getCommenterInviteActivityForBoards(boards []*model.Board, limit u
 			}
 			for _, entry := range memberHistory {
 				entryTime := entry.InsertAt.UnixMilli()
-				if entry.Action != "commenter" {
+				if !isMemberInviteActivity(entry.Action) {
 					continue
+				}
+				if entry.Action == "created" {
+					entry.Action = memberInviteActionForRole(member)
 				}
 				if beforeUpdateAt > 0 && entryTime >= beforeUpdateAt {
 					continue
@@ -96,6 +99,31 @@ func (a *App) getCommenterInviteActivityForBoards(boards []*model.Board, limit u
 	}
 
 	return history, nil
+}
+
+func isMemberInviteActivity(action string) bool {
+	switch action {
+	case "admin", "editor", "commenter", "viewer", "created":
+		return true
+	default:
+		return false
+	}
+}
+
+func memberInviteActionForRole(member *model.BoardMember) string {
+	if member.SchemeAdmin {
+		return "admin"
+	}
+	if member.SchemeEditor {
+		return "editor"
+	}
+	if member.SchemeCommenter {
+		return "commenter"
+	}
+	if member.SchemeViewer {
+		return "viewer"
+	}
+	return "created"
 }
 
 func (a *App) getActivityBlocksForBoards(boards []*model.Board, limit uint64, beforeUpdateAt int64, afterUpdateAt int64) ([]*model.Block, error) {

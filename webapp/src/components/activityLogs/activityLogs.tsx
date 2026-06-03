@@ -24,7 +24,25 @@ import '@tabler/core/dist/css/tabler.min.css'
 import '../admin/adminPages.scss'
 import './activityLogs.scss'
 
-type ActivityAction = 'created' | 'deleted' | 'renamed' | 'moved' | 'edited' | 'updated' | 'invited-commenter'
+type ActivityAction =
+    'created' |
+    'deleted' |
+    'renamed' |
+    'moved' |
+    'edited' |
+    'updated' |
+    'comment-added' |
+    'comment-deleted' |
+    'content-added' |
+    'content-deleted' |
+    'property-changed' |
+    'assigned-person' |
+    'unassigned-person' |
+    'invited-admin' |
+    'invited-editor' |
+    'invited-commenter' |
+    'invited-viewer' |
+    'invited-member'
 
 type ActivityLog = {
     id: string
@@ -35,6 +53,8 @@ type ActivityLog = {
     cardId: string
     cardTitle: string
     fromValue?: string
+    propertyName?: string
+    propertyType?: string
     timestamp: number
     toValue?: string
 }
@@ -88,25 +108,37 @@ const getPropertyValueLabel = (property: IPropertyTemplate, value: string | stri
     }).join(', ')
 }
 
-const getMoveDetails = (board: Board, card: Card, previousCard?: Card): Pick<ActivityLog, 'fromValue' | 'toValue'> | null => {
+const getChangedProperty = (board: Board, card: Card, previousCard?: Card): IPropertyTemplate | null => {
     if (!previousCard) {
         return null
     }
 
-    const changedProperty = board.cardProperties.find((property) => {
+    return board.cardProperties.find((property) => {
         const oldValue = JSON.stringify(previousCard.fields.properties[property.id] || '')
         const newValue = JSON.stringify(card.fields.properties[property.id] || '')
-        return oldValue !== newValue && property.options.length > 0
-    })
+        return oldValue !== newValue
+    }) || null
+}
 
-    if (!changedProperty) {
+const getMoveDetails = (board: Board, card: Card, previousCard?: Card): Pick<ActivityLog, 'fromValue' | 'propertyName' | 'toValue'> | null => {
+    const changedProperty = getChangedProperty(board, card, previousCard)
+
+    if (!changedProperty || changedProperty.options.length === 0) {
         return null
     }
 
     return {
         fromValue: getPropertyValueLabel(changedProperty, previousCard.fields.properties[changedProperty.id]),
+        propertyName: changedProperty.name,
         toValue: getPropertyValueLabel(changedProperty, card.fields.properties[changedProperty.id]),
     }
+}
+
+const valueCount = (value: string | string[] | undefined): number => {
+    if (!value) {
+        return 0
+    }
+    return Array.isArray(value) ? value.length : 1
 }
 
 const getActivityAction = (board: Board, card: Card, previousCard?: Card): ActivityAction => {
@@ -126,6 +158,21 @@ const getActivityAction = (board: Board, card: Card, previousCard?: Card): Activ
         return 'moved'
     }
 
+    const changedProperty = getChangedProperty(board, card, previousCard)
+    if (changedProperty) {
+        if (changedProperty.type === 'person' || changedProperty.type === 'multiPerson') {
+            const previousCount = valueCount(previousCard?.fields.properties[changedProperty.id])
+            const nextCount = valueCount(card.fields.properties[changedProperty.id])
+            if (nextCount > previousCount) {
+                return 'assigned-person'
+            }
+            if (nextCount < previousCount) {
+                return 'unassigned-person'
+            }
+        }
+        return 'property-changed'
+    }
+
     return 'updated'
 }
 
@@ -138,6 +185,7 @@ const createActivityLog = (
 ): ActivityLog => {
     const timestamp = sourceBlock?.updateAt || card.updateAt || Date.now()
     const moveDetails = action === 'moved' ? getMoveDetails(board, card, previousCard) : null
+    const changedProperty = moveDetails ? null : getChangedProperty(board, card, previousCard)
 
     return {
         action,
@@ -146,45 +194,95 @@ const createActivityLog = (
         boardTitle: board.title,
         cardId: card.id,
         cardTitle: card.title || previousCard?.title || '',
-        fromValue: moveDetails?.fromValue,
+        fromValue: moveDetails?.fromValue || (changedProperty ? getPropertyValueLabel(changedProperty, previousCard?.fields.properties[changedProperty.id]) : undefined),
         id: `${sourceBlock?.id || card.id}-${timestamp}-${action}`,
+        propertyName: moveDetails?.propertyName || changedProperty?.name,
+        propertyType: changedProperty?.type,
         timestamp,
-        toValue: moveDetails?.toValue,
+        toValue: moveDetails?.toValue || (changedProperty ? getPropertyValueLabel(changedProperty, card.fields.properties[changedProperty.id]) : undefined),
     }
 }
 
-const createCommenterInviteActivityLog = (member: BoardMember, board: Board): ActivityLog => {
+const getMemberInviteAction = (role: string): ActivityAction => {
+    switch (role) {
+    case 'admin':
+        return 'invited-admin'
+    case 'editor':
+        return 'invited-editor'
+    case 'commenter':
+        return 'invited-commenter'
+    case 'viewer':
+        return 'invited-viewer'
+    default:
+        return 'invited-member'
+    }
+}
+
+const getMemberRole = (member: BoardMember): string => {
+    if (member.schemeAdmin) {
+        return 'admin'
+    }
+    if (member.schemeEditor) {
+        return 'editor'
+    }
+    if (member.schemeCommenter) {
+        return 'commenter'
+    }
+    if (member.schemeViewer) {
+        return 'viewer'
+    }
+    return 'member'
+}
+
+const createMemberInviteActivityLog = (member: BoardMember, board: Board): ActivityLog => {
     const timestamp = Date.now()
+    const action = getMemberInviteAction(getMemberRole(member))
 
     return {
-        action: 'invited-commenter',
+        action,
         actorId: member.userId,
         boardId: board.id,
         boardTitle: board.title,
         cardId: member.userId,
         cardTitle: '',
-        id: `${board.id}-${member.userId}-${timestamp}-invited-commenter`,
+        id: `${board.id}-${member.userId}-${timestamp}-${action}`,
         timestamp,
     }
 }
 
-const createCommenterInviteActivityLogFromHistory = (entry: BoardMemberActivityEntry, board: Board): ActivityLog => {
+const createMemberInviteActivityLogFromHistory = (entry: BoardMemberActivityEntry, board: Board): ActivityLog => {
     const timestamp = new Date(entry.insertAt).getTime()
+    const action = getMemberInviteAction(entry.action)
 
     return {
-        action: 'invited-commenter',
+        action,
         actorId: entry.userId,
         boardId: board.id,
         boardTitle: board.title,
         cardId: entry.userId,
         cardTitle: '',
-        id: `${board.id}-${entry.userId}-${timestamp}-invited-commenter`,
+        id: `${board.id}-${entry.userId}-${timestamp}-${action}`,
         timestamp,
     }
 }
 
-const isRealCommenterMember = (member: BoardMember): boolean => {
-    return Boolean(member.schemeCommenter && !member.schemeEditor && !member.schemeAdmin && !member.synthetic)
+const isRealBoardMember = (member: BoardMember): boolean => {
+    return Boolean(!member.synthetic && (member.schemeAdmin || member.schemeEditor || member.schemeCommenter || member.schemeViewer))
+}
+
+const isMemberInviteHistoryAction = (action: string): boolean => {
+    return ['admin', 'editor', 'commenter', 'viewer', 'created'].includes(action)
+}
+
+const getRelatedUserIdsFromLog = (log: ActivityLog): string[] => {
+    if (log.propertyType !== 'person' && log.propertyType !== 'multiPerson') {
+        return []
+    }
+
+    return [log.fromValue, log.toValue].
+        filter(Boolean).
+        flatMap((value) => (value || '').split(',').map((part) => part.trim())).
+        filter(Boolean)
 }
 
 const getHistoryPreviousBlock = (historyById: Map<string, Block[]>, block: Block): Block | undefined => {
@@ -235,10 +333,32 @@ const buildActivityLogsFromHistory = (
             return result
         }
 
+        if (block.type === 'comment') {
+            const parentCard = cardsById[block.parentId]
+            if (parentCard) {
+                const previousComment = getHistoryPreviousBlock(historyById, block)
+                let action: ActivityAction = 'comment-added'
+                if (block.deleteAt !== 0) {
+                    action = 'comment-deleted'
+                } else if (previousComment) {
+                    action = 'edited'
+                }
+                result.push(createActivityLog(parentCard, board, action, parentCard, block))
+            }
+            return result
+        }
+
         if (isCardContentBlock(block)) {
             const parentCard = cardsById[block.parentId]
             if (parentCard) {
-                result.push(createActivityLog(parentCard, board, 'edited', parentCard, block))
+                const previousContent = getHistoryPreviousBlock(historyById, block)
+                let action: ActivityAction = 'edited'
+                if (block.deleteAt !== 0) {
+                    action = 'content-deleted'
+                } else if (!previousContent) {
+                    action = 'content-added'
+                }
+                result.push(createActivityLog(parentCard, board, action, parentCard, block))
             }
         }
 
@@ -488,13 +608,11 @@ const ActivityLogs = (props: Props): JSX.Element => {
                 entry.userIds.forEach((userId) => nextMemberUserIds.add(userId))
             })
             teamUsers.forEach((user) => nextMemberUserIds.add(user.id))
-            const nextMemberUserIdList = Array.from(nextMemberUserIds)
-            setMemberUserIds(nextMemberUserIdList)
 
             const memberHistoryLogs = memberHistoryEntries.reduce<ActivityLog[]>((result, entry) => {
                 const board = effectiveBoardsById.get(entry.boardId)
-                if (board && entry.action === 'commenter') {
-                    result.push(createCommenterInviteActivityLogFromHistory(entry, board))
+                if (board && isMemberInviteHistoryAction(entry.action)) {
+                    result.push(createMemberInviteActivityLogFromHistory(entry, board))
                 }
                 return result
             }, [])
@@ -505,6 +623,12 @@ const ActivityLogs = (props: Props): JSX.Element => {
             ].
                 filter((log) => !selectedUserId || log.actorId === selectedUserId).
                 sort((a, b) => b.timestamp - a.timestamp)
+            pageLogs.forEach((log) => {
+                nextMemberUserIds.add(log.actorId)
+                getRelatedUserIdsFromLog(log).forEach((userId) => nextMemberUserIds.add(userId))
+            })
+            const nextMemberUserIdList = Array.from(nextMemberUserIds)
+            setMemberUserIds(nextMemberUserIdList)
             const currentLogs = pageLogs.slice(0, ACTIVITY_LOG_PAGE_SIZE)
             const nextCursor = currentLogs[currentLogs.length - 1]?.timestamp || 0
 
@@ -540,7 +664,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
     useWebsockets(websocketTeamId, (wsClient) => {
         const incrementalBlockUpdate = (_: WSClient, blocks: Block[]) => {
             const cardUpdates = blocks.filter((block) => block.type === 'card' && !block.fields.isTemplate) as Card[]
-            const contentUpdates = blocks.filter(isCardContentBlock)
+            const contentUpdates = blocks.filter((block) => block.type === 'comment' || isCardContentBlock(block))
             const nextLogs = cardUpdates.reduce<ActivityLog[]>((result, card) => {
                 const board = boardsById.get(card.boardId)
                 if (!board) {
@@ -563,7 +687,13 @@ const ActivityLogs = (props: Props): JSX.Element => {
                 const board = boardsById.get(block.boardId)
                 const parentCard = cardsSnapshot.current[block.parentId]
                 if (board && parentCard) {
-                    nextLogs.push(createActivityLog(parentCard, board, 'edited', parentCard, block))
+                    if (block.type === 'comment') {
+                        const action: ActivityAction = block.deleteAt === 0 ? 'comment-added' : 'comment-deleted'
+                        nextLogs.push(createActivityLog(parentCard, board, action, parentCard, block))
+                    } else {
+                        const action: ActivityAction = block.deleteAt === 0 ? 'edited' : 'content-deleted'
+                        nextLogs.push(createActivityLog(parentCard, board, action, parentCard, block))
+                    }
                 }
             })
 
@@ -597,6 +727,15 @@ const ActivityLogs = (props: Props): JSX.Element => {
                     activityLogsCache.cardsSnapshot = cardsSnapshot.current
                     return mergedLogs
                 })
+                setMemberUserIds((previousMemberUserIds) => {
+                    const mergedUserIds = Array.from(new Set([
+                        ...previousMemberUserIds,
+                        ...filteredNextLogs.map((log) => log.actorId),
+                        ...filteredNextLogs.flatMap(getRelatedUserIdsFromLog),
+                    ]))
+                    activityLogsCache.memberUserIds = mergedUserIds
+                    return mergedUserIds
+                })
             }
         }
 
@@ -605,11 +744,11 @@ const ActivityLogs = (props: Props): JSX.Element => {
         const incrementalBoardMemberUpdate = async (_: WSClient, members: BoardMember[]) => {
             const nextLogs = members.reduce<ActivityLog[]>((result, member) => {
                 const board = boardsById.get(member.boardId)
-                if (!board || !isRealCommenterMember(member)) {
+                if (!board || !isRealBoardMember(member)) {
                     return result
                 }
 
-                result.push(createCommenterInviteActivityLog(member, board))
+                result.push(createMemberInviteActivityLog(member, board))
                 return result
             }, [])
 
@@ -688,6 +827,16 @@ const ActivityLogs = (props: Props): JSX.Element => {
             defaultMessage: 'Someone',
         })
     }, [boardUsers, intl, me])
+    const getActivityValueDisplay = useCallback((log: ActivityLog, value?: string): string => {
+        if (!value) {
+            return ''
+        }
+        if (log.propertyType !== 'person' && log.propertyType !== 'multiPerson') {
+            return value
+        }
+        return value.split(',').map((userId) => getUserDisplayName(userId.trim())).join(', ')
+    }, [getUserDisplayName])
+
     const userFilterOptions = useMemo(() => {
         return Array.from(new Set([
             ...(me?.id ? [me.id] : []),
@@ -736,8 +885,12 @@ const ActivityLogs = (props: Props): JSX.Element => {
                 id: 'Dashboard.untitled-card',
                 defaultMessage: 'Untitled card',
             }),
-            source: log.fromValue || emptyValue,
-            target: log.toValue || emptyValue,
+            source: getActivityValueDisplay(log, log.fromValue) || emptyValue,
+            target: getActivityValueDisplay(log, log.toValue) || emptyValue,
+            property: log.propertyName || intl.formatMessage({
+                id: 'ActivityLogs.unknown-property',
+                defaultMessage: 'a property',
+            }),
             user: getUserDisplayName(log.actorId),
         }
 
@@ -782,11 +935,99 @@ const ActivityLogs = (props: Props): JSX.Element => {
                     values={values}
                 />
             )
+        case 'comment-added':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-comment-added'
+                    defaultMessage='<b>{user}</b> commented on <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'comment-deleted':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-comment-deleted'
+                    defaultMessage='<b>{user}</b> deleted a comment on <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'content-added':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-content-added'
+                    defaultMessage='<b>{user}</b> added content to <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'content-deleted':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-content-deleted'
+                    defaultMessage='<b>{user}</b> deleted content from <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'property-changed':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-property-changed'
+                    defaultMessage='<b>{user}</b> changed <b>{property}</b> on <b>{card}</b> from <b>{source}</b> to <b>{target}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'assigned-person':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-assigned-person'
+                    defaultMessage='<b>{user}</b> assigned <b>{target}</b> to <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'unassigned-person':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-unassigned-person'
+                    defaultMessage='<b>{user}</b> removed <b>{source}</b> from <b>{card}</b> in <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'invited-admin':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-invited-admin'
+                    defaultMessage='<b>{user}</b> was invited as an admin to <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'invited-editor':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-invited-editor'
+                    defaultMessage='<b>{user}</b> was invited as an editor to <b>{board}</b>'
+                    values={values}
+                />
+            )
         case 'invited-commenter':
             return (
                 <FormattedMessage
                     id='ActivityLogs.activity-invited-commenter'
                     defaultMessage='<b>{user}</b> was invited as a commenter to <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'invited-viewer':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-invited-viewer'
+                    defaultMessage='<b>{user}</b> was invited as a viewer to <b>{board}</b>'
+                    values={values}
+                />
+            )
+        case 'invited-member':
+            return (
+                <FormattedMessage
+                    id='ActivityLogs.activity-invited-member'
+                    defaultMessage='<b>{user}</b> was invited to <b>{board}</b>'
                     values={values}
                 />
             )
@@ -813,6 +1054,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
             action,
             log.boardTitle,
             log.cardTitle,
+            log.propertyName,
             log.fromValue,
             log.toValue,
             log.timestamp,
