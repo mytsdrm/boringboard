@@ -164,12 +164,73 @@ class OctoClient {
             method: 'POST',
             headers: this.headers(),
         })
-        localStorage.removeItem('focalboardSessionId')
+        await this.clearBrowserData()
 
         if (response.status !== 200) {
             return false
         }
         return true
+    }
+
+    private async clearBrowserData(): Promise<void> {
+        localStorage.clear()
+        sessionStorage.clear()
+        this.clearCookies()
+        await Promise.all([
+            this.clearCacheStorage(),
+            this.clearIndexedDB(),
+        ])
+    }
+
+    private clearCookies(): void {
+        document.cookie.split(';').forEach((cookie) => {
+            const name = cookie.split('=')[0]?.trim()
+            if (!name) {
+                return
+            }
+            document.cookie = `${name}=; expires=Thu, 01 Jan 1970 00:00:00 GMT; path=/`
+        })
+    }
+
+    private async clearCacheStorage(): Promise<void> {
+        if (!('caches' in window)) {
+            return
+        }
+
+        try {
+            const keys = await window.caches.keys()
+            await Promise.all(keys.map((key) => window.caches.delete(key)))
+        } catch {
+            // Cache storage may be unavailable in some browser contexts.
+        }
+    }
+
+    private async clearIndexedDB(): Promise<void> {
+        const indexedDBFactory = window.indexedDB as IDBFactory & {
+            databases?: () => Promise<Array<{name?: string}>>
+        }
+
+        if (!indexedDBFactory?.databases) {
+            return
+        }
+
+        try {
+            const databases = await indexedDBFactory.databases()
+            await Promise.all(databases.map((database) => {
+                if (!database.name) {
+                    return Promise.resolve()
+                }
+
+                return new Promise<void>((resolve) => {
+                    const request = indexedDBFactory.deleteDatabase(database.name as string)
+                    request.onsuccess = () => resolve()
+                    request.onerror = () => resolve()
+                    request.onblocked = () => resolve()
+                })
+            }))
+        } catch {
+            // IndexedDB enumeration is not supported by every browser.
+        }
     }
 
     async getClientConfig(): Promise<ClientConfig | null> {
