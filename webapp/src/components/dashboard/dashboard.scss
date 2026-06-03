@@ -210,6 +210,26 @@
                     outline: 0;
                 }
             }
+
+            .dashboard-account-checkbox {
+                display: flex;
+                align-items: center;
+                gap: 10px;
+                min-height: 34px;
+                color: var(--bb-text);
+                font-size: 14px;
+                font-weight: 750;
+                line-height: 20px;
+
+                input {
+                    width: 18px;
+                    height: 18px;
+                    flex: 0 0 auto;
+                    padding: 0;
+                    border-radius: 4px;
+                    box-shadow: none;
+                }
+            }
         }
 
         .dashboard-account-error,

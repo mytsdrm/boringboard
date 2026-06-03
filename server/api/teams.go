@@ -247,6 +247,14 @@ func (a *API) handleGetTeamUsers(w http.ResponseWriter, r *http.Request) {
 		a.errorResponse(w, r, err)
 		return
 	}
+	isSystemAdmin := a.permissions.HasPermissionTo(userID, model.PermissionManageSystem)
+	for _, user := range users {
+		if user.ID == userID {
+			user.Sanitize(map[string]bool{})
+		} else {
+			a.app.SanitizeProfile(user, isSystemAdmin)
+		}
+	}
 
 	data, err := json.Marshal(users)
 	if err != nil {
@@ -350,6 +358,14 @@ func (a *API) handleGetTeamUsersByID(w http.ResponseWriter, r *http.Request) {
 			if a.permissions.HasPermissionTo(u.ID, model.PermissionManageSystem) {
 				users[i].Permissions = append(users[i].Permissions, model.PermissionManageSystem.Id)
 			}
+		}
+	}
+	isSystemAdmin := a.permissions.HasPermissionTo(userID, model.PermissionManageSystem)
+	for _, user := range users {
+		if user.ID == userID {
+			user.Sanitize(map[string]bool{})
+		} else {
+			a.app.SanitizeProfile(user, isSystemAdmin)
 		}
 	}
 

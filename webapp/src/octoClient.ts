@@ -76,6 +76,9 @@ export type AdminUserPayload = {
     username: string
     email: string
     nickname: string
+    phoneNumber: string
+    phoneWhatsAppEnabled: boolean
+    phoneTelegramEnabled: boolean
     password?: string
     group: 'SuperAdmin' | 'PublicUser'
 }
@@ -84,6 +87,9 @@ export type UserProfilePayload = {
     username: string
     email: string
     nickname: string
+    phoneNumber: string
+    phoneWhatsAppEnabled: boolean
+    phoneTelegramEnabled: boolean
 }
 
 export type TablePDFPayload = {

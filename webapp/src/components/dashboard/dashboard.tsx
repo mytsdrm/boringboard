@@ -352,7 +352,14 @@ const Dashboard = (): JSX.Element => {
     const [profileModalOpen, setProfileModalOpen] = useState(false)
     const [passwordModalOpen, setPasswordModalOpen] = useState(false)
     const [inviteModalOpen, setInviteModalOpen] = useState(false)
-    const [profileForm, setProfileForm] = useState({username: '', email: '', nickname: ''})
+    const [profileForm, setProfileForm] = useState({
+        username: '',
+        email: '',
+        nickname: '',
+        phoneNumber: '',
+        phoneWhatsAppEnabled: false,
+        phoneTelegramEnabled: false,
+    })
     const [profileError, setProfileError] = useState('')
     const [profileSaving, setProfileSaving] = useState(false)
     const [passwordForm, setPasswordForm] = useState({confirm: '', next: ''})
@@ -696,6 +703,9 @@ const Dashboard = (): JSX.Element => {
         setProfileForm({
             email: profileUser?.email || '',
             nickname: profileUser?.nickname || '',
+            phoneNumber: profileUser?.phoneNumber || '',
+            phoneTelegramEnabled: profileUser?.phoneTelegramEnabled || false,
+            phoneWhatsAppEnabled: profileUser?.phoneWhatsAppEnabled || false,
             username: profileUser?.username || '',
         })
         setProfileError('')
@@ -727,6 +737,9 @@ const Dashboard = (): JSX.Element => {
         const response = await octoClient.updateMyProfile({
             email: profileForm.email.trim(),
             nickname: profileForm.nickname.trim(),
+            phoneNumber: profileForm.phoneNumber.trim(),
+            phoneTelegramEnabled: profileForm.phoneTelegramEnabled,
+            phoneWhatsAppEnabled: profileForm.phoneWhatsAppEnabled,
             username: profileForm.username.trim(),
         })
         setProfileSaving(false)
@@ -1148,6 +1161,49 @@ const Dashboard = (): JSX.Element => {
                                         setProfileError('')
                                     }}
                                 />
+                                <input
+                                    type='tel'
+                                    inputMode='tel'
+                                    value={profileForm.phoneNumber}
+                                    placeholder={intl.formatMessage({id: 'Dashboard.profile-phone-number', defaultMessage: 'Phone Number'})}
+                                    aria-label={intl.formatMessage({id: 'Dashboard.profile-phone-number', defaultMessage: 'Phone Number'})}
+                                    onChange={(e) => {
+                                        setProfileForm({...profileForm, phoneNumber: e.target.value})
+                                        setProfileError('')
+                                    }}
+                                />
+                                <label className='dashboard-account-checkbox'>
+                                    <input
+                                        type='checkbox'
+                                        checked={profileForm.phoneWhatsAppEnabled}
+                                        onChange={(e) => {
+                                            setProfileForm({...profileForm, phoneWhatsAppEnabled: e.target.checked})
+                                            setProfileError('')
+                                        }}
+                                    />
+                                    <span>
+                                        <FormattedMessage
+                                            id='Dashboard.profile-whatsapp'
+                                            defaultMessage='WhatsApp'
+                                        />
+                                    </span>
+                                </label>
+                                <label className='dashboard-account-checkbox'>
+                                    <input
+                                        type='checkbox'
+                                        checked={profileForm.phoneTelegramEnabled}
+                                        onChange={(e) => {
+                                            setProfileForm({...profileForm, phoneTelegramEnabled: e.target.checked})
+                                            setProfileError('')
+                                        }}
+                                    />
+                                    <span>
+                                        <FormattedMessage
+                                            id='Dashboard.profile-telegram'
+                                            defaultMessage='Telegram'
+                                        />
+                                    </span>
+                                </label>
                             </div>
                             <div className='dashboard-account-actions'>
                                 <button

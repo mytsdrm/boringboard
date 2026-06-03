@@ -170,6 +170,44 @@
         white-space: nowrap;
     }
 
+    .admin-user-phone {
+        display: inline-flex;
+        flex-direction: column;
+        gap: 4px;
+        font-weight: 700;
+    }
+
+    .admin-user-phone-channels {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 4px;
+        color: var(--bb-text-muted);
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 14px;
+
+        span {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 22px;
+            height: 22px;
+            border-radius: 999px;
+            background: var(--bb-blue-soft);
+            color: var(--bb-blue-text);
+
+            &.whatsapp {
+                background: rgba(37, 211, 102, 0.14);
+                color: #128c7e;
+            }
+
+            &.telegram {
+                background: rgba(34, 158, 217, 0.14);
+                color: #229ed9;
+            }
+        }
+    }
+
     .admin-user-form-card {
         margin-bottom: 18px;
     }
@@ -703,6 +741,23 @@
         input,
         select {
             width: 100%;
+        }
+
+        .admin-user-checkbox {
+            flex-direction: row;
+            align-items: center;
+            gap: 10px;
+            min-height: 28px;
+            color: var(--bb-text);
+            font-size: 14px;
+            letter-spacing: 0;
+            text-transform: none;
+
+            input {
+                width: 18px;
+                height: 18px;
+                flex: 0 0 auto;
+            }
         }
     }
 

@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React, {useEffect, useMemo, useState} from 'react'
-import {IconChevronLeft, IconChevronRight, IconEdit, IconPlus, IconSearch, IconShieldLock, IconTrash, IconUserCircle} from '@tabler/icons-react'
+import {IconBrandTelegram, IconBrandWhatsapp, IconChevronLeft, IconChevronRight, IconEdit, IconPlus, IconSearch, IconShieldLock, IconTrash, IconUserCircle} from '@tabler/icons-react'
 import {FormattedMessage, useIntl} from 'react-intl'
 
 import octoClient, {AdminUserPayload} from '../../octoClient'
@@ -24,6 +24,9 @@ type UserFormState = {
     username: string
     email: string
     nickname: string
+    phoneNumber: string
+    phoneWhatsAppEnabled: boolean
+    phoneTelegramEnabled: boolean
     password: string
     group: UserGroup
 }
@@ -34,6 +37,9 @@ const emptyForm: UserFormState = {
     id: '',
     nickname: '',
     password: '',
+    phoneNumber: '',
+    phoneTelegramEnabled: false,
+    phoneWhatsAppEnabled: false,
     username: '',
 }
 
@@ -92,6 +98,7 @@ const AdminUsers = (): JSX.Element => {
                     user.username,
                     user.email,
                     user.nickname,
+                    user.phoneNumber,
                     getUserGroup(user),
                 ].join(' ').toLowerCase()
 
@@ -139,6 +146,9 @@ const AdminUsers = (): JSX.Element => {
             id: user.id,
             nickname: user.nickname || '',
             password: '',
+            phoneNumber: user.phoneNumber || '',
+            phoneTelegramEnabled: user.phoneTelegramEnabled || false,
+            phoneWhatsAppEnabled: user.phoneWhatsAppEnabled || false,
             username: user.username,
         })
         setError('')
@@ -171,6 +181,9 @@ const AdminUsers = (): JSX.Element => {
             group: form.group,
             nickname: form.nickname.trim(),
             password: form.password,
+            phoneNumber: form.phoneNumber.trim(),
+            phoneTelegramEnabled: form.phoneTelegramEnabled,
+            phoneWhatsAppEnabled: form.phoneWhatsAppEnabled,
             username: form.username.trim(),
         }
 
@@ -335,6 +348,41 @@ const AdminUsers = (): JSX.Element => {
                             </label>
                             <label>
                                 <FormattedMessage
+                                    id='AdminUsers.form-phone-number'
+                                    defaultMessage='Phone Number'
+                                />
+                                <input
+                                    className='form-control'
+                                    inputMode='tel'
+                                    type='tel'
+                                    value={form.phoneNumber}
+                                    onChange={(event) => setForm({...form, phoneNumber: event.target.value})}
+                                />
+                            </label>
+                            <label className='admin-user-checkbox'>
+                                <input
+                                    checked={form.phoneWhatsAppEnabled}
+                                    type='checkbox'
+                                    onChange={(event) => setForm({...form, phoneWhatsAppEnabled: event.target.checked})}
+                                />
+                                <FormattedMessage
+                                    id='AdminUsers.form-whatsapp'
+                                    defaultMessage='WhatsApp'
+                                />
+                            </label>
+                            <label className='admin-user-checkbox'>
+                                <input
+                                    checked={form.phoneTelegramEnabled}
+                                    type='checkbox'
+                                    onChange={(event) => setForm({...form, phoneTelegramEnabled: event.target.checked})}
+                                />
+                                <FormattedMessage
+                                    id='AdminUsers.form-telegram'
+                                    defaultMessage='Telegram'
+                                />
+                            </label>
+                            <label>
+                                <FormattedMessage
                                     id='AdminUsers.form-password'
                                     defaultMessage='Password'
                                 />
@@ -493,6 +541,12 @@ const AdminUsers = (): JSX.Element => {
                                 </th>
                                 <th>
                                     <FormattedMessage
+                                        id='AdminUsers.phone-number'
+                                        defaultMessage='Phone Number'
+                                    />
+                                </th>
+                                <th>
+                                    <FormattedMessage
                                         id='AdminUsers.group'
                                         defaultMessage='Group'
                                     />
@@ -523,6 +577,31 @@ const AdminUsers = (): JSX.Element => {
                                         </span>
                                     </td>
                                     <td>{user.email || '-'}</td>
+                                    <td>
+                                        {user.phoneNumber ? (
+                                            <span className='admin-user-phone'>
+                                                <span>{user.phoneNumber}</span>
+                                                <span className='admin-user-phone-channels'>
+                                                    {user.phoneWhatsAppEnabled &&
+                                                        <span
+                                                            aria-label='WhatsApp'
+                                                            className='whatsapp'
+                                                            title='WhatsApp'
+                                                        >
+                                                            <IconBrandWhatsapp size={14}/>
+                                                        </span>}
+                                                    {user.phoneTelegramEnabled &&
+                                                        <span
+                                                            aria-label='Telegram'
+                                                            className='telegram'
+                                                            title='Telegram'
+                                                        >
+                                                            <IconBrandTelegram size={14}/>
+                                                        </span>}
+                                                </span>
+                                            </span>
+                                        ) : '-'}
+                                    </td>
                                     <td>
                                         <span className={`badge ${getUserGroup(user) === 'SuperAdmin' ? 'bg-blue-lt' : 'bg-secondary-lt'}`}>
                                             {getUserGroup(user) === 'SuperAdmin' &&

@@ -64,6 +64,9 @@ func (s *SQLStore) getUsersByCondition(db sq.BaseRunner, condition interface{}, 
 			"username",
 			"email",
 			"nickname",
+			"phone_number",
+			"phone_whatsapp_enabled",
+			"phone_telegram_enabled",
 			"password",
 			"mfa_secret",
 			"auth_service",
@@ -132,8 +135,8 @@ func (s *SQLStore) createUser(db sq.BaseRunner, user *model.User) (*model.User, 
 	user.DeleteAt = 0
 
 	query := s.getQueryBuilder(db).Insert(s.tablePrefix+"users").
-		Columns("id", "username", "email", "nickname", "password", "mfa_secret", "auth_service", "auth_data", "roles", "create_at", "update_at", "delete_at").
-		Values(user.ID, user.Username, user.Email, user.Nickname, user.Password, user.MfaSecret, user.AuthService, user.AuthData, user.Roles, user.CreateAt, user.UpdateAt, user.DeleteAt)
+		Columns("id", "username", "email", "nickname", "phone_number", "phone_whatsapp_enabled", "phone_telegram_enabled", "password", "mfa_secret", "auth_service", "auth_data", "roles", "create_at", "update_at", "delete_at").
+		Values(user.ID, user.Username, user.Email, user.Nickname, user.PhoneNumber, user.PhoneWhatsAppEnabled, user.PhoneTelegramEnabled, user.Password, user.MfaSecret, user.AuthService, user.AuthData, user.Roles, user.CreateAt, user.UpdateAt, user.DeleteAt)
 
 	_, err := query.Exec()
 	return user, err
@@ -147,6 +150,9 @@ func (s *SQLStore) updateUser(db sq.BaseRunner, user *model.User) (*model.User, 
 		Set("username", user.Username).
 		Set("email", user.Email).
 		Set("nickname", user.Nickname).
+		Set("phone_number", user.PhoneNumber).
+		Set("phone_whatsapp_enabled", user.PhoneWhatsAppEnabled).
+		Set("phone_telegram_enabled", user.PhoneTelegramEnabled).
 		Set("roles", user.Roles).
 		Set("update_at", user.UpdateAt).
 		Where(sq.Eq{"id": user.ID})
@@ -406,6 +412,9 @@ func (s *SQLStore) usersFromRows(rows *sql.Rows) ([]*model.User, error) {
 			&user.Username,
 			&user.Email,
 			&user.Nickname,
+			&user.PhoneNumber,
+			&user.PhoneWhatsAppEnabled,
+			&user.PhoneTelegramEnabled,
 			&user.Password,
 			&user.MfaSecret,
 			&user.AuthService,

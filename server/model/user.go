@@ -35,6 +35,12 @@ type User struct {
 
 	// The user's nickname
 	Nickname string `json:"nickname"`
+	// The user's phone number for external notifications
+	PhoneNumber string `json:"phoneNumber"`
+	// If WhatsApp notifications are enabled for this phone number
+	PhoneWhatsAppEnabled bool `json:"phoneWhatsAppEnabled"`
+	// If Telegram notifications are enabled for this phone number
+	PhoneTelegramEnabled bool `json:"phoneTelegramEnabled"`
 	// The user's first name
 	FirstName string `json:"firstname"`
 	// The user's last name
@@ -91,9 +97,12 @@ type UserPreferencesPatch struct {
 }
 
 type UserProfileRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Nickname string `json:"nickname"`
+	Username             string `json:"username"`
+	Email                string `json:"email"`
+	Nickname             string `json:"nickname"`
+	PhoneNumber          string `json:"phoneNumber"`
+	PhoneWhatsAppEnabled bool   `json:"phoneWhatsAppEnabled"`
+	PhoneTelegramEnabled bool   `json:"phoneTelegramEnabled"`
 }
 
 type Session struct {
@@ -124,5 +133,10 @@ func (u *User) Sanitize(options map[string]bool) {
 	if len(options) != 0 && !options["fullname"] {
 		u.FirstName = ""
 		u.LastName = ""
+	}
+	if len(options) != 0 && !options["phone"] {
+		u.PhoneNumber = ""
+		u.PhoneWhatsAppEnabled = false
+		u.PhoneTelegramEnabled = false
 	}
 }

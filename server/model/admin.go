@@ -26,9 +26,12 @@ type AdminSystemSettings struct {
 }
 
 type AdminUserRequest struct {
-	Username string `json:"username"`
-	Email    string `json:"email"`
-	Nickname string `json:"nickname"`
-	Password string `json:"password"`
-	Group    string `json:"group"`
+	Username             string `json:"username"`
+	Email                string `json:"email"`
+	Nickname             string `json:"nickname"`
+	PhoneNumber          string `json:"phoneNumber"`
+	PhoneWhatsAppEnabled bool   `json:"phoneWhatsAppEnabled"`
+	PhoneTelegramEnabled bool   `json:"phoneTelegramEnabled"`
+	Password             string `json:"password"`
+	Group                string `json:"group"`
 }

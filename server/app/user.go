@@ -46,6 +46,7 @@ func (a *App) UpdateUserProfile(userID string, request model.UserProfileRequest)
 	username := strings.TrimSpace(request.Username)
 	email := strings.TrimSpace(request.Email)
 	nickname := strings.TrimSpace(request.Nickname)
+	phoneNumber := strings.TrimSpace(request.PhoneNumber)
 	if username == "" {
 		return nil, model.NewErrBadRequest("username is required")
 	}
@@ -66,6 +67,9 @@ func (a *App) UpdateUserProfile(userID string, request model.UserProfileRequest)
 	user.Username = username
 	user.Email = email
 	user.Nickname = nickname
+	user.PhoneNumber = phoneNumber
+	user.PhoneWhatsAppEnabled = request.PhoneWhatsAppEnabled
+	user.PhoneTelegramEnabled = request.PhoneTelegramEnabled
 	return a.store.UpdateUser(user)
 }
 
@@ -120,6 +124,7 @@ func (a *App) SanitizeProfile(user *model.User, isAdmin bool) {
 	if isAdmin {
 		options["fullname"] = true
 		options["email"] = true
+		options["phone"] = true
 	} else {
 		options["fullname"] = a.config.ShowFullName
 		options["email"] = a.config.ShowEmailAddress

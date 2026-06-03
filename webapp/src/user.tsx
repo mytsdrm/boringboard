@@ -6,6 +6,9 @@ interface IUser {
     username: string
     email: string
     nickname: string
+    phoneNumber?: string
+    phoneWhatsAppEnabled?: boolean
+    phoneTelegramEnabled?: boolean
     firstname: string
     lastname: string
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

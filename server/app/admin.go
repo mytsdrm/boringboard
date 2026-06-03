@@ -67,6 +67,7 @@ func (a *App) CreateManagedUser(request model.AdminUserRequest) (*model.User, er
 	username := strings.TrimSpace(request.Username)
 	email := strings.TrimSpace(request.Email)
 	nickname := strings.TrimSpace(request.Nickname)
+	phoneNumber := strings.TrimSpace(request.PhoneNumber)
 	password := request.Password
 	if username == "" {
 		return nil, model.NewErrBadRequest("username is required")
@@ -92,15 +93,18 @@ func (a *App) CreateManagedUser(request model.AdminUserRequest) (*model.User, er
 	}
 
 	user, err := a.store.CreateUser(&model.User{
-		ID:          utils.NewID(utils.IDTypeUser),
-		Username:    username,
-		Email:       email,
-		Nickname:    nickname,
-		Password:    auth.HashPassword(password),
-		MfaSecret:   "",
-		AuthService: a.config.AuthMode,
-		AuthData:    "",
-		Roles:       adminGroupRoles(normalizeAdminGroup(request.Group)),
+		ID:                   utils.NewID(utils.IDTypeUser),
+		Username:             username,
+		Email:                email,
+		Nickname:             nickname,
+		PhoneNumber:          phoneNumber,
+		PhoneWhatsAppEnabled: request.PhoneWhatsAppEnabled,
+		PhoneTelegramEnabled: request.PhoneTelegramEnabled,
+		Password:             auth.HashPassword(password),
+		MfaSecret:            "",
+		AuthService:          a.config.AuthMode,
+		AuthData:             "",
+		Roles:                adminGroupRoles(normalizeAdminGroup(request.Group)),
 	})
 	if err != nil {
 		return nil, err
@@ -118,6 +122,7 @@ func (a *App) UpdateManagedUser(userID string, request model.AdminUserRequest) (
 	username := strings.TrimSpace(request.Username)
 	email := strings.TrimSpace(request.Email)
 	nickname := strings.TrimSpace(request.Nickname)
+	phoneNumber := strings.TrimSpace(request.PhoneNumber)
 	if username == "" {
 		return nil, model.NewErrBadRequest("username is required")
 	}
@@ -143,6 +148,9 @@ func (a *App) UpdateManagedUser(userID string, request model.AdminUserRequest) (
 	user.Username = username
 	user.Email = email
 	user.Nickname = nickname
+	user.PhoneNumber = phoneNumber
+	user.PhoneWhatsAppEnabled = request.PhoneWhatsAppEnabled
+	user.PhoneTelegramEnabled = request.PhoneTelegramEnabled
 	user.Roles = adminGroupRoles(normalizeAdminGroup(request.Group))
 
 	updatedUser, err := a.store.UpdateUser(user)
