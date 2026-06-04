@@ -211,6 +211,20 @@ describe('utils', () => {
 
             expect(history.push).toBeCalledWith('/board_id_2')
         })
+
+        it('should switch boards from activity logs route', () => {
+            const match = {
+                params: {},
+                path: '/activity-logs',
+            } as unknown as routerMatch<{boardId: string, viewId?: string, cardId?: string, teamId?: string}>
+
+            const history = createMemoryHistory()
+            history.push = jest.fn()
+
+            Utils.showBoard('board_id_2', match, history)
+
+            expect(history.push).toBeCalledWith('/board_id_2')
+        })
     })
 
     describe('getUserDisplayName test', () => {
