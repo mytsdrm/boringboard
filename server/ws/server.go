@@ -3,6 +3,7 @@ package ws
 import (
 	"encoding/json"
 	"net/http"
+	"strings"
 	"sync"
 
 	"github.com/gorilla/mux"
@@ -67,6 +68,14 @@ func (wss *websocketSession) isAuthenticated() bool {
 	return wss.userID != ""
 }
 
+func isExpectedWebsocketDisconnect(err error) bool {
+	if websocket.IsCloseError(err, websocket.CloseNormalClosure, websocket.CloseGoingAway, websocket.CloseNoStatusReceived, websocket.CloseAbnormalClosure) {
+		return true
+	}
+
+	return strings.Contains(err.Error(), "use of closed network connection")
+}
+
 // NewServer creates a new Server.
 func NewServer(auth *auth.Auth, singleUserToken string, isMattermostAuth bool, logger mlog.LoggerIFace, store Store) *Server {
 	return &Server{
@@ -127,10 +136,17 @@ func (ws *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	for {
 		_, p, err := wsSession.conn.ReadMessage()
 		if err != nil {
-			ws.logger.Error("ERROR WebSocket",
-				mlog.Stringer("client", wsSession.conn.RemoteAddr()),
-				mlog.Err(err),
-			)
+			if isExpectedWebsocketDisconnect(err) {
+				ws.logger.Debug("CLOSE WebSocket",
+					mlog.Stringer("client", wsSession.conn.RemoteAddr()),
+					mlog.Err(err),
+				)
+			} else {
+				ws.logger.Error("ERROR WebSocket",
+					mlog.Stringer("client", wsSession.conn.RemoteAddr()),
+					mlog.Err(err),
+				)
+			}
 			ws.removeListener(wsSession)
 			break
 		}

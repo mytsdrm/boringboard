@@ -344,6 +344,10 @@ class WSClient {
 
     open(): void {
         if (this.client !== null) {
+            if (this.state === 'open') {
+                return
+            }
+
             // configure the Mattermost websocket client callbacks
             const onConnect = () => {
                 Utils.log('WSClient in plugin mode, reusing Mattermost WS connection')
@@ -405,6 +409,11 @@ class WSClient {
             this.client.addCloseListener(onClose)
             this.client.addReconnectListener(onReconnect)
 
+            return
+        }
+
+        if (this.ws?.readyState === WebSocket.CONNECTING || this.ws?.readyState === WebSocket.OPEN) {
+            Utils.log(`WSClient open skipped, existing connection state: ${this.ws.readyState}`)
             return
         }
 
