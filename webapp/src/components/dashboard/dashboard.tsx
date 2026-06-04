@@ -68,6 +68,9 @@ type DashboardActivity = {
 const DASHBOARD_ACTIVITY_LIMIT = 10
 const DASHBOARD_ACTIVITY_HISTORY_LIMIT = 120
 const DASHBOARD_RECENT_BOARD_LIMIT = 10
+const SIDEBAR_TASK_BOARD_GROUP_EVENT = 'boringboard:sidebar-task-board-group'
+
+type SidebarTaskBoardGroup = 'personal' | 'joined'
 
 const getCardStats = (board: Board, cards: Card[]) => {
     const boardActivityAt = board.updateAt || board.createAt || 0
@@ -381,6 +384,12 @@ const Dashboard = (): JSX.Element => {
     const [passwordSucceeded, setPasswordSucceeded] = useState(false)
     const cardsSnapshot = useRef<{[cardId: string]: Card}>({...dashboardCache.cardsSnapshot})
     const userMenuRef = useRef<HTMLDetailsElement|null>(null)
+
+    const expandSidebarTaskBoardGroup = useCallback((group: SidebarTaskBoardGroup) => {
+        window.dispatchEvent(new CustomEvent(SIDEBAR_TASK_BOARD_GROUP_EVENT, {
+            detail: {group},
+        }))
+    }, [])
 
     const taskBoards = useMemo(() => boards.filter((board) => !board.isTemplate), [boards])
     const taskBoardsById = useMemo(() => new Map(taskBoards.map((board) => [board.id, board])), [taskBoards])
@@ -1308,7 +1317,11 @@ const Dashboard = (): JSX.Element => {
                 </AppModal>}
 
             <section className='dashboard-metric-grid'>
-                <div className='dashboard-metric-card board-count'>
+                <button
+                    type='button'
+                    className='dashboard-metric-card board-count is-clickable'
+                    onClick={() => expandSidebarTaskBoardGroup('personal')}
+                >
                     <div className='metric-icon'>
                         <CompassIcon icon='product-boards'/>
                     </div>
@@ -1327,9 +1340,13 @@ const Dashboard = (): JSX.Element => {
                             />
                         </p>
                     </div>
-                </div>
+                </button>
 
-                <div className='dashboard-metric-card joined-count'>
+                <button
+                    type='button'
+                    className='dashboard-metric-card joined-count is-clickable'
+                    onClick={() => expandSidebarTaskBoardGroup('joined')}
+                >
                     <div className='metric-icon'>
                         <CompassIcon icon='share-variant-outline'/>
                     </div>
@@ -1348,7 +1365,7 @@ const Dashboard = (): JSX.Element => {
                             />
                         </p>
                     </div>
-                </div>
+                </button>
 
                 <div className='dashboard-metric-card task-count'>
                     <div className='metric-icon'>

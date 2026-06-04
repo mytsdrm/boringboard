@@ -254,9 +254,11 @@
         --metric-accent-soft: var(--bb-blue-soft);
 
         position: relative;
+        appearance: none;
         display: grid;
         grid-template-columns: 44px minmax(0, 1fr);
         gap: 12px;
+        width: 100%;
         min-height: 118px;
         padding: 16px 18px;
         overflow: hidden;
@@ -264,6 +266,11 @@
         border-radius: 16px;
         background: color-mix(in srgb, var(--bb-dashboard-panel-bg) 94%, transparent);
         box-shadow: 0 18px 42px var(--bb-shadow-soft);
+        color: inherit;
+        cursor: default;
+        font: inherit;
+        text-align: left;
+        transition: border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
 
         &::after {
             position: absolute;
@@ -289,6 +296,22 @@
         &.assigned-count {
             --metric-accent: var(--bb-assigned-text);
             --metric-accent-soft: var(--bb-assigned-soft);
+        }
+
+        &.is-clickable {
+            cursor: pointer;
+
+            &:hover,
+            &:focus-visible {
+                border-color: color-mix(in srgb, var(--metric-accent) 34%, var(--bb-border));
+                box-shadow: 0 20px 48px color-mix(in srgb, var(--metric-accent) 12%, var(--bb-shadow-soft));
+                outline: 0;
+                transform: translateY(-1px);
+            }
+
+            &:active {
+                transform: translateY(0);
+            }
         }
     }
 

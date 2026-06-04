@@ -64,6 +64,10 @@ type Props = {
 }
 
 export const ClassForManageCategoriesTourStep = 'manageCategoriesTourStep'
+const SIDEBAR_TASK_BOARD_GROUP_EVENT = 'boringboard:sidebar-task-board-group'
+
+type SidebarTaskBoardGroup = 'personal' | 'joined'
+type SidebarTaskBoardGroupEvent = CustomEvent<{group?: SidebarTaskBoardGroup}>
 
 const SidebarCategory = (props: Props) => {
     const [collapsed, setCollapsed] = useState(props.categoryBoards.collapsed)
@@ -174,6 +178,27 @@ const SidebarCategory = (props: Props) => {
             setJoinedBoardsCollapsed(false)
         }
     }, [isTaskBoardsCategory, joinedBoards, personalBoards, props.activeBoardID])
+
+    useEffect(() => {
+        if (!isTaskBoardsCategory) {
+            return undefined
+        }
+
+        const handleTaskBoardGroupEvent = (event: Event) => {
+            const group = (event as SidebarTaskBoardGroupEvent).detail?.group
+
+            if (group === 'personal') {
+                setPersonalBoardsCollapsed(false)
+            }
+
+            if (group === 'joined') {
+                setJoinedBoardsCollapsed(false)
+            }
+        }
+
+        window.addEventListener(SIDEBAR_TASK_BOARD_GROUP_EVENT, handleTaskBoardGroupEvent)
+        return () => window.removeEventListener(SIDEBAR_TASK_BOARD_GROUP_EVENT, handleTaskBoardGroupEvent)
+    }, [isTaskBoardsCategory])
 
     const handleCreateNewCategory = () => {
         setShowCreateCategoryModal(true)
