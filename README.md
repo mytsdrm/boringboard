@@ -13,6 +13,11 @@ That's why it's called **BoringBoard**.
 **Default Theme**
 ![BoringBoard](README.assets/boringboard.png)
 
+**Admin**
+![BoringBoard](README.assets/admin.png)
+
+![BoringBoard](README.assets/adminsetting.png)
+
 **Dark Theme**
 ![BoringBoard](README.assets/boringboard-dark.png)
 
