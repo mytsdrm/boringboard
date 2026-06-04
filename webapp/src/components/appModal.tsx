@@ -92,6 +92,8 @@ const AppModal = (props: Props): JSX.Element => {
         <RootPortal>
             <Dialog
                 className={`AppModal ${className}`}
+                disableBackdropClose={true}
+                disableEscapeClose={true}
                 hideCloseButton={hideCloseButton}
                 size={size}
                 style={modalStyle}

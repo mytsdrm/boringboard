@@ -16,6 +16,8 @@ type Props = {
     toolsMenu?: React.ReactNode // some dialogs may not  require a toolmenu
     toolbar?: React.ReactNode
     hideCloseButton?: boolean
+    disableBackdropClose?: boolean
+    disableEscapeClose?: boolean
     className?: string
     style?: React.CSSProperties
     title?: JSX.Element
@@ -32,7 +34,11 @@ const Dialog = (props: Props) => {
         defaultMessage: 'Close dialog',
     })
 
-    useHotkeys('esc', () => props.onClose())
+    useHotkeys('esc', () => {
+        if (!props.disableEscapeClose) {
+            props.onClose()
+        }
+    })
 
     const isBackdropClickedRef = useRef(false)
 
@@ -46,6 +52,10 @@ const Dialog = (props: Props) => {
                 className='wrapper'
                 onClick={(e) => {
                     e.stopPropagation()
+                    if (props.disableBackdropClose) {
+                        isBackdropClickedRef.current = false
+                        return
+                    }
                     if (!isBackdropClickedRef.current) {
                         return
                     }
@@ -53,6 +63,9 @@ const Dialog = (props: Props) => {
                     props.onClose()
                 }}
                 onMouseDown={(e) => {
+                    if (props.disableBackdropClose) {
+                        return
+                    }
                     if (e.target === e.currentTarget) {
                         isBackdropClickedRef.current = true
                     }
