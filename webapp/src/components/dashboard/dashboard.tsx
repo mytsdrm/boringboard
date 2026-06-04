@@ -1410,6 +1410,10 @@ const Dashboard = (): JSX.Element => {
                         {recentlyUpdatedBoards.map((board) => {
                             const latestActivityAt = statsByBoard[board.id]?.latestActivityAt || board.updateAt || board.createAt
                             const latestActivityUserId = statsByBoard[board.id]?.latestActivityUserId || board.modifiedBy || board.createdBy
+                            const boardScope = board.createdBy === me?.id ? 'personal' : 'joined'
+                            const boardScopeLabel = boardScope === 'personal' ?
+                                intl.formatMessage({id: 'Dashboard.recent-board-scope-personal', defaultMessage: 'Personal'}) :
+                                intl.formatMessage({id: 'Dashboard.recent-board-scope-joined', defaultMessage: 'Joined'})
                             return (
                                 <button
                                     className='dashboard-widget-row'
@@ -1430,6 +1434,13 @@ const Dashboard = (): JSX.Element => {
                                                 }}
                                             />
                                         </span>
+                                    </span>
+                                    <span
+                                        aria-label={boardScopeLabel}
+                                        className={`dashboard-board-scope ${boardScope}`}
+                                        title={boardScopeLabel}
+                                    >
+                                        <CompassIcon icon={boardScope === 'personal' ? 'account-outline' : 'account-multiple-outline'}/>
                                     </span>
                                     <span className='dashboard-time-pill'>{formatRelativeTime(latestActivityAt)}</span>
                                 </button>

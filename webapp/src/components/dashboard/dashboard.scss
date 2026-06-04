@@ -427,7 +427,7 @@
 
     .dashboard-widget-row {
         display: grid;
-        grid-template-columns: 28px minmax(0, 1fr) auto;
+        grid-template-columns: 28px minmax(0, 1fr) auto auto;
         align-items: center;
         gap: 12px;
         width: 100%;
@@ -487,6 +487,37 @@
         font-size: 12px;
         font-weight: normal;
         line-height: 18px;
+    }
+
+    .dashboard-board-scope {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 5px;
+        width: 28px;
+        height: 28px;
+        padding: 0;
+        border-radius: 999px;
+        font-size: 11px;
+        font-weight: 800;
+        line-height: 1;
+        white-space: nowrap;
+
+        .Icon {
+            width: 13px;
+            height: 13px;
+            margin: 0;
+        }
+
+        &.personal {
+            background: var(--bb-green-soft);
+            color: var(--bb-green-text);
+        }
+
+        &.joined {
+            background: var(--bb-orange-soft);
+            color: var(--bb-orange-text);
+        }
     }
 
     .dashboard-time-pill {
@@ -833,6 +864,12 @@
             grid-template-columns: 24px minmax(0, 1fr);
             gap: 10px;
             min-height: 54px;
+
+            .dashboard-board-scope {
+                grid-column: 2;
+                justify-self: start;
+                margin-top: -2px;
+            }
 
             .dashboard-time-pill {
                 grid-column: 2;
