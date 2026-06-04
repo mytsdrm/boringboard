@@ -146,98 +146,100 @@ const ViewHeader = (props: Props) => {
 
             </div>
 
-            <div className='octo-spacer'/>
+            <div className='ViewHeader__controls'>
+                {!props.readonly &&
+                <>
+                    {/* Card properties */}
 
-            {!props.readonly &&
-            <>
-                {/* Card properties */}
+                    <ViewHeaderPropertiesMenu
+                        properties={board.cardProperties}
+                        activeView={activeView}
+                    />
 
-                <ViewHeaderPropertiesMenu
-                    properties={board.cardProperties}
-                    activeView={activeView}
-                />
+                    {/* Group by */}
 
-                {/* Group by */}
+                    {withGroupBy &&
+                    <ViewHeaderGroupByMenu
+                        properties={board.cardProperties}
+                        activeView={activeView}
+                        groupByProperty={groupByProperty}
+                    />}
 
-                {withGroupBy &&
-                <ViewHeaderGroupByMenu
-                    properties={board.cardProperties}
-                    activeView={activeView}
-                    groupByProperty={groupByProperty}
-                />}
+                    {/* Display by */}
 
-                {/* Display by */}
+                    {withDisplayBy &&
+                    <ViewHeaderDisplayByMenu
+                        properties={board.cardProperties}
+                        activeView={activeView}
+                        dateDisplayPropertyName={dateDisplayProperty?.name}
+                    />}
 
-                {withDisplayBy &&
-                <ViewHeaderDisplayByMenu
-                    properties={board.cardProperties}
-                    activeView={activeView}
-                    dateDisplayPropertyName={dateDisplayProperty?.name}
-                />}
+                    {/* Filter */}
 
-                {/* Filter */}
+                    <ModalWrapper>
+                        <Button
+                            active={hasFilter}
+                            onClick={() => setShowFilter(!showFilter)}
+                            onMouseOver={() => setLockFilterOnClose(true)}
+                            onMouseLeave={() => setLockFilterOnClose(false)}
+                        >
+                            <FormattedMessage
+                                id='ViewHeader.filter'
+                                defaultMessage='Filter'
+                            />
+                        </Button>
+                        {showFilter &&
+                        <FilterComponent
+                            board={board}
+                            activeView={activeView}
+                            onClose={() => {
+                                if (!lockFilterOnClose) {
+                                    setShowFilter(false)
+                                }
+                            }}
+                        />}
+                    </ModalWrapper>
 
-                <ModalWrapper>
-                    <Button
-                        active={hasFilter}
-                        onClick={() => setShowFilter(!showFilter)}
-                        onMouseOver={() => setLockFilterOnClose(true)}
-                        onMouseLeave={() => setLockFilterOnClose(false)}
-                    >
-                        <FormattedMessage
-                            id='ViewHeader.filter'
-                            defaultMessage='Filter'
-                        />
-                    </Button>
-                    {showFilter &&
-                    <FilterComponent
+                    {/* Sort */}
+
+                    {withSortBy &&
+                    <ViewHeaderSortMenu
+                        properties={board.cardProperties}
+                        activeView={activeView}
+                        orderedCards={cards}
+                    />
+                    }
+                </>
+                }
+            </div>
+
+            <div className='ViewHeader__actions'>
+                {/* Search */}
+
+                <ViewHeaderSearch/>
+
+                {/* Options menu */}
+
+                {!props.readonly &&
+                <>
+                    <ViewHeaderActionsMenu
                         board={board}
                         activeView={activeView}
-                        onClose={() => {
-                            if (!lockFilterOnClose) {
-                                setShowFilter(false)
-                            }
-                        }}
-                    />}
-                </ModalWrapper>
-
-                {/* Sort */}
-
-                {withSortBy &&
-                <ViewHeaderSortMenu
-                    properties={board.cardProperties}
-                    activeView={activeView}
-                    orderedCards={cards}
-                />
-                }
-            </>
-            }
-
-            {/* Search */}
-
-            <ViewHeaderSearch/>
-
-            {/* Options menu */}
-
-            {!props.readonly &&
-            <>
-                <ViewHeaderActionsMenu
-                    board={board}
-                    activeView={activeView}
-                    cards={cards}
-                />
-
-                {/* New card button */}
-
-                <BoardPermissionGate permissions={[Permission.ManageBoardCards]}>
-                    <NewCardButton
-                        addCard={props.addCard}
-                        addCardFromTemplate={props.addCardFromTemplate}
-                        addCardTemplate={props.addCardTemplate}
-                        editCardTemplate={props.editCardTemplate}
+                        cards={cards}
                     />
-                </BoardPermissionGate>
-            </>}
+
+                    {/* New card button */}
+
+                    <BoardPermissionGate permissions={[Permission.ManageBoardCards]}>
+                        <NewCardButton
+                            addCard={props.addCard}
+                            addCardFromTemplate={props.addCardFromTemplate}
+                            addCardTemplate={props.addCardTemplate}
+                            editCardTemplate={props.editCardTemplate}
+                        />
+                    </BoardPermissionGate>
+                </>}
+            </div>
         </div>
     )
 }

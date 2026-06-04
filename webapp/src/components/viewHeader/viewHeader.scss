@@ -1,9 +1,8 @@
 .ViewHeader {
     flex: 0 0 auto;
-    display: flex;
-    flex-direction: row;
-    flex-wrap: wrap;
-    gap: 10px 12px;
+    display: grid;
+    grid-template-columns: minmax(180px, 220px) minmax(0, 1fr) auto;
+    gap: 10px 14px;
     width: 100%;
     max-width: 100%;
     min-width: 0;
@@ -21,6 +20,7 @@
     font-weight: 650;
 
     @media (max-width: 768px) {
+        grid-template-columns: max-content max-content max-content;
         min-width: 100%;
         margin-top: 12px;
         padding: 9px 10px;
@@ -37,13 +37,29 @@
         }
     }
 
-    .octo-spacer {
-        flex: 1 1 24px;
+    .ViewHeader__controls,
+    .ViewHeader__actions {
+        display: flex;
+        align-items: center;
+        gap: 10px;
         min-width: 0;
+    }
+
+    .ViewHeader__controls {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+
+    .ViewHeader__actions {
+        justify-content: flex-end;
+        flex-wrap: nowrap;
+        justify-self: end;
+        min-width: max-content;
     }
 
     .board-search-field {
         flex: 0 1 220px;
+        width: 220px;
         min-width: min(220px, 100%);
     }
 
