@@ -82,6 +82,59 @@
     }
 }
 
+@media screen and (max-width: 1024px) {
+    .AppModal {
+        .dialog {
+            width: min(var(--app-modal-width, 680px), calc(100vw - 28px));
+            max-width: min(var(--app-modal-width, 680px), calc(100vw - 28px));
+            max-height: calc(100vh - 28px);
+        }
+    }
+
+    .AppModal__body {
+        max-height: min(62vh, 560px);
+        padding: 0 24px 20px;
+    }
+
+    .AppModal__footer {
+        padding: 14px 24px 24px;
+    }
+}
+
+@media screen and (max-width: 560px) {
+    .AppModal {
+        .dialog {
+            width: calc(100vw - 20px);
+            max-width: calc(100vw - 20px);
+            max-height: calc(100vh - 20px);
+        }
+    }
+
+    .AppModal__title {
+        gap: 8px;
+    }
+
+    .AppModal__titleIcon {
+        width: 24px;
+        height: 24px;
+    }
+
+    .AppModal__body {
+        padding: 0 18px 18px;
+    }
+
+    .AppModal__footer {
+        align-items: stretch;
+        flex-direction: column-reverse;
+        padding: 12px 18px 18px;
+    }
+
+    .AppModal__cancel,
+    .AppModal__save {
+        width: 100%;
+    }
+}
+
 .AppModal__cancel {
     border: 1px solid rgba(217, 45, 32, 0.28);
     background: #fff;

@@ -657,6 +657,53 @@
     }
 }
 
+@media screen and (max-width: 1024px) {
+    .CreateTaskBoardFromCommandModal {
+        .dialog {
+            width: min(720px, calc(100vw - 32px));
+            max-height: calc(100vh - 32px);
+        }
+
+        .dialog > .toolbar {
+            padding: 24px 24px 18px;
+        }
+
+        .ai-command-modal-body {
+            padding: 0 24px 20px;
+        }
+
+        .ai-command-input-area,
+        .ai-command-options,
+        .ai-preview-heading,
+        .ai-preview-tasks {
+            grid-template-columns: 1fr;
+        }
+
+        .ai-preview-metrics {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .ai-command-status-list,
+        .ai-command-status-row,
+        .ai-command-add-status {
+            grid-template-columns: 1fr;
+        }
+
+        .ai-command-loader {
+            top: 22px;
+            right: 64px;
+            max-width: calc(100vw - 180px);
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .ai-preview-actions {
+            padding: 14px 24px 22px;
+        }
+    }
+}
+
 @media screen and (max-width: 767px) {
     .CreateTaskBoardFromCommandModal {
         .dialog {

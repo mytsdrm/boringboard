@@ -367,6 +367,7 @@ const Dashboard = (): JSX.Element => {
     const [passwordSucceeded, setPasswordSucceeded] = useState(false)
     const cardsSnapshot = useRef<{[cardId: string]: Card}>({...dashboardCache.cardsSnapshot})
     const userMenuRef = useRef<HTMLDetailsElement|null>(null)
+
     const taskBoards = useMemo(() => boards.filter((board) => !board.isTemplate), [boards])
     const taskBoardsById = useMemo(() => new Map(taskBoards.map((board) => [board.id, board])), [taskBoards])
     const websocketTeamId = currentTeamId || firstTeam?.id || taskBoards[0]?.teamId || ''

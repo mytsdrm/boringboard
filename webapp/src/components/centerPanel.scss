@@ -29,12 +29,20 @@
     > * {
         padding: 0 var(--board-gutter);
 
+        @media screen and (max-width: 1024px) {
+            padding: 0 22px;
+        }
+
         @media screen and (max-width: 768px) {
             padding: 0 16px;
         }
 
         &:first-child {
             padding-top: 10px;
+
+            @media screen and (max-width: 1024px) {
+                padding: 0 22px;
+            }
 
             @media screen and (max-width: 768px) {
                 padding: 0 16px;
@@ -111,6 +119,15 @@
             }
         }
 
+        @media screen and (max-width: 1024px) {
+            padding-bottom: 12px;
+
+            > .mid-head {
+                margin-top: 20px;
+                gap: 12px;
+            }
+        }
+
         @media screen and (max-width: 768px) {
             padding-bottom: 10px;
 
@@ -137,6 +154,10 @@
         overflow: hidden;
         padding: 0 var(--board-gutter);
         margin-left: 0;
+
+        @media (max-width: 1024px) {
+            padding: 0 22px;
+        }
 
         @media (max-width: 768px) {
             padding: 0 16px;

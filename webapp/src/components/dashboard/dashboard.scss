@@ -257,7 +257,7 @@
         display: grid;
         grid-template-columns: 52px minmax(0, 1fr);
         gap: 16px;
-        min-height: 170px;
+        min-height: 158px;
         padding: 22px 22px 18px;
         overflow: hidden;
         border: 1px solid var(--bb-border);
@@ -350,7 +350,7 @@
         display: grid;
         grid-template-columns: minmax(280px, 0.85fr) minmax(420px, 1.35fr);
         gap: 18px;
-        flex: 1 1 auto;
+        flex: 0 0 auto;
         width: var(--dashboard-content-width);
         min-height: 0;
         margin: 0 auto;
@@ -364,9 +364,9 @@
     }
 
     .dashboard-widget {
-        min-height: 100%;
+        min-height: 0;
         padding: 28px;
-        overflow: auto;
+        overflow: hidden;
     }
 
     .dashboard-widget-title {
@@ -533,9 +533,142 @@
         }
     }
 
-    @media screen and (max-width: 1100px) {
+    @media screen and (max-width: 1440px) {
+        padding: 36px 40px 48px;
+
+        .dashboard-header {
+            margin-bottom: 30px;
+
+            h1 {
+                font-size: 38px;
+                line-height: 44px;
+            }
+        }
+
+        .dashboard-metric-grid {
+            grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+            gap: 16px;
+            margin-bottom: 18px;
+        }
+
+        .dashboard-metric-card {
+            grid-template-columns: 46px minmax(0, 1fr);
+            gap: 14px;
+            min-height: 136px;
+            padding: 18px 18px 20px;
+
+            &::after {
+                right: 14px;
+                bottom: 12px;
+                left: 14px;
+            }
+        }
+
+        .metric-icon {
+            width: 46px;
+            height: 46px;
+
+            .Icon {
+                width: 22px;
+                height: 22px;
+            }
+        }
+
+        .metric-content {
+            strong {
+                margin-top: 10px;
+                font-size: 38px;
+                line-height: 40px;
+            }
+
+            p {
+                margin-top: 10px;
+                line-height: 18px;
+            }
+        }
+
+        .dashboard-widget-grid {
+            gap: 16px;
+        }
+
+        .dashboard-widget {
+            padding: 22px;
+        }
+    }
+
+    @media screen and (max-width: 1024px) {
+        padding: 30px 30px 44px;
+
+        .dashboard-header {
+            display: grid;
+            grid-template-columns: minmax(0, 1fr);
+            gap: 18px;
+            margin-bottom: 24px;
+
+            > div:first-child {
+                flex-basis: auto;
+            }
+
+            h1 {
+                max-width: 100%;
+                font-size: 34px;
+                line-height: 40px;
+            }
+
+            p {
+                max-width: 560px;
+            }
+        }
+
+        .dashboard-actions {
+            align-items: stretch;
+            width: 100%;
+        }
+
+        .dashboard-user-menu {
+            width: 100%;
+        }
+
+        .dashboard-greeting {
+            justify-content: center;
+            width: 100%;
+        }
+
+        .dashboard-user-dropdown {
+            right: 0;
+            left: 0;
+            width: 100%;
+        }
+
+        .dashboard-metric-grid {
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 14px;
+        }
+
+        .dashboard-metric-card {
+            min-height: 0;
+            padding: 18px;
+        }
+
+        .metric-content {
+            strong {
+                margin-top: 12px;
+                font-size: 40px;
+                line-height: 42px;
+            }
+
+            p {
+                margin-top: 12px;
+            }
+        }
+
         .dashboard-widget-grid {
             grid-template-columns: 1fr;
+        }
+
+        .dashboard-widget {
+            min-height: auto;
+            padding: 22px;
         }
     }
 
@@ -557,27 +690,125 @@
     }
 
     @media screen and (max-width: 768px) {
-        padding: 24px 18px 40px;
+        padding: 22px 18px 36px;
         overflow: auto;
 
         .dashboard-header {
+            gap: 16px;
+            margin-bottom: 20px;
+
             h1 {
-                font-size: 32px;
-                line-height: 38px;
+                margin-top: 8px;
+                font-size: 30px;
+                line-height: 36px;
+            }
+
+            p {
+                font-size: 14px;
+                line-height: 22px;
             }
         }
 
+        .dashboard-greeting {
+            min-height: 46px;
+            padding: 0 14px;
+        }
+
         .dashboard-metric-grid {
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: 1fr;
+            gap: 14px;
+            margin-bottom: 22px;
         }
 
         .dashboard-metric-card {
-            min-height: 176px;
+            align-items: flex-start;
+            grid-template-columns: 48px minmax(0, 1fr);
+            gap: 14px;
+            min-height: 0;
+            padding: 18px 18px 20px;
+
+            &::after {
+                right: 16px;
+                bottom: 12px;
+                left: 16px;
+            }
+        }
+
+        .metric-icon,
+        .dashboard-widget-icon {
+            width: 48px;
+            height: 48px;
+
+            .Icon {
+                width: 23px;
+                height: 23px;
+            }
+        }
+
+        .metric-content {
+            span {
+                line-height: 19px;
+            }
+
+            strong {
+                margin-top: 10px;
+                font-size: 38px;
+                line-height: 40px;
+            }
+
+            p {
+                max-width: none;
+                margin-top: 10px;
+                line-height: 18px;
+            }
+        }
+
+        .dashboard-widget-grid {
+            display: flex;
+            flex: 0 0 auto;
+            flex-direction: column;
+            gap: 14px;
+            min-height: 0;
+            overflow: visible;
         }
 
         .dashboard-widget {
-            min-height: auto;
-            padding: 22px;
+            min-height: 0;
+            padding: 18px;
+            overflow: hidden;
+        }
+
+        .dashboard-widget-title {
+            gap: 12px;
+            margin-bottom: 16px;
+
+            h2 {
+                font-size: 15px;
+                line-height: 22px;
+            }
+        }
+
+        .dashboard-widget-row {
+            grid-template-columns: 24px minmax(0, 1fr);
+            gap: 10px;
+            min-height: 54px;
+
+            .dashboard-time-pill {
+                grid-column: 2;
+                justify-self: start;
+                margin-top: -4px;
+            }
+        }
+
+        .dashboard-activity-row {
+            grid-template-columns: 32px minmax(0, 1fr);
+            gap: 10px;
+            padding: 10px 0;
+        }
+
+        .dashboard-activity-icon {
+            width: 30px;
+            height: 30px;
         }
     }
 }

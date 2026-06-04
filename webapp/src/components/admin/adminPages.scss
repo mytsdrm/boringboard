@@ -1022,6 +1022,101 @@
         }
     }
 
+    @media (max-width: 1024px) {
+        padding: 30px 30px 44px;
+
+        &.admin-users-page,
+        &.admin-reminders-page,
+        &.admin-announcements-page {
+            padding: 26px 24px 38px;
+        }
+
+        .admin-page-header {
+            margin-bottom: 22px;
+
+            h1 {
+                font-size: 32px;
+                line-height: 38px;
+            }
+        }
+
+        .admin-page-header-row {
+            align-items: stretch;
+            flex-direction: column;
+
+            > div:first-child {
+                min-width: 0;
+            }
+        }
+
+        .admin-settings-tabs {
+            overflow-x: auto;
+            padding: 14px 18px 0;
+
+            button {
+                flex: 0 0 auto;
+            }
+        }
+
+        .admin-settings-scroll {
+            gap: 20px;
+            padding: 20px;
+        }
+
+        .admin-settings-section {
+            grid-template-columns: 1fr;
+            gap: 14px;
+        }
+
+        .admin-settings-section-header {
+            p {
+                max-width: 620px;
+            }
+        }
+
+        .admin-header-actions {
+            align-items: stretch;
+            flex-basis: auto;
+            flex-wrap: wrap;
+            justify-content: flex-start;
+
+            .admin-users-search,
+            .admin-reminders-search,
+            .admin-announcements-search {
+                flex: 1 1 260px;
+                min-width: 220px;
+            }
+
+            label:not(.admin-users-search):not(.admin-reminders-search):not(.admin-announcements-search) {
+                flex: 1 1 160px;
+            }
+
+            .btn {
+                flex: 0 0 auto;
+            }
+        }
+
+        .admin-user-form {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .admin-reminder-metrics,
+        .admin-announcement-metrics {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+
+        .admin-settings-field-grid,
+        .admin-ai-settings,
+        .admin-notification-user-list,
+        .admin-notification-tool-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .admin-ai-user-list {
+            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+        }
+    }
+
     @media (max-width: 767px) {
         padding: 28px 22px 42px;
 

@@ -181,6 +181,53 @@
     }
 }
 
+@media screen and (max-width: 1024px) {
+    .BoardTemplateSelector__container {
+        padding: 40px;
+        align-items: stretch;
+    }
+
+    .BoardTemplateSelector__container--page {
+        padding: 0;
+    }
+
+    .BoardTemplateSelector {
+        .header {
+            height: auto;
+            min-height: 96px;
+            align-items: flex-start;
+            flex-direction: column;
+            padding: 26px 72px 20px 24px;
+
+            .description {
+                max-width: none;
+                margin: 6px 0 0;
+                padding-left: 0;
+                border-left: 0;
+                text-align: left;
+            }
+        }
+
+        .templates-sidebar {
+            flex-basis: 260px;
+        }
+
+        .templates .templates-list {
+            padding: 16px 14px;
+        }
+
+        .templates-sidebar__footer,
+        .buttons {
+            height: auto;
+            padding: 16px;
+        }
+
+        .template-preview-box {
+            padding: 24px 24px 0;
+        }
+    }
+}
+
 @media screen and (max-width: 767px) {
     .BoardTemplateSelector__container {
         padding: 16px;
