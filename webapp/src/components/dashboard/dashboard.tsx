@@ -27,6 +27,7 @@ type BoardStats = {
     total: number
     invitedUserIds: string[]
     latestActivityAt: number
+    latestActivityUserId: string
 }
 
 type DashboardActivityAction =
@@ -69,12 +70,24 @@ const DASHBOARD_ACTIVITY_HISTORY_LIMIT = 120
 const DASHBOARD_RECENT_BOARD_LIMIT = 10
 
 const getCardStats = (board: Board, cards: Card[]) => {
-    const latestActivityAt = cards.reduce((latest, card) => {
-        return Math.max(latest, card.updateAt || card.createAt || 0)
-    }, board.updateAt || board.createAt || 0)
+    const boardActivityAt = board.updateAt || board.createAt || 0
+    const latestActivity = cards.reduce((latest, card) => {
+        const cardActivityAt = card.updateAt || card.createAt || 0
+        if (cardActivityAt <= latest.timestamp) {
+            return latest
+        }
+        return {
+            timestamp: cardActivityAt,
+            userId: card.modifiedBy || card.createdBy,
+        }
+    }, {
+        timestamp: boardActivityAt,
+        userId: board.modifiedBy || board.createdBy,
+    })
 
     return {
-        latestActivityAt,
+        latestActivityAt: latestActivity.timestamp,
+        latestActivityUserId: latestActivity.userId,
         total: cards.length,
     }
 }
@@ -460,7 +473,12 @@ const Dashboard = (): JSX.Element => {
                     filter((member) => member.userId !== board.createdBy).
                     map((member) => member.userId)
                 const cardStats = getCardStats(board, cards)
-                const userIds = Array.from(new Set([...realMembers.map((member) => member.userId), board.createdBy]))
+                const userIds = Array.from(new Set([
+                    ...realMembers.map((member) => member.userId),
+                    board.createdBy,
+                    board.modifiedBy,
+                    cardStats.latestActivityUserId,
+                ].filter(Boolean)))
 
                 if (userIds.length > 0) {
                     const users = await octoClient.getTeamUsersList(userIds, board.teamId)
@@ -1389,18 +1407,34 @@ const Dashboard = (): JSX.Element => {
                         </h2>
                     </div>
                     <div className='dashboard-widget-list'>
-                        {recentlyUpdatedBoards.map((board) => (
-                            <button
-                                className='dashboard-widget-row'
-                                key={board.id}
-                                type='button'
-                                onClick={() => showBoard(board.id)}
-                            >
-                                <span className='dashboard-board-icon'>{board.icon ? <StoredIcon icon={board.icon}/> : <CompassIcon icon='product-boards'/>}</span>
-                                <span className='dashboard-board-name'>{board.title}</span>
-                                <span className='dashboard-time-pill'>{formatRelativeTime(statsByBoard[board.id]?.latestActivityAt || board.updateAt || board.createAt)}</span>
-                            </button>
-                        ))}
+                        {recentlyUpdatedBoards.map((board) => {
+                            const latestActivityAt = statsByBoard[board.id]?.latestActivityAt || board.updateAt || board.createAt
+                            const latestActivityUserId = statsByBoard[board.id]?.latestActivityUserId || board.modifiedBy || board.createdBy
+                            return (
+                                <button
+                                    className='dashboard-widget-row'
+                                    key={board.id}
+                                    type='button'
+                                    onClick={() => showBoard(board.id)}
+                                >
+                                    <span className='dashboard-board-icon'>{board.icon ? <StoredIcon icon={board.icon}/> : <CompassIcon icon='product-boards'/>}</span>
+                                    <span className='dashboard-board-details'>
+                                        <span className='dashboard-board-name'>{board.title}</span>
+                                        <span className='dashboard-board-meta'>
+                                            <FormattedMessage
+                                                id='Dashboard.recent-board-last-updated-by'
+                                                defaultMessage='Last updated by: {user}, {datetime}'
+                                                values={{
+                                                    datetime: formatAuditDate(latestActivityAt),
+                                                    user: getUserDisplayName(latestActivityUserId),
+                                                }}
+                                            />
+                                        </span>
+                                    </span>
+                                    <span className='dashboard-time-pill'>{formatRelativeTime(latestActivityAt)}</span>
+                                </button>
+                            )
+                        })}
                         {recentlyUpdatedBoards.length === 0 &&
                             <div className='dashboard-empty-state'>
                                 <FormattedMessage

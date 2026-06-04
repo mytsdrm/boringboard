@@ -468,10 +468,25 @@
         }
     }
 
-    .dashboard-board-name {
+    .dashboard-board-details {
+        min-width: 0;
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+    }
+
+    .dashboard-board-name,
+    .dashboard-board-meta {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
+    }
+
+    .dashboard-board-meta {
+        color: var(--bb-text-muted);
+        font-size: 12px;
+        font-weight: normal;
+        line-height: 18px;
     }
 
     .dashboard-time-pill {
