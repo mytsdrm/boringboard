@@ -39,6 +39,10 @@ type TaskBoardInfoItem = {
     isUrl?: boolean
 }
 
+type ViewTitleStyle = React.CSSProperties & {
+    '--view-title-main-height'?: string
+}
+
 const TASK_BOARD_SETTINGS_PROPERTY = 'boardIntegration'
 
 const getTaskBoardSettings = (board: Board): TaskBoardSettings => {
@@ -67,10 +71,13 @@ const ViewTitle = (props: Props) => {
     const {board} = props
 
     const viewTitleRef = useRef<HTMLDivElement | null>(null)
+    const mainRef = useRef<HTMLDivElement | null>(null)
+    const infoRef = useRef<HTMLDivElement | null>(null)
     const descriptionRef = useRef<HTMLDivElement | null>(null)
     const [title, setTitle] = useState(board.title)
     const [showFullText, setShowFullText] = useState(false)
     const [hasHiddenText, setHasHiddenText] = useState(false)
+    const [mainBlockHeight, setMainBlockHeight] = useState(0)
     const updateShowFullText = useCallback((nextShowFullText: boolean) => {
         setShowFullText(nextShowFullText)
         props.onShowFullTextChanged?.(nextShowFullText)
@@ -131,10 +138,20 @@ const ViewTitle = (props: Props) => {
                 return
             }
 
+            const mainElement = mainRef.current
+            if (mainElement) {
+                const nextMainBlockHeight = Math.ceil(mainElement.getBoundingClientRect().height)
+                setMainBlockHeight((currentHeight) => {
+                    return currentHeight === nextMainBlockHeight ? currentHeight : nextMainBlockHeight
+                })
+            }
+
             const descriptionElement = descriptionRef.current
-            const hasHeaderOverflow = viewTitleElement.scrollHeight > viewTitleElement.clientHeight + 1
+            const infoElement = infoRef.current
+            const hasHeaderOverflow = mainElement ? mainElement.scrollHeight > mainElement.clientHeight + 1 : viewTitleElement.scrollHeight > viewTitleElement.clientHeight + 1
             const hasDescriptionOverflow = Boolean(descriptionElement && descriptionElement.scrollHeight > descriptionElement.clientHeight + 1)
-            const hasOverflow = hasHeaderOverflow || hasDescriptionOverflow
+            const hasInfoOverflow = Boolean(infoElement && infoElement.scrollHeight > infoElement.clientHeight + 1)
+            const hasOverflow = hasHeaderOverflow || hasDescriptionOverflow || hasInfoOverflow
             setHasHiddenText(hasOverflow)
         }
 
@@ -159,11 +176,15 @@ const ViewTitle = (props: Props) => {
         showFullText ? 'ViewTitle--expanded' : '',
         taskBoardInfoItems.length > 0 ? 'ViewTitle--withInfo' : '',
     ].filter(Boolean).join(' ')
+    const viewTitleStyle: ViewTitleStyle | undefined = mainBlockHeight > 0 ? {
+        '--view-title-main-height': `${mainBlockHeight}px`,
+    } : undefined
 
     return (
         <div
             ref={viewTitleRef}
             className={viewTitleClassName}
+            style={viewTitleStyle}
         >
             <div className='add-buttons add-visible'>
                 {!propertyReadonly && !board.icon &&
@@ -217,7 +238,10 @@ const ViewTitle = (props: Props) => {
             </div>
 
             <div className='ViewTitle__columns'>
-                <div className='ViewTitle__main'>
+                <div
+                    ref={mainRef}
+                    className='ViewTitle__main'
+                >
                     <div className='title'>
                         <BoardIconSelector
                             board={board}
@@ -249,30 +273,13 @@ const ViewTitle = (props: Props) => {
                             />
                         </div>
                     }
-                    {canExpandText &&
-                        <Button
-                            emphasis='link'
-                            size='xsmall'
-                            className='ViewTitle__showMore'
-                            onClick={() => updateShowFullText(!showFullText)}
-                        >
-                            {showFullText ? (
-                                <FormattedMessage
-                                    id='ViewTitle.show-less'
-                                    defaultMessage='Show less'
-                                />
-                            ) : (
-                                <FormattedMessage
-                                    id='ViewTitle.show-more'
-                                    defaultMessage='Show more'
-                                />
-                            )}
-                        </Button>
-                    }
                 </div>
 
                 {taskBoardInfoItems.length > 0 &&
-                    <div className='ViewTitle__info'>
+                    <div
+                        ref={infoRef}
+                        className='ViewTitle__info'
+                    >
                         <div className='ViewTitle__infoTitle'>
                             <FormattedMessage
                                 id='ViewTitle.task-board-info-title'
@@ -311,6 +318,26 @@ const ViewTitle = (props: Props) => {
                     </div>
                 }
             </div>
+            {canExpandText &&
+                <Button
+                    emphasis='link'
+                    size='xsmall'
+                    className='ViewTitle__showMore'
+                    onClick={() => updateShowFullText(!showFullText)}
+                >
+                    {showFullText ? (
+                        <FormattedMessage
+                            id='ViewTitle.show-less'
+                            defaultMessage='Show less'
+                        />
+                    ) : (
+                        <FormattedMessage
+                            id='ViewTitle.show-more'
+                            defaultMessage='Show more'
+                        />
+                    )}
+                </Button>
+            }
         </div>
     )
 }
