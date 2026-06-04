@@ -133,7 +133,7 @@ class WSClient {
     private notificationDelay = 100
     private reopenDelay = 3000
     private reopenRetryCount = 0
-    private reopenMaxRetries = 10
+    private reconnecting = false
     private updatedData: UpdatedData = {Blocks: [], Categories: [], BoardCategories: [], Boards: [], BoardMembers: [], CategoryOrder: []}
     private updateTimeout?: NodeJS.Timeout
     private errorPollId?: NodeJS.Timeout
@@ -441,6 +441,13 @@ class WSClient {
             for (const handler of this.onStateChange) {
                 handler(this, 'open')
             }
+
+            if (this.reconnecting) {
+                this.reconnecting = false
+                for (const handler of this.onReconnect) {
+                    handler(this)
+                }
+            }
         }
 
         ws.onerror = (e) => {
@@ -460,19 +467,13 @@ class WSClient {
                 }
                 this.state = 'close'
 
-                if (this.reopenRetryCount < this.reopenMaxRetries) {
-                    setTimeout(() => {
-                        this.reopenRetryCount++
-                        Utils.log(`Reopening websocket connection, count: ${this.reopenRetryCount}`)
+                setTimeout(() => {
+                    this.reopenRetryCount++
+                    Utils.log(`Reopening websocket connection, count: ${this.reopenRetryCount}`)
 
-                        this.open()
-                        for (const handler of this.onReconnect) {
-                            handler(this)
-                        }
-                    }, this.reopenDelay)
-                } else {
-                    Utils.logError('Reached max websocket re-opening attempts')
-                }
+                    this.reconnecting = true
+                    this.open()
+                }, this.reopenDelay)
             }
         }
 

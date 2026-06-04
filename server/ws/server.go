@@ -5,6 +5,7 @@ import (
 	"net/http"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/gorilla/mux"
 	"github.com/gorilla/websocket"
@@ -15,11 +16,20 @@ import (
 	"github.com/mattermost/mattermost/server/public/shared/mlog"
 )
 
+const websocketPingInterval = 25 * time.Second
+const websocketPingTimeout = 10 * time.Second
+
 func (wss *websocketSession) WriteJSON(v interface{}) error {
 	wss.mu.Lock()
 	defer wss.mu.Unlock()
 	err := wss.conn.WriteJSON(v)
 	return err
+}
+
+func (wss *websocketSession) WritePing() error {
+	wss.mu.Lock()
+	defer wss.mu.Unlock()
+	return wss.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(websocketPingTimeout))
 }
 
 func (wss *websocketSession) isSubscribedToTeam(teamID string) bool {
@@ -122,14 +132,37 @@ func (ws *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws.addListener(wsSession)
+	done := make(chan struct{})
 
 	// Make sure we close the connection when the function returns
 	defer func() {
+		close(done)
 		ws.logger.Debug("DISCONNECT WebSocket", mlog.Stringer("client", wsSession.conn.RemoteAddr()))
 
 		// Remove session from listeners
 		ws.removeListener(wsSession)
 		wsSession.conn.Close()
+	}()
+
+	go func() {
+		ticker := time.NewTicker(websocketPingInterval)
+		defer ticker.Stop()
+
+		for {
+			select {
+			case <-ticker.C:
+				if err := wsSession.WritePing(); err != nil {
+					ws.logger.Debug("PING WebSocket failed",
+						mlog.Stringer("client", wsSession.conn.RemoteAddr()),
+						mlog.Err(err),
+					)
+					wsSession.conn.Close()
+					return
+				}
+			case <-done:
+				return
+			}
+		}
 	}()
 
 	// Simple message handling loop
