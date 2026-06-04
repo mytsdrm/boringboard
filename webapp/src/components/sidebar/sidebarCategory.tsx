@@ -161,6 +161,20 @@ const SidebarCategory = (props: Props) => {
     const personalBoards = visibleBoards.filter((board) => board.createdBy === me?.id)
     const joinedBoards = visibleBoards.filter((board) => board.createdBy !== me?.id)
 
+    useEffect(() => {
+        if (!isTaskBoardsCategory || !props.activeBoardID) {
+            return
+        }
+
+        if (personalBoards.some((board) => board.id === props.activeBoardID)) {
+            setPersonalBoardsCollapsed(false)
+        }
+
+        if (joinedBoards.some((board) => board.id === props.activeBoardID)) {
+            setJoinedBoardsCollapsed(false)
+        }
+    }, [isTaskBoardsCategory, joinedBoards, personalBoards, props.activeBoardID])
+
     const handleCreateNewCategory = () => {
         setShowCreateCategoryModal(true)
     }
@@ -316,7 +330,7 @@ const SidebarCategory = (props: Props) => {
             >
                 {isCollapsed ? <ChevronRight/> : <ChevronDown/>}
                 <span>{label}</span>
-                <span className='sidebar-task-board-group-count'>{groupBoards.length}</span>
+                <span className={`sidebar-task-board-group-count ${key}`}>{groupBoards.length}</span>
             </button>
             {!isCollapsed && groupBoards.length === 0 &&
                 <div className='octo-sidebar-item subitem no-views sidebar-task-board-empty'>

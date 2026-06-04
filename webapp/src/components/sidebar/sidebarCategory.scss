@@ -287,7 +287,7 @@
     }
 
     .sidebar-task-board-group-count {
-        min-width: 18px;
+        min-width: 24px;
         padding: 1px 6px;
         border-radius: 999px;
         background: rgba(var(--sidebar-text-rgb), 0.1);
@@ -296,6 +296,16 @@
         font-weight: 700;
         line-height: 16px;
         text-align: center;
+
+        &.personal-task-boards {
+            background: rgba(15, 82, 186, 0.18);
+            color: #0b3f91;
+        }
+
+        &.joined-task-boards {
+            background: rgba(93, 52, 168, 0.18);
+            color: #42247a;
+        }
     }
 
     .sidebar-task-board-empty {
