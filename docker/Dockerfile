@@ -22,6 +22,9 @@ ADD . /go/src/focalboard
 ARG TARGETOS
 ARG TARGETARCH  
 
+ENV GOPROXY=https://proxy.golang.org,direct
+ENV GOSUMDB=sum.golang.org
+
 RUN EXCLUDE_PLUGIN=true EXCLUDE_SERVER=true EXCLUDE_ENTERPRISE=true make server-docker os=${TARGETOS} arch=${TARGETARCH}
 
 ## Final image
@@ -42,8 +45,6 @@ COPY --from=gobuild --chown=nobody:nogroup /go/src/focalboard/LICENSE.txt LICENS
 COPY --from=gobuild --chown=nobody:nogroup /go/src/focalboard/docker/server_config.json config.json
 
 USER nobody
-
-EXPOSE 8000/tcp
 
 EXPOSE 8000/tcp 9092/tcp
 
