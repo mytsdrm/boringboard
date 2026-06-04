@@ -12,7 +12,7 @@ import IconButton from '../widgets/buttons/iconButton'
 import HideIcon from '../widgets/icons/hide'
 import ShowIcon from '../widgets/icons/show'
 import client from '../octoClient'
-import {BRANDING_UPDATED_EVENT, getBrandingFromSettings, SystemBranding} from '../branding'
+import {BRANDING_UPDATED_EVENT, getBrandingFromSettings, getStoredCustomBranding, SystemBranding} from '../branding'
 import './loginPage.scss'
 
 const LoginPage = () => {
@@ -20,7 +20,7 @@ const LoginPage = () => {
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
-    const [branding, setBranding] = useState<SystemBranding>(() => getBrandingFromSettings())
+    const [branding, setBranding] = useState<SystemBranding | null>(() => getStoredCustomBranding())
     const dispatch = useAppDispatch()
     const loggedIn = useAppSelector<boolean|null>(getLoggedIn)
     const queryParams = new URLSearchParams(useLocation().search)
@@ -89,10 +89,12 @@ const LoginPage = () => {
                 }}
             >
                 <div className='brand'>
-                    <img
-                        src={branding.logo}
-                        alt={branding.appName}
-                    />
+                    {branding &&
+                        <img
+                            src={branding.logo}
+                            alt={branding.appName}
+                        />
+                    }
                 </div>
                 {errorMessage &&
                     <div className='error'>

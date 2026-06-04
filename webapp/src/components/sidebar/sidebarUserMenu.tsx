@@ -6,9 +6,8 @@ import {FormattedMessage, useIntl} from 'react-intl'
 
 import {Constants} from '../../constants'
 import {IUser} from '../../user'
-import {BRANDING_UPDATED_EVENT, getBrandingFromSettings, getStoredBranding, SystemBranding} from '../../branding'
+import {BRANDING_UPDATED_EVENT, getBrandingFromSettings, getStoredBranding, getStoredCustomBranding, SystemBranding} from '../../branding'
 import octoClient from '../../octoClient'
-import FocalboardLogoIcon from '../../widgets/icons/focalboard_logo'
 import Menu from '../../widgets/menu'
 import MenuWrapper from '../../widgets/menuWrapper'
 import {getMe} from '../../store/users'
@@ -24,7 +23,7 @@ import './sidebarUserMenu.scss'
 const SidebarUserMenu = () => {
     const [showRegistrationLinkDialog, setShowRegistrationLinkDialog] = useState(false)
     const [showAboutDialog, setShowAboutDialog] = useState(false)
-    const [branding, setBranding] = useState<SystemBranding>(getStoredBranding)
+    const [branding, setBranding] = useState<SystemBranding | null>(() => getStoredCustomBranding())
     const user = useAppSelector<IUser|null>(getMe)
     const intl = useIntl()
 
@@ -55,18 +54,18 @@ const SidebarUserMenu = () => {
                 <MenuWrapper>
                     <div className='logo'>
                         <div className='logo-title'>
-                            {branding.logo ? (
+                            {branding?.logo ? (
                                 <img
                                     className='brand-logo'
                                     src={branding.logo}
                                     alt={branding.appName}
                                 />
-                            ) : (
-                                <FocalboardLogoIcon/>
-                            )}
-                            <span className='brand-name'>
-                                {branding.appName}
-                            </span>
+                            ) : null}
+                            {branding &&
+                                <span className='brand-name'>
+                                    {branding.appName}
+                                </span>
+                            }
                             <div className='versionFrame'>
                                 <div
                                     className='version'
@@ -122,10 +121,12 @@ const SidebarUserMenu = () => {
                         onClose={() => setShowAboutDialog(false)}
                     >
                         <div className='about-boringboard'>
-                            <img
-                                src={branding.logo}
-                                alt={branding.appName}
-                            />
+                            {branding &&
+                                <img
+                                    src={branding.logo}
+                                    alt={branding.appName}
+                                />
+                            }
                             <p>
                                 <FormattedMessage
                                     id='Sidebar.about-description'

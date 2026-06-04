@@ -20,7 +20,7 @@ import {useAppSelector, useAppDispatch} from './store/hooks'
 import {fetchClientConfig} from './store/clientConfig'
 import FocalboardRouter from './router'
 import octoClient from './octoClient'
-import {applySystemBranding} from './branding'
+import {applySystemBranding, getStoredCustomBranding} from './branding'
 
 import {IUser} from './user'
 
@@ -37,6 +37,11 @@ const App = (props: Props): JSX.Element => {
         dispatch(fetchLanguage())
         dispatch(fetchMe())
         dispatch(fetchClientConfig())
+
+        const cachedCustomBranding = getStoredCustomBranding()
+        if (cachedCustomBranding) {
+            applySystemBranding(cachedCustomBranding)
+        }
 
         async function loadSystemBranding() {
             const branding = await octoClient.getSystemBranding()

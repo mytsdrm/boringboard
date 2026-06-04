@@ -33,6 +33,20 @@ export const getStoredBranding = (): SystemBranding => {
     }
 }
 
+export const getStoredCustomBranding = (): SystemBranding | null => {
+    try {
+        const storedBranding = window.localStorage.getItem(BRANDING_STORAGE_KEY)
+        if (storedBranding) {
+            const branding = getBrandingFromSettings(JSON.parse(storedBranding) as SystemBranding)
+            return branding.logo === DEFAULT_LOGO ? null : branding
+        }
+
+        return null
+    } catch {
+        return null
+    }
+}
+
 const setImageFavicon = (logo: string): void => {
     document.querySelectorAll("link[rel*='icon']").forEach((node) => node.remove())
 
