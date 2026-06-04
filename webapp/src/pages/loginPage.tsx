@@ -1,6 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React, {useState} from 'react'
+import React, {useEffect, useState} from 'react'
 import {Link, Redirect, useLocation, useHistory} from 'react-router-dom'
 import {FormattedMessage, useIntl} from 'react-intl'
 
@@ -12,6 +12,7 @@ import IconButton from '../widgets/buttons/iconButton'
 import HideIcon from '../widgets/icons/hide'
 import ShowIcon from '../widgets/icons/show'
 import client from '../octoClient'
+import {BRANDING_UPDATED_EVENT, getBrandingFromSettings, SystemBranding} from '../branding'
 import './loginPage.scss'
 
 const LoginPage = () => {
@@ -19,11 +20,33 @@ const LoginPage = () => {
     const [password, setPassword] = useState('')
     const [showPassword, setShowPassword] = useState(false)
     const [errorMessage, setErrorMessage] = useState('')
+    const [branding, setBranding] = useState<SystemBranding>(() => getBrandingFromSettings())
     const dispatch = useAppDispatch()
     const loggedIn = useAppSelector<boolean|null>(getLoggedIn)
     const queryParams = new URLSearchParams(useLocation().search)
     const history = useHistory()
     const intl = useIntl()
+
+    useEffect(() => {
+        let canceled = false
+        async function loadBranding() {
+            const settings = await client.getSystemBranding()
+            if (!canceled) {
+                setBranding(getBrandingFromSettings(settings))
+            }
+        }
+
+        const updateBranding = (event: Event) => {
+            setBranding((event as CustomEvent<SystemBranding>).detail || getBrandingFromSettings())
+        }
+
+        window.addEventListener(BRANDING_UPDATED_EVENT, updateBranding)
+        loadBranding()
+        return () => {
+            canceled = true
+            window.removeEventListener(BRANDING_UPDATED_EVENT, updateBranding)
+        }
+    }, [])
 
     const handleLogin = async (): Promise<void> => {
         const trimmedUsername = username.trim()
@@ -67,8 +90,8 @@ const LoginPage = () => {
             >
                 <div className='brand'>
                     <img
-                        src='/static/boringboard-logo.webp'
-                        alt='BoringBoard'
+                        src={branding.logo}
+                        alt={branding.appName}
                     />
                 </div>
                 {errorMessage &&

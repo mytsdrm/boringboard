@@ -10,6 +10,7 @@ import (
 )
 
 func (a *API) registerAdminDashboardRoutes(r *mux.Router) {
+	r.HandleFunc("/system-branding", a.attachSession(a.handleGetSystemBranding, false)).Methods(http.MethodGet)
 	r.HandleFunc("/system-settings", a.sessionRequired(a.handleGetSystemSettings)).Methods(http.MethodGet)
 	r.HandleFunc("/admin/boards", a.sessionRequired(a.handleGetAdminBoards)).Methods(http.MethodGet)
 	r.HandleFunc("/admin/users", a.sessionRequired(a.handleGetAdminUsers)).Methods(http.MethodGet)
@@ -207,6 +208,29 @@ func (a *API) handleGetSystemSettings(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	jsonBytesResponse(w, http.StatusOK, data)
+}
+
+func (a *API) handleGetSystemBranding(w http.ResponseWriter, r *http.Request) {
+	settings, err := a.app.GetAdminSystemSettings()
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	data, err := json.Marshal(struct {
+		AppName string `json:"appName"`
+		Logo    string `json:"logo"`
+	}{
+		AppName: settings.AppName,
+		Logo:    systemBrandingLogoPath(settings.Logo),
+	})
+	if err != nil {
+		a.errorResponse(w, r, err)
+		return
+	}
+
+	w.Header().Set("Cache-Control", "no-store")
 	jsonBytesResponse(w, http.StatusOK, data)
 }
 

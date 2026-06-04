@@ -26,6 +26,7 @@ import {Utils} from '../utils'
 import {IUser} from '../user'
 import propsRegistry from '../properties'
 import {applyProjectSystemSettings} from '../systemSettings'
+import {applySystemBranding} from '../branding'
 
 import {getMe} from '../store/users'
 import {loadBoardData} from '../store/initialLoad'
@@ -102,6 +103,7 @@ function CenterContent(props: Props) {
         wsClient.addOnConfigChange(onConfigChangeHandler)
 
         const onSystemSettingsChangeHandler = (_: WSClient, settings: AdminSystemSettings) => {
+            applySystemBranding(settings)
             applyProjectSystemSettings(settings)
         }
         wsClient.addOnSystemSettingsChange(onSystemSettingsChangeHandler)

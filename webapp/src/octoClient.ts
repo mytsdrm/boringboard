@@ -66,6 +66,8 @@ export type AdminSystemSettings = {
     announcements: Announcement[]
 }
 
+export type PublicSystemBranding = Pick<AdminSystemSettings, 'appName' | 'logo'>
+
 export type BoardMemberActivityEntry = {
     action: string
     boardId: string
@@ -687,6 +689,18 @@ class OctoClient {
                 whatsApp: false,
             },
             announcements: [],
+        })
+    }
+
+    async getSystemBranding(): Promise<PublicSystemBranding> {
+        const path = '/api/v2/system-branding'
+        const response = await fetch(this.getBaseURL() + path, {
+            cache: 'no-store',
+            headers: this.headers(),
+        })
+        return this.getJson<PublicSystemBranding>(response, {
+            appName: 'BoringBoard',
+            logo: '',
         })
     }
 

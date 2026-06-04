@@ -6,7 +6,8 @@ import {FormattedMessage, useIntl} from 'react-intl'
 
 import {Constants} from '../../constants'
 import {IUser} from '../../user'
-import {BRANDING_UPDATED_EVENT, getStoredBranding, SystemBranding} from '../../branding'
+import {BRANDING_UPDATED_EVENT, getBrandingFromSettings, getStoredBranding, SystemBranding} from '../../branding'
+import octoClient from '../../octoClient'
 import FocalboardLogoIcon from '../../widgets/icons/focalboard_logo'
 import Menu from '../../widgets/menu'
 import MenuWrapper from '../../widgets/menuWrapper'
@@ -28,12 +29,22 @@ const SidebarUserMenu = () => {
     const intl = useIntl()
 
     useEffect(() => {
+        let canceled = false
+        async function loadBranding() {
+            const settings = await octoClient.getSystemBranding()
+            if (!canceled) {
+                setBranding(getBrandingFromSettings(settings))
+            }
+        }
+
         const handleBrandingUpdated = (event: Event) => {
             setBranding((event as CustomEvent<SystemBranding>).detail || getStoredBranding())
         }
 
         window.addEventListener(BRANDING_UPDATED_EVENT, handleBrandingUpdated)
+        loadBranding()
         return () => {
+            canceled = true
             window.removeEventListener(BRANDING_UPDATED_EVENT, handleBrandingUpdated)
         }
     }, [])
