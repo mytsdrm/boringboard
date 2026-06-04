@@ -19,7 +19,7 @@ import undoManager from './undomanager'
 import {Utils, IDType} from './utils'
 import {UserSettings} from './userSettings'
 import TelemetryClient, {TelemetryCategory, TelemetryActions} from './telemetry/telemetryClient'
-import {Category} from './store/sidebar'
+import {Category, updateBoardCategories} from './store/sidebar'
 
 /* eslint-disable max-lines */
 import {UserConfigPatch, UserPreference} from './user'
@@ -34,13 +34,32 @@ import {addBoardUsers, removeBoardUsersById} from './store/users'
 
 function updateAllBoardsAndBlocks(boards: Board[], blocks: Block[]) {
     return batch(() => {
-        store.dispatch(updateBoards(boards.filter((b: Board) => b.deleteAt !== 0) as Board[]))
+        store.dispatch(updateBoards(boards))
         store.dispatch(updateViews(blocks.filter((b: Block) => b.type === 'view' || b.deleteAt !== 0) as BoardView[]))
         store.dispatch(updateCards(blocks.filter((b: Block) => b.type === 'card' || b.deleteAt !== 0) as Card[]))
         store.dispatch(updateAttachments(blocks.filter((b: Block) => b.type === 'attachment' || b.deleteAt !== 0) as AttachmentBlock[]))
         store.dispatch(updateComments(blocks.filter((b: Block) => b.type === 'comment' || b.deleteAt !== 0) as CommentBlock[]))
         store.dispatch(updateContents(blocks.filter((b: Block) => b.type !== 'card' && b.type !== 'view' && b.type !== 'board' && b.type !== 'comment') as ContentBlock[]))
     })
+}
+
+function addBoardsToDefaultSidebarCategory(boards: Board[]) {
+    const category = store.getState().sidebar.categoryAttributes.find((c) => c.name === 'Boards')
+    if (!category) {
+        return
+    }
+
+    const boardCategories = boards.
+        filter((board) => !board.isTemplate && board.deleteAt === 0).
+        map((board) => ({
+            boardID: board.id,
+            categoryID: category.id,
+            hidden: false,
+        }))
+
+    if (boardCategories.length > 0) {
+        store.dispatch(updateBoardCategories(boardCategories))
+    }
 }
 
 //
@@ -188,6 +207,8 @@ class Mutator {
             async () => {
                 const res = await octoClient.createBoardsAndBlocks(bab)
                 const newBab = (await res.json()) as BoardsAndBlocks
+                updateAllBoardsAndBlocks(newBab.boards, newBab.blocks)
+                addBoardsToDefaultSidebarCategory(newBab.boards)
                 await afterRedo?.(newBab)
                 return newBab
             },

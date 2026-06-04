@@ -9,6 +9,8 @@ import Menu from '../../widgets/menu'
 import MenuWrapper from '../../widgets/menuWrapper'
 import {useAppDispatch, useAppSelector} from '../../store/hooks'
 import {storeLanguage} from '../../store/language'
+import {initialLoad} from '../../store/initialLoad'
+import {fetchSidebarCategories} from '../../store/sidebar'
 import {patchProps, getMe} from '../../store/users'
 import {getCurrentTeam, Team} from '../../store/teams'
 import {IUser, UserConfigPatch} from '../../user'
@@ -55,7 +57,12 @@ const GlobalHeaderSettingsMenu = (props: Props) => {
                             name={intl.formatMessage({id: 'Sidebar.import-archive', defaultMessage: 'Import archive'})}
                             onClick={async () => {
                                 TelemetryClient.trackEvent(TelemetryCategory, TelemetryActions.ImportArchive)
-                                Archiver.importFullArchive()
+                                Archiver.importFullArchive(() => {
+                                    dispatch(initialLoad())
+                                    if (currentTeam) {
+                                        dispatch(fetchSidebarCategories(currentTeam.id))
+                                    }
+                                })
                             }}
                         />
                         {

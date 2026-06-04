@@ -19,6 +19,8 @@ import MenuWrapper from '../../widgets/menuWrapper'
 import {useAppDispatch, useAppSelector} from '../../store/hooks'
 import {storeLanguage} from '../../store/language'
 import {getCurrentTeam, Team} from '../../store/teams'
+import {initialLoad} from '../../store/initialLoad'
+import {fetchSidebarCategories} from '../../store/sidebar'
 import {UserSettings} from '../../userSettings'
 
 import './sidebarSettingsMenu.scss'
@@ -95,7 +97,12 @@ const SidebarSettingsMenu = (props: Props) => {
                             name={intl.formatMessage({id: 'Sidebar.import-archive', defaultMessage: 'Import archive'})}
                             onClick={async () => {
                                 TelemetryClient.trackEvent(TelemetryCategory, TelemetryActions.ImportArchive)
-                                Archiver.importFullArchive()
+                                Archiver.importFullArchive(() => {
+                                    dispatch(initialLoad())
+                                    if (currentTeam) {
+                                        dispatch(fetchSidebarCategories(currentTeam.id))
+                                    }
+                                })
                             }}
                         />
                         {
