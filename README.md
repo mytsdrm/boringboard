@@ -21,15 +21,16 @@ That's why it's called **BoringBoard**.
 - **AI integration**: Create task board previews from a command before creating the real board.
 - **Available AI providers**: OpenAI, Gemini, Ollama, Cline, and Anything LLM.
 - **AI model selection**: Select provider models from System Settings, including Ollama model loading from the configured endpoint.
+- **AI access control**: Enable AI for all users or selected users with a searchable multi-user picker designed for large user lists.
 - **Centralized admin user**: Default `SuperAdmin` user/group support with configurable admin username and password from `.env`.
 - **User management**: Admin-only Users menu with search, group filtering, pagination, add/edit/delete modals, and Tabler-styled tables.
 - **Activity logs**: Admin activity log view across registered users with search, filters, date range, pagination, and scrollable table area.
-- **System Settings**: Manage app name, logo upload, timezone, AI provider settings, and task board permissions.
-- **Realtime settings updates**: Branding, logo, and selected task board permission settings update across active clients.
+- **System Settings**: Manage app name, logo upload, timezone, AI provider settings, AI user access, and task board permissions.
+- **Realtime settings updates**: Branding, logo, favicon, and selected task board permission settings update across active clients.
 - **Task board permissions**: Configure whether invited users can share task boards or edit task board properties.
 - **Task board settings**: Board owners can save repository, dev/prod branch, and environment URL details at the task-board level, with a read-only Task Board Info panel in the board header.
 - **Profile menu improvements**: Top-right user menu with Invite users, Profile, Change password, and Logout modals.
-- **Branding updates**: Custom app name/logo support with circular logo preview and sidebar display.
+- **Branding updates**: Custom app name/logo/favicon support with custom branding loaded first on login and sidebar header to avoid default-logo flashes on slow connections.
 - **Table utilities**: Reusable table module with search alignment, Options menu, and print/export actions.
 
 ## How to start
