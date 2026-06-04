@@ -12,6 +12,7 @@ import TelemetryClient from './telemetry/telemetryClient'
 import {getMessages} from './i18n'
 import {FlashMessages} from './components/flashMessages'
 import NewVersionBanner from './components/newVersionBanner'
+import AnnouncementModal from './components/announcementModal'
 import {Utils} from './utils'
 import {fetchMe, getMe} from './store/users'
 import {getLanguage, fetchLanguage} from './store/language'
@@ -53,6 +54,7 @@ const App = (props: Props): JSX.Element => {
                     <div id='main'>
                         <NewVersionBanner/>
                         <FocalboardRouter history={props.history}/>
+                        <AnnouncementModal me={me}/>
                     </div>
                 </div>
             </DndProvider>

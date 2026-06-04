@@ -46,6 +46,7 @@ func defaultAdminSystemSettings() model.AdminSystemSettings {
 			WhatsApp:          false,
 			Telegram:          false,
 		},
+		Announcements: []model.AdminAnnouncement{},
 	}
 }
 
@@ -247,6 +248,9 @@ func (a *App) SaveAdminSystemSettings(settings model.AdminSystemSettings) (model
 	}
 	if settings.TimeZone == "" {
 		settings.TimeZone = defaultAdminSystemSettings().TimeZone
+	}
+	if settings.Announcements == nil {
+		settings.Announcements = []model.AdminAnnouncement{}
 	}
 
 	data, err := json.Marshal(settings)

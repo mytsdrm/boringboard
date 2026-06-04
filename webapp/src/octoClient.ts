@@ -18,6 +18,7 @@ import {Constants} from './constants'
 import {BoardsCloudLimits} from './boardsCloudLimits'
 import {TopBoardResponse} from './insights'
 import {BoardSiteStatistics} from './statistics'
+import {Announcement} from './announcements'
 
 export type TaskBoardPreviewLanguage = 'English' | 'Indonesia'
 
@@ -62,6 +63,7 @@ export type AdminSystemSettings = {
     taskBoards: AdminTaskBoardSettings
     modules: AdminModuleSettings
     notifications: AdminNotificationSettings
+    announcements: Announcement[]
 }
 
 export type BoardMemberActivityEntry = {
@@ -631,6 +633,7 @@ class OctoClient {
                 web: true,
                 whatsApp: false,
             },
+            announcements: [],
         })
     }
 
@@ -683,6 +686,7 @@ class OctoClient {
                 web: true,
                 whatsApp: false,
             },
+            announcements: [],
         })
     }
 

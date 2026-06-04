@@ -1,0 +1,49 @@
+.AnnouncementModal {
+    .dialog {
+        width: 100%;
+        max-width: 520px;
+        height: auto;
+        margin: 0;
+    }
+}
+
+.AnnouncementModal__body {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 0 32px 32px;
+
+    p {
+        margin: 0;
+        color: rgb(var(--center-channel-color-rgb));
+        font-size: 15px;
+        line-height: 22px;
+        white-space: pre-wrap;
+    }
+}
+
+.AnnouncementModal__priority {
+    align-self: flex-start;
+    border-radius: 999px;
+    padding: 4px 10px;
+    background: rgba(var(--center-channel-color-rgb), 0.08);
+    color: rgba(var(--center-channel-color-rgb), 0.72);
+    font-size: 12px;
+    font-weight: 700;
+}
+
+.AnnouncementModal__priority--important {
+    background: rgba(255, 188, 31, 0.18);
+    color: #8a6100;
+}
+
+.AnnouncementModal__priority--urgent {
+    background: #d92d20;
+    color: #fff;
+    box-shadow: 0 6px 14px -10px rgba(217, 45, 32, 0.9);
+}
+
+.AnnouncementModal__actions {
+    display: flex;
+    justify-content: flex-end;
+}

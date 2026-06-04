@@ -1,8 +1,18 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React, {useEffect, useMemo, useState} from 'react'
-import {IconChevronLeft, IconChevronRight, IconEdit, IconMessage2Exclamation, IconPlus, IconSearch, IconTrash} from '@tabler/icons-react'
+import {IconChevronLeft, IconChevronRight, IconEdit, IconMessage2Exclamation, IconPlus, IconRefresh, IconSearch, IconTrash} from '@tabler/icons-react'
 import {FormattedMessage, useIntl} from 'react-intl'
+
+import {
+    Announcement,
+    AnnouncementAudience,
+    AnnouncementFormState,
+    AnnouncementPriority,
+    AnnouncementStatus,
+    emptyAnnouncementForm,
+} from '../../announcements'
+import octoClient, {AdminSystemSettings} from '../../octoClient'
 
 import Dialog from '../dialog'
 import RootPortal from '../rootPortal'
@@ -11,83 +21,44 @@ import TableModule from '../tableModule/tableModule'
 import '@tabler/core/dist/css/tabler.min.css'
 import './adminPages.scss'
 
-type AnnouncementStatus = 'Draft' | 'Published' | 'Archived'
-type AnnouncementAudience = 'All Users' | 'SuperAdmin' | 'PublicUser'
-type AnnouncementPriority = 'Normal' | 'Important' | 'Urgent'
-
-type Announcement = {
-    id: string
-    title: string
-    message: string
-    audience: AnnouncementAudience
-    priority: AnnouncementPriority
-    publishAt: string
-    expireAt: string
-    status: AnnouncementStatus
-    createAt: number
-}
-
-type AnnouncementFormState = Omit<Announcement, 'createAt'>
-
-const ANNOUNCEMENTS_STORAGE_KEY = 'boringboardAdminAnnouncements'
 const ANNOUNCEMENT_PAGE_SIZE = 10
 
-const emptyForm: AnnouncementFormState = {
-    audience: 'All Users',
-    expireAt: '',
-    id: '',
-    message: '',
-    priority: 'Normal',
-    publishAt: '',
-    status: 'Draft',
-    title: '',
+const getCurrentDateTimeInputValue = (): string => {
+    const now = new Date()
+    const timezoneOffsetMs = now.getTimezoneOffset() * 60 * 1000
+    return new Date(now.getTime() - timezoneOffsetMs).toISOString().slice(0, 19)
 }
 
-const defaultAnnouncements: Announcement[] = [
-    {
-        audience: 'All Users',
-        createAt: Date.now(),
-        expireAt: '',
-        id: 'default-welcome-announcement',
-        message: 'Welcome to the workspace. Check Dashboard and Reminders for the latest admin updates.',
-        priority: 'Normal',
-        publishAt: '',
-        status: 'Published',
-        title: 'Welcome announcement',
-    },
-]
-
-const loadStoredAnnouncements = (): Announcement[] => {
-    try {
-        const value = window.localStorage.getItem(ANNOUNCEMENTS_STORAGE_KEY)
-        if (!value) {
-            return defaultAnnouncements
-        }
-
-        const announcements = JSON.parse(value) as Announcement[]
-        return Array.isArray(announcements) ? announcements : defaultAnnouncements
-    } catch {
-        return defaultAnnouncements
-    }
-}
-
-const saveStoredAnnouncements = (announcements: Announcement[]) => {
-    window.localStorage.setItem(ANNOUNCEMENTS_STORAGE_KEY, JSON.stringify(announcements))
+const createAnnouncementDeliveryKey = (): string => {
+    return Date.now().toString()
 }
 
 const AdminAnnouncements = (): JSX.Element => {
     const intl = useIntl()
-    const [announcements, setAnnouncements] = useState<Announcement[]>(loadStoredAnnouncements)
+    const [settings, setSettings] = useState<AdminSystemSettings | null>(null)
+    const [announcements, setAnnouncements] = useState<Announcement[]>([])
     const [statusFilter, setStatusFilter] = useState<AnnouncementStatus | 'All'>('All')
     const [searchQuery, setSearchQuery] = useState('')
     const [currentPage, setCurrentPage] = useState(1)
-    const [form, setForm] = useState<AnnouncementFormState>(emptyForm)
+    const [form, setForm] = useState<AnnouncementFormState>(emptyAnnouncementForm)
     const [showForm, setShowForm] = useState(false)
     const [deleteTarget, setDeleteTarget] = useState<Announcement | null>(null)
 
     useEffect(() => {
-        saveStoredAnnouncements(announcements)
-    }, [announcements])
+        let canceled = false
+        async function loadAnnouncements() {
+            const nextSettings = await octoClient.getAdminSystemSettings()
+            if (!canceled) {
+                setSettings(nextSettings)
+                setAnnouncements(nextSettings.announcements || [])
+            }
+        }
+
+        loadAnnouncements()
+        return () => {
+            canceled = true
+        }
+    }, [])
 
     const filteredAnnouncements = useMemo(() => {
         const normalizedSearch = searchQuery.trim().toLowerCase()
@@ -154,7 +125,7 @@ const AdminAnnouncements = (): JSX.Element => {
     const urgentCount = announcements.filter((announcement) => announcement.priority === 'Urgent').length
 
     const startAddAnnouncement = () => {
-        setForm(emptyForm)
+        setForm(emptyAnnouncementForm)
         setShowForm(true)
     }
 
@@ -173,19 +144,38 @@ const AdminAnnouncements = (): JSX.Element => {
     }
 
     const closeForm = () => {
-        setForm(emptyForm)
+        setForm(emptyAnnouncementForm)
         setShowForm(false)
     }
 
-    const saveAnnouncement = (event: React.FormEvent<HTMLFormElement>) => {
+    const persistAnnouncements = async (nextAnnouncements: Announcement[]) => {
+        if (!settings) {
+            return false
+        }
+
+        const savedSettings = await octoClient.saveAdminSystemSettings({
+            ...settings,
+            announcements: nextAnnouncements,
+        })
+        if (!savedSettings) {
+            return false
+        }
+
+        setSettings(savedSettings)
+        setAnnouncements(savedSettings.announcements || [])
+        return true
+    }
+
+    const saveAnnouncement = async (event: React.FormEvent<HTMLFormElement>) => {
         event.preventDefault()
         const title = form.title.trim()
         if (!title) {
             return
         }
 
+        let nextAnnouncements: Announcement[]
         if (form.id) {
-            setAnnouncements((currentAnnouncements) => currentAnnouncements.map((announcement) => {
+            nextAnnouncements = announcements.map((announcement) => {
                 if (announcement.id !== form.id) {
                     return announcement
                 }
@@ -195,9 +185,9 @@ const AdminAnnouncements = (): JSX.Element => {
                     message: form.message.trim(),
                     title,
                 }
-            }))
+            })
         } else {
-            setAnnouncements((currentAnnouncements) => [
+            nextAnnouncements = [
                 {
                     ...form,
                     createAt: Date.now(),
@@ -205,20 +195,57 @@ const AdminAnnouncements = (): JSX.Element => {
                     message: form.message.trim(),
                     title,
                 },
-                ...currentAnnouncements,
-            ])
+                ...announcements,
+            ]
         }
 
-        closeForm()
+        if (await persistAnnouncements(nextAnnouncements)) {
+            if (form.status === 'Published') {
+                setStatusFilter('Published')
+            }
+            closeForm()
+        }
     }
 
-    const deleteAnnouncement = () => {
+    const deleteAnnouncement = async () => {
         if (!deleteTarget) {
             return
         }
 
-        setAnnouncements((currentAnnouncements) => currentAnnouncements.filter((announcement) => announcement.id !== deleteTarget.id))
-        setDeleteTarget(null)
+        if (await persistAnnouncements(announcements.filter((announcement) => announcement.id !== deleteTarget.id))) {
+            setDeleteTarget(null)
+        }
+    }
+
+    const republishAnnouncement = async (targetAnnouncement: Announcement) => {
+        await persistAnnouncements(announcements.map((announcement) => {
+            if (announcement.id !== targetAnnouncement.id) {
+                return announcement
+            }
+
+            return {
+                ...announcement,
+                deliveryKey: createAnnouncementDeliveryKey(),
+                expireAt: '',
+                publishAt: getCurrentDateTimeInputValue(),
+                status: 'Published',
+            }
+        }))
+    }
+
+    const publishAnnouncementNow = async (targetAnnouncement: Announcement) => {
+        await persistAnnouncements(announcements.map((announcement) => {
+            if (announcement.id !== targetAnnouncement.id) {
+                return announcement
+            }
+
+            return {
+                ...announcement,
+                deliveryKey: createAnnouncementDeliveryKey(),
+                publishAt: getCurrentDateTimeInputValue(),
+                status: 'Published',
+            }
+        }))
     }
 
     const formatDate = (value: string): string => {
@@ -558,6 +585,12 @@ const AdminAnnouncements = (): JSX.Element => {
                                 </th>
                                 <th>
                                     <FormattedMessage
+                                        id='AdminAnnouncements.table-published-at'
+                                        defaultMessage='Published At'
+                                    />
+                                </th>
+                                <th>
+                                    <FormattedMessage
                                         id='AdminAnnouncements.table-schedule'
                                         defaultMessage='Schedule'
                                     />
@@ -592,10 +625,10 @@ const AdminAnnouncements = (): JSX.Element => {
                                     </td>
                                     <td>{announcement.audience}</td>
                                     <td>{announcement.priority}</td>
+                                    <td>{formatDate(announcement.publishAt)}</td>
                                     <td>
                                         <span className='admin-announcement-schedule'>
-                                            <strong>{formatDate(announcement.publishAt)}</strong>
-                                            <small>{announcement.expireAt ? formatDate(announcement.expireAt) : '-'}</small>
+                                            <strong>{announcement.expireAt ? formatDate(announcement.expireAt) : '-'}</strong>
                                         </span>
                                     </td>
                                     <td>
@@ -605,6 +638,46 @@ const AdminAnnouncements = (): JSX.Element => {
                                     </td>
                                     <td>
                                         <div className='admin-table-actions'>
+                                            {announcement.status === 'Published' &&
+                                                <button
+                                                    aria-label={intl.formatMessage({
+                                                        id: 'AdminAnnouncements.republish-announcement',
+                                                        defaultMessage: 'Republish announcement',
+                                                    })}
+                                                    className='btn btn-icon btn-outline-primary'
+                                                    title={intl.formatMessage({
+                                                        id: 'AdminAnnouncements.republish-announcement',
+                                                        defaultMessage: 'Republish announcement',
+                                                    })}
+                                                    type='button'
+                                                    onClick={() => republishAnnouncement(announcement)}
+                                                >
+                                                    <IconRefresh
+                                                        className='icon'
+                                                        size={18}
+                                                    />
+                                                </button>
+                                            }
+                                            {announcement.status === 'Draft' && !announcement.publishAt &&
+                                                <button
+                                                    aria-label={intl.formatMessage({
+                                                        id: 'AdminAnnouncements.publish-now-announcement',
+                                                        defaultMessage: 'Publish Now',
+                                                    })}
+                                                    className='btn btn-icon btn-outline-primary'
+                                                    title={intl.formatMessage({
+                                                        id: 'AdminAnnouncements.publish-now-announcement',
+                                                        defaultMessage: 'Publish Now',
+                                                    })}
+                                                    type='button'
+                                                    onClick={() => publishAnnouncementNow(announcement)}
+                                                >
+                                                    <IconMessage2Exclamation
+                                                        className='icon'
+                                                        size={18}
+                                                    />
+                                                </button>
+                                            }
                                             <button
                                                 aria-label={intl.formatMessage({
                                                     id: 'AdminAnnouncements.edit-announcement',

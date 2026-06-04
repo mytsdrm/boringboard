@@ -18,8 +18,8 @@ type AdminTaskBoardSettings struct {
 }
 
 type AdminModuleSettings struct {
-	Reminder      bool `json:"reminder"`
-	Announcement  bool `json:"announcement"`
+	Reminder     bool `json:"reminder"`
+	Announcement bool `json:"announcement"`
 }
 
 type AdminNotificationSettings struct {
@@ -33,6 +33,19 @@ type AdminNotificationSettings struct {
 	Telegram          bool     `json:"telegram"`
 }
 
+type AdminAnnouncement struct {
+	ID          string `json:"id"`
+	Title       string `json:"title"`
+	Message     string `json:"message"`
+	Audience    string `json:"audience"`
+	Priority    string `json:"priority"`
+	PublishAt   string `json:"publishAt"`
+	ExpireAt    string `json:"expireAt"`
+	Status      string `json:"status"`
+	CreateAt    int64  `json:"createAt"`
+	DeliveryKey string `json:"deliveryKey"`
+}
+
 type AdminSystemSettings struct {
 	AppName       string                    `json:"appName"`
 	Logo          string                    `json:"logo"`
@@ -41,6 +54,7 @@ type AdminSystemSettings struct {
 	TaskBoards    AdminTaskBoardSettings    `json:"taskBoards"`
 	Modules       AdminModuleSettings       `json:"modules"`
 	Notifications AdminNotificationSettings `json:"notifications"`
+	Announcements []AdminAnnouncement       `json:"announcements"`
 }
 
 type AdminUserRequest struct {

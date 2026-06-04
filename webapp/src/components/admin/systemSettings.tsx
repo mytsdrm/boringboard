@@ -102,6 +102,7 @@ const defaultSettings: AdminSystemSettings = {
         web: true,
         whatsApp: false,
     },
+    announcements: [],
 }
 
 const fallbackTimeZones = [
