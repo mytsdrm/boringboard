@@ -3,16 +3,29 @@
 
     .ViewTitle__columns {
         display: grid;
-        grid-template-columns: minmax(320px, 1fr) minmax(300px, 420px);
-        gap: 32px;
+        grid-template-columns: minmax(0, 1fr);
+        gap: 22px;
         align-items: start;
         width: 100%;
         min-width: 0;
         margin-top: 1rem;
     }
 
+    &.ViewTitle--withInfo {
+        .ViewTitle__columns {
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+        }
+    }
+
     .ViewTitle__main {
         min-width: 0;
+        max-width: 100%;
+        padding: 12px 16px 12px 18px;
+        border: 1px solid color-mix(in srgb, var(--bb-border-strong) 70%, transparent);
+        border-left: 4px solid var(--bb-blue-text);
+        border-radius: 8px;
+        background: linear-gradient(180deg, color-mix(in srgb, var(--bb-dashboard-panel-bg) 98%, transparent), color-mix(in srgb, var(--bb-blue-soft) 38%, transparent));
+        box-shadow: 0 10px 24px -20px var(--bb-blue-text);
     }
 
     .title {
@@ -22,6 +35,7 @@
         align-items: center;
         min-width: 0;
         min-height: 36px;
+        max-width: 100%;
     }
 
     .description {
@@ -37,6 +51,9 @@
     }
 
     &.ViewTitle--expanded {
+        max-height: none;
+        overflow: visible;
+
         .description {
             max-height: none;
             overflow: visible;
@@ -55,20 +72,26 @@
         flex-direction: column;
         gap: 8px;
         min-width: 0;
-        padding-top: 4px;
+        max-width: 100%;
+        padding: 12px 14px 12px 16px;
+        border: 1px solid color-mix(in srgb, var(--bb-border-strong) 74%, transparent);
+        border-left: 4px solid #16a34a;
+        border-radius: 8px;
+        background: color-mix(in srgb, var(--bb-dashboard-panel-bg) 96%, transparent);
+        box-shadow: 0 10px 24px -22px #16a34a;
     }
 
     .ViewTitle__infoTitle {
         color: var(--bb-text);
-        font-size: 14px;
-        font-weight: 700;
+        font-size: 15px;
+        font-weight: 850;
         line-height: 20px;
     }
 
     .ViewTitle__infoList {
         display: grid;
-        grid-template-columns: minmax(110px, auto) minmax(0, 1fr);
-        gap: 5px 12px;
+        grid-template-columns: minmax(120px, auto) minmax(0, 1fr);
+        gap: 6px 14px;
         min-width: 0;
     }
 
@@ -78,14 +101,18 @@
 
     .ViewTitle__infoLabel {
         color: var(--bb-text-muted);
-        font-size: 12px;
+        font-size: 11px;
+        font-weight: 750;
+        letter-spacing: 0.02em;
         line-height: 18px;
+        text-transform: uppercase;
         white-space: nowrap;
     }
 
     .ViewTitle__infoValue {
         color: var(--bb-text);
-        font-size: 12px;
+        font-size: 13px;
+        font-weight: 700;
         line-height: 18px;
         min-width: 0;
         overflow: hidden;
@@ -138,17 +165,20 @@
     .Editable {
         margin-bottom: 0;
         flex-grow: 1;
-        font-size: 26px;
-        line-height: 34px;
-        font-weight: 760;
+        min-width: 0;
+        font-size: 21px;
+        line-height: 27px;
+        font-weight: 850;
         color: var(--bb-text);
-        overflow: hidden;
+        overflow: visible;
         padding-top: 2px;
+        white-space: normal;
+        overflow-wrap: anywhere;
 
         > * {
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
+            overflow: visible;
+            overflow-wrap: anywhere;
+            white-space: normal;
         }
     }
 
@@ -163,7 +193,20 @@
         flex-grow: 1;
     }
 
-    @media screen and (max-width: 1100px) {
+    @media screen and (max-width: 1280px) {
+        &.ViewTitle--withInfo {
+            .ViewTitle__columns {
+                grid-template-columns: repeat(2, minmax(0, 1fr));
+            }
+        }
+
+        .ViewTitle__columns {
+            gap: 16px;
+        }
+    }
+
+    @media screen and (max-width: 1120px) {
+        &.ViewTitle--withInfo .ViewTitle__columns,
         .ViewTitle__columns {
             grid-template-columns: minmax(0, 1fr);
             gap: 10px;
@@ -180,8 +223,8 @@
         }
 
         .Editable {
-            font-size: 24px;
-            line-height: 30px;
+            font-size: 20px;
+            line-height: 26px;
         }
 
         .description {

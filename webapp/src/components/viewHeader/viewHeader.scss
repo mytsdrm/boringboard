@@ -2,6 +2,11 @@
     flex: 0 0 auto;
     display: flex;
     flex-direction: row;
+    flex-wrap: wrap;
+    gap: 10px 12px;
+    width: 100%;
+    max-width: 100%;
+    min-width: 0;
 
     border-bottom: 0;
     margin: 18px 0 0;
@@ -16,7 +21,6 @@
     font-weight: 650;
 
     @media (max-width: 768px) {
-        width: max-content;
         min-width: 100%;
         margin-top: 12px;
         padding: 9px 10px;
@@ -25,12 +29,26 @@
     }
 
     > div {
-        margin-right: 16px;
+        margin-right: 0;
         white-space: nowrap;
 
         &:last-child {
             margin: 0;
         }
+    }
+
+    .octo-spacer {
+        flex: 1 1 24px;
+        min-width: 0;
+    }
+
+    .board-search-field {
+        flex: 0 1 220px;
+        min-width: min(220px, 100%);
+    }
+
+    .ButtonWithMenu {
+        flex: 0 0 auto;
     }
 
     #groupByLabel {
@@ -56,8 +74,10 @@
     .viewSelector {
         display: flex;
         flex-direction: row;
+        flex: 0 1 220px;
         position: relative;
         padding: 0 10px;
+        min-width: 180px;
         min-height: 36px;
         align-items: center;
         background: var(--bb-panel-bg-soft);
@@ -78,6 +98,10 @@
 
 .board-search-field {
     position: relative;
+
+    .Editable {
+        width: 100%;
+    }
 
     input {
         font-size: 13px;

@@ -1,6 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React, {useState, useCallback} from 'react'
+import React, {useState, useCallback, useLayoutEffect, useRef} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
 
 import {BlockIcons} from '../blockIcons'
@@ -66,8 +66,11 @@ const getTaskBoardSettings = (board: Board): TaskBoardSettings => {
 const ViewTitle = (props: Props) => {
     const {board} = props
 
+    const viewTitleRef = useRef<HTMLDivElement | null>(null)
+    const descriptionRef = useRef<HTMLDivElement | null>(null)
     const [title, setTitle] = useState(board.title)
     const [showFullText, setShowFullText] = useState(false)
+    const [hasHiddenText, setHasHiddenText] = useState(false)
     const updateShowFullText = useCallback((nextShowFullText: boolean) => {
         setShowFullText(nextShowFullText)
         props.onShowFullTextChanged?.(nextShowFullText)
@@ -120,10 +123,48 @@ const ViewTitle = (props: Props) => {
             isUrl: true,
         },
     ].filter((item) => item.value.trim() !== '')
-    const canExpandText = board.title.length > 54 || (board.showDescription && board.description.trim().length > 120)
+    useLayoutEffect(() => {
+        const updateHiddenText = () => {
+            const viewTitleElement = viewTitleRef.current
+            if (!viewTitleElement || showFullText) {
+                setHasHiddenText(false)
+                return
+            }
+
+            const descriptionElement = descriptionRef.current
+            const hasHeaderOverflow = viewTitleElement.scrollHeight > viewTitleElement.clientHeight + 1
+            const hasDescriptionOverflow = Boolean(descriptionElement && descriptionElement.scrollHeight > descriptionElement.clientHeight + 1)
+            const hasOverflow = hasHeaderOverflow || hasDescriptionOverflow
+            setHasHiddenText(hasOverflow)
+        }
+
+        updateHiddenText()
+        window.addEventListener('resize', updateHiddenText)
+        return () => window.removeEventListener('resize', updateHiddenText)
+    }, [
+        board.description,
+        board.showDescription,
+        showFullText,
+        taskBoardSettings.developmentUrl,
+        taskBoardSettings.devBranch,
+        taskBoardSettings.productionUrl,
+        taskBoardSettings.prodBranch,
+        taskBoardSettings.repoUrl,
+        title,
+    ])
+    const canExpandText = showFullText || hasHiddenText
+
+    const viewTitleClassName = [
+        'ViewTitle',
+        showFullText ? 'ViewTitle--expanded' : '',
+        taskBoardInfoItems.length > 0 ? 'ViewTitle--withInfo' : '',
+    ].filter(Boolean).join(' ')
 
     return (
-        <div className={`ViewTitle${showFullText ? ' ViewTitle--expanded' : ''}`}>
+        <div
+            ref={viewTitleRef}
+            className={viewTitleClassName}
+        >
             <div className='add-buttons add-visible'>
                 {!propertyReadonly && !board.icon &&
                     <Button
@@ -196,7 +237,10 @@ const ViewTitle = (props: Props) => {
                     </div>
 
                     {board.showDescription &&
-                        <div className='description'>
+                        <div
+                            ref={descriptionRef}
+                            className='description'
+                        >
                             <MarkdownEditor
                                 text={board.description}
                                 placeholderText='Add a description...'

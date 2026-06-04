@@ -61,19 +61,21 @@
             margin-top: 24px;
             flex: 0 0 auto;
             display: grid;
-            grid-template-columns: minmax(0, 860px) auto;
+            grid-template-columns: minmax(0, 1fr) auto;
             align-items: flex-start;
             gap: 16px;
             min-height: 52px;
         }
 
         .ViewTitle {
-            flex: 0 1 860px;
-            max-width: 860px;
+            flex: 1 1 auto;
+            width: 100%;
+            max-width: 1180px;
+            min-width: 0;
             padding: 0 16px 0 0;
             position: relative;
             min-height: 52px;
-            max-height: 118px;
+            max-height: 176px;
             justify-content: flex-start;
             display: flex;
             flex-direction: column;
@@ -85,9 +87,27 @@
         }
 
         &.top-head--expanded {
+            overflow: visible;
+
             .ViewTitle {
                 max-height: none;
                 overflow: visible;
+            }
+        }
+
+        @media screen and (max-width: 1180px) {
+            > .mid-head {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .ViewTitle {
+                max-width: none;
+                padding-right: 0;
+            }
+
+            .shareButtonWrapper {
+                justify-self: start;
+                margin-top: 0;
             }
         }
 
