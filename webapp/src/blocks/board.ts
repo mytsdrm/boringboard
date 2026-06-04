@@ -22,6 +22,8 @@ enum MemberRole {
     None = '',
 }
 
+type BoardPropertyValue = string | string[] | Record<string, unknown> | null
+
 type Board = {
     id: string
     teamId: string
@@ -37,7 +39,7 @@ type Board = {
     showDescription: boolean
     isTemplate: boolean
     templateVersion: number
-    properties: Record<string, string | string[]>
+    properties: Record<string, BoardPropertyValue>
     cardProperties: IPropertyTemplate[]
 
     createAt: number
@@ -318,6 +320,7 @@ function createPatchesFromBoardsAndBlocks(updatedBoard: Board, oldBoard: Board, 
 
 export {
     Board,
+    BoardPropertyValue,
     BoardPatch,
     BoardMember,
     BoardsAndBlocks,

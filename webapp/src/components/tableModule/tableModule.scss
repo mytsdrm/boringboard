@@ -23,7 +23,8 @@
         min-width: 0;
 
         .admin-users-search,
-        .admin-reminders-search {
+        .admin-reminders-search,
+        .admin-announcements-search {
             display: block;
             width: min(420px, 100%);
             min-width: 0;
@@ -182,7 +183,8 @@
         }
 
         .table-module-toolbar-left .admin-users-search,
-        .table-module-toolbar-left .admin-reminders-search {
+        .table-module-toolbar-left .admin-reminders-search,
+        .table-module-toolbar-left .admin-announcements-search {
             width: 100%;
         }
 

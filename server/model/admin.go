@@ -20,19 +20,27 @@ type AdminTaskBoardSettings struct {
 type AdminModuleSettings struct {
 	Reminder      bool `json:"reminder"`
 	Announcement  bool `json:"announcement"`
-	Reports       bool `json:"reports"`
-	AuditLog      bool `json:"auditLog"`
-	Notifications bool `json:"notifications"`
-	Calendar      bool `json:"calendar"`
+}
+
+type AdminNotificationSettings struct {
+	TaskBoardActivity bool     `json:"taskBoardActivity"`
+	TaskActivity      bool     `json:"taskActivity"`
+	EnableForAllUsers bool     `json:"enableForAllUsers"`
+	EnabledUserIDs    []string `json:"enabledUserIds"`
+	Web               bool     `json:"web"`
+	Email             bool     `json:"email"`
+	WhatsApp          bool     `json:"whatsApp"`
+	Telegram          bool     `json:"telegram"`
 }
 
 type AdminSystemSettings struct {
-	AppName    string                 `json:"appName"`
-	Logo       string                 `json:"logo"`
-	TimeZone   string                 `json:"timeZone"`
-	AI         AdminAISettings        `json:"ai"`
-	TaskBoards AdminTaskBoardSettings `json:"taskBoards"`
-	Modules    AdminModuleSettings    `json:"modules"`
+	AppName       string                    `json:"appName"`
+	Logo          string                    `json:"logo"`
+	TimeZone      string                    `json:"timeZone"`
+	AI            AdminAISettings           `json:"ai"`
+	TaskBoards    AdminTaskBoardSettings    `json:"taskBoards"`
+	Modules       AdminModuleSettings       `json:"modules"`
+	Notifications AdminNotificationSettings `json:"notifications"`
 }
 
 type AdminUserRequest struct {

@@ -41,10 +41,17 @@ export type AdminTaskBoardSettings = {
 export type AdminModuleSettings = {
     reminder: boolean
     announcement: boolean
-    reports: boolean
-    auditLog: boolean
-    notifications: boolean
-    calendar: boolean
+}
+
+export type AdminNotificationSettings = {
+    taskBoardActivity: boolean
+    taskActivity: boolean
+    enableForAllUsers: boolean
+    enabledUserIds: string[]
+    web: boolean
+    email: boolean
+    whatsApp: boolean
+    telegram: boolean
 }
 
 export type AdminSystemSettings = {
@@ -54,6 +61,7 @@ export type AdminSystemSettings = {
     ai: AdminAISettings
     taskBoards: AdminTaskBoardSettings
     modules: AdminModuleSettings
+    notifications: AdminNotificationSettings
 }
 
 export type BoardMemberActivityEntry = {
@@ -611,11 +619,17 @@ class OctoClient {
             },
             modules: {
                 announcement: false,
-                auditLog: false,
-                calendar: false,
-                notifications: false,
                 reminder: false,
-                reports: false,
+            },
+            notifications: {
+                email: false,
+                enabledUserIds: [],
+                enableForAllUsers: true,
+                taskActivity: true,
+                taskBoardActivity: true,
+                telegram: false,
+                web: true,
+                whatsApp: false,
             },
         })
     }
@@ -657,11 +671,17 @@ class OctoClient {
             },
             modules: {
                 announcement: false,
-                auditLog: false,
-                calendar: false,
-                notifications: false,
                 reminder: false,
-                reports: false,
+            },
+            notifications: {
+                email: false,
+                enabledUserIds: [],
+                enableForAllUsers: true,
+                taskActivity: true,
+                taskBoardActivity: true,
+                telegram: false,
+                web: true,
+                whatsApp: false,
             },
         })
     }

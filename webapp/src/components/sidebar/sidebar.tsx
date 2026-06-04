@@ -78,10 +78,6 @@ const adminModuleMenuItems: Array<{
 }> = [
     {key: 'reminder', path: '/reminders', icon: 'clock-outline', labelId: 'Sidebar.module-reminder', label: 'Reminder'},
     {key: 'announcement', path: '/announcements', icon: 'bullhorn-outline', labelId: 'Sidebar.module-announcement', label: 'Announcement'},
-    {key: 'reports', path: '/reports', icon: 'chart-bar', labelId: 'Sidebar.module-reports', label: 'Reports'},
-    {key: 'auditLog', path: '/audit-log', icon: 'clipboard-text-clock-outline', labelId: 'Sidebar.module-audit-log', label: 'Audit Log'},
-    {key: 'notifications', path: '/notifications', icon: 'bell-outline', labelId: 'Sidebar.module-notifications', label: 'Notifications'},
-    {key: 'calendar', path: '/calendar', icon: 'calendar-outline', labelId: 'Sidebar.module-calendar', label: 'Calendar'},
 ]
 
 function getWindowDimensions() {

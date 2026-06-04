@@ -25,35 +25,11 @@ const moduleMessages: Record<AdminModuleKey, {
         descriptionId: 'AdminModulePage.announcement-description',
         description: 'Announcement module is enabled. Build the announcement workflow here.',
     },
-    auditLog: {
-        titleId: 'AdminModulePage.audit-log-title',
-        title: 'Audit Log',
-        descriptionId: 'AdminModulePage.audit-log-description',
-        description: 'Audit Log module is enabled.',
-    },
-    calendar: {
-        titleId: 'AdminModulePage.calendar-title',
-        title: 'Calendar',
-        descriptionId: 'AdminModulePage.calendar-description',
-        description: 'Calendar module is enabled. Build the admin calendar workflow here.',
-    },
-    notifications: {
-        titleId: 'AdminModulePage.notifications-title',
-        title: 'Notifications',
-        descriptionId: 'AdminModulePage.notifications-description',
-        description: 'Notifications module is enabled. Build notification settings here.',
-    },
     reminder: {
         titleId: 'AdminModulePage.reminder-title',
         title: 'Reminder',
         descriptionId: 'AdminModulePage.reminder-description',
         description: 'Reminder module is enabled. Build reminder management here.',
-    },
-    reports: {
-        titleId: 'AdminModulePage.reports-title',
-        title: 'Reports',
-        descriptionId: 'AdminModulePage.reports-description',
-        description: 'Reports module is enabled.',
     },
 }
 

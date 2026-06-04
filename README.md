@@ -25,6 +25,7 @@ That's why it's called **BoringBoard**.
 - **System Settings**: Manage app name, logo upload, timezone, AI provider settings, and task board permissions.
 - **Realtime settings updates**: Branding, logo, and selected task board permission settings update across active clients.
 - **Task board permissions**: Configure whether invited users can share task boards or edit task board properties.
+- **Task board settings**: Board owners can save repository, dev/prod branch, and environment URL details at the task-board level, with a read-only Task Board Info panel in the board header.
 - **Profile menu improvements**: Top-right user menu with Invite users, Profile, Change password, and Logout modals.
 - **Branding updates**: Custom app name/logo support with circular logo preview and sidebar display.
 - **Table utilities**: Reusable table module with search alignment, Options menu, and print/export actions.

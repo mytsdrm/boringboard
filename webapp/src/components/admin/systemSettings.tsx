@@ -4,7 +4,7 @@ import React, {useEffect, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
 
 import {applySystemBranding, getBrandingFromSettings} from '../../branding'
-import octoClient, {AdminModuleSettings, AdminSystemSettings, TaskBoardPreviewLanguage} from '../../octoClient'
+import octoClient, {AdminModuleSettings, AdminNotificationSettings, AdminSystemSettings, TaskBoardPreviewLanguage} from '../../octoClient'
 import {applyProjectSystemSettings, DEFAULT_PROJECT_TIME_ZONE} from '../../systemSettings'
 import {IUser} from '../../user'
 
@@ -12,7 +12,7 @@ import './adminPages.scss'
 
 const PROVIDERS = ['OpenAI', 'Gemini', 'Ollama', 'Cline', 'Anything LLM']
 const OUTPUT_LANGUAGE_OPTIONS: TaskBoardPreviewLanguage[] = ['English', 'Indonesia']
-type SettingsTab = 'general' | 'modules'
+type SettingsTab = 'general' | 'modules' | 'notification'
 
 const MODULE_OPTIONS: Array<{
     key: keyof AdminModuleSettings
@@ -34,34 +34,6 @@ const MODULE_OPTIONS: Array<{
         label: 'Announcement',
         descriptionId: 'SystemSettings.module-announcement-description',
         description: 'Show the Announcement admin menu.',
-    },
-    {
-        key: 'reports',
-        labelId: 'SystemSettings.module-reports',
-        label: 'Reports',
-        descriptionId: 'SystemSettings.module-reports-description',
-        description: 'Show the Reports admin menu.',
-    },
-    {
-        key: 'auditLog',
-        labelId: 'SystemSettings.module-audit-log',
-        label: 'Audit Log',
-        descriptionId: 'SystemSettings.module-audit-log-description',
-        description: 'Show the Audit Log admin menu.',
-    },
-    {
-        key: 'notifications',
-        labelId: 'SystemSettings.module-notifications',
-        label: 'Notifications',
-        descriptionId: 'SystemSettings.module-notifications-description',
-        description: 'Show the Notifications admin menu.',
-    },
-    {
-        key: 'calendar',
-        labelId: 'SystemSettings.module-calendar',
-        label: 'Calendar',
-        descriptionId: 'SystemSettings.module-calendar-description',
-        description: 'Show the Calendar admin menu.',
     },
 ]
 
@@ -118,11 +90,17 @@ const defaultSettings: AdminSystemSettings = {
     },
     modules: {
         announcement: false,
-        auditLog: false,
-        calendar: false,
-        notifications: false,
         reminder: false,
-        reports: false,
+    },
+    notifications: {
+        email: false,
+        enabledUserIds: [],
+        enableForAllUsers: true,
+        taskActivity: true,
+        taskBoardActivity: true,
+        telegram: false,
+        web: true,
+        whatsApp: false,
     },
 }
 
@@ -171,6 +149,11 @@ const mergeWithDefaultSettings = (settings: AdminSystemSettings): AdminSystemSet
     modules: {
         ...defaultSettings.modules,
         ...(settings.modules || {}),
+    },
+    notifications: {
+        ...defaultSettings.notifications,
+        ...(settings.notifications || {}),
+        enabledUserIds: Array.isArray(settings.notifications?.enabledUserIds) ? settings.notifications.enabledUserIds : defaultSettings.notifications.enabledUserIds,
     },
 })
 
@@ -330,6 +313,11 @@ const SystemSettings = (): JSX.Element => {
                 ...defaultSettings.modules,
                 ...settings.modules,
             },
+            notifications: {
+                ...defaultSettings.notifications,
+                ...settings.notifications,
+                enabledUserIds: settings.notifications.enableForAllUsers ? [] : settings.notifications.enabledUserIds,
+            },
         })
         if (saved) {
             const mergedSettings = mergeWithDefaultSettings(saved)
@@ -383,6 +371,27 @@ const SystemSettings = (): JSX.Element => {
                 [key]: enabled,
             },
         })
+    }
+    const updateNotificationSettings = (nextNotificationSettings: Partial<AdminNotificationSettings>) => {
+        setSettings({
+            ...settings,
+            notifications: {
+                ...settings.notifications,
+                ...nextNotificationSettings,
+            },
+        })
+    }
+    const updateNotificationRecipientMode = (enableForAllUsers: boolean) => {
+        updateNotificationSettings({
+            enabledUserIds: enableForAllUsers ? [] : settings.notifications.enabledUserIds,
+            enableForAllUsers,
+        })
+    }
+    const toggleNotificationUser = (userId: string, enabled: boolean) => {
+        const enabledUserIds = enabled ?
+            Array.from(new Set([...settings.notifications.enabledUserIds, userId])) :
+            settings.notifications.enabledUserIds.filter((enabledUserId) => enabledUserId !== userId)
+        updateNotificationSettings({enabledUserIds})
     }
     const uploadLogo = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
@@ -462,6 +471,18 @@ const SystemSettings = (): JSX.Element => {
                         <FormattedMessage
                             id='SystemSettings.tab-modules'
                             defaultMessage='Modules'
+                        />
+                    </button>
+                    <button
+                        aria-selected={activeTab === 'notification'}
+                        className={activeTab === 'notification' ? 'active' : ''}
+                        onClick={() => setActiveTab('notification')}
+                        role='tab'
+                        type='button'
+                    >
+                        <FormattedMessage
+                            id='SystemSettings.tab-notification'
+                            defaultMessage='Notification'
                         />
                     </button>
                 </div>
@@ -879,6 +900,217 @@ const SystemSettings = (): JSX.Element => {
                             ))}
                         </div>
                     </div>}
+                    {activeTab === 'notification' &&
+                    <>
+                        <div className='admin-settings-section'>
+                            <div className='admin-settings-section-header'>
+                                <h2>
+                                    <FormattedMessage
+                                        id='SystemSettings.notification-flow-title'
+                                        defaultMessage='Notification Flow'
+                                    />
+                                </h2>
+                                <p>
+                                    <FormattedMessage
+                                        id='SystemSettings.notification-flow-description'
+                                        defaultMessage='Choose which Task Board and task activity should create notifications.'
+                                    />
+                                </p>
+                            </div>
+                            <div className='admin-notification-controls'>
+                                <label className='admin-settings-checkbox'>
+                                    <input
+                                        checked={settings.notifications.taskBoardActivity}
+                                        onChange={(event) => updateNotificationSettings({taskBoardActivity: event.target.checked})}
+                                        type='checkbox'
+                                    />
+                                    <span>
+                                        <strong>
+                                            <FormattedMessage
+                                                id='SystemSettings.notification-task-board-activity'
+                                                defaultMessage='Task Board activity'
+                                            />
+                                        </strong>
+                                        <small>
+                                            <FormattedMessage
+                                                id='SystemSettings.notification-task-board-activity-description'
+                                                defaultMessage='Notify recipients when Task Boards are created, updated, shared, or changed.'
+                                            />
+                                        </small>
+                                    </span>
+                                </label>
+                                <label className='admin-settings-checkbox'>
+                                    <input
+                                        checked={settings.notifications.taskActivity}
+                                        onChange={(event) => updateNotificationSettings({taskActivity: event.target.checked})}
+                                        type='checkbox'
+                                    />
+                                    <span>
+                                        <strong>
+                                            <FormattedMessage
+                                                id='SystemSettings.notification-task-activity'
+                                                defaultMessage='Task activity'
+                                            />
+                                        </strong>
+                                        <small>
+                                            <FormattedMessage
+                                                id='SystemSettings.notification-task-activity-description'
+                                                defaultMessage='Notify recipients when cards, comments, content, assignments, or properties change.'
+                                            />
+                                        </small>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                        <div className='admin-settings-section'>
+                            <div className='admin-settings-section-header'>
+                                <h2>
+                                    <FormattedMessage
+                                        id='SystemSettings.notification-recipients-title'
+                                        defaultMessage='Recipients'
+                                    />
+                                </h2>
+                                <p>
+                                    <FormattedMessage
+                                        id='SystemSettings.notification-recipients-description'
+                                        defaultMessage='Send notifications to all users by default, or limit delivery to selected users.'
+                                    />
+                                </p>
+                            </div>
+                            <div className='admin-notification-controls'>
+                                <label>
+                                    <span>
+                                        <FormattedMessage
+                                            id='SystemSettings.notification-recipient-mode'
+                                            defaultMessage='Recipient mode'
+                                        />
+                                    </span>
+                                    <select
+                                        onChange={(event) => updateNotificationRecipientMode(event.target.value === 'all')}
+                                        value={settings.notifications.enableForAllUsers ? 'all' : 'selected'}
+                                    >
+                                        <option value='all'>
+                                            {intl.formatMessage({
+                                                id: 'SystemSettings.notification-all-users',
+                                                defaultMessage: 'All users',
+                                            })}
+                                        </option>
+                                        <option value='selected'>
+                                            {intl.formatMessage({
+                                                id: 'SystemSettings.notification-selected-users',
+                                                defaultMessage: 'Selected users only',
+                                            })}
+                                        </option>
+                                    </select>
+                                </label>
+                                {!settings.notifications.enableForAllUsers &&
+                                    <div className='admin-notification-user-list'>
+                                        {registeredUsers.map((user) => (
+                                            <label
+                                                className='admin-settings-checkbox admin-notification-user-toggle'
+                                                key={user.id}
+                                            >
+                                                <input
+                                                    checked={settings.notifications.enabledUserIds.includes(user.id)}
+                                                    onChange={(event) => toggleNotificationUser(user.id, event.target.checked)}
+                                                    type='checkbox'
+                                                />
+                                                <span>{userDisplayName(user)}</span>
+                                            </label>
+                                        ))}
+                                        {registeredUsers.length === 0 &&
+                                            <small>
+                                                <FormattedMessage
+                                                    id='SystemSettings.notification-no-users'
+                                                    defaultMessage='No registered users found.'
+                                                />
+                                            </small>}
+                                    </div>}
+                            </div>
+                        </div>
+                        <div className='admin-settings-section admin-settings-notification-section'>
+                            <div className='admin-settings-section-header'>
+                                <h2>
+                                    <FormattedMessage
+                                        id='SystemSettings.notification-tools-title'
+                                        defaultMessage='Notification Tools'
+                                    />
+                                </h2>
+                                <p>
+                                    <FormattedMessage
+                                        id='SystemSettings.notification-tools-description'
+                                        defaultMessage='Enable one or more tools. Notifications will be sent through every enabled tool.'
+                                    />
+                                </p>
+                            </div>
+                            <div className='admin-notification-tool-grid'>
+                                <label className='admin-settings-checkbox admin-notification-tool-toggle'>
+                                    <input
+                                        checked={settings.notifications.web}
+                                        onChange={(event) => updateNotificationSettings({web: event.target.checked})}
+                                        type='checkbox'
+                                    />
+                                    <span>
+                                        <strong>{'Web'}</strong>
+                                        <small>
+                                            <FormattedMessage
+                                                id='SystemSettings.notification-tool-web-description'
+                                                defaultMessage='In-app notification label only for now.'
+                                            />
+                                        </small>
+                                    </span>
+                                </label>
+                                <label className='admin-settings-checkbox admin-notification-tool-toggle'>
+                                    <input
+                                        checked={settings.notifications.email}
+                                        onChange={(event) => updateNotificationSettings({email: event.target.checked})}
+                                        type='checkbox'
+                                    />
+                                    <span>
+                                        <strong>{'Email'}</strong>
+                                        <small>
+                                            <FormattedMessage
+                                                id='SystemSettings.notification-tool-email-description'
+                                                defaultMessage='Email notification label only for now.'
+                                            />
+                                        </small>
+                                    </span>
+                                </label>
+                                <label className='admin-settings-checkbox admin-notification-tool-toggle'>
+                                    <input
+                                        checked={settings.notifications.whatsApp}
+                                        onChange={(event) => updateNotificationSettings({whatsApp: event.target.checked})}
+                                        type='checkbox'
+                                    />
+                                    <span>
+                                        <strong>{'WhatsApp'}</strong>
+                                        <small>
+                                            <FormattedMessage
+                                                id='SystemSettings.notification-tool-whatsapp-description'
+                                                defaultMessage='Send notifications by WhatsApp for recipients with WhatsApp enabled.'
+                                            />
+                                        </small>
+                                    </span>
+                                </label>
+                                <label className='admin-settings-checkbox admin-notification-tool-toggle'>
+                                    <input
+                                        checked={settings.notifications.telegram}
+                                        onChange={(event) => updateNotificationSettings({telegram: event.target.checked})}
+                                        type='checkbox'
+                                    />
+                                    <span>
+                                        <strong>{'Telegram'}</strong>
+                                        <small>
+                                            <FormattedMessage
+                                                id='SystemSettings.notification-tool-telegram-description'
+                                                defaultMessage='Send notifications by Telegram for recipients with Telegram enabled.'
+                                            />
+                                        </small>
+                                    </span>
+                                </label>
+                            </div>
+                        </div>
+                    </>}
                 </div>
                 {saveError &&
                     <div className='admin-settings-error'>

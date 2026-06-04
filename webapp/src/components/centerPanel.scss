@@ -17,7 +17,6 @@
     }
 }
 
-
 .BoardComponent {
     --board-gutter: 30px;
 
@@ -61,20 +60,35 @@
         > .mid-head {
             margin-top: 24px;
             flex: 0 0 auto;
-            display: flex;
-            flex-direction: row;
-            justify-content: space-between;
-            align-items: center;
+            display: grid;
+            grid-template-columns: minmax(0, 860px) auto;
+            align-items: flex-start;
+            gap: 16px;
+            min-height: 52px;
         }
 
         .ViewTitle {
-            flex: 1;
+            flex: 0 1 860px;
+            max-width: 860px;
             padding: 0 16px 0 0;
             position: relative;
             min-height: 52px;
-            justify-content: center;
+            max-height: 118px;
+            justify-content: flex-start;
             display: flex;
             flex-direction: column;
+            overflow: hidden;
+
+            &.ViewTitle--expanded {
+                overflow: visible;
+            }
+        }
+
+        &.top-head--expanded {
+            .ViewTitle {
+                max-height: none;
+                overflow: visible;
+            }
         }
 
         @media screen and (max-width: 768px) {
@@ -83,15 +97,17 @@
             > .mid-head {
                 margin-top: 18px;
                 align-items: flex-start;
+                grid-template-columns: minmax(0, 1fr);
             }
 
             .ViewTitle {
+                flex: 1 1 auto;
+                max-width: none;
                 min-width: 0;
                 padding-right: 56px;
             }
         }
     }
-
 
     > .board-view-content {
         display: flex;
@@ -109,8 +125,14 @@
     }
 
     .shareButtonWrapper {
-        position: relative;
-        flex: 0 0 auto;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        align-self: start;
+        justify-self: end;
+        gap: 8px;
+        margin-top: 1rem;
+        white-space: nowrap;
 
         @media screen and (max-width: 768px) {
             display: none;

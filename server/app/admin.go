@@ -35,10 +35,16 @@ func defaultAdminSystemSettings() model.AdminSystemSettings {
 		Modules: model.AdminModuleSettings{
 			Reminder:      false,
 			Announcement:  false,
-			Reports:       false,
-			AuditLog:      false,
-			Notifications: false,
-			Calendar:      false,
+		},
+		Notifications: model.AdminNotificationSettings{
+			TaskBoardActivity: true,
+			TaskActivity:      true,
+			EnableForAllUsers: true,
+			EnabledUserIDs:    []string{},
+			Web:               true,
+			Email:             false,
+			WhatsApp:          false,
+			Telegram:          false,
 		},
 	}
 }

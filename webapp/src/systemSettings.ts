@@ -1,7 +1,7 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 
-import {AdminAISettings, AdminModuleSettings, AdminSystemSettings} from './octoClient'
+import {AdminAISettings, AdminModuleSettings, AdminNotificationSettings, AdminSystemSettings} from './octoClient'
 
 export const DEFAULT_PROJECT_TIME_ZONE = 'Asia/Jakarta'
 export const SYSTEM_SETTINGS_UPDATED_EVENT = 'boringboard-system-settings-updated'
@@ -22,16 +22,24 @@ const DEFAULT_AI_SETTINGS: AdminAISettings = {
 
 const DEFAULT_MODULE_SETTINGS: AdminModuleSettings = {
     announcement: false,
-    auditLog: false,
-    calendar: false,
-    notifications: false,
     reminder: false,
-    reports: false,
+}
+
+const DEFAULT_NOTIFICATION_SETTINGS: AdminNotificationSettings = {
+    email: false,
+    enabledUserIds: [],
+    enableForAllUsers: true,
+    taskActivity: true,
+    taskBoardActivity: true,
+    telegram: false,
+    web: true,
+    whatsApp: false,
 }
 
 export type ProjectSystemSettings = {
     ai: AdminAISettings
     modules: AdminModuleSettings
+    notifications: AdminNotificationSettings
     timeZone: string
     taskBoards: {
         enableInvitedUserEditProperty: boolean
@@ -52,7 +60,9 @@ const normalizeTimeZone = (timeZone?: string): string => {
     return isValidTimeZone(nextTimeZone) ? nextTimeZone : DEFAULT_PROJECT_TIME_ZONE
 }
 
-export const getProjectSettingsFromSystemSettings = (settings?: Pick<AdminSystemSettings, 'ai' | 'timeZone' | 'taskBoards' | 'modules'>): ProjectSystemSettings => {
+export const getProjectSettingsFromSystemSettings = (settings?: Pick<AdminSystemSettings, 'ai' | 'timeZone' | 'taskBoards' | 'modules' | 'notifications'>): ProjectSystemSettings => {
+    const notificationEnabledUserIds = Array.isArray(settings?.notifications?.enabledUserIds) ? settings?.notifications?.enabledUserIds || [] : DEFAULT_NOTIFICATION_SETTINGS.enabledUserIds
+
     return {
         ai: {
             ...DEFAULT_AI_SETTINGS,
@@ -62,6 +72,11 @@ export const getProjectSettingsFromSystemSettings = (settings?: Pick<AdminSystem
         modules: {
             ...DEFAULT_MODULE_SETTINGS,
             ...(settings?.modules || {}),
+        },
+        notifications: {
+            ...DEFAULT_NOTIFICATION_SETTINGS,
+            ...(settings?.notifications || {}),
+            enabledUserIds: notificationEnabledUserIds,
         },
         taskBoards: {
             enableInvitedUserEditProperty: settings?.taskBoards?.enableInvitedUserEditProperty || false,
@@ -84,7 +99,7 @@ export const getStoredProjectSystemSettings = (): ProjectSystemSettings => {
     }
 }
 
-export const applyProjectSystemSettings = (settings?: Pick<AdminSystemSettings, 'ai' | 'timeZone' | 'taskBoards' | 'modules'>): ProjectSystemSettings => {
+export const applyProjectSystemSettings = (settings?: Pick<AdminSystemSettings, 'ai' | 'timeZone' | 'taskBoards' | 'modules' | 'notifications'>): ProjectSystemSettings => {
     const projectSettings = getProjectSettingsFromSystemSettings(settings)
     window.localStorage.setItem(SYSTEM_SETTINGS_STORAGE_KEY, JSON.stringify(projectSettings))
     window.dispatchEvent(new CustomEvent<ProjectSystemSettings>(SYSTEM_SETTINGS_UPDATED_EVENT, {detail: projectSettings}))

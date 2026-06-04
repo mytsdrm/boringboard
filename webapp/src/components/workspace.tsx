@@ -39,6 +39,7 @@ import GuestNoBoards from './guestNoBoards'
 import Sidebar from './sidebar/sidebar'
 import Dashboard from './dashboard/dashboard'
 import ActivityLogs from './activityLogs/activityLogs'
+import AdminAnnouncements from './admin/adminAnnouncements'
 import AdminUsers from './admin/adminUsers'
 import SystemSettings from './admin/systemSettings'
 import AdminModulePage, {AdminModuleKey} from './admin/adminModulePage'
@@ -180,6 +181,9 @@ function CenterContent(props: Props) {
         }
         if (props.adminModule === 'reminder') {
             return <AdminReminders/>
+        }
+        if (props.adminModule === 'announcement') {
+            return <AdminAnnouncements/>
         }
         return <AdminModulePage moduleKey={props.adminModule}/>
     }

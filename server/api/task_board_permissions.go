@@ -43,3 +43,8 @@ func (a *API) hasPermissionToManageTaskBoardProperties(userID, boardID string) b
 	return a.permissions.HasPermissionToBoard(userID, boardID, model.PermissionManageBoardProperties) &&
 		a.canInvitedUserEditTaskBoardProperties(userID, boardID)
 }
+
+func (a *API) hasPermissionToEditTaskBoardMetadata(userID, boardID string) bool {
+	return a.permissions.HasPermissionToBoard(userID, boardID, model.PermissionManageBoardProperties) &&
+		!a.isInvitedNonAdminTaskBoardMember(userID, boardID)
+}

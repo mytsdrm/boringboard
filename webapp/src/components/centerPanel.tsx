@@ -45,6 +45,7 @@ import {applyProjectSystemSettings, getStoredProjectSystemSettings, ProjectSyste
 
 import ShareBoardButton from './shareBoard/shareBoardButton'
 import ShareBoardLoginButton from './shareBoard/shareBoardLoginButton'
+import BoardIntegrationSettingsButton from './boardIntegrationSettings/boardIntegrationSettingsButton'
 
 import CardDialog from './cardDialog'
 import RootPortal from './rootPortal'
@@ -82,6 +83,7 @@ const CenterPanel = (props: Props) => {
     const [selectedCardIds, setSelectedCardIds] = useState<string[]>([])
     const [cardIdToFocusOnRender, setCardIdToFocusOnRender] = useState('')
     const [showHiddenCardCountNotification, setShowHiddenCardCountNotification] = useState(false)
+    const [showFullBoardHeaderText, setShowFullBoardHeaderText] = useState(false)
     const [projectSettings, setProjectSettings] = useState<ProjectSystemSettings>(getStoredProjectSystemSettings)
 
     const onboardingTourStarted = useAppSelector(getOnboardingTourStarted)
@@ -100,6 +102,10 @@ const CenterPanel = (props: Props) => {
     useEffect(() => {
         TelemetryClient.trackEvent(TelemetryCategory, TelemetryActions.ViewBoard, {board: props.board.id, view: props.activeView.id, viewType: props.activeView.fields.viewType})
     }, [])
+
+    useEffect(() => {
+        setShowFullBoardHeaderText(false)
+    }, [props.board.id])
 
     useEffect(() => {
         let canceled = false
@@ -392,6 +398,7 @@ const CenterPanel = (props: Props) => {
     const canShareAsInvitedUser = Boolean(projectSettings.taskBoards.enableInvitedUserShare && myBoardMembership && !myBoardMembership.synthetic && !myBoardMembership.schemeAdmin)
     const showShareButton = !props.readonly && me?.id !== 'single-user' && (canShareAsBoardAdmin || canShareAsInvitedUser)
     const showShareLoginButton = props.readonly && me?.id !== 'single-user'
+    const showBoardIntegrationSettingsButton = !props.readonly && Boolean(me?.id) && me?.id === board.createdBy
 
     const getUserDisplayName = (boardGroup: BoardGroup) => {
         const user = boardUsers[boardGroup.option.id]
@@ -441,19 +448,23 @@ const CenterPanel = (props: Props) => {
                     />
                 </RootPortal>}
 
-            <div className='top-head'>
+            <div className={`top-head${showFullBoardHeaderText ? ' top-head--expanded' : ''}`}>
                 <TopBar/>
                 <div className='mid-head'>
                     <ViewTitle
                         key={board.id + board.title}
                         board={board}
                         readonly={props.readonly}
+                        onShowFullTextChanged={setShowFullBoardHeaderText}
                     />
                     <div className='shareButtonWrapper'>
                         {showShareButton &&
                         <ShareBoardButton
                             enableSharedBoards={props.clientConfig?.enablePublicSharedBoards || false}
                         />
+                        }
+                        {showBoardIntegrationSettingsButton &&
+                            <BoardIntegrationSettingsButton board={board}/>
                         }
                         {showShareLoginButton &&
                             <ShareBoardLoginButton/>

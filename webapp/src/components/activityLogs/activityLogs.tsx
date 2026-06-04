@@ -1072,6 +1072,20 @@ const ActivityLogs = (props: Props): JSX.Element => {
 
         return logs.filter((log) => getActivitySearchText(log).includes(normalizedSearch))
     }, [getActivitySearchText, logs, searchQuery])
+    let pageDescription = (
+        <FormattedMessage
+            id='ActivityLogs.description'
+            defaultMessage='Recent board activity related to your Task Boards.'
+        />
+    )
+    if (props.adminMode) {
+        pageDescription = (
+            <FormattedMessage
+                id='ActivityLogs.admin-description'
+                defaultMessage='Recent board activity from all registered users.'
+            />
+        )
+    }
 
     return (
         <div className='AdminPage admin-users-page ActivityLogs'>
@@ -1090,17 +1104,7 @@ const ActivityLogs = (props: Props): JSX.Element => {
                         />
                     </h1>
                     <p>
-                        {props.adminMode ? (
-                            <FormattedMessage
-                                id='ActivityLogs.admin-description'
-                                defaultMessage='Recent board activity from all registered users.'
-                            />
-                        ) : (
-                            <FormattedMessage
-                                id='ActivityLogs.description'
-                                defaultMessage='Recent board activity related to your Task Boards.'
-                            />
-                        )}
+                        {pageDescription}
                     </p>
                 </div>
                 <div className='admin-header-actions'>

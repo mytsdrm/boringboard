@@ -1,22 +1,104 @@
 .ViewTitle {
-    > div {
-        flex: 0 0 auto;
+    min-width: 0;
+
+    .ViewTitle__columns {
+        display: grid;
+        grid-template-columns: minmax(320px, 1fr) minmax(300px, 420px);
+        gap: 32px;
+        align-items: start;
+        width: 100%;
+        min-width: 0;
+        margin-top: 1rem;
+    }
+
+    .ViewTitle__main {
+        min-width: 0;
+    }
+
+    .title {
         display: flex;
+        flex: 0 0 auto;
         flex-direction: row;
-        align-items: flex-start;
-        min-width: 300px;
-        min-height: 28px;
+        align-items: center;
+        min-width: 0;
+        min-height: 36px;
     }
 
     .description {
-        max-height: 80px;
-        overflow: auto;
+        max-height: 44px;
+        overflow: hidden;
         margin-top: 2px;
 
         .MarkdownEditor {
             color: var(--bb-text-muted);
             font-size: 14px;
             line-height: 22px;
+        }
+    }
+
+    &.ViewTitle--expanded {
+        .description {
+            max-height: none;
+            overflow: visible;
+        }
+
+        .Editable {
+            > * {
+                overflow: visible;
+                white-space: normal;
+            }
+        }
+    }
+
+    .ViewTitle__info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+        padding-top: 4px;
+    }
+
+    .ViewTitle__infoTitle {
+        color: var(--bb-text);
+        font-size: 14px;
+        font-weight: 700;
+        line-height: 20px;
+    }
+
+    .ViewTitle__infoList {
+        display: grid;
+        grid-template-columns: minmax(110px, auto) minmax(0, 1fr);
+        gap: 5px 12px;
+        min-width: 0;
+    }
+
+    .ViewTitle__infoItem {
+        display: contents;
+    }
+
+    .ViewTitle__infoLabel {
+        color: var(--bb-text-muted);
+        font-size: 12px;
+        line-height: 18px;
+        white-space: nowrap;
+    }
+
+    .ViewTitle__infoValue {
+        color: var(--bb-text);
+        font-size: 12px;
+        line-height: 18px;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    a.ViewTitle__infoValue {
+        color: rgb(var(--button-bg-rgb));
+        text-decoration: none;
+
+        &:hover {
+            text-decoration: underline;
         }
     }
 
@@ -60,14 +142,40 @@
         line-height: 34px;
         font-weight: 760;
         color: var(--bb-text);
+        overflow: hidden;
+        padding-top: 2px;
+
+        > * {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
     }
 
-    >.description>* {
+    .ViewTitle__showMore {
+        align-self: flex-start;
+        height: 22px;
+        margin-top: 2px;
+        padding: 0;
+    }
+
+    > .description > * {
         flex-grow: 1;
     }
 
+    @media screen and (max-width: 1100px) {
+        .ViewTitle__columns {
+            grid-template-columns: minmax(0, 1fr);
+            gap: 10px;
+        }
+
+        .ViewTitle__infoList {
+            grid-template-columns: minmax(110px, auto) minmax(0, 1fr);
+        }
+    }
+
     @media screen and (max-width: 768px) {
-        > div {
+        .title {
             min-width: 0;
         }
 
@@ -77,7 +185,7 @@
         }
 
         .description {
-            max-height: 70px;
+            max-height: 40px;
 
             .MarkdownEditor {
                 font-size: 13px;

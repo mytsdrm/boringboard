@@ -347,6 +347,11 @@ func (a *API) handlePatchBoard(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	if (patch.Title != nil || patch.Description != nil) && !a.hasPermissionToEditTaskBoardMetadata(userID, boardID) {
+		a.errorResponse(w, r, model.NewErrPermission("access denied to modifying board title or description"))
+		return
+	}
+
 	if patch.Type != nil || patch.MinimumRole != nil {
 		if !a.permissions.HasPermissionToBoard(userID, boardID, model.PermissionManageBoardType) {
 			a.errorResponse(w, r, model.NewErrPermission("access denied to modifying board type"))
