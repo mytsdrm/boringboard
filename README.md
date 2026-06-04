@@ -8,6 +8,8 @@ The goal isn't to reinvent project management. The goal is to make it a little l
 
 That's why it's called **BoringBoard**.
 
+<a href="https://www.producthunt.com/products/boringboard-another-fork-of-focalboard?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-boringboard-another-fork-of-focalboard" target="_blank" rel="noopener noreferrer"><img alt="BoringBoard, another fork of focalboard - BoringBoard, A place for all those &quot;I'll do it later&quot; tasks | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1161605&amp;theme=light&amp;t=1780545806963"></a>
+
 **Default Theme**
 ![BoringBoard](README.assets/boringboard.png)
 
