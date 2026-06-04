@@ -2,6 +2,7 @@
 // See LICENSE.txt for license information.
 
 import React, {useEffect, useMemo, useState} from 'react'
+import {IconMessage2Exclamation} from '@tabler/icons-react'
 import {FormattedMessage} from 'react-intl'
 
 import {
@@ -18,10 +19,7 @@ import {IUser} from '../user'
 import {Utils} from '../utils'
 import wsClient, {WSClient} from '../wsclient'
 
-import Button from '../widgets/buttons/button'
-
-import Dialog from './dialog'
-import RootPortal from './rootPortal'
+import AppModal from './appModal'
 
 import './announcementModal.scss'
 
@@ -105,32 +103,26 @@ const AnnouncementModal = (props: Props): JSX.Element | null => {
     }
 
     return (
-        <RootPortal>
-            <Dialog
-                className='AnnouncementModal'
-                size='small'
-                title={<>{activeAnnouncement.title}</>}
-                onClose={closeAnnouncement}
-            >
-                <div className='AnnouncementModal__body'>
-                    <div className={`AnnouncementModal__priority AnnouncementModal__priority--${activeAnnouncement.priority.toLowerCase()}`}>
-                        {activeAnnouncement.priority}
-                    </div>
-                    <p>{activeAnnouncement.message}</p>
-                    <div className='AnnouncementModal__actions'>
-                        <Button
-                            emphasis='primary'
-                            onClick={closeAnnouncement}
-                        >
-                            <FormattedMessage
-                                id='AnnouncementModal.close'
-                                defaultMessage='Close'
-                            />
-                        </Button>
-                    </div>
-                </div>
-            </Dialog>
-        </RootPortal>
+        <AppModal
+            bodyClassName='AnnouncementModal__body'
+            cancelText={(
+                <FormattedMessage
+                    id='AnnouncementModal.close'
+                    defaultMessage='Close'
+                />
+            )}
+            cancelVariant='close'
+            className='AnnouncementModal'
+            showSaveButton={false}
+            title={<>{activeAnnouncement.title}</>}
+            titleIcon={<IconMessage2Exclamation size={20}/>}
+            onClose={closeAnnouncement}
+        >
+            <div className={`AnnouncementModal__priority AnnouncementModal__priority--${activeAnnouncement.priority.toLowerCase()}`}>
+                {activeAnnouncement.priority}
+            </div>
+            <p>{activeAnnouncement.message}</p>
+        </AppModal>
     )
 }
 

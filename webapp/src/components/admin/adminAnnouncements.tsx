@@ -14,6 +14,7 @@ import {
 } from '../../announcements'
 import octoClient, {AdminSystemSettings} from '../../octoClient'
 
+import AppModal from '../appModal'
 import Dialog from '../dialog'
 import RootPortal from '../rootPortal'
 import TableModule from '../tableModule/tableModule'
@@ -344,144 +345,130 @@ const AdminAnnouncements = (): JSX.Element => {
             </div>
 
             {showForm &&
-                <RootPortal>
-                    <Dialog
-                        className='admin-announcement-dialog'
-                        size='small'
-                        title={form.id ? (
-                            <FormattedMessage
-                                id='AdminAnnouncements.edit-announcement-title'
-                                defaultMessage='Edit Announcement'
-                            />
-                        ) : (
-                            <FormattedMessage
-                                id='AdminAnnouncements.add-announcement-title'
-                                defaultMessage='Add Announcement'
-                            />
-                        )}
-                        onClose={closeForm}
-                    >
-                        <form
-                            className='admin-announcement-form'
-                            onSubmit={saveAnnouncement}
+                <AppModal
+                    bodyClassName='admin-announcement-form'
+                    cancelText={(
+                        <FormattedMessage
+                            id='AdminAnnouncements.cancel'
+                            defaultMessage='Cancel'
+                        />
+                    )}
+                    className='admin-announcement-dialog'
+                    saveText={(
+                        <FormattedMessage
+                            id='AdminAnnouncements.save'
+                            defaultMessage='Save'
+                        />
+                    )}
+                    title={form.id ? (
+                        <FormattedMessage
+                            id='AdminAnnouncements.edit-announcement-title'
+                            defaultMessage='Edit Announcement'
+                        />
+                    ) : (
+                        <FormattedMessage
+                            id='AdminAnnouncements.add-announcement-title'
+                            defaultMessage='Add Announcement'
+                        />
+                    )}
+                    titleIcon={<IconMessage2Exclamation size={20}/>}
+                    onClose={closeForm}
+                    onSubmit={saveAnnouncement}
+                >
+                    <label className='admin-announcement-form-wide'>
+                        <FormattedMessage
+                            id='AdminAnnouncements.form-title'
+                            defaultMessage='Title'
+                        />
+                        <input
+                            className='form-control'
+                            required={true}
+                            value={form.title}
+                            onChange={(event) => setForm({...form, title: event.target.value})}
+                        />
+                    </label>
+                    <label className='admin-announcement-form-wide'>
+                        <FormattedMessage
+                            id='AdminAnnouncements.form-message'
+                            defaultMessage='Message'
+                        />
+                        <textarea
+                            className='form-control'
+                            rows={4}
+                            value={form.message}
+                            onChange={(event) => setForm({...form, message: event.target.value})}
+                        />
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminAnnouncements.form-publish-at'
+                            defaultMessage='Publish At'
+                        />
+                        <input
+                            className='form-control'
+                            type='datetime-local'
+                            value={form.publishAt}
+                            onChange={(event) => setForm({...form, publishAt: event.target.value})}
+                        />
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminAnnouncements.form-expire-at'
+                            defaultMessage='Expire At'
+                        />
+                        <input
+                            className='form-control'
+                            type='datetime-local'
+                            value={form.expireAt}
+                            onChange={(event) => setForm({...form, expireAt: event.target.value})}
+                        />
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminAnnouncements.form-audience'
+                            defaultMessage='Audience'
+                        />
+                        <select
+                            className='form-select'
+                            value={form.audience}
+                            onChange={(event) => setForm({...form, audience: event.target.value as AnnouncementAudience})}
                         >
-                            <label className='admin-announcement-form-wide'>
-                                <FormattedMessage
-                                    id='AdminAnnouncements.form-title'
-                                    defaultMessage='Title'
-                                />
-                                <input
-                                    className='form-control'
-                                    required={true}
-                                    value={form.title}
-                                    onChange={(event) => setForm({...form, title: event.target.value})}
-                                />
-                            </label>
-                            <label className='admin-announcement-form-wide'>
-                                <FormattedMessage
-                                    id='AdminAnnouncements.form-message'
-                                    defaultMessage='Message'
-                                />
-                                <textarea
-                                    className='form-control'
-                                    rows={4}
-                                    value={form.message}
-                                    onChange={(event) => setForm({...form, message: event.target.value})}
-                                />
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminAnnouncements.form-publish-at'
-                                    defaultMessage='Publish At'
-                                />
-                                <input
-                                    className='form-control'
-                                    type='datetime-local'
-                                    value={form.publishAt}
-                                    onChange={(event) => setForm({...form, publishAt: event.target.value})}
-                                />
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminAnnouncements.form-expire-at'
-                                    defaultMessage='Expire At'
-                                />
-                                <input
-                                    className='form-control'
-                                    type='datetime-local'
-                                    value={form.expireAt}
-                                    onChange={(event) => setForm({...form, expireAt: event.target.value})}
-                                />
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminAnnouncements.form-audience'
-                                    defaultMessage='Audience'
-                                />
-                                <select
-                                    className='form-select'
-                                    value={form.audience}
-                                    onChange={(event) => setForm({...form, audience: event.target.value as AnnouncementAudience})}
-                                >
-                                    <option value='All Users'>{'All Users'}</option>
-                                    <option value='SuperAdmin'>{'SuperAdmin'}</option>
-                                    <option value='PublicUser'>{'PublicUser'}</option>
-                                </select>
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminAnnouncements.form-priority'
-                                    defaultMessage='Priority'
-                                />
-                                <select
-                                    className='form-select'
-                                    value={form.priority}
-                                    onChange={(event) => setForm({...form, priority: event.target.value as AnnouncementPriority})}
-                                >
-                                    <option value='Normal'>{'Normal'}</option>
-                                    <option value='Important'>{'Important'}</option>
-                                    <option value='Urgent'>{'Urgent'}</option>
-                                </select>
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminAnnouncements.form-status'
-                                    defaultMessage='Status'
-                                />
-                                <select
-                                    className='form-select'
-                                    value={form.status}
-                                    onChange={(event) => setForm({...form, status: event.target.value as AnnouncementStatus})}
-                                >
-                                    <option value='Draft'>{'Draft'}</option>
-                                    <option value='Published'>{'Published'}</option>
-                                    <option value='Archived'>{'Archived'}</option>
-                                </select>
-                            </label>
-                            <div className='admin-form-actions admin-announcement-form-actions'>
-                                <button
-                                    className='btn btn-outline-secondary'
-                                    type='button'
-                                    onClick={closeForm}
-                                >
-                                    <FormattedMessage
-                                        id='AdminAnnouncements.cancel'
-                                        defaultMessage='Cancel'
-                                    />
-                                </button>
-                                <button
-                                    className='btn btn-primary'
-                                    type='submit'
-                                >
-                                    <FormattedMessage
-                                        id='AdminAnnouncements.save'
-                                        defaultMessage='Save'
-                                    />
-                                </button>
-                            </div>
-                        </form>
-                    </Dialog>
-                </RootPortal>}
+                            <option value='All Users'>{'All Users'}</option>
+                            <option value='SuperAdmin'>{'SuperAdmin'}</option>
+                            <option value='PublicUser'>{'PublicUser'}</option>
+                        </select>
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminAnnouncements.form-priority'
+                            defaultMessage='Priority'
+                        />
+                        <select
+                            className='form-select'
+                            value={form.priority}
+                            onChange={(event) => setForm({...form, priority: event.target.value as AnnouncementPriority})}
+                        >
+                            <option value='Normal'>{'Normal'}</option>
+                            <option value='Important'>{'Important'}</option>
+                            <option value='Urgent'>{'Urgent'}</option>
+                        </select>
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminAnnouncements.form-status'
+                            defaultMessage='Status'
+                        />
+                        <select
+                            className='form-select'
+                            value={form.status}
+                            onChange={(event) => setForm({...form, status: event.target.value as AnnouncementStatus})}
+                        >
+                            <option value='Draft'>{'Draft'}</option>
+                            <option value='Published'>{'Published'}</option>
+                            <option value='Archived'>{'Archived'}</option>
+                        </select>
+                    </label>
+                </AppModal>}
 
             {deleteTarget &&
                 <RootPortal>

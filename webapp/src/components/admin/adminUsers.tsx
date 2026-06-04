@@ -8,6 +8,7 @@ import octoClient, {AdminUserPayload} from '../../octoClient'
 import {useAppSelector} from '../../store/hooks'
 import {getMe} from '../../store/users'
 import {IUser} from '../../user'
+import AppModal from '../appModal'
 import Dialog from '../dialog'
 import RootPortal from '../rootPortal'
 import TableModule from '../tableModule/tableModule'
@@ -288,159 +289,145 @@ const AdminUsers = (): JSX.Element => {
                 </div>
             </div>
             {showForm &&
-                <RootPortal>
-                    <Dialog
-                        className='admin-user-dialog'
-                        size='small'
-                        title={
-                            form.id ? (
-                                <FormattedMessage
-                                    id='AdminUsers.edit-user-title'
-                                    defaultMessage='Edit User'
-                                />
-                            ) : (
-                                <FormattedMessage
-                                    id='AdminUsers.add-user-title'
-                                    defaultMessage='Add User'
-                                />
-                            )
-                        }
-                        onClose={closeForm}
-                    >
-                        <form
-                            className='admin-user-form'
-                            onSubmit={saveUser}
+                <AppModal
+                    bodyClassName='admin-user-form'
+                    cancelText={(
+                        <FormattedMessage
+                            id='AdminUsers.cancel'
+                            defaultMessage='Cancel'
+                        />
+                    )}
+                    className='admin-user-dialog'
+                    saveDisabled={isSaving}
+                    saveText={(
+                        <FormattedMessage
+                            id='AdminUsers.save'
+                            defaultMessage='Save'
+                        />
+                    )}
+                    title={
+                        form.id ? (
+                            <FormattedMessage
+                                id='AdminUsers.edit-user-title'
+                                defaultMessage='Edit User'
+                            />
+                        ) : (
+                            <FormattedMessage
+                                id='AdminUsers.add-user-title'
+                                defaultMessage='Add User'
+                            />
+                        )
+                    }
+                    titleIcon={<IconUserCircle size={20}/>}
+                    onClose={closeForm}
+                    onSubmit={saveUser}
+                >
+                    <label>
+                        <FormattedMessage
+                            id='AdminUsers.form-username'
+                            defaultMessage='Username'
+                        />
+                        <input
+                            className='form-control'
+                            required={true}
+                            value={form.username}
+                            onChange={(event) => setForm({...form, username: event.target.value})}
+                        />
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminUsers.form-email'
+                            defaultMessage='Email'
+                        />
+                        <input
+                            className='form-control'
+                            type='email'
+                            value={form.email}
+                            onChange={(event) => setForm({...form, email: event.target.value})}
+                        />
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminUsers.form-display-name'
+                            defaultMessage='Display name'
+                        />
+                        <input
+                            className='form-control'
+                            value={form.nickname}
+                            onChange={(event) => setForm({...form, nickname: event.target.value})}
+                        />
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminUsers.form-phone-number'
+                            defaultMessage='Phone Number'
+                        />
+                        <input
+                            className='form-control'
+                            inputMode='tel'
+                            type='tel'
+                            value={form.phoneNumber}
+                            onChange={(event) => setForm({...form, phoneNumber: event.target.value})}
+                        />
+                    </label>
+                    <label className='admin-user-checkbox'>
+                        <input
+                            checked={form.phoneWhatsAppEnabled}
+                            type='checkbox'
+                            onChange={(event) => setForm({...form, phoneWhatsAppEnabled: event.target.checked})}
+                        />
+                        <FormattedMessage
+                            id='AdminUsers.form-whatsapp'
+                            defaultMessage='WhatsApp'
+                        />
+                    </label>
+                    <label className='admin-user-checkbox'>
+                        <input
+                            checked={form.phoneTelegramEnabled}
+                            type='checkbox'
+                            onChange={(event) => setForm({...form, phoneTelegramEnabled: event.target.checked})}
+                        />
+                        <FormattedMessage
+                            id='AdminUsers.form-telegram'
+                            defaultMessage='Telegram'
+                        />
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminUsers.form-password'
+                            defaultMessage='Password'
+                        />
+                        <input
+                            className='form-control'
+                            required={!form.id}
+                            placeholder={form.id ? intl.formatMessage({
+                                id: 'AdminUsers.password-unchanged',
+                                defaultMessage: 'Leave blank to keep current password',
+                            }) : undefined}
+                            type='password'
+                            value={form.password}
+                            onChange={(event) => setForm({...form, password: event.target.value})}
+                        />
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminUsers.form-group'
+                            defaultMessage='Group'
+                        />
+                        <select
+                            className='form-select'
+                            value={form.group}
+                            onChange={(event) => setForm({...form, group: event.target.value as UserGroup})}
                         >
-                            <label>
-                                <FormattedMessage
-                                    id='AdminUsers.form-username'
-                                    defaultMessage='Username'
-                                />
-                                <input
-                                    className='form-control'
-                                    required={true}
-                                    value={form.username}
-                                    onChange={(event) => setForm({...form, username: event.target.value})}
-                                />
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminUsers.form-email'
-                                    defaultMessage='Email'
-                                />
-                                <input
-                                    className='form-control'
-                                    type='email'
-                                    value={form.email}
-                                    onChange={(event) => setForm({...form, email: event.target.value})}
-                                />
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminUsers.form-display-name'
-                                    defaultMessage='Display name'
-                                />
-                                <input
-                                    className='form-control'
-                                    value={form.nickname}
-                                    onChange={(event) => setForm({...form, nickname: event.target.value})}
-                                />
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminUsers.form-phone-number'
-                                    defaultMessage='Phone Number'
-                                />
-                                <input
-                                    className='form-control'
-                                    inputMode='tel'
-                                    type='tel'
-                                    value={form.phoneNumber}
-                                    onChange={(event) => setForm({...form, phoneNumber: event.target.value})}
-                                />
-                            </label>
-                            <label className='admin-user-checkbox'>
-                                <input
-                                    checked={form.phoneWhatsAppEnabled}
-                                    type='checkbox'
-                                    onChange={(event) => setForm({...form, phoneWhatsAppEnabled: event.target.checked})}
-                                />
-                                <FormattedMessage
-                                    id='AdminUsers.form-whatsapp'
-                                    defaultMessage='WhatsApp'
-                                />
-                            </label>
-                            <label className='admin-user-checkbox'>
-                                <input
-                                    checked={form.phoneTelegramEnabled}
-                                    type='checkbox'
-                                    onChange={(event) => setForm({...form, phoneTelegramEnabled: event.target.checked})}
-                                />
-                                <FormattedMessage
-                                    id='AdminUsers.form-telegram'
-                                    defaultMessage='Telegram'
-                                />
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminUsers.form-password'
-                                    defaultMessage='Password'
-                                />
-                                <input
-                                    className='form-control'
-                                    required={!form.id}
-                                    placeholder={form.id ? intl.formatMessage({
-                                        id: 'AdminUsers.password-unchanged',
-                                        defaultMessage: 'Leave blank to keep current password',
-                                    }) : undefined}
-                                    type='password'
-                                    value={form.password}
-                                    onChange={(event) => setForm({...form, password: event.target.value})}
-                                />
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminUsers.form-group'
-                                    defaultMessage='Group'
-                                />
-                                <select
-                                    className='form-select'
-                                    value={form.group}
-                                    onChange={(event) => setForm({...form, group: event.target.value as UserGroup})}
-                                >
-                                    <option value='PublicUser'>{'PublicUser'}</option>
-                                    <option value='SuperAdmin'>{'SuperAdmin'}</option>
-                                </select>
-                            </label>
-                            {error &&
-                                <div className='admin-form-error'>
-                                    {error}
-                                </div>}
-                            <div className='admin-form-actions'>
-                                <button
-                                    className='btn btn-outline-secondary'
-                                    type='button'
-                                    onClick={closeForm}
-                                >
-                                    <FormattedMessage
-                                        id='AdminUsers.cancel'
-                                        defaultMessage='Cancel'
-                                    />
-                                </button>
-                                <button
-                                    className='btn btn-primary'
-                                    disabled={isSaving}
-                                    type='submit'
-                                >
-                                    <FormattedMessage
-                                        id='AdminUsers.save'
-                                        defaultMessage='Save'
-                                    />
-                                </button>
-                            </div>
-                        </form>
-                    </Dialog>
-                </RootPortal>}
+                            <option value='PublicUser'>{'PublicUser'}</option>
+                            <option value='SuperAdmin'>{'SuperAdmin'}</option>
+                        </select>
+                    </label>
+                    {error &&
+                        <div className='admin-form-error'>
+                            {error}
+                        </div>}
+                </AppModal>}
             {deleteTarget &&
                 <RootPortal>
                     <Dialog

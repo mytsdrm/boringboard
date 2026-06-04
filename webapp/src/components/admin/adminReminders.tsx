@@ -4,6 +4,7 @@ import React, {useEffect, useMemo, useState} from 'react'
 import {IconBellRinging, IconChevronLeft, IconChevronRight, IconEdit, IconPlus, IconSearch, IconTrash} from '@tabler/icons-react'
 import {FormattedMessage, useIntl} from 'react-intl'
 
+import AppModal from '../appModal'
 import Dialog from '../dialog'
 import RootPortal from '../rootPortal'
 import TableModule from '../tableModule/tableModule'
@@ -311,150 +312,136 @@ const AdminReminders = (): JSX.Element => {
             </div>
 
             {showForm &&
-                <RootPortal>
-                    <Dialog
-                        className='admin-reminder-dialog'
-                        size='small'
-                        title={
-                            form.id ? (
-                                <FormattedMessage
-                                    id='AdminReminders.edit-reminder-title'
-                                    defaultMessage='Edit Reminder'
-                                />
-                            ) : (
-                                <FormattedMessage
-                                    id='AdminReminders.add-reminder-title'
-                                    defaultMessage='Add Reminder'
-                                />
-                            )
-                        }
-                        onClose={closeForm}
-                    >
-                        <form
-                            className='admin-reminder-form'
-                            onSubmit={saveReminder}
+                <AppModal
+                    bodyClassName='admin-reminder-form'
+                    cancelText={(
+                        <FormattedMessage
+                            id='AdminReminders.cancel'
+                            defaultMessage='Cancel'
+                        />
+                    )}
+                    className='admin-reminder-dialog'
+                    saveText={(
+                        <FormattedMessage
+                            id='AdminReminders.save'
+                            defaultMessage='Save'
+                        />
+                    )}
+                    title={
+                        form.id ? (
+                            <FormattedMessage
+                                id='AdminReminders.edit-reminder-title'
+                                defaultMessage='Edit Reminder'
+                            />
+                        ) : (
+                            <FormattedMessage
+                                id='AdminReminders.add-reminder-title'
+                                defaultMessage='Add Reminder'
+                            />
+                        )
+                    }
+                    titleIcon={<IconBellRinging size={20}/>}
+                    onClose={closeForm}
+                    onSubmit={saveReminder}
+                >
+                    <label className='admin-reminder-form-wide'>
+                        <FormattedMessage
+                            id='AdminReminders.form-title'
+                            defaultMessage='Title'
+                        />
+                        <input
+                            className='form-control'
+                            required={true}
+                            value={form.title}
+                            onChange={(event) => setForm({...form, title: event.target.value})}
+                        />
+                    </label>
+                    <label className='admin-reminder-form-wide'>
+                        <FormattedMessage
+                            id='AdminReminders.form-description'
+                            defaultMessage='Description'
+                        />
+                        <textarea
+                            className='form-control'
+                            rows={3}
+                            value={form.description}
+                            onChange={(event) => setForm({...form, description: event.target.value})}
+                        />
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminReminders.form-remind-at'
+                            defaultMessage='Remind At'
+                        />
+                        <input
+                            className='form-control'
+                            type='datetime-local'
+                            value={form.remindAt}
+                            onChange={(event) => setForm({...form, remindAt: event.target.value})}
+                        />
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminReminders.form-repeat'
+                            defaultMessage='Repeat'
+                        />
+                        <select
+                            className='form-select'
+                            value={form.repeat}
+                            onChange={(event) => setForm({...form, repeat: event.target.value as ReminderRepeat})}
                         >
-                            <label className='admin-reminder-form-wide'>
-                                <FormattedMessage
-                                    id='AdminReminders.form-title'
-                                    defaultMessage='Title'
-                                />
-                                <input
-                                    className='form-control'
-                                    required={true}
-                                    value={form.title}
-                                    onChange={(event) => setForm({...form, title: event.target.value})}
-                                />
-                            </label>
-                            <label className='admin-reminder-form-wide'>
-                                <FormattedMessage
-                                    id='AdminReminders.form-description'
-                                    defaultMessage='Description'
-                                />
-                                <textarea
-                                    className='form-control'
-                                    rows={3}
-                                    value={form.description}
-                                    onChange={(event) => setForm({...form, description: event.target.value})}
-                                />
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminReminders.form-remind-at'
-                                    defaultMessage='Remind At'
-                                />
-                                <input
-                                    className='form-control'
-                                    type='datetime-local'
-                                    value={form.remindAt}
-                                    onChange={(event) => setForm({...form, remindAt: event.target.value})}
-                                />
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminReminders.form-repeat'
-                                    defaultMessage='Repeat'
-                                />
-                                <select
-                                    className='form-select'
-                                    value={form.repeat}
-                                    onChange={(event) => setForm({...form, repeat: event.target.value as ReminderRepeat})}
-                                >
-                                    <option value='Never'>{'Never'}</option>
-                                    <option value='Daily'>{'Daily'}</option>
-                                    <option value='Weekly'>{'Weekly'}</option>
-                                    <option value='Monthly'>{'Monthly'}</option>
-                                </select>
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminReminders.form-audience'
-                                    defaultMessage='Audience'
-                                />
-                                <select
-                                    className='form-select'
-                                    value={form.audience}
-                                    onChange={(event) => setForm({...form, audience: event.target.value as ReminderAudience})}
-                                >
-                                    <option value='All Users'>{'All Users'}</option>
-                                    <option value='SuperAdmin'>{'SuperAdmin'}</option>
-                                    <option value='PublicUser'>{'PublicUser'}</option>
-                                </select>
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminReminders.form-channel'
-                                    defaultMessage='Channel'
-                                />
-                                <select
-                                    className='form-select'
-                                    value={form.channel}
-                                    onChange={(event) => setForm({...form, channel: event.target.value as ReminderChannel})}
-                                >
-                                    <option value='In-app'>{'In-app'}</option>
-                                    <option value='Email'>{'Email'}</option>
-                                    <option value='WhatsApp'>{'WhatsApp'}</option>
-                                    <option value='Telegram'>{'Telegram'}</option>
-                                </select>
-                            </label>
-                            <label>
-                                <FormattedMessage
-                                    id='AdminReminders.form-status'
-                                    defaultMessage='Status'
-                                />
-                                <select
-                                    className='form-select'
-                                    value={form.status}
-                                    onChange={(event) => setForm({...form, status: event.target.value as ReminderStatus})}
-                                >
-                                    <option value='Active'>{'Active'}</option>
-                                    <option value='Paused'>{'Paused'}</option>
-                                </select>
-                            </label>
-                            <div className='admin-form-actions admin-reminder-form-actions'>
-                                <button
-                                    className='btn btn-outline-secondary'
-                                    type='button'
-                                    onClick={closeForm}
-                                >
-                                    <FormattedMessage
-                                        id='AdminReminders.cancel'
-                                        defaultMessage='Cancel'
-                                    />
-                                </button>
-                                <button
-                                    className='btn btn-primary'
-                                    type='submit'
-                                >
-                                    <FormattedMessage
-                                        id='AdminReminders.save'
-                                        defaultMessage='Save'
-                                    />
-                                </button>
-                            </div>
-                        </form>
-                    </Dialog>
-                </RootPortal>}
+                            <option value='Never'>{'Never'}</option>
+                            <option value='Daily'>{'Daily'}</option>
+                            <option value='Weekly'>{'Weekly'}</option>
+                            <option value='Monthly'>{'Monthly'}</option>
+                        </select>
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminReminders.form-audience'
+                            defaultMessage='Audience'
+                        />
+                        <select
+                            className='form-select'
+                            value={form.audience}
+                            onChange={(event) => setForm({...form, audience: event.target.value as ReminderAudience})}
+                        >
+                            <option value='All Users'>{'All Users'}</option>
+                            <option value='SuperAdmin'>{'SuperAdmin'}</option>
+                            <option value='PublicUser'>{'PublicUser'}</option>
+                        </select>
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminReminders.form-channel'
+                            defaultMessage='Channel'
+                        />
+                        <select
+                            className='form-select'
+                            value={form.channel}
+                            onChange={(event) => setForm({...form, channel: event.target.value as ReminderChannel})}
+                        >
+                            <option value='In-app'>{'In-app'}</option>
+                            <option value='Email'>{'Email'}</option>
+                            <option value='WhatsApp'>{'WhatsApp'}</option>
+                            <option value='Telegram'>{'Telegram'}</option>
+                        </select>
+                    </label>
+                    <label>
+                        <FormattedMessage
+                            id='AdminReminders.form-status'
+                            defaultMessage='Status'
+                        />
+                        <select
+                            className='form-select'
+                            value={form.status}
+                            onChange={(event) => setForm({...form, status: event.target.value as ReminderStatus})}
+                        >
+                            <option value='Active'>{'Active'}</option>
+                            <option value='Paused'>{'Paused'}</option>
+                        </select>
+                    </label>
+                </AppModal>}
 
             {deleteTarget &&
                 <RootPortal>
