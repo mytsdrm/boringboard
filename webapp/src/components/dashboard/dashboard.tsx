@@ -64,8 +64,9 @@ type DashboardActivity = {
     toValue?: string
 }
 
-const DASHBOARD_ACTIVITY_LIMIT = 20
+const DASHBOARD_ACTIVITY_LIMIT = 10
 const DASHBOARD_ACTIVITY_HISTORY_LIMIT = 120
+const DASHBOARD_RECENT_BOARD_LIMIT = 10
 
 const getCardStats = (board: Board, cards: Card[]) => {
     const latestActivityAt = cards.reduce((latest, card) => {
@@ -390,8 +391,9 @@ const Dashboard = (): JSX.Element => {
                 const bActivityAt = statsByBoard[b.id]?.latestActivityAt || b.updateAt || b.createAt
                 return bActivityAt - aActivityAt
             }).
-            slice(0, 3)
+            slice(0, DASHBOARD_RECENT_BOARD_LIMIT)
     }, [statsByBoard, taskBoards])
+    const recentActivities = useMemo(() => activities.slice(0, DASHBOARD_ACTIVITY_LIMIT), [activities])
 
     useEffect(() => {
         let canceled = false
@@ -790,6 +792,9 @@ const Dashboard = (): JSX.Element => {
     const showBoard = useCallback((boardId: string) => {
         Utils.showBoard(boardId, match, history)
     }, [history, match])
+    const showActivityLogs = useCallback(() => {
+        history.push('/activity-logs')
+    }, [history])
 
     const getUserDisplayName = useCallback((userId: string): string => {
         if (me?.id === userId) {
@@ -1418,10 +1423,20 @@ const Dashboard = (): JSX.Element => {
                                 defaultMessage='Recent activity'
                             />
                         </h2>
+                        <button
+                            className='dashboard-widget-link'
+                            type='button'
+                            onClick={showActivityLogs}
+                        >
+                            <FormattedMessage
+                                id='Dashboard.show-all-activity'
+                                defaultMessage='Show All'
+                            />
+                        </button>
                     </div>
-                    {activities.length > 0 ? (
+                    {recentActivities.length > 0 ? (
                         <div className='dashboard-activity-list'>
-                            {activities.map((activity) => (
+                            {recentActivities.map((activity) => (
                                 <div
                                     className='dashboard-activity-row'
                                     key={activity.id}

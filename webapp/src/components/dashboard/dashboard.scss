@@ -384,6 +384,27 @@
         }
     }
 
+    .dashboard-widget-link {
+        flex: 0 0 auto;
+        min-height: 32px;
+        margin-left: auto;
+        padding: 0 12px;
+        color: var(--bb-blue-text);
+        border: 1px solid color-mix(in srgb, var(--bb-blue-text) 22%, var(--bb-border));
+        border-radius: 999px;
+        background: var(--bb-blue-soft);
+        cursor: pointer;
+        font-size: 12px;
+        font-weight: 850;
+        line-height: 1;
+
+        &:hover,
+        &:focus {
+            border-color: color-mix(in srgb, var(--bb-blue-text) 38%, var(--bb-border));
+            background: color-mix(in srgb, var(--bb-blue-soft) 76%, #fff);
+        }
+    }
+
     .dashboard-widget-icon {
         width: 42px;
         height: 42px;
@@ -786,6 +807,11 @@
                 font-size: 15px;
                 line-height: 22px;
             }
+        }
+
+        .dashboard-widget-link {
+            min-height: 30px;
+            padding: 0 10px;
         }
 
         .dashboard-widget-row {
