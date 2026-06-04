@@ -830,6 +830,86 @@
         grid-column: 1 / -1;
     }
 
+    .admin-ai-user-picker {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        min-width: 0;
+    }
+
+    .admin-ai-user-picker-panel {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        min-height: 220px;
+        padding: 12px;
+        border: 1px solid var(--bb-border);
+        border-radius: 10px;
+        background: color-mix(in srgb, var(--bb-dashboard-panel-bg) 82%, transparent);
+        box-shadow: 0 1px 2px rgb(16 24 40 / 4%);
+    }
+
+    .admin-ai-user-picker-toolbar {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 12px;
+        min-height: 30px;
+    }
+
+    .admin-ai-user-count {
+        flex: 0 0 auto;
+        color: var(--bb-text-muted);
+        font-size: 12px;
+        font-weight: 750;
+        line-height: 18px;
+    }
+
+    .admin-ai-user-search {
+        height: 38px;
+        padding: 0 12px;
+    }
+
+    .admin-ai-user-list {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        align-content: start;
+        gap: 2px 8px;
+        max-height: 220px;
+        min-height: 88px;
+        padding-right: 4px;
+        overflow: auto;
+    }
+
+    .admin-ai-user-toggle-all {
+        flex: 1 1 auto;
+        min-width: 0;
+    }
+
+    .admin-ai-user-toggle {
+        min-height: 24px !important;
+        min-width: 0;
+        gap: 8px !important;
+
+        input:disabled + span {
+            color: var(--bb-text-muted);
+        }
+
+        input {
+            width: 14px;
+            height: 14px;
+        }
+
+        > span {
+            min-width: 0;
+            overflow: hidden;
+            font-size: 12px;
+            line-height: 18px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+    }
+
     .admin-ai-model-status {
         display: flex;
         align-items: center;
@@ -845,6 +925,7 @@
     }
 
     .admin-ai-controls .admin-settings-checkbox,
+    .admin-ai-user-picker .admin-settings-checkbox,
     .admin-task-board-controls .admin-settings-checkbox,
     .admin-module-controls .admin-settings-checkbox,
     .admin-notification-controls .admin-settings-checkbox,

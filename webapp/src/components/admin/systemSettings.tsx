@@ -175,6 +175,7 @@ const SystemSettings = (): JSX.Element => {
     const [isLoadingOllamaModels, setIsLoadingOllamaModels] = useState(false)
     const [isLoadingProviderModels, setIsLoadingProviderModels] = useState(false)
     const [registeredUsers, setRegisteredUsers] = useState<IUser[]>([])
+    const [aiUserSearch, setAIUserSearch] = useState('')
     const [saveState, setSaveState] = useState<'idle' | 'saving' | 'saved'>('idle')
     const [saveError, setSaveError] = useState('')
     const branding = getBrandingFromSettings(settings)
@@ -338,6 +339,13 @@ const SystemSettings = (): JSX.Element => {
     const timeZoneOptions = getTimeZoneOptions(settings.timeZone)
     const modelOptions = settings.ai.provider === 'Ollama' ? ollamaModels : (providerModels[settings.ai.provider] || [])
     const canShowModelSelect = settings.ai.provider === 'Ollama' || modelOptions.length > 0
+    const normalizedAIUserSearch = aiUserSearch.trim().toLowerCase()
+    const filteredAIUsers = normalizedAIUserSearch ?
+        registeredUsers.filter((user) => {
+            const searchableUserText = `${userDisplayName(user)} ${user.username || ''} ${user.email || ''}`.toLowerCase()
+            return searchableUserText.includes(normalizedAIUserSearch)
+        }) :
+        registeredUsers
     const updateAIProvider = (provider: string) => {
         const model = provider === 'Ollama' ? (ollamaModels[0] || providerModelOptions.Ollama[0]) : providerModelOptions[provider][0]
         setProviderModels({})
@@ -357,12 +365,14 @@ const SystemSettings = (): JSX.Element => {
         setIsLoadingProviderModels(false)
         setSettings({...settings, ai: enabled ? {...settings.ai, enabled} : defaultSettings.ai})
     }
-    const updateAIEnabledFor = (value: string) => {
-        if (value === 'all') {
-            setSettings({...settings, ai: {...settings.ai, enableForAllUsers: true, enabledUserIds: []}})
-            return
-        }
-        setSettings({...settings, ai: {...settings.ai, enableForAllUsers: false, enabledUserIds: [value]}})
+    const updateAIEnabledForAllUsers = (enableForAllUsers: boolean) => {
+        setSettings({...settings, ai: {...settings.ai, enableForAllUsers, enabledUserIds: enableForAllUsers ? [] : settings.ai.enabledUserIds}})
+    }
+    const toggleAIEnabledUser = (userId: string, enabled: boolean) => {
+        const enabledUserIds = enabled ?
+            Array.from(new Set([...settings.ai.enabledUserIds, userId])) :
+            settings.ai.enabledUserIds.filter((enabledUserId) => enabledUserId !== userId)
+        setSettings({...settings, ai: {...settings.ai, enableForAllUsers: false, enabledUserIds}})
     }
     const updateModuleEnabled = (key: keyof AdminModuleSettings, enabled: boolean) => {
         setSettings({
@@ -745,33 +755,96 @@ const SystemSettings = (): JSX.Element => {
                                             ))}
                                         </select>
                                     </label>
-                                    <label>
-                                        <span>
+                                    <div className='admin-ai-user-picker'>
+                                        <span className='admin-settings-label'>
                                             <FormattedMessage
                                                 id='SystemSettings.enable-ai-for'
                                                 defaultMessage='Enable for'
                                             />
                                         </span>
-                                        <select
-                                            onChange={(event) => updateAIEnabledFor(event.target.value)}
-                                            value={settings.ai.enableForAllUsers ? 'all' : (settings.ai.enabledUserIds[0] || 'all')}
-                                        >
-                                            <option value='all'>
-                                                {intl.formatMessage({
-                                                    id: 'SystemSettings.enable-ai-for-all-users',
-                                                    defaultMessage: 'All User',
+                                        <div className='admin-ai-user-picker-panel'>
+                                            <div className='admin-ai-user-picker-toolbar'>
+                                                <label className='admin-settings-checkbox admin-ai-user-toggle admin-ai-user-toggle-all'>
+                                                    <input
+                                                        checked={settings.ai.enableForAllUsers}
+                                                        onChange={(event) => updateAIEnabledForAllUsers(event.target.checked)}
+                                                        type='checkbox'
+                                                    />
+                                                    <span>
+                                                        {intl.formatMessage({
+                                                            id: 'SystemSettings.enable-ai-for-all-users',
+                                                            defaultMessage: 'All User',
+                                                        })}
+                                                    </span>
+                                                </label>
+                                                <span className='admin-ai-user-count'>
+                                                    {settings.ai.enableForAllUsers ? (
+                                                        <FormattedMessage
+                                                            id='SystemSettings.enable-ai-all-users-count'
+                                                            defaultMessage='{count} users'
+                                                            values={{count: registeredUsers.length}}
+                                                        />
+                                                    ) : (
+                                                        <FormattedMessage
+                                                            id='SystemSettings.enable-ai-selected-users-count'
+                                                            defaultMessage='{count} selected'
+                                                            values={{count: settings.ai.enabledUserIds.length}}
+                                                        />
+                                                    )}
+                                                </span>
+                                            </div>
+                                            <input
+                                                aria-label={intl.formatMessage({
+                                                    id: 'SystemSettings.enable-ai-user-search',
+                                                    defaultMessage: 'Search users',
                                                 })}
-                                            </option>
-                                            {registeredUsers.map((user) => (
-                                                <option
-                                                    key={user.id}
-                                                    value={user.id}
-                                                >
-                                                    {userDisplayName(user)}
-                                                </option>
-                                            ))}
-                                        </select>
-                                    </label>
+                                                className='admin-ai-user-search'
+                                                onChange={(event) => setAIUserSearch(event.target.value)}
+                                                placeholder={intl.formatMessage({
+                                                    id: 'SystemSettings.enable-ai-user-search-placeholder',
+                                                    defaultMessage: 'Search users',
+                                                })}
+                                                value={aiUserSearch}
+                                            />
+                                            <div className='admin-ai-user-list'>
+                                                {filteredAIUsers.map((user) => (
+                                                    <label
+                                                        className='admin-settings-checkbox admin-ai-user-toggle'
+                                                        key={user.id}
+                                                    >
+                                                        <input
+                                                            checked={settings.ai.enableForAllUsers || settings.ai.enabledUserIds.includes(user.id)}
+                                                            disabled={settings.ai.enableForAllUsers}
+                                                            onChange={(event) => toggleAIEnabledUser(user.id, event.target.checked)}
+                                                            type='checkbox'
+                                                        />
+                                                        <span>{userDisplayName(user)}</span>
+                                                    </label>
+                                                ))}
+                                                {registeredUsers.length === 0 &&
+                                                <small>
+                                                    <FormattedMessage
+                                                        id='SystemSettings.enable-ai-no-users'
+                                                        defaultMessage='No registered users found.'
+                                                    />
+                                                </small>}
+                                                {registeredUsers.length > 0 && filteredAIUsers.length === 0 &&
+                                                <small>
+                                                    <FormattedMessage
+                                                        id='SystemSettings.enable-ai-no-matching-users'
+                                                        defaultMessage='No users match this search.'
+                                                    />
+                                                </small>}
+                                            </div>
+                                            {!settings.ai.enableForAllUsers && settings.ai.enabledUserIds.length === 0 &&
+                                            <small>
+                                                {intl.formatMessage({
+                                                    id: 'SystemSettings.enable-ai-select-users',
+                                                    defaultMessage: 'Select at least one user to enable AI access.',
+                                                })}
+                                            </small>}
+                                        </div>
+                                    </div>
                                     {settings.ai.provider === 'Ollama' &&
                                         <label className='admin-ai-ollama-endpoint'>
                                             <span>
