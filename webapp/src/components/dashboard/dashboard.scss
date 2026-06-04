@@ -155,30 +155,10 @@
     }
 
     @at-root {
-        .DashboardAccountDialog {
-            .dialog {
-                max-width: 560px;
-                height: auto;
-                border-radius: 10px;
-            }
-
-            .toolbar {
-                padding: 28px 32px 18px;
-            }
-
-            .dialog-title {
-                color: var(--bb-text);
-                font-size: 22px;
-                font-weight: 850;
-                line-height: 28px;
-            }
-        }
-
         .dashboard-account-form {
             display: flex;
             flex-direction: column;
             gap: 18px;
-            padding: 0 32px 32px;
 
             .dashboard-account-fields {
                 display: flex;
@@ -249,55 +229,6 @@
         .dashboard-account-success {
             background: var(--bb-green-soft);
             color: var(--bb-green-text);
-        }
-
-        .dashboard-account-actions {
-            display: flex;
-            justify-content: flex-end;
-            gap: 10px;
-            margin-top: 2px;
-
-            button {
-                min-height: 42px;
-                min-width: 92px;
-                padding: 0 18px;
-                border: 1px solid var(--bb-blue-text);
-                border-radius: 8px;
-                background: var(--bb-blue-text);
-                color: #fff;
-                cursor: pointer;
-                font-size: 13px;
-                font-weight: 800;
-
-                &:disabled {
-                    cursor: not-allowed;
-                    opacity: 0.64;
-                }
-
-                &.secondary {
-                    border-color: #d0d5dd;
-                    background: var(--bb-dashboard-panel-bg);
-                    color: var(--bb-text);
-                }
-            }
-        }
-
-        @media screen and (max-width: 560px) {
-            .DashboardAccountDialog {
-                .toolbar {
-                    padding: 24px 20px 16px;
-                }
-            }
-
-            .dashboard-account-form {
-                padding: 0 20px 24px;
-            }
-
-            .dashboard-account-actions {
-                button {
-                    flex: 1 1 0;
-                }
-            }
         }
     }
 

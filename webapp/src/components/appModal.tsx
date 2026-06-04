@@ -27,6 +27,7 @@ type Props = {
     saveDisabled?: boolean
     showSaveButton?: boolean
     hideCloseButton?: boolean
+    footerContent?: React.ReactNode
     size?: string
     width?: string
     titleIcon?: React.ReactNode
@@ -39,6 +40,7 @@ const AppModal = (props: Props): JSX.Element => {
         cancelText = 'Cancel',
         children,
         className = '',
+        footerContent,
         hideCloseButton = true,
         onClose,
         onSave,
@@ -61,29 +63,33 @@ const AppModal = (props: Props): JSX.Element => {
                 {children}
             </div>
             <div className='AppModal__footer'>
-                <button
-                    className={`AppModal__cancel ${isCloseAction ? 'AppModal__cancel--close' : ''}`}
-                    type='button'
-                    onClick={onClose}
-                >
-                    <span className='AppModal__cancelIcon'>
-                        <IconX size={16}/>
-                    </span>
-                    {cancelText}
-                </button>
-                {showSaveButton &&
-                    <button
-                        className='AppModal__save'
-                        disabled={saveDisabled}
-                        type={onSubmit ? 'submit' : 'button'}
-                        onClick={onSave}
-                    >
-                        <IconCheck
-                            className='icon'
-                            size={17}
-                        />
-                        {saveText}
-                    </button>}
+                {footerContent || (
+                    <>
+                        <button
+                            className={`AppModal__cancel ${isCloseAction ? 'AppModal__cancel--close' : ''}`}
+                            type='button'
+                            onClick={onClose}
+                        >
+                            <span className='AppModal__cancelIcon'>
+                                <IconX size={16}/>
+                            </span>
+                            {cancelText}
+                        </button>
+                        {showSaveButton &&
+                        <button
+                            className='AppModal__save'
+                            disabled={saveDisabled}
+                            type={onSubmit ? 'submit' : 'button'}
+                            onClick={onSave}
+                        >
+                            <IconCheck
+                                className='icon'
+                                size={17}
+                            />
+                            {saveText}
+                        </button>}
+                    </>
+                )}
             </div>
         </>
     )

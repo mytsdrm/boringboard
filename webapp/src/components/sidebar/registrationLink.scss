@@ -2,7 +2,6 @@
     display: flex;
     flex-direction: column;
     gap: 14px;
-    padding: 0 32px 32px;
     color: rgb(var(--center-channel-color-rgb));
     font-weight: normal;
     line-height: normal;
@@ -48,14 +47,24 @@
         white-space: nowrap;
     }
 
+    @media screen and (max-width: 560px) {
+        .invite-link-row {
+            align-items: stretch;
+            flex-direction: column;
+        }
+    }
+}
+
+.RegistrationLinkDialog {
     .invite-actions {
-        width: 100%;
-        gap: 10px;
+        display: flex;
         justify-content: flex-end;
         flex-wrap: nowrap;
+        gap: 10px;
+        width: 100%;
 
         .Button {
-            flex: 1 1 0;
+            flex: 0 1 auto;
             min-width: 0;
             white-space: nowrap;
         }
@@ -72,22 +81,12 @@
     }
 
     @media screen and (max-width: 560px) {
-        padding: 0 20px 24px;
-
-        .invite-link-row {
-            align-items: stretch;
-            flex-direction: column;
-        }
-
         .invite-actions {
-            flex-direction: row;
-        }
-    }
-}
+            flex-direction: column-reverse;
 
-.RegistrationLinkDialog {
-    .dialog {
-        max-width: 560px;
-        height: auto;
+            .Button {
+                width: 100%;
+            }
+        }
     }
 }

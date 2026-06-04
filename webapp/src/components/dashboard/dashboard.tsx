@@ -17,8 +17,7 @@ import {applyProjectSystemSettings, getStoredProjectSystemSettings, ProjectSyste
 import {Utils} from '../../utils'
 import CompassIcon from '../../widgets/icons/compassIcon'
 import {WSClient} from '../../wsclient'
-import Dialog from '../dialog'
-import RootPortal from '../rootPortal'
+import AppModal from '../appModal'
 import RegistrationLink from '../sidebar/registrationLink'
 import {StoredIcon} from '../icons/storedIcon'
 
@@ -1107,208 +1106,182 @@ const Dashboard = (): JSX.Element => {
                 />}
 
             {profileModalOpen &&
-                <RootPortal>
-                    <Dialog
-                        size='small'
-                        className='DashboardAccountDialog'
-                        title={(
-                            <FormattedMessage
-                                id='Dashboard.profile'
-                                defaultMessage='Profile'
-                            />
-                        )}
-                        onClose={() => setProfileModalOpen(false)}
-                    >
-                        <form
-                            className='dashboard-account-form'
-                            onSubmit={(e) => {
-                                e.preventDefault()
-                                saveProfile()
+                <AppModal
+                    className='DashboardAccountDialog'
+                    title={(
+                        <FormattedMessage
+                            id='Dashboard.profile'
+                            defaultMessage='Profile'
+                        />
+                    )}
+                    bodyClassName='dashboard-account-form'
+                    cancelText={(
+                        <FormattedMessage
+                            id='Button.cancel'
+                            defaultMessage='Cancel'
+                        />
+                    )}
+                    saveDisabled={profileSaving}
+                    saveText={(
+                        <FormattedMessage
+                            id='Button.save'
+                            defaultMessage='Save'
+                        />
+                    )}
+                    width='560px'
+                    onClose={() => setProfileModalOpen(false)}
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        saveProfile()
+                    }}
+                >
+                    {profileError &&
+                        <div className='dashboard-account-error'>
+                            {profileError}
+                        </div>}
+                    <div className='dashboard-account-fields'>
+                        <input
+                            type='text'
+                            value={profileForm.username}
+                            placeholder={intl.formatMessage({id: 'Dashboard.profile-username', defaultMessage: 'Username'})}
+                            aria-label={intl.formatMessage({id: 'Dashboard.profile-username', defaultMessage: 'Username'})}
+                            onChange={(e) => {
+                                setProfileForm({...profileForm, username: e.target.value})
+                                setProfileError('')
                             }}
-                        >
-                            {profileError &&
-                                <div className='dashboard-account-error'>
-                                    {profileError}
-                                </div>}
-                            <div className='dashboard-account-fields'>
-                                <input
-                                    type='text'
-                                    value={profileForm.username}
-                                    placeholder={intl.formatMessage({id: 'Dashboard.profile-username', defaultMessage: 'Username'})}
-                                    aria-label={intl.formatMessage({id: 'Dashboard.profile-username', defaultMessage: 'Username'})}
-                                    onChange={(e) => {
-                                        setProfileForm({...profileForm, username: e.target.value})
-                                        setProfileError('')
-                                    }}
+                        />
+                        <input
+                            type='email'
+                            value={profileForm.email}
+                            placeholder={intl.formatMessage({id: 'Dashboard.profile-email', defaultMessage: 'Email'})}
+                            aria-label={intl.formatMessage({id: 'Dashboard.profile-email', defaultMessage: 'Email'})}
+                            onChange={(e) => {
+                                setProfileForm({...profileForm, email: e.target.value})
+                                setProfileError('')
+                            }}
+                        />
+                        <input
+                            type='text'
+                            value={profileForm.nickname}
+                            placeholder={intl.formatMessage({id: 'Dashboard.profile-nickname', defaultMessage: 'Display name'})}
+                            aria-label={intl.formatMessage({id: 'Dashboard.profile-nickname', defaultMessage: 'Display name'})}
+                            onChange={(e) => {
+                                setProfileForm({...profileForm, nickname: e.target.value})
+                                setProfileError('')
+                            }}
+                        />
+                        <input
+                            type='tel'
+                            inputMode='tel'
+                            value={profileForm.phoneNumber}
+                            placeholder={intl.formatMessage({id: 'Dashboard.profile-phone-number', defaultMessage: 'Phone Number'})}
+                            aria-label={intl.formatMessage({id: 'Dashboard.profile-phone-number', defaultMessage: 'Phone Number'})}
+                            onChange={(e) => {
+                                setProfileForm({...profileForm, phoneNumber: e.target.value})
+                                setProfileError('')
+                            }}
+                        />
+                        <label className='dashboard-account-checkbox'>
+                            <input
+                                type='checkbox'
+                                checked={profileForm.phoneWhatsAppEnabled}
+                                onChange={(e) => {
+                                    setProfileForm({...profileForm, phoneWhatsAppEnabled: e.target.checked})
+                                    setProfileError('')
+                                }}
+                            />
+                            <span>
+                                <FormattedMessage
+                                    id='Dashboard.profile-whatsapp'
+                                    defaultMessage='WhatsApp'
                                 />
-                                <input
-                                    type='email'
-                                    value={profileForm.email}
-                                    placeholder={intl.formatMessage({id: 'Dashboard.profile-email', defaultMessage: 'Email'})}
-                                    aria-label={intl.formatMessage({id: 'Dashboard.profile-email', defaultMessage: 'Email'})}
-                                    onChange={(e) => {
-                                        setProfileForm({...profileForm, email: e.target.value})
-                                        setProfileError('')
-                                    }}
+                            </span>
+                        </label>
+                        <label className='dashboard-account-checkbox'>
+                            <input
+                                type='checkbox'
+                                checked={profileForm.phoneTelegramEnabled}
+                                onChange={(e) => {
+                                    setProfileForm({...profileForm, phoneTelegramEnabled: e.target.checked})
+                                    setProfileError('')
+                                }}
+                            />
+                            <span>
+                                <FormattedMessage
+                                    id='Dashboard.profile-telegram'
+                                    defaultMessage='Telegram'
                                 />
-                                <input
-                                    type='text'
-                                    value={profileForm.nickname}
-                                    placeholder={intl.formatMessage({id: 'Dashboard.profile-nickname', defaultMessage: 'Display name'})}
-                                    aria-label={intl.formatMessage({id: 'Dashboard.profile-nickname', defaultMessage: 'Display name'})}
-                                    onChange={(e) => {
-                                        setProfileForm({...profileForm, nickname: e.target.value})
-                                        setProfileError('')
-                                    }}
-                                />
-                                <input
-                                    type='tel'
-                                    inputMode='tel'
-                                    value={profileForm.phoneNumber}
-                                    placeholder={intl.formatMessage({id: 'Dashboard.profile-phone-number', defaultMessage: 'Phone Number'})}
-                                    aria-label={intl.formatMessage({id: 'Dashboard.profile-phone-number', defaultMessage: 'Phone Number'})}
-                                    onChange={(e) => {
-                                        setProfileForm({...profileForm, phoneNumber: e.target.value})
-                                        setProfileError('')
-                                    }}
-                                />
-                                <label className='dashboard-account-checkbox'>
-                                    <input
-                                        type='checkbox'
-                                        checked={profileForm.phoneWhatsAppEnabled}
-                                        onChange={(e) => {
-                                            setProfileForm({...profileForm, phoneWhatsAppEnabled: e.target.checked})
-                                            setProfileError('')
-                                        }}
-                                    />
-                                    <span>
-                                        <FormattedMessage
-                                            id='Dashboard.profile-whatsapp'
-                                            defaultMessage='WhatsApp'
-                                        />
-                                    </span>
-                                </label>
-                                <label className='dashboard-account-checkbox'>
-                                    <input
-                                        type='checkbox'
-                                        checked={profileForm.phoneTelegramEnabled}
-                                        onChange={(e) => {
-                                            setProfileForm({...profileForm, phoneTelegramEnabled: e.target.checked})
-                                            setProfileError('')
-                                        }}
-                                    />
-                                    <span>
-                                        <FormattedMessage
-                                            id='Dashboard.profile-telegram'
-                                            defaultMessage='Telegram'
-                                        />
-                                    </span>
-                                </label>
-                            </div>
-                            <div className='dashboard-account-actions'>
-                                <button
-                                    type='button'
-                                    className='secondary'
-                                    onClick={() => setProfileModalOpen(false)}
-                                >
-                                    <FormattedMessage
-                                        id='Button.cancel'
-                                        defaultMessage='Cancel'
-                                    />
-                                </button>
-                                <button
-                                    type='submit'
-                                    disabled={profileSaving}
-                                >
-                                    <FormattedMessage
-                                        id='Button.save'
-                                        defaultMessage='Save'
-                                    />
-                                </button>
-                            </div>
-                        </form>
-                    </Dialog>
-                </RootPortal>}
+                            </span>
+                        </label>
+                    </div>
+                </AppModal>}
 
             {passwordModalOpen &&
-                <RootPortal>
-                    <Dialog
-                        size='small'
-                        className='DashboardAccountDialog'
-                        title={(
+                <AppModal
+                    className='DashboardAccountDialog'
+                    title={(
+                        <FormattedMessage
+                            id='Sidebar.changePassword'
+                            defaultMessage='Change password'
+                        />
+                    )}
+                    bodyClassName='dashboard-account-form'
+                    cancelText={(
+                        <FormattedMessage
+                            id='Button.cancel'
+                            defaultMessage='Cancel'
+                        />
+                    )}
+                    saveDisabled={passwordSaving}
+                    saveText={(
+                        <FormattedMessage
+                            id='changePassword.submit-button'
+                            defaultMessage='Change password'
+                        />
+                    )}
+                    width='560px'
+                    onClose={() => setPasswordModalOpen(false)}
+                    onSubmit={(e) => {
+                        e.preventDefault()
+                        savePassword()
+                    }}
+                >
+                    {passwordError &&
+                        <div className='dashboard-account-error'>
+                            {passwordError}
+                        </div>}
+                    {passwordSucceeded &&
+                        <div className='dashboard-account-success'>
                             <FormattedMessage
-                                id='Sidebar.changePassword'
-                                defaultMessage='Change password'
+                                id='changePassword.success-short'
+                                defaultMessage='Password changed.'
                             />
-                        )}
-                        onClose={() => setPasswordModalOpen(false)}
-                    >
-                        <form
-                            className='dashboard-account-form'
-                            onSubmit={(e) => {
-                                e.preventDefault()
-                                savePassword()
+                        </div>}
+                    <div className='dashboard-account-fields'>
+                        <input
+                            type='password'
+                            value={passwordForm.next}
+                            placeholder={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
+                            aria-label={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
+                            onChange={(e) => {
+                                setPasswordForm({...passwordForm, next: e.target.value})
+                                setPasswordError('')
+                                setPasswordSucceeded(false)
                             }}
-                        >
-                            {passwordError &&
-                                <div className='dashboard-account-error'>
-                                    {passwordError}
-                                </div>}
-                            {passwordSucceeded &&
-                                <div className='dashboard-account-success'>
-                                    <FormattedMessage
-                                        id='changePassword.success-short'
-                                        defaultMessage='Password changed.'
-                                    />
-                                </div>}
-                            <div className='dashboard-account-fields'>
-                                <input
-                                    type='password'
-                                    value={passwordForm.next}
-                                    placeholder={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
-                                    aria-label={intl.formatMessage({id: 'changePassword.new-password-label', defaultMessage: 'New password'})}
-                                    onChange={(e) => {
-                                        setPasswordForm({...passwordForm, next: e.target.value})
-                                        setPasswordError('')
-                                        setPasswordSucceeded(false)
-                                    }}
-                                />
-                                <input
-                                    type='password'
-                                    value={passwordForm.confirm}
-                                    placeholder={intl.formatMessage({id: 'changePassword.confirm-password-label', defaultMessage: 'Confirm password'})}
-                                    aria-label={intl.formatMessage({id: 'changePassword.confirm-password-label', defaultMessage: 'Confirm password'})}
-                                    onChange={(e) => {
-                                        setPasswordForm({...passwordForm, confirm: e.target.value})
-                                        setPasswordError('')
-                                        setPasswordSucceeded(false)
-                                    }}
-                                />
-                            </div>
-                            <div className='dashboard-account-actions'>
-                                <button
-                                    type='button'
-                                    className='secondary'
-                                    onClick={() => setPasswordModalOpen(false)}
-                                >
-                                    <FormattedMessage
-                                        id='Button.cancel'
-                                        defaultMessage='Cancel'
-                                    />
-                                </button>
-                                <button
-                                    type='submit'
-                                    disabled={passwordSaving}
-                                >
-                                    <FormattedMessage
-                                        id='changePassword.submit-button'
-                                        defaultMessage='Change password'
-                                    />
-                                </button>
-                            </div>
-                        </form>
-                    </Dialog>
-                </RootPortal>}
+                        />
+                        <input
+                            type='password'
+                            value={passwordForm.confirm}
+                            placeholder={intl.formatMessage({id: 'changePassword.confirm-password-label', defaultMessage: 'Confirm password'})}
+                            aria-label={intl.formatMessage({id: 'changePassword.confirm-password-label', defaultMessage: 'Confirm password'})}
+                            onChange={(e) => {
+                                setPasswordForm({...passwordForm, confirm: e.target.value})
+                                setPasswordError('')
+                                setPasswordSucceeded(false)
+                            }}
+                        />
+                    </div>
+                </AppModal>}
 
             <section className='dashboard-metric-grid'>
                 <div className='dashboard-metric-card board-count'>
