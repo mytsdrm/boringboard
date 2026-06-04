@@ -10,8 +10,6 @@
     }
 
     .dialog {
-        width: 600px;
-        max-width: 90%;
         height: auto;
         margin: 0;
         max-height: calc(100vh - 96px);
@@ -31,6 +29,10 @@
                 padding: 5px 20px;
             }
         }
+    }
+
+    .ShareBoardDialog__body {
+        padding: 0;
     }
 
     .tabs-container {
@@ -86,7 +88,7 @@
                 flex: 1;
                 margin-right: 12px;
                 height: 40px;
-                width: 400px;
+                min-width: 0;
                 align-items: center;
                 display: flex;
                 padding: 0 4px 0 8px;
@@ -149,12 +151,6 @@
     .share-input__container {
         padding: 0 32px 24px;
         border-bottom: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
-    }
-
-    .share-dialog-footer {
-        display: flex;
-        justify-content: flex-end;
-        padding: 0 32px 24px;
     }
 
     .share-input {

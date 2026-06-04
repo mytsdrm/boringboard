@@ -17,6 +17,7 @@ type Props = {
     toolbar?: React.ReactNode
     hideCloseButton?: boolean
     className?: string
+    style?: React.CSSProperties
     title?: JSX.Element
     subtitle?: JSX.Element
     onClose: () => void
@@ -36,7 +37,10 @@ const Dialog = (props: Props) => {
     const isBackdropClickedRef = useRef(false)
 
     return (
-        <div className={`Dialog dialog-back ${props.className} size--${size || 'medium'}`}>
+        <div
+            className={`Dialog dialog-back ${props.className} size--${size || 'medium'}`}
+            style={props.style}
+        >
             <div className='backdrop'/>
             <div
                 className='wrapper'

@@ -2,8 +2,8 @@
     .dialog {
         display: flex;
         flex-direction: column;
-        width: min(680px, calc(100vw - 40px));
-        max-width: 680px;
+        width: min(var(--app-modal-width, 680px), calc(100vw - 40px));
+        max-width: min(var(--app-modal-width, 680px), calc(100vw - 40px));
         max-height: min(760px, calc(100vh - 48px));
         overflow: hidden;
         border-radius: 12px;

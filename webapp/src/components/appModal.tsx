@@ -9,6 +9,10 @@ import RootPortal from './rootPortal'
 
 import './appModal.scss'
 
+type AppModalStyle = React.CSSProperties & {
+    '--app-modal-width'?: string
+}
+
 type Props = {
     children: React.ReactNode
     title: React.ReactNode
@@ -24,6 +28,7 @@ type Props = {
     showSaveButton?: boolean
     hideCloseButton?: boolean
     size?: string
+    width?: string
     titleIcon?: React.ReactNode
 }
 
@@ -44,10 +49,12 @@ const AppModal = (props: Props): JSX.Element => {
         size = 'small',
         title,
         titleIcon = <IconInfoCircle size={20}/>,
+        width,
     } = props
 
     const cancelLabel = typeof cancelText === 'string' ? cancelText : ''
     const isCloseAction = cancelVariant ? cancelVariant === 'close' : cancelLabel.toLowerCase() === 'close'
+    const modalStyle: AppModalStyle | undefined = width ? {'--app-modal-width': width} : undefined
     const body = (
         <>
             <div className={`AppModal__body ${bodyClassName}`}>
@@ -87,6 +94,7 @@ const AppModal = (props: Props): JSX.Element => {
                 className={`AppModal ${className}`}
                 hideCloseButton={hideCloseButton}
                 size={size}
+                style={modalStyle}
                 title={(
                     <span className='AppModal__title'>
                         <span className='AppModal__titleIcon'>{titleIcon}</span>

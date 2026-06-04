@@ -8,8 +8,7 @@ import {Board} from '../../blocks/board'
 import mutator from '../../mutator'
 import Button from '../../widgets/buttons/button'
 import SettingsIcon from '../../widgets/icons/settings'
-import Dialog from '../dialog'
-import RootPortal from '../rootPortal'
+import AppModal from '../appModal'
 
 import './boardIntegrationSettingsButton.scss'
 
@@ -41,7 +40,7 @@ const getConfig = (board: Board): BoardIntegrationConfig => {
         return emptyConfig
     }
 
-    const config = value as Partial<BoardIntegrationConfig>
+    const config = value as Partial<BoardIntegrationConfig> & {branchFilter?: string}
     return {
         repoUrl: config.repoUrl || '',
         devBranch: config.devBranch || config.branchFilter || '',
@@ -118,117 +117,104 @@ const BoardIntegrationSettingsButton = (props: Props): JSX.Element => {
                 />
             </Button>
             {showDialog &&
-                <RootPortal>
-                    <Dialog
-                        onClose={() => setShowDialog(false)}
-                        className='BoardIntegrationSettingsDialog'
-                        size='small'
-                        title={
+                <AppModal
+                    bodyClassName='BoardIntegrationSettingsDialog__form'
+                    cancelText={(
+                        <FormattedMessage
+                            id='BoardIntegrationSettings.cancel'
+                            defaultMessage='Cancel'
+                        />
+                    )}
+                    className='BoardIntegrationSettingsDialog'
+                    saveText={(
+                        <FormattedMessage
+                            id='BoardIntegrationSettings.save'
+                            defaultMessage='Save'
+                        />
+                    )}
+                    title={
+                        <FormattedMessage
+                            id='BoardIntegrationSettings.title'
+                            defaultMessage='Task Board Settings'
+                        />
+                    }
+                    titleIcon={<SettingsIcon/>}
+                    onClose={() => setShowDialog(false)}
+                    onSubmit={saveConfig}
+                >
+                    <label>
+                        <span>
                             <FormattedMessage
-                                id='BoardIntegrationSettings.title'
-                                defaultMessage='Task Board Settings'
+                                id='BoardIntegrationSettings.repoUrl'
+                                defaultMessage='Repository URL'
                             />
-                        }
-                    >
-                        <form
-                            className='BoardIntegrationSettingsDialog__form'
-                            onSubmit={saveConfig}
-                        >
-                            <label>
-                                <span>
-                                    <FormattedMessage
-                                        id='BoardIntegrationSettings.repoUrl'
-                                        defaultMessage='Repository URL'
-                                    />
-                                </span>
-                                <input
-                                    type='url'
-                                    value={config.repoUrl}
-                                    onChange={updateField('repoUrl')}
-                                    placeholder='https://github.com/org/repo'
+                        </span>
+                        <input
+                            type='url'
+                            value={config.repoUrl}
+                            onChange={updateField('repoUrl')}
+                            placeholder='https://github.com/org/repo'
+                        />
+                    </label>
+                    <div className='BoardIntegrationSettingsDialog__branchRow'>
+                        <label>
+                            <span>
+                                <FormattedMessage
+                                    id='BoardIntegrationSettings.devBranch'
+                                    defaultMessage='Dev Branch'
                                 />
-                            </label>
-                            <div className='BoardIntegrationSettingsDialog__branchRow'>
-                                <label>
-                                    <span>
-                                        <FormattedMessage
-                                            id='BoardIntegrationSettings.devBranch'
-                                            defaultMessage='Dev Branch'
-                                        />
-                                    </span>
-                                    <input
-                                        type='text'
-                                        value={config.devBranch}
-                                        onChange={updateField('devBranch')}
-                                        placeholder='develop'
-                                    />
-                                </label>
-                                <label>
-                                    <span>
-                                        <FormattedMessage
-                                            id='BoardIntegrationSettings.prodBranch'
-                                            defaultMessage='Prod Branch'
-                                        />
-                                    </span>
-                                    <input
-                                        type='text'
-                                        value={config.prodBranch}
-                                        onChange={updateField('prodBranch')}
-                                        placeholder='main'
-                                    />
-                                </label>
-                            </div>
-                            <label>
-                                <span>
-                                    <FormattedMessage
-                                        id='BoardIntegrationSettings.developmentUrl'
-                                        defaultMessage='Development URL'
-                                    />
-                                </span>
-                                <input
-                                    type='url'
-                                    value={config.developmentUrl}
-                                    onChange={updateField('developmentUrl')}
-                                    placeholder='https://dev.example.com'
+                            </span>
+                            <input
+                                type='text'
+                                value={config.devBranch}
+                                onChange={updateField('devBranch')}
+                                placeholder='develop'
+                            />
+                        </label>
+                        <label>
+                            <span>
+                                <FormattedMessage
+                                    id='BoardIntegrationSettings.prodBranch'
+                                    defaultMessage='Prod Branch'
                                 />
-                            </label>
-                            <label>
-                                <span>
-                                    <FormattedMessage
-                                        id='BoardIntegrationSettings.productionUrl'
-                                        defaultMessage='Production URL'
-                                    />
-                                </span>
-                                <input
-                                    type='url'
-                                    value={config.productionUrl}
-                                    onChange={updateField('productionUrl')}
-                                    placeholder='https://example.com'
-                                />
-                            </label>
-                            <div className='BoardIntegrationSettingsDialog__footer'>
-                                <Button
-                                    onClick={() => setShowDialog(false)}
-                                    emphasis='secondary'
-                                >
-                                    <FormattedMessage
-                                        id='BoardIntegrationSettings.cancel'
-                                        defaultMessage='Cancel'
-                                    />
-                                </Button>
-                                <Button
-                                    submit={true}
-                                    emphasis='primary'
-                                >
-                                    <FormattedMessage
-                                        id='BoardIntegrationSettings.save'
-                                        defaultMessage='Save'
-                                    />
-                                </Button>
-                            </div>
-                        </form>
-                    </Dialog>
-                </RootPortal>
+                            </span>
+                            <input
+                                type='text'
+                                value={config.prodBranch}
+                                onChange={updateField('prodBranch')}
+                                placeholder='main'
+                            />
+                        </label>
+                    </div>
+                    <label>
+                        <span>
+                            <FormattedMessage
+                                id='BoardIntegrationSettings.developmentUrl'
+                                defaultMessage='Development URL'
+                            />
+                        </span>
+                        <input
+                            type='url'
+                            value={config.developmentUrl}
+                            onChange={updateField('developmentUrl')}
+                            placeholder='https://dev.example.com'
+                        />
+                    </label>
+                    <label>
+                        <span>
+                            <FormattedMessage
+                                id='BoardIntegrationSettings.productionUrl'
+                                defaultMessage='Production URL'
+                            />
+                        </span>
+                        <input
+                            type='url'
+                            value={config.productionUrl}
+                            onChange={updateField('productionUrl')}
+                            placeholder='https://example.com'
+                        />
+                    </label>
+                </AppModal>
             }
         </div>
     )
