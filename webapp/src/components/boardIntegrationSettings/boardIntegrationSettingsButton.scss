@@ -1,5 +1,24 @@
 .BoardIntegrationSettingsButton {
     display: flex;
+
+    .Button {
+        border: 1px solid color-mix(in srgb, var(--bb-blue-text) 34%, var(--bb-border));
+        background: var(--bb-blue-soft);
+        color: var(--bb-blue-text);
+        box-shadow: 0 10px 22px -18px var(--bb-blue-text);
+
+        &:hover {
+            border-color: color-mix(in srgb, var(--bb-blue-text) 52%, var(--bb-border));
+            background: color-mix(in srgb, var(--bb-blue-soft) 72%, var(--bb-dashboard-panel-bg));
+            color: var(--bb-blue-text);
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            background: color-mix(in srgb, var(--bb-blue-soft) 84%, var(--bb-blue-text));
+            transform: translateY(0);
+        }
+    }
 }
 
 .AppModal.BoardIntegrationSettingsDialog {

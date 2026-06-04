@@ -170,9 +170,9 @@
                 width: 100%;
                 height: 50px;
                 padding: 0 16px;
-                border: 1px solid #d0d5dd;
+                border: 1px solid var(--bb-border);
                 border-radius: 9px;
-                background: #fff;
+                background: var(--bb-dashboard-panel-bg);
                 color: var(--bb-text);
                 font-size: 14px;
                 font-weight: 700;
@@ -416,7 +416,7 @@
         &:hover,
         &:focus {
             border-color: color-mix(in srgb, var(--bb-blue-text) 38%, var(--bb-border));
-            background: color-mix(in srgb, var(--bb-blue-soft) 76%, #fff);
+            background: color-mix(in srgb, var(--bb-blue-soft) 76%, var(--bb-dashboard-panel-bg));
         }
     }
 
@@ -498,7 +498,7 @@
     }
 
     .dashboard-board-meta {
-        color: var(--bb-text-muted);
+        color: var(--bb-date-text);
         font-size: 12px;
         font-weight: normal;
         line-height: 18px;

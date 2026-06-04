@@ -452,8 +452,53 @@
         }
     }
 
+    .admin-date-cell,
+    .admin-date-cell strong,
+    .admin-date-cell small {
+        color: var(--bb-date-text);
+        font-weight: 650;
+    }
+
     .admin-table-actions {
         justify-content: flex-end;
+
+        .btn {
+            border-color: color-mix(in srgb, var(--bb-text) 24%, var(--bb-border));
+            background: color-mix(in srgb, var(--bb-dashboard-panel-bg) 82%, transparent);
+            color: color-mix(in srgb, var(--bb-text) 72%, transparent);
+            box-shadow: none;
+
+            &:hover,
+            &:focus {
+                background: var(--bb-blue-soft);
+                border-color: color-mix(in srgb, var(--bb-blue-text) 46%, var(--bb-border));
+                color: var(--bb-blue-text);
+            }
+        }
+
+        .btn-outline-primary {
+            border-color: color-mix(in srgb, var(--bb-blue-text) 52%, var(--bb-border));
+            color: var(--bb-blue-text);
+
+            &:hover,
+            &:focus {
+                background: var(--bb-blue-soft);
+                border-color: var(--bb-blue-text);
+                color: var(--bb-blue-text);
+            }
+        }
+
+        .btn-outline-danger {
+            border-color: color-mix(in srgb, rgb(var(--button-danger-bg-rgb)) 52%, var(--bb-border));
+            color: rgb(var(--button-danger-bg-rgb));
+
+            &:hover,
+            &:focus {
+                background: rgba(var(--button-danger-bg-rgb), 0.1);
+                border-color: rgb(var(--button-danger-bg-rgb));
+                color: rgb(var(--button-danger-bg-rgb));
+            }
+        }
     }
 
     .admin-user-cell,
@@ -505,15 +550,15 @@
         strong {
             color: var(--bb-text);
             font-size: 14px;
-            font-weight: 800;
+            font-weight: 850;
             line-height: 20px;
         }
 
         small {
             max-width: 520px;
-            color: var(--bb-text-muted);
+            color: color-mix(in srgb, var(--bb-text) 82%, transparent);
             font-size: 12px;
-            font-weight: 650;
+            font-weight: 600;
             line-height: 18px;
             white-space: normal;
         }
@@ -533,7 +578,7 @@
         }
 
         small {
-            color: var(--bb-text-muted);
+            color: color-mix(in srgb, var(--bb-text) 78%, transparent);
             font-size: 12px;
             font-weight: 650;
             line-height: 18px;
@@ -543,6 +588,27 @@
     .admin-reminders-table,
     .admin-announcements-table {
         min-width: 1080px;
+        color: var(--bb-text);
+
+        tbody {
+            tr {
+                background: var(--bb-table-row-bg);
+
+                &:nth-child(even) {
+                    background: var(--bb-table-row-alt-bg);
+                }
+
+                &:hover {
+                    background: var(--bb-table-row-hover-bg);
+                }
+            }
+
+            td {
+                border-color: var(--bb-table-border);
+                background: transparent;
+                color: var(--bb-text);
+            }
+        }
     }
 
     .admin-page-empty {

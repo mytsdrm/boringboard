@@ -579,7 +579,7 @@ const AdminReminders = (): JSX.Element => {
                                     </td>
                                     <td>{reminder.audience}</td>
                                     <td>{reminder.channel}</td>
-                                    <td>
+                                    <td className='admin-date-cell'>
                                         <span className='admin-reminder-schedule'>
                                             <strong>{formatReminderDate(reminder.remindAt)}</strong>
                                             <small>{reminder.repeat}</small>

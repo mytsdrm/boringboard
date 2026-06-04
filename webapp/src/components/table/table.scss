@@ -1,4 +1,4 @@
-@import "../../styles/z-index";
+@import '../../styles/z-index';
 
 .Table {
     margin-top: 22px;
@@ -305,6 +305,13 @@
                 font-size: inherit;
                 font-weight: 500;
                 color: var(--bb-text-muted);
+            }
+
+            &.octo-table-date-cell {
+                .octo-propertyvalue {
+                    color: var(--bb-date-text);
+                    font-weight: 650;
+                }
             }
         }
 

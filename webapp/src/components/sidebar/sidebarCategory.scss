@@ -267,7 +267,7 @@
         text-align: left;
 
         &:hover {
-            background-color: rgba(18, 98, 255, 0.08);
+            background-color: var(--bb-blue-soft);
             color: rgb(var(--sidebar-text-rgb));
         }
 
@@ -298,13 +298,13 @@
         text-align: center;
 
         &.personal-task-boards {
-            background: rgba(15, 82, 186, 0.18);
-            color: #0b3f91;
+            background: var(--bb-blue-soft);
+            color: var(--bb-blue-text);
         }
 
         &.joined-task-boards {
-            background: rgba(93, 52, 168, 0.18);
-            color: #42247a;
+            background: var(--bb-purple-soft);
+            color: var(--bb-purple-text);
         }
     }
 

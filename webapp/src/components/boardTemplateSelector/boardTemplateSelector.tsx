@@ -190,6 +190,7 @@ const BoardTemplateSelector = (props: Props) => {
                         </div>
                         <div className='templates-sidebar__footer'>
                             <Button
+                                className='templates-sidebar__empty-board-button'
                                 emphasis='secondary'
                                 size={'medium'}
                                 icon={<CompassIcon icon='kanban'/>}
@@ -201,7 +202,7 @@ const BoardTemplateSelector = (props: Props) => {
                             >
                                 <FormattedMessage
                                     id='BoardTemplateSelector.create-empty-board'
-                                    defaultMessage='Create empty board'
+                                    defaultMessage='Create an empty board'
                                 />
                             </Button>
                         </div>

@@ -612,8 +612,8 @@ const AdminAnnouncements = (): JSX.Element => {
                                     </td>
                                     <td>{announcement.audience}</td>
                                     <td>{announcement.priority}</td>
-                                    <td>{formatDate(announcement.publishAt)}</td>
-                                    <td>
+                                    <td className='admin-date-cell'>{formatDate(announcement.publishAt)}</td>
+                                    <td className='admin-date-cell'>
                                         <span className='admin-announcement-schedule'>
                                             <strong>{announcement.expireAt ? formatDate(announcement.expireAt) : '-'}</strong>
                                         </span>

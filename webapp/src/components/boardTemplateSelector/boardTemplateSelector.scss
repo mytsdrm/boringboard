@@ -113,6 +113,29 @@
         }
     }
 
+    .templates-sidebar__empty-board-button {
+        border: 1px solid color-mix(in srgb, var(--bb-blue-text) 38%, var(--bb-border));
+        background:
+            linear-gradient(180deg, color-mix(in srgb, var(--bb-blue-soft) 92%, transparent), color-mix(in srgb, var(--bb-blue-soft) 66%, transparent)),
+            var(--bb-dashboard-panel-bg);
+        color: var(--bb-blue-text);
+        font-weight: 800;
+        box-shadow: 0 12px 24px -18px var(--bb-blue-text);
+
+        &:hover {
+            border-color: color-mix(in srgb, var(--bb-blue-text) 58%, var(--bb-border));
+            background:
+                linear-gradient(180deg, color-mix(in srgb, var(--bb-blue-soft) 100%, transparent), color-mix(in srgb, var(--bb-blue-soft) 78%, transparent)),
+                var(--bb-dashboard-panel-bg);
+            color: var(--bb-blue-text);
+            transform: translateY(-1px);
+        }
+
+        &:active {
+            transform: translateY(0);
+        }
+    }
+
     .templates__empty-board {
         color: rgb(var(--button-bg-rgb));
         padding: 0;

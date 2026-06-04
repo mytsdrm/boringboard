@@ -38,9 +38,9 @@
         min-width: 0;
         max-width: none;
         min-height: 48px;
-        color: var(--bb-text);
+        color: var(--bb-date-text);
         font-size: 14px;
-        font-weight: 500;
+        font-weight: 650;
         letter-spacing: 0;
         line-height: 20px;
         padding-right: 14px;
@@ -49,7 +49,12 @@
         text-transform: none;
 
         &:hover {
-            border-color: #90b5f9;
+            border-color: color-mix(in srgb, var(--bb-blue-text) 44%, var(--bb-border));
+        }
+
+        &:disabled {
+            color: var(--bb-date-text);
+            opacity: 1;
         }
     }
 
@@ -61,7 +66,7 @@
 
         svg {
             flex: 0 0 auto;
-            color: #667085;
+            color: color-mix(in srgb, var(--bb-date-text) 78%, var(--bb-blue-text));
         }
 
         span {
@@ -73,7 +78,7 @@
 
     .activity-logs-date-range-chevron {
         flex: 0 0 auto;
-        color: #667085;
+        color: color-mix(in srgb, var(--bb-date-text) 78%, var(--bb-blue-text));
     }
 
     .activity-logs-date-range-popover {
@@ -115,7 +120,7 @@
         margin: 0 -10px -10px;
         padding: 10px;
         border-top: 1px solid var(--bb-border);
-        background: #f8fafc;
+        background: var(--bb-panel-bg-soft);
     }
 
     .activity-logs-table-card {
@@ -210,6 +215,16 @@
     .activity-log-time,
     .activity-log-board {
         color: var(--bb-text-muted);
+    }
+
+    .activity-log-time {
+        color: var(--bb-date-text);
+        font-weight: 650;
+    }
+
+    .activity-log-board {
+        color: var(--bb-date-text);
+        font-weight: 650;
     }
 
     .activity-log-user {

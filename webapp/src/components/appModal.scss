@@ -137,7 +137,7 @@
 
 .AppModal__cancel {
     border: 1px solid rgba(217, 45, 32, 0.28);
-    background: #fff;
+    background: var(--bb-dashboard-panel-bg);
     color: #b42318;
 
     &:hover:not(:disabled) {
@@ -171,12 +171,12 @@
 .AppModal__save {
     border: 1px solid var(--bb-blue-text);
     background: var(--bb-blue-text);
-    color: #fff;
+    color: rgb(var(--button-color-rgb));
     box-shadow: 0 8px 18px -12px var(--bb-blue-text);
 
     &:hover:not(:disabled) {
-        border-color: #004fd8;
-        background: #004fd8;
+        border-color: color-mix(in srgb, var(--bb-blue-text) 84%, var(--bb-text));
+        background: color-mix(in srgb, var(--bb-blue-text) 84%, var(--bb-text));
         box-shadow: 0 12px 22px -12px rgba(0, 95, 255, 0.9);
         transform: translateY(-1px);
     }

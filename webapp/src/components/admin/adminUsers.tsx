@@ -599,7 +599,7 @@ const AdminUsers = (): JSX.Element => {
                                             {getUserGroup(user)}
                                         </span>
                                     </td>
-                                    <td>{formatDate(user.create_at)}</td>
+                                    <td className='admin-date-cell'>{formatDate(user.create_at)}</td>
                                     <td>
                                         <div className='admin-table-actions'>
                                             <button

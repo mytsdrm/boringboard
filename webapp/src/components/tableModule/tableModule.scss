@@ -3,6 +3,10 @@
 .TableModule {
     position: relative;
     overflow: visible;
+    border: 1px solid var(--bb-border);
+    border-radius: 10px;
+    background: var(--bb-dashboard-panel-bg);
+    box-shadow: 0 16px 34px var(--bb-shadow-soft);
 
     .table-module-toolbar {
         display: flex;
@@ -12,6 +16,7 @@
         min-height: 68px;
         padding: 14px 18px;
         border-bottom: 1px solid var(--bb-table-border);
+        border-radius: 10px 10px 0 0;
         background: var(--bb-dashboard-panel-bg);
     }
 
@@ -47,7 +52,7 @@
 
         &[open] {
             .table-module-options-button {
-                border-color: color-mix(in srgb, var(--bb-blue-text) 36%, #d0d5dd);
+                border-color: color-mix(in srgb, var(--bb-blue-text) 46%, var(--bb-border));
                 color: var(--bb-blue-text);
                 background: var(--bb-blue-soft);
             }
@@ -69,9 +74,19 @@
         min-height: 40px;
         padding: 0 14px;
         border-radius: 8px;
+        border-color: color-mix(in srgb, var(--bb-text) 28%, var(--bb-border));
+        background: color-mix(in srgb, var(--bb-dashboard-panel-bg) 84%, transparent);
+        color: color-mix(in srgb, var(--bb-text) 76%, var(--bb-blue-text));
         font-size: 13px;
         font-weight: 750;
         cursor: pointer;
+
+        &:hover,
+        &:focus {
+            border-color: color-mix(in srgb, var(--bb-blue-text) 42%, var(--bb-border));
+            background: var(--bb-blue-soft);
+            color: var(--bb-blue-text);
+        }
 
         .icon {
             margin: 0;
@@ -145,12 +160,14 @@
 
     .table-module-content {
         min-height: 0;
+        overflow: hidden;
+        border-radius: 0 0 10px 10px;
 
         table {
             thead th {
                 padding: 16px 20px;
                 border-bottom: 1px solid var(--bb-table-border-strong);
-                background: color-mix(in srgb, var(--bb-table-header-bg) 82%, #fff);
+                background: color-mix(in srgb, var(--bb-table-header-bg) 82%, var(--bb-dashboard-panel-bg));
                 color: color-mix(in srgb, var(--bb-text) 74%, var(--bb-blue-text));
                 font-size: 12px;
                 font-weight: 850;

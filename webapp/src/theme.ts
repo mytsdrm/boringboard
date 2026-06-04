@@ -147,6 +147,7 @@ function setBoringBoardThemeVariables(theme: Theme) {
     document.documentElement.style.setProperty('--bb-text', mainFg.rgb().string())
     document.documentElement.style.setProperty('--bb-text-muted', mainFg.alpha(isDark ? 0.72 : 0.68).rgb().string())
     document.documentElement.style.setProperty('--bb-text-subtle', mainFg.alpha(isDark ? 0.52 : 0.5).rgb().string())
+    document.documentElement.style.setProperty('--bb-date-text', isDark ? '#475569' : mainFg.alpha(0.72).rgb().string())
     document.documentElement.style.setProperty('--bb-border', border.rgb().string())
     document.documentElement.style.setProperty('--bb-border-strong', borderStrong.rgb().string())
     document.documentElement.style.setProperty('--bb-shadow', shadow)

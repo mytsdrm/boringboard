@@ -238,9 +238,10 @@ const TableRow = (props: Props) => {
 
             {/* Columns, one per property */}
             {visiblePropertyTemplates.map((template) => {
+                const isDateProperty = template.type === 'date' || template.type === 'createdTime' || template.type === 'updatedTime'
                 return (
                     <div
-                        className='octo-table-cell'
+                        className={`octo-table-cell${isDateProperty ? ' octo-table-date-cell' : ''}`}
                         key={template.id}
                         style={{width: columnResize.width(template.id)}}
                         ref={(ref) => columnResize.updateRef(card.id, template.id, ref)}
