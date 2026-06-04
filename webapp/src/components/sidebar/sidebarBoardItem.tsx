@@ -63,6 +63,7 @@ type Props = {
     index: number
     draggedItemID?: string
     hideViews?: boolean
+    dragDisabled?: boolean
 }
 
 const SidebarBoardItem = (props: Props) => {
@@ -199,6 +200,7 @@ const SidebarBoardItem = (props: Props) => {
             draggableId={props.board.id}
             key={props.board.id}
             index={props.index}
+            isDragDisabled={props.dragDisabled}
         >
             {(provided, snapshot) => (
                 <div

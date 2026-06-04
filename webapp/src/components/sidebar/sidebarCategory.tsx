@@ -27,6 +27,7 @@ import CreateNewFolder from '../../widgets/icons/newFolder'
 import CreateCategory from '../createCategory/createCategory'
 import {useAppSelector} from '../../store/hooks'
 import {
+    getMe,
     getOnboardingTourCategory,
     getOnboardingTourStep,
 } from '../../store/users'
@@ -66,6 +67,8 @@ export const ClassForManageCategoriesTourStep = 'manageCategoriesTourStep'
 
 const SidebarCategory = (props: Props) => {
     const [collapsed, setCollapsed] = useState(props.categoryBoards.collapsed)
+    const [personalBoardsCollapsed, setPersonalBoardsCollapsed] = useState(true)
+    const [joinedBoardsCollapsed, setJoinedBoardsCollapsed] = useState(true)
     const intl = useIntl()
     const history = useHistory()
 
@@ -79,6 +82,7 @@ const SidebarCategory = (props: Props) => {
 
     const onboardingTourCategory = useAppSelector(getOnboardingTourCategory)
     const onboardingTourStep = useAppSelector(getOnboardingTourStep)
+    const me = useAppSelector(getMe)
     const currentCard = useAppSelector(getCurrentCard)
     const noCardOpen = !currentCard
     const team = useAppSelector(getCurrentTeam)
@@ -153,6 +157,9 @@ const SidebarCategory = (props: Props) => {
 
     const sidebarBoardMetadata = props.categoryBoards.boardMetadata || []
     const visibleBlocks = props.categoryBoards.boardMetadata.filter((boardMetadata) => isBoardVisible(boardMetadata.boardID, boardMetadata))
+    const visibleBoards = props.boards.filter((board) => isBoardVisible(board.id) && !board.isTemplate)
+    const personalBoards = visibleBoards.filter((board) => board.createdBy === me?.id)
+    const joinedBoards = visibleBoards.filter((board) => board.createdBy !== me?.id)
 
     const handleCreateNewCategory = () => {
         setShowCreateCategoryModal(true)
@@ -274,6 +281,54 @@ const SidebarCategory = (props: Props) => {
         }, 200)
     }
 
+    const renderBoardItem = (board: Board, index: number, dragDisabled?: boolean) => (
+        <SidebarBoardItem
+            index={index}
+            key={board.id}
+            board={board}
+            categoryBoards={props.categoryBoards}
+            allCategories={props.allCategories}
+            isActive={board.id === props.activeBoardID}
+            showBoard={showBoard}
+            showView={showView}
+            onDeleteRequest={setDeleteBoard}
+            hideViews={props.draggedItemID === board.id || props.draggedItemID === props.categoryBoards.id}
+            dragDisabled={dragDisabled}
+        />
+    )
+
+    const renderTaskBoardGroup = (
+        key: string,
+        label: React.ReactNode,
+        groupBoards: Board[],
+        isCollapsed: boolean,
+        onToggle: () => void,
+        startIndex: number,
+    ) => (
+        <div
+            className='sidebar-task-board-group'
+            key={key}
+        >
+            <button
+                type='button'
+                className={`sidebar-task-board-group-title${isCollapsed ? ' collapsed' : ' expanded'}`}
+                onClick={onToggle}
+            >
+                {isCollapsed ? <ChevronRight/> : <ChevronDown/>}
+                <span>{label}</span>
+                <span className='sidebar-task-board-group-count'>{groupBoards.length}</span>
+            </button>
+            {!isCollapsed && groupBoards.length === 0 &&
+                <div className='octo-sidebar-item subitem no-views sidebar-task-board-empty'>
+                    <FormattedMessage
+                        id='Sidebar.no-boards-in-group'
+                        defaultMessage='No boards inside'
+                    />
+                </div>}
+            {!isCollapsed && groupBoards.map((board, index) => renderBoardItem(board, startIndex + index, true))}
+        </div>
+    )
+
     return (
         <Draggable
             draggableId={props.categoryBoards.id}
@@ -364,7 +419,7 @@ const SidebarCategory = (props: Props) => {
                                                 </MenuWrapper>
                                             </div>
                                         </div>
-                                        {!(categoryCollapsed || props.forceCollapse || snapshot.isDragging || props.draggedItemID === props.categoryBoards.id) && visibleBlocks.length === 0 &&
+                                        {!(categoryCollapsed || props.forceCollapse || snapshot.isDragging || props.draggedItemID === props.categoryBoards.id) && !isTaskBoardsCategory && visibleBlocks.length === 0 &&
                                             (
                                                 <div>
                                                     {!props.categoryBoards.isNew && (
@@ -398,22 +453,32 @@ const SidebarCategory = (props: Props) => {
                                                 />
                                             )
                                         })}
-                                        {!(categoryCollapsed || props.forceCollapse || snapshot.isDragging || props.draggedItemID === props.categoryBoards.id) && props.boards.filter((board) => isBoardVisible(board.id) && !board.isTemplate).map((board: Board, zzz) => {
-                                            return (
-                                                <SidebarBoardItem
-                                                    index={zzz}
-                                                    key={board.id}
-                                                    board={board}
-                                                    categoryBoards={props.categoryBoards}
-                                                    allCategories={props.allCategories}
-                                                    isActive={board.id === props.activeBoardID}
-                                                    showBoard={showBoard}
-                                                    showView={showView}
-                                                    onDeleteRequest={setDeleteBoard}
-                                                    hideViews={props.draggedItemID === board.id || props.draggedItemID === props.categoryBoards.id}
-                                                />
-                                            )
-                                        })}
+                                        {!(categoryCollapsed || props.forceCollapse || snapshot.isDragging || props.draggedItemID === props.categoryBoards.id) && isTaskBoardsCategory &&
+                                            <>
+                                                {renderTaskBoardGroup(
+                                                    'personal-task-boards',
+                                                    <FormattedMessage
+                                                        id='Sidebar.personal-task-board'
+                                                        defaultMessage='Personal Task Board'
+                                                    />,
+                                                    personalBoards,
+                                                    personalBoardsCollapsed,
+                                                    () => setPersonalBoardsCollapsed((isCollapsed) => !isCollapsed),
+                                                    0,
+                                                )}
+                                                {renderTaskBoardGroup(
+                                                    'joined-task-boards',
+                                                    <FormattedMessage
+                                                        id='Sidebar.joined-task-boards'
+                                                        defaultMessage='Joined Task Boards'
+                                                    />,
+                                                    joinedBoards,
+                                                    joinedBoardsCollapsed,
+                                                    () => setJoinedBoardsCollapsed((isCollapsed) => !isCollapsed),
+                                                    personalBoards.length,
+                                                )}
+                                            </>}
+                                        {!(categoryCollapsed || props.forceCollapse || snapshot.isDragging || props.draggedItemID === props.categoryBoards.id) && !isTaskBoardsCategory && visibleBoards.map((board: Board, zzz) => renderBoardItem(board, zzz))}
                                         {categoryProvided.placeholder}
                                     </div>
                                 )
