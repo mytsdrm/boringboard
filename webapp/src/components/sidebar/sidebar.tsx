@@ -52,6 +52,7 @@ import {Board} from '../../blocks/board'
 
 import CreateTaskBoardFromCommand from '../aiCreateBoard/createTaskBoardFromCommand'
 import {AdminModuleKey} from '../admin/adminModulePage'
+import {getStoredPluginMenuSettings, PluginMenuSettings, PLUGIN_PACKAGE_UPDATED_EVENT} from '../admin/pluginModuleStorage'
 
 import SidebarCategory from './sidebarCategory'
 import SidebarSettingsMenu from './sidebarSettingsMenu'
@@ -78,6 +79,7 @@ const adminModuleMenuItems: Array<{
 }> = [
     {key: 'reminder', path: '/reminders', icon: 'clock-outline', labelId: 'Sidebar.module-reminder', label: 'Reminder'},
     {key: 'announcement', path: '/announcements', icon: 'bullhorn-outline', labelId: 'Sidebar.module-announcement', label: 'Announcement'},
+    {key: 'plugin', path: '/plugin', icon: 'apps', labelId: 'Sidebar.module-plugin', label: 'Plugin'},
 ]
 
 function getWindowDimensions() {
@@ -107,6 +109,7 @@ const Sidebar = (props: Props) => {
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions())
     const [aiSettings, setAISettings] = useState<AdminAISettings>(getStoredProjectSystemSettings().ai)
     const [moduleSettings, setModuleSettings] = useState<AdminModuleSettings>(getStoredProjectSystemSettings().modules)
+    const [pluginMenuSettings, setPluginMenuSettings] = useState<PluginMenuSettings|null>(getStoredPluginMenuSettings())
     const history = useHistory()
     const match = useRouteMatch<{boardId: string, viewId?: string, cardId?: string, teamId?: string}>()
     const boards = useAppSelector(getMySortedBoards)
@@ -116,6 +119,13 @@ const Sidebar = (props: Props) => {
     const activeViewID = useAppSelector(getCurrentViewId)
     const currentBoard = useAppSelector(getCurrentBoard)
     const isSystemAdmin = Boolean(me?.roles && Utils.isSystemAdmin(me.roles)) || Boolean(me?.permissions?.includes('manage_system'))
+    const canViewPluginMenu = Boolean(
+        me?.id &&
+        moduleSettings.plugin &&
+        pluginMenuSettings?.placements.includes('sidebar') &&
+        (!pluginMenuSettings.adminOnly || isSystemAdmin),
+    )
+    const visiblePluginMenuSettings = canViewPluginMenu ? pluginMenuSettings : null
 
     useEffect(() => {
         const categoryOnChangeHandler = (_: WSClient, categories: Category[]) => {
@@ -169,6 +179,23 @@ const Sidebar = (props: Props) => {
         return () => {
             canceled = true
             window.removeEventListener(SYSTEM_SETTINGS_UPDATED_EVENT, handleSystemSettingsUpdated)
+        }
+    }, [])
+
+    useEffect(() => {
+        const updatePluginMenuSettings = () => {
+            setPluginMenuSettings(getStoredPluginMenuSettings())
+        }
+
+        window.addEventListener(PLUGIN_PACKAGE_UPDATED_EVENT, updatePluginMenuSettings)
+        window.addEventListener('storage', updatePluginMenuSettings)
+        wsClient.addOnReconnect(updatePluginMenuSettings)
+        updatePluginMenuSettings()
+
+        return () => {
+            window.removeEventListener(PLUGIN_PACKAGE_UPDATED_EVENT, updatePluginMenuSettings)
+            window.removeEventListener('storage', updatePluginMenuSettings)
+            wsClient.removeOnReconnect(updatePluginMenuSettings)
         }
     }, [])
 
@@ -490,55 +517,78 @@ const Sidebar = (props: Props) => {
                 </div>}
 
             {isSystemAdmin && adminModuleMenuItems.filter((item) => moduleSettings[item.key]).map((item) => (
-                <div
-                    className={`octo-sidebar-dashboard-item${props.adminModuleActive === item.key ? ' active' : ''}`}
-                    key={item.key}
-                    onClick={() => {
-                        history.push(item.path)
-                        hideSidebar()
-                    }}
-                >
-                    <CompassIcon icon={item.icon}/>
-                    <span className='active-text'>
-                        <FormattedMessage
-                            id={item.labelId}
-                            defaultMessage={item.label}
-                        />
-                    </span>
-                </div>
+                <React.Fragment key={item.key}>
+                    <div
+                        className={`octo-sidebar-dashboard-item${props.adminModuleActive === item.key ? ' active' : ''}`}
+                        onClick={() => {
+                            history.push(item.path)
+                            hideSidebar()
+                        }}
+                    >
+                        <CompassIcon icon={item.icon}/>
+                        <span className='active-text'>
+                            <FormattedMessage
+                                id={item.labelId}
+                                defaultMessage={item.label}
+                            />
+                        </span>
+                    </div>
+                    {item.key === 'announcement' &&
+                    <>
+                        <div
+                            className={`octo-sidebar-dashboard-item${props.activityLogsActive ? ' active' : ''}`}
+                            onClick={() => {
+                                history.push('/activity-logs')
+                                hideSidebar()
+                            }}
+                        >
+                            <CompassIcon icon='clock-outline'/>
+                            <span className='active-text'>
+                                <FormattedMessage
+                                    id='Sidebar.activity-logs'
+                                    defaultMessage='Activity Logs'
+                                />
+                            </span>
+                        </div>
+                        <div
+                            className={`octo-sidebar-dashboard-item${props.templatesActive ? ' active' : ''}`}
+                            onClick={() => {
+                                history.push('/templates')
+                                hideSidebar()
+                            }}
+                        >
+                            <CompassIcon icon='product-boards'/>
+                            <span className='active-text'>
+                                <FormattedMessage
+                                    id='Sidebar.templates'
+                                    defaultMessage='Templates'
+                                />
+                            </span>
+                        </div>
+                    </>}
+                </React.Fragment>
             ))}
 
-            <div
-                className={`octo-sidebar-dashboard-item${props.activityLogsActive ? ' active' : ''}`}
-                onClick={() => {
-                    history.push('/activity-logs')
-                    hideSidebar()
-                }}
-            >
-                <CompassIcon icon='clock-outline'/>
-                <span className='active-text'>
-                    <FormattedMessage
-                        id='Sidebar.activity-logs'
-                        defaultMessage='Activity Logs'
-                    />
-                </span>
-            </div>
-
-            <div
-                className={`octo-sidebar-dashboard-item${props.templatesActive ? ' active' : ''}`}
-                onClick={() => {
-                    history.push('/templates')
-                    hideSidebar()
-                }}
-            >
-                <CompassIcon icon='product-boards'/>
-                <span className='active-text'>
-                    <FormattedMessage
-                        id='Sidebar.templates'
-                        defaultMessage='Templates'
-                    />
-                </span>
-            </div>
+            {visiblePluginMenuSettings &&
+                <div className='octo-sidebar-plugin-section'>
+                    <div className='octo-sidebar-plugin-section-title'>
+                        <FormattedMessage
+                            id='Sidebar.plugin-section'
+                            defaultMessage='Plugin'
+                        />
+                    </div>
+                    <div
+                        className={`octo-sidebar-dashboard-item${history.location.pathname === visiblePluginMenuSettings.path ? ' active' : ''}`}
+                        key={visiblePluginMenuSettings.id}
+                        onClick={() => {
+                            history.push(visiblePluginMenuSettings.path)
+                            hideSidebar()
+                        }}
+                    >
+                        <CompassIcon icon={visiblePluginMenuSettings.icon}/>
+                        <span className='active-text'>{visiblePluginMenuSettings.label}</span>
+                    </div>
+                </div>}
 
             <DragDropContext
                 onDragEnd={onDragEnd}

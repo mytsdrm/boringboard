@@ -71,6 +71,7 @@ type Props = {
     templates?: boolean
     users?: boolean
     adminModule?: AdminModuleKey
+    pluginRuntime?: boolean
 }
 
 const BoardPage = (props: Props): JSX.Element => {
@@ -300,7 +301,7 @@ const BoardPage = (props: Props): JSX.Element => {
 
             {!showJoinBoardDialog &&
                 <div className='BoardPage'>
-                    {!props.new && !props.activityLogs && !props.dashboard && !props.systemSettings && !props.templates && !props.users && !props.adminModule && <TeamToBoardAndViewRedirect/>}
+                    {!props.new && !props.activityLogs && !props.dashboard && !props.systemSettings && !props.templates && !props.users && !props.adminModule && !props.pluginRuntime && <TeamToBoardAndViewRedirect/>}
                     <BackwardCompatibilityQueryParamsRedirect/>
                     <SetWindowTitleAndIcon/>
                     <UndoRedoHotKeys/>
@@ -343,6 +344,7 @@ const BoardPage = (props: Props): JSX.Element => {
                             templates={props.templates || false}
                             users={props.users || false}
                             adminModule={props.adminModule}
+                            pluginRuntime={props.pluginRuntime || false}
                         />
                     }
                 </div>

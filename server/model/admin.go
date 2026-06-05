@@ -20,6 +20,7 @@ type AdminTaskBoardSettings struct {
 type AdminModuleSettings struct {
 	Reminder     bool `json:"reminder"`
 	Announcement bool `json:"announcement"`
+	Plugin       bool `json:"plugin"`
 }
 
 type AdminNotificationSettings struct {

@@ -5,6 +5,8 @@ import {FormattedMessage} from 'react-intl'
 
 import {AdminModuleSettings} from '../../octoClient'
 
+import AdminPluginModule from './adminPluginModule'
+
 import './adminPages.scss'
 
 export type AdminModuleKey = keyof AdminModuleSettings
@@ -25,6 +27,12 @@ const moduleMessages: Record<AdminModuleKey, {
         descriptionId: 'AdminModulePage.announcement-description',
         description: 'Announcement module is enabled. Build the announcement workflow here.',
     },
+    plugin: {
+        titleId: 'AdminModulePage.plugin-title',
+        title: 'Plugin',
+        descriptionId: 'AdminModulePage.plugin-description',
+        description: 'Original Focalboard plugin support is enabled.',
+    },
     reminder: {
         titleId: 'AdminModulePage.reminder-title',
         title: 'Reminder',
@@ -35,6 +43,10 @@ const moduleMessages: Record<AdminModuleKey, {
 
 const AdminModulePage = (props: Props): JSX.Element => {
     const messages = moduleMessages[props.moduleKey]
+
+    if (props.moduleKey === 'plugin') {
+        return <AdminPluginModule/>
+    }
 
     return (
         <div className='AdminPage admin-module-page'>

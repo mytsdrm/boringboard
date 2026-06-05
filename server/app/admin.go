@@ -33,8 +33,9 @@ func defaultAdminSystemSettings() model.AdminSystemSettings {
 			EnableInvitedUserEditProperty: false,
 		},
 		Modules: model.AdminModuleSettings{
-			Reminder:      false,
-			Announcement:  false,
+			Reminder:     false,
+			Announcement: false,
+			Plugin:       false,
 		},
 		Notifications: model.AdminNotificationSettings{
 			TaskBoardActivity: true,

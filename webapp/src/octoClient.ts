@@ -42,6 +42,7 @@ export type AdminTaskBoardSettings = {
 export type AdminModuleSettings = {
     reminder: boolean
     announcement: boolean
+    plugin: boolean
 }
 
 export type AdminNotificationSettings = {
@@ -623,6 +624,7 @@ class OctoClient {
             },
             modules: {
                 announcement: false,
+                plugin: false,
                 reminder: false,
             },
             notifications: {
@@ -676,6 +678,7 @@ class OctoClient {
             },
             modules: {
                 announcement: false,
+                plugin: false,
                 reminder: false,
             },
             notifications: {

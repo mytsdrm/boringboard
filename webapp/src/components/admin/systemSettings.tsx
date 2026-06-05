@@ -35,6 +35,13 @@ const MODULE_OPTIONS: Array<{
         descriptionId: 'SystemSettings.module-announcement-description',
         description: 'Show the Announcement admin menu.',
     },
+    {
+        key: 'plugin',
+        labelId: 'SystemSettings.module-plugin',
+        label: 'Plugin',
+        descriptionId: 'SystemSettings.module-plugin-description',
+        description: 'Show the original Focalboard plugin support menu.',
+    },
 ]
 
 const providerModelOptions: {[key: string]: string[]} = {
@@ -90,6 +97,7 @@ const defaultSettings: AdminSystemSettings = {
     },
     modules: {
         announcement: false,
+        plugin: false,
         reminder: false,
     },
     notifications: {
@@ -340,12 +348,10 @@ const SystemSettings = (): JSX.Element => {
     const modelOptions = settings.ai.provider === 'Ollama' ? ollamaModels : (providerModels[settings.ai.provider] || [])
     const canShowModelSelect = settings.ai.provider === 'Ollama' || modelOptions.length > 0
     const normalizedAIUserSearch = aiUserSearch.trim().toLowerCase()
-    const filteredAIUsers = normalizedAIUserSearch ?
-        registeredUsers.filter((user) => {
-            const searchableUserText = `${userDisplayName(user)} ${user.username || ''} ${user.email || ''}`.toLowerCase()
-            return searchableUserText.includes(normalizedAIUserSearch)
-        }) :
-        registeredUsers
+    const filteredAIUsers = normalizedAIUserSearch ? registeredUsers.filter((user) => {
+        const searchableUserText = `${userDisplayName(user)} ${user.username || ''} ${user.email || ''}`.toLowerCase()
+        return searchableUserText.includes(normalizedAIUserSearch)
+    }) : registeredUsers
     const updateAIProvider = (provider: string) => {
         const model = provider === 'Ollama' ? (ollamaModels[0] || providerModelOptions.Ollama[0]) : providerModelOptions[provider][0]
         setProviderModels({})
@@ -369,9 +375,7 @@ const SystemSettings = (): JSX.Element => {
         setSettings({...settings, ai: {...settings.ai, enableForAllUsers, enabledUserIds: enableForAllUsers ? [] : settings.ai.enabledUserIds}})
     }
     const toggleAIEnabledUser = (userId: string, enabled: boolean) => {
-        const enabledUserIds = enabled ?
-            Array.from(new Set([...settings.ai.enabledUserIds, userId])) :
-            settings.ai.enabledUserIds.filter((enabledUserId) => enabledUserId !== userId)
+        const enabledUserIds = enabled ? Array.from(new Set([...settings.ai.enabledUserIds, userId])) : settings.ai.enabledUserIds.filter((enabledUserId) => enabledUserId !== userId)
         setSettings({...settings, ai: {...settings.ai, enableForAllUsers: false, enabledUserIds}})
     }
     const updateModuleEnabled = (key: keyof AdminModuleSettings, enabled: boolean) => {
@@ -391,18 +395,6 @@ const SystemSettings = (): JSX.Element => {
                 ...nextNotificationSettings,
             },
         })
-    }
-    const updateNotificationRecipientMode = (enableForAllUsers: boolean) => {
-        updateNotificationSettings({
-            enabledUserIds: enableForAllUsers ? [] : settings.notifications.enabledUserIds,
-            enableForAllUsers,
-        })
-    }
-    const toggleNotificationUser = (userId: string, enabled: boolean) => {
-        const enabledUserIds = enabled ?
-            Array.from(new Set([...settings.notifications.enabledUserIds, userId])) :
-            settings.notifications.enabledUserIds.filter((enabledUserId) => enabledUserId !== userId)
-        updateNotificationSettings({enabledUserIds})
     }
     const uploadLogo = (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
@@ -981,7 +973,7 @@ const SystemSettings = (): JSX.Element => {
                                 <h2>
                                     <FormattedMessage
                                         id='SystemSettings.notification-flow-title'
-                                        defaultMessage='Notification Flow'
+                                        defaultMessage='Notification Items'
                                     />
                                 </h2>
                                 <p>
@@ -1036,78 +1028,12 @@ const SystemSettings = (): JSX.Element => {
                                 </label>
                             </div>
                         </div>
-                        <div className='admin-settings-section'>
-                            <div className='admin-settings-section-header'>
-                                <h2>
-                                    <FormattedMessage
-                                        id='SystemSettings.notification-recipients-title'
-                                        defaultMessage='Recipients'
-                                    />
-                                </h2>
-                                <p>
-                                    <FormattedMessage
-                                        id='SystemSettings.notification-recipients-description'
-                                        defaultMessage='Send notifications to all users by default, or limit delivery to selected users.'
-                                    />
-                                </p>
-                            </div>
-                            <div className='admin-notification-controls'>
-                                <label>
-                                    <span>
-                                        <FormattedMessage
-                                            id='SystemSettings.notification-recipient-mode'
-                                            defaultMessage='Recipient mode'
-                                        />
-                                    </span>
-                                    <select
-                                        onChange={(event) => updateNotificationRecipientMode(event.target.value === 'all')}
-                                        value={settings.notifications.enableForAllUsers ? 'all' : 'selected'}
-                                    >
-                                        <option value='all'>
-                                            {intl.formatMessage({
-                                                id: 'SystemSettings.notification-all-users',
-                                                defaultMessage: 'All users',
-                                            })}
-                                        </option>
-                                        <option value='selected'>
-                                            {intl.formatMessage({
-                                                id: 'SystemSettings.notification-selected-users',
-                                                defaultMessage: 'Selected users only',
-                                            })}
-                                        </option>
-                                    </select>
-                                </label>
-                                {!settings.notifications.enableForAllUsers &&
-                                    <div className='admin-notification-user-list'>
-                                        {registeredUsers.map((user) => (
-                                            <label
-                                                className='admin-settings-checkbox admin-notification-user-toggle'
-                                                key={user.id}
-                                            >
-                                                <input
-                                                    checked={settings.notifications.enabledUserIds.includes(user.id)}
-                                                    onChange={(event) => toggleNotificationUser(user.id, event.target.checked)}
-                                                    type='checkbox'
-                                                />
-                                                <span>{userDisplayName(user)}</span>
-                                            </label>
-                                        ))}
-                                        {registeredUsers.length === 0 &&
-                                            <small>
-                                                <FormattedMessage
-                                                    id='SystemSettings.notification-no-users'
-                                                    defaultMessage='No registered users found.'
-                                                />
-                                            </small>}
-                                    </div>}
-                            </div>
-                        </div>
                         <div className='admin-settings-section admin-settings-notification-section'>
                             <div className='admin-settings-section-header'>
                                 <h2>
                                     <FormattedMessage
                                         id='SystemSettings.notification-tools-title'
-                                        defaultMessage='Notification Tools'
+                                        defaultMessage='Notification Media'
                                     />
                                 </h2>
                                 <p>

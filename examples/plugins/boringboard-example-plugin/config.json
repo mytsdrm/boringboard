@@ -1,0 +1,23 @@
+{
+  "id": "boringboard-example-plugin",
+  "name": "Example Plugin",
+  "description": "Renders a small plugin card inside BoringBoard.",
+  "version": "1.0.0",
+
+  "author": "BoringBoard Team",
+  "homepage": "https://example.com",
+  "license": "MIT",
+
+  "entry": "index.js",
+
+  "ui": {
+    "menu": true,
+    "isAdmin": true,
+    "menuLabel": "Example",
+    "menuIcon": "sparkles",
+    "view": "page",
+    "layout": "card",
+    "placements": ["sidebar"]
+  },
+  "permissions": []
+}

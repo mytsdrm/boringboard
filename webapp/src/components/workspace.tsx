@@ -45,6 +45,7 @@ import AdminUsers from './admin/adminUsers'
 import SystemSettings from './admin/systemSettings'
 import AdminModulePage, {AdminModuleKey} from './admin/adminModulePage'
 import AdminReminders from './admin/adminReminders'
+import PluginRuntimePage from './pluginRuntime/pluginRuntimePage'
 
 import './workspace.scss'
 
@@ -56,6 +57,7 @@ type Props = {
     templates?: boolean
     users?: boolean
     adminModule?: AdminModuleKey
+    pluginRuntime?: boolean
 }
 
 function CenterContent(props: Props) {
@@ -129,7 +131,7 @@ function CenterContent(props: Props) {
     }, [props.users, props.systemSettings, props.adminModule, me, isSystemAdmin, history])
 
     useEffect(() => {
-        if (!match.params.boardId || props.readonly || props.dashboard || props.activityLogs || props.systemSettings || props.templates || props.users || props.adminModule) {
+        if (!match.params.boardId || props.readonly || props.dashboard || props.activityLogs || props.systemSettings || props.templates || props.users || props.adminModule || props.pluginRuntime) {
             return
         }
 
@@ -139,7 +141,7 @@ function CenterContent(props: Props) {
 
         retriedBoardLoads.current.add(match.params.boardId)
         dispatch(loadBoardData(match.params.boardId))
-    }, [match.params.boardId, props.readonly, props.dashboard, props.activityLogs, props.systemSettings, props.templates, props.users, props.adminModule, isLoading, board, activeView, views.length, dispatch])
+    }, [match.params.boardId, props.readonly, props.dashboard, props.activityLogs, props.systemSettings, props.templates, props.users, props.adminModule, props.pluginRuntime, isLoading, board, activeView, views.length, dispatch])
 
     const templateSelector = (
         <BoardTemplateSelector
@@ -192,6 +194,10 @@ function CenterContent(props: Props) {
 
     if (props.activityLogs) {
         return <ActivityLogs adminMode={isSystemAdmin}/>
+    }
+
+    if (props.pluginRuntime) {
+        return <PluginRuntimePage/>
     }
 
     if (match.params.channelId) {
@@ -285,7 +291,7 @@ const Workspace = (props: Props) => {
                 <Sidebar
                     onBoardTemplateSelectorOpen={openBoardTemplateSelector}
                     onBoardTemplateSelectorClose={closeBoardTemplateSelector}
-                    activeBoardId={(props.activityLogs || props.dashboard || props.systemSettings || props.templates || props.users || props.adminModule) ? undefined : (match.params.boardId || board?.id)}
+                    activeBoardId={(props.activityLogs || props.dashboard || props.systemSettings || props.templates || props.users || props.adminModule || props.pluginRuntime) ? undefined : (match.params.boardId || board?.id)}
                     activityLogsActive={props.activityLogs || false}
                     dashboardActive={props.dashboard || false}
                     adminModuleActive={props.adminModule}
@@ -310,6 +316,7 @@ const Workspace = (props: Props) => {
                     templates={props.templates || false}
                     users={props.users || false}
                     adminModule={props.adminModule}
+                    pluginRuntime={props.pluginRuntime || false}
                 />
             </div>
             {boardTemplateSelectorOpen &&
