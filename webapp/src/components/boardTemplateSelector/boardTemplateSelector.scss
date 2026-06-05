@@ -11,6 +11,7 @@
     display: flex;
     align-items: center;
     justify-content: center;
+    overflow: hidden;
 
     @media (max-height: 900) {
         padding: 80px;
@@ -47,6 +48,7 @@
     width: 100%;
     height: 100%;
     overflow: auto;
+    overflow-x: hidden;
     display: flex;
     flex-direction: column;
     border-radius: 12px;
@@ -64,32 +66,40 @@
 
     .header {
         width: 100%;
-        height: 80px;
+        min-height: 92px;
         display: flex;
         align-items: center;
         justify-content: flex-start;
-        padding: 32px;
-        border-bottom: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
+        gap: 14px;
+        padding: 28px 88px 24px 32px;
+        border-bottom: 1px solid var(--bb-border);
+        background:
+            linear-gradient(180deg, color-mix(in srgb, var(--bb-panel-bg-soft) 84%, transparent), transparent),
+            rgb(var(--center-channel-bg-rgb));
 
         .title {
             font-size: 22px;
+            line-height: 1.2;
             margin: 0;
+            white-space: nowrap;
         }
 
         .description {
             max-width: 640px;
-            text-align: center;
+            text-align: left;
             color: rgba(var(--center-channel-color-rgb), 0.56);
             border-left: 1px solid rgba(var(--center-channel-color-rgb), 0.08);
-            padding-left: 8px;
-            margin: 0 0 0 8px;
+            padding-left: 14px;
+            margin: 0;
+            line-height: 1.4;
         }
     }
 
     .templates-sidebar {
-        flex: 0 0 294px;
+        flex: 0 0 clamp(248px, 20vw, 294px);
         display: flex;
         flex-direction: column;
+        min-width: 0;
         overflow: hidden;
         background:
             linear-gradient(180deg, var(--bb-blue-soft), color-mix(in srgb, var(--bb-template-sidebar-bg) 92%, transparent)),
@@ -104,7 +114,7 @@
         display: flex;
         align-items: center;
         border-top: 1px solid var(--bb-border);
-        padding: 24px;
+        padding: 20px;
         height: 89px;
         background: color-mix(in srgb, var(--bb-panel-bg-soft) 84%, transparent);
 
@@ -119,8 +129,23 @@
             linear-gradient(180deg, color-mix(in srgb, var(--bb-blue-soft) 92%, transparent), color-mix(in srgb, var(--bb-blue-soft) 66%, transparent)),
             var(--bb-dashboard-panel-bg);
         color: var(--bb-blue-text);
+        min-width: 0;
+        padding: 0 12px;
+        font-size: 13px;
         font-weight: 800;
+        white-space: nowrap;
         box-shadow: 0 12px 24px -18px var(--bb-blue-text);
+
+        span {
+            min-width: 0;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+
+        .CompassIcon:first-child {
+            margin-right: 7px;
+        }
 
         &:hover {
             border-color: color-mix(in srgb, var(--bb-blue-text) 58%, var(--bb-border));
@@ -157,6 +182,7 @@
         justify-content: center;
         flex: 1;
         overflow: hidden;
+        min-width: 0;
 
         .templates-list {
             flex: 1;
@@ -178,25 +204,63 @@
         flex-direction: column;
         height: 100%;
         overflow: hidden;
+        min-width: 0;
     }
 
     .buttons {
         display: flex;
+        flex-wrap: wrap;
+        gap: 12px;
         padding: 24px;
         justify-content: flex-end;
-        height: 89px;
+        min-height: 89px;
         border-top: 1px solid rgba(var(--center-channel-color-rgb), 0.16);
         background-color: rgb(var(--center-channel-bg-rgb));
+
+        button {
+            min-width: max-content;
+        }
+    }
+
+    .BoardTemplateSelector__cancel {
+        min-height: 40px;
+        padding: 0 15px;
+        border: 1px solid rgba(217, 45, 32, 0.28);
+        border-radius: 8px;
+        background: var(--bb-dashboard-panel-bg);
+        color: #b42318;
+        font-size: 13px;
+        font-weight: 850;
+        line-height: 1;
+        gap: 8px;
+        transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, color 120ms ease, transform 120ms ease;
+        white-space: nowrap;
+
+        &:hover:not(:disabled) {
+            border-color: rgba(217, 45, 32, 0.48);
+            background: rgba(217, 45, 32, 0.06);
+            color: #912018;
+            box-shadow: 0 8px 18px -16px rgba(217, 45, 32, 0.9);
+        }
+    }
+
+    .BoardTemplateSelector__cancelIcon {
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        color: #d92d20;
     }
 
     .template-preview-box {
-        padding: 32px 32px 0;
+        padding: clamp(20px, 2vw, 32px) clamp(16px, 2vw, 32px) 0;
         position: relative;
         background-color: rgb(var(--center-channel-bg-rgb));
         width: 100%;
         flex: 1;
+        min-width: 0;
         overflow: hidden;
         overflow-y: auto;
+        overflow-x: hidden;
 
         .empty-board {
             background-color: rgb(var(--center-channel-bg-rgb));
@@ -220,7 +284,12 @@
             min-height: 96px;
             align-items: flex-start;
             flex-direction: column;
+            gap: 6px;
             padding: 26px 72px 20px 24px;
+
+            .title {
+                white-space: normal;
+            }
 
             .description {
                 max-width: none;
@@ -232,7 +301,7 @@
         }
 
         .templates-sidebar {
-            flex-basis: 260px;
+            flex-basis: clamp(228px, 24vw, 260px);
         }
 
         .templates .templates-list {
@@ -246,7 +315,7 @@
         }
 
         .template-preview-box {
-            padding: 24px 24px 0;
+            padding: 20px 20px 0;
         }
     }
 }
@@ -279,6 +348,7 @@
             min-height: 112px;
             align-items: flex-start;
             flex-direction: column;
+            gap: 6px;
             padding: 24px 72px 18px 20px;
 
             .title {
@@ -335,6 +405,7 @@
         .buttons {
             height: auto;
             padding: 16px;
+            flex-direction: column-reverse;
 
             button {
                 width: 100%;

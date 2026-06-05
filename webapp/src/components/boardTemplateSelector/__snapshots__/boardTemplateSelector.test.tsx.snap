@@ -132,7 +132,7 @@ exports[`components/boardTemplateSelector/boardTemplateSelector a focalboard Plu
                 class="CompassIcon icon-kanban"
               />
               <span>
-                Create empty board
+                Create an empty board
               </span>
             </button>
           </div>
@@ -145,11 +145,45 @@ exports[`components/boardTemplateSelector/boardTemplateSelector a focalboard Plu
           >
             <div
               class="BoardTemplateSelectorPreview"
-            />
+            >
+              <div
+                class="BoardTemplateSelectorPreview__surface"
+              />
+            </div>
           </div>
           <div
             class="buttons"
           >
+            <button
+              type="button"
+            >
+              <span
+                class="BoardTemplateSelector__cancelIcon"
+              >
+                <svg
+                  class="tabler-icon tabler-icon-x "
+                  fill="none"
+                  height="16"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6l-12 12"
+                  />
+                  <path
+                    d="M6 6l12 12"
+                  />
+                </svg>
+              </span>
+              <span>
+                Cancel
+              </span>
+            </button>
             <button
               type="button"
             >
@@ -284,7 +318,7 @@ exports[`components/boardTemplateSelector/boardTemplateSelector a focalboard Plu
                 class="CompassIcon icon-kanban"
               />
               <span>
-                Create empty board
+                Create an empty board
               </span>
             </button>
           </div>
@@ -297,7 +331,11 @@ exports[`components/boardTemplateSelector/boardTemplateSelector a focalboard Plu
           >
             <div
               class="BoardTemplateSelectorPreview"
-            />
+            >
+              <div
+                class="BoardTemplateSelectorPreview__surface"
+              />
+            </div>
           </div>
           <div
             class="buttons"
@@ -436,7 +474,7 @@ exports[`components/boardTemplateSelector/boardTemplateSelector a focalboard Plu
                 class="CompassIcon icon-kanban"
               />
               <span>
-                Create empty board
+                Create an empty board
               </span>
             </button>
           </div>
@@ -449,7 +487,11 @@ exports[`components/boardTemplateSelector/boardTemplateSelector a focalboard Plu
           >
             <div
               class="BoardTemplateSelectorPreview"
-            />
+            >
+              <div
+                class="BoardTemplateSelectorPreview__surface"
+              />
+            </div>
           </div>
           <div
             class="buttons"
@@ -601,7 +643,7 @@ exports[`components/boardTemplateSelector/boardTemplateSelector not a focalboard
                 class="CompassIcon icon-kanban"
               />
               <span>
-                Create empty board
+                Create an empty board
               </span>
             </button>
           </div>
@@ -614,11 +656,45 @@ exports[`components/boardTemplateSelector/boardTemplateSelector not a focalboard
           >
             <div
               class="BoardTemplateSelectorPreview"
-            />
+            >
+              <div
+                class="BoardTemplateSelectorPreview__surface"
+              />
+            </div>
           </div>
           <div
             class="buttons"
           >
+            <button
+              type="button"
+            >
+              <span
+                class="BoardTemplateSelector__cancelIcon"
+              >
+                <svg
+                  class="tabler-icon tabler-icon-x "
+                  fill="none"
+                  height="16"
+                  stroke="currentColor"
+                  stroke-linecap="round"
+                  stroke-linejoin="round"
+                  stroke-width="2"
+                  viewBox="0 0 24 24"
+                  width="16"
+                  xmlns="http://www.w3.org/2000/svg"
+                >
+                  <path
+                    d="M18 6l-12 12"
+                  />
+                  <path
+                    d="M6 6l12 12"
+                  />
+                </svg>
+              </span>
+              <span>
+                Cancel
+              </span>
+            </button>
             <button
               type="button"
             >

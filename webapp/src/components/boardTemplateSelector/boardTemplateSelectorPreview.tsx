@@ -71,86 +71,87 @@ const BoardTemplateSelectorPreview = (props: Props) => {
 
     return (
         <div className='BoardTemplateSelectorPreview'>
-            {activeView &&
-            <div className='top-head'>
-                <ViewTitle
-                    key={activeTemplate?.id + activeTemplate?.title}
-                    board={activeTemplate}
-                    readonly={true}
-                />
-                <ViewHeader
+            <div className='BoardTemplateSelectorPreview__surface'>
+                {activeView &&
+                <div className='top-head'>
+                    <ViewTitle
+                        key={activeTemplate?.id + activeTemplate?.title}
+                        board={activeTemplate}
+                        readonly={true}
+                    />
+                    <ViewHeader
+                        board={activeTemplate}
+                        activeView={activeView}
+                        cards={activeTemplateCards}
+                        views={[activeView]}
+                        groupByProperty={groupByProperty}
+                        addCard={() => null}
+                        addCardFromTemplate={() => null}
+                        addCardTemplate={() => null}
+                        editCardTemplate={() => null}
+                        readonly={false}
+                    />
+                </div>}
+
+                {activeView?.fields.viewType === 'board' &&
+                <Kanban
                     board={activeTemplate}
                     activeView={activeView}
                     cards={activeTemplateCards}
-                    views={[activeView]}
                     groupByProperty={groupByProperty}
-                    addCard={() => null}
-                    addCardFromTemplate={() => null}
-                    addCardTemplate={() => null}
-                    editCardTemplate={() => null}
+                    visibleGroups={visibleGroups}
+                    hiddenGroups={hiddenGroups}
+                    selectedCardIds={[]}
                     readonly={false}
-                />
-            </div>}
-
-            {activeView?.fields.viewType === 'board' &&
-            <Kanban
-                board={activeTemplate}
-                activeView={activeView}
-                cards={activeTemplateCards}
-                groupByProperty={groupByProperty}
-                visibleGroups={visibleGroups}
-                hiddenGroups={hiddenGroups}
-                selectedCardIds={[]}
-                readonly={false}
-                onCardClicked={() => null}
-                addCard={() => Promise.resolve()}
-                addCardFromTemplate={() => Promise.resolve()}
-                showCard={() => null}
-                hiddenCardsCount={0}
-                showHiddenCardCountNotification={() => null}
-            />}
-            {activeView?.fields.viewType === 'table' &&
-            <Table
-                board={activeTemplate}
-                activeView={activeView}
-                cards={activeTemplateCards}
-                groupByProperty={groupByProperty}
-                views={[activeView]}
-                visibleGroups={visibleGroups}
-                selectedCardIds={[]}
-                readonly={false}
-                cardIdToFocusOnRender={''}
-                onCardClicked={() => null}
-                addCard={() => Promise.resolve()}
-                showCard={() => null}
-                hiddenCardsCount={0}
-                showHiddenCardCountNotification={() => null}
-            />}
-            {activeView?.fields.viewType === 'gallery' &&
-            <Gallery
-                board={activeTemplate}
-                cards={activeTemplateCards}
-                activeView={activeView}
-                readonly={false}
-                selectedCardIds={[]}
-                onCardClicked={() => null}
-                addCard={() => Promise.resolve()}
-                hiddenCardsCount={0}
-                showHiddenCardCountNotification={() => null}
-            />}
-            {activeView?.fields.viewType === 'calendar' &&
-            <CalendarFullView
-                board={activeTemplate}
-                cards={activeTemplateCards}
-                activeView={activeView}
-                readonly={false}
-                dateDisplayProperty={dateDisplayProperty}
-                showCard={() => null}
-                addCard={() => Promise.resolve()}
-            />}
+                    onCardClicked={() => null}
+                    addCard={() => Promise.resolve()}
+                    addCardFromTemplate={() => Promise.resolve()}
+                    showCard={() => null}
+                    hiddenCardsCount={0}
+                    showHiddenCardCountNotification={() => null}
+                />}
+                {activeView?.fields.viewType === 'table' &&
+                <Table
+                    board={activeTemplate}
+                    activeView={activeView}
+                    cards={activeTemplateCards}
+                    groupByProperty={groupByProperty}
+                    views={[activeView]}
+                    visibleGroups={visibleGroups}
+                    selectedCardIds={[]}
+                    readonly={false}
+                    cardIdToFocusOnRender={''}
+                    onCardClicked={() => null}
+                    addCard={() => Promise.resolve()}
+                    showCard={() => null}
+                    hiddenCardsCount={0}
+                    showHiddenCardCountNotification={() => null}
+                />}
+                {activeView?.fields.viewType === 'gallery' &&
+                <Gallery
+                    board={activeTemplate}
+                    cards={activeTemplateCards}
+                    activeView={activeView}
+                    readonly={false}
+                    selectedCardIds={[]}
+                    onCardClicked={() => null}
+                    addCard={() => Promise.resolve()}
+                    hiddenCardsCount={0}
+                    showHiddenCardCountNotification={() => null}
+                />}
+                {activeView?.fields.viewType === 'calendar' &&
+                <CalendarFullView
+                    board={activeTemplate}
+                    cards={activeTemplateCards}
+                    activeView={activeView}
+                    readonly={false}
+                    dateDisplayProperty={dateDisplayProperty}
+                    showCard={() => null}
+                    addCard={() => Promise.resolve()}
+                />}
+            </div>
         </div>
     )
 }
 
 export default React.memo(BoardTemplateSelectorPreview)
-

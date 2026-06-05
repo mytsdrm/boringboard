@@ -212,6 +212,19 @@ describe('components/boardTemplateSelector/boardTemplateSelector', () => {
             userEvent.click(divCloseButton!)
             expect(onClose).toBeCalledTimes(1)
         })
+        test('return BoardTemplateSelector and click cancel call the onClose callback', () => {
+            const onClose = jest.fn()
+            render(wrapDNDIntl(
+                <ReduxProvider store={store}>
+                    <BoardTemplateSelector onClose={onClose}/>
+                </ReduxProvider>
+                ,
+            ), {wrapper: MemoryRouter})
+            const cancelButton = screen.getByText('Cancel').parentElement
+            expect(cancelButton).not.toBeNull()
+            userEvent.click(cancelButton!)
+            expect(onClose).toBeCalledTimes(1)
+        })
         test('return BoardTemplateSelector and click new template', () => {
             render(wrapDNDIntl(
                 <ReduxProvider store={store}>
@@ -235,7 +248,7 @@ describe('components/boardTemplateSelector/boardTemplateSelector', () => {
                 ,
             ), {wrapper: MemoryRouter})
 
-            const divEmptyboard = screen.getByText('Create empty board').parentElement
+            const divEmptyboard = screen.getByText('Create an empty board').parentElement
             expect(divEmptyboard).not.toBeNull()
             userEvent.click(divEmptyboard!)
             expect(mockedMutator.addEmptyBoard).toBeCalledTimes(1)

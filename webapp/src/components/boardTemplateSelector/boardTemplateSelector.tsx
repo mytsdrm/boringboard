@@ -4,6 +4,7 @@ import React, {useEffect, useState, useCallback, useMemo} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
 import {useHistory, useRouteMatch} from 'react-router-dom'
 import {useHotkeys} from 'react-hotkeys-hook'
+import {IconX} from '@tabler/icons-react'
 
 import CompassIcon from '../../widgets/icons/compassIcon'
 
@@ -212,6 +213,22 @@ const BoardTemplateSelector = (props: Props) => {
                             <BoardTemplateSelectorPreview activeTemplate={activeTemplate}/>
                         </div>
                         <div className='buttons'>
+                            {onClose &&
+                                <Button
+                                    className='BoardTemplateSelector__cancel'
+                                    icon={(
+                                        <span className='BoardTemplateSelector__cancelIcon'>
+                                            <IconX size={16}/>
+                                        </span>
+                                    )}
+                                    size={'medium'}
+                                    onClick={onClose}
+                                >
+                                    <FormattedMessage
+                                        id='BoardTemplateSelector.cancel'
+                                        defaultMessage='Cancel'
+                                    />
+                                </Button>}
                             <Button
                                 filled={true}
                                 size={'medium'}

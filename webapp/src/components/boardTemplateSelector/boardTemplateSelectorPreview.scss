@@ -1,25 +1,58 @@
 .BoardTemplateSelectorPreview {
+    --template-preview-scale: 0.82;
+
     position: relative;
-    transform-origin: top left;
-    transform: scale(0.8);
-    width: 126%;
-    height: 480px;
+    display: flex;
+    width: 100%;
+    min-width: 0;
+    height: clamp(340px, calc(100vh - 380px), 640px);
     border-radius: var(--modal-rad);
     pointer-events: none;
+    overflow: hidden;
+}
+
+.BoardTemplateSelectorPreview__surface {
+    display: flex;
+    flex-direction: column;
+    width: calc(100% / var(--template-preview-scale));
+    min-width: 0;
+    height: calc(100% / var(--template-preview-scale));
+    transform: scale(var(--template-preview-scale));
+    transform-origin: top left;
+    overflow: hidden;
 
     .ButtonWithMenu {
         display: none;
     }
 
-    .Kanban {
+    .top-head,
+    .Kanban,
+    .Table,
+    .Gallery,
+    .CalendarFullView {
+        min-width: 0;
+        max-width: 100%;
+    }
+
+    .Kanban,
+    .Table,
+    .Gallery {
         overflow: hidden;
+    }
+}
+
+@media screen and (max-width: 1180px) {
+    .BoardTemplateSelectorPreview {
+        --template-preview-scale: 0.74;
+
+        height: clamp(320px, calc(100vh - 360px), 560px);
     }
 }
 
 @media screen and (max-width: 767px) {
     .BoardTemplateSelectorPreview {
-        transform: scale(0.58);
-        width: 172%;
-        height: 300px;
+        --template-preview-scale: 0.66;
+
+        height: clamp(260px, 42vh, 380px);
     }
 }

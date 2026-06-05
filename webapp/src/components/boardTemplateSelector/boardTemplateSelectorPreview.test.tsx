@@ -151,6 +151,14 @@ describe('components/boardTemplateSelector/boardTemplateSelectorPreview', () => 
                 ],
                 cards: [],
                 views: [],
+                membersInBoards: {
+                    [board.id]: {
+                        'user-id': {userId: 'user-id', schemeAdmin: true},
+                    },
+                    1: {
+                        'user-id': {userId: 'user-id', schemeAdmin: true},
+                    },
+                },
                 myBoardMemberships: {
                     [board.id]: {userId: 'user-id', schemeAdmin: true},
                 },
