@@ -183,6 +183,10 @@ type BoardMember struct {
 	// required: false
 	Roles string `json:"roles"`
 
+	// The time this user was invited to the board
+	// required: false
+	CreateAt int64 `json:"createAt"`
+
 	// Minimum role because the board configuration
 	// required: false
 	MinimumRole string `json:"minimumRole"`

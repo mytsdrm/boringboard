@@ -69,17 +69,30 @@ func boardHistoryFields() []string {
 	return fields
 }
 
-var boardMemberFields = []string{
-	"COALESCE(B.minimum_role, '')",
-	"BM.board_id",
-	"BM.user_id",
-	"BM.roles",
-	"BM.scheme_admin",
-	"BM.scheme_editor",
-	"BM.scheme_commenter",
-	"BM.scheme_viewer",
-	"COALESCE(BM.status_scope_enabled, false)",
-	"COALESCE(BM.status_scope_option_ids, '[]')",
+func boardMemberFields(tablePrefix string, dbType string) []string {
+	createAtField := "0"
+	switch dbType {
+	case model.PostgresDBType:
+		createAtField = "COALESCE((SELECT CAST(EXTRACT(EPOCH FROM MAX(BMH.insert_at)) * 1000 AS BIGINT) FROM " + tablePrefix + "board_members_history AS BMH WHERE BMH.board_id = BM.board_id AND BMH.user_id = BM.user_id AND BMH.action <> 'deleted'), 0)"
+	case model.MysqlDBType:
+		createAtField = "COALESCE((SELECT CAST(UNIX_TIMESTAMP(MAX(BMH.insert_at)) * 1000 AS SIGNED) FROM " + tablePrefix + "board_members_history AS BMH WHERE BMH.board_id = BM.board_id AND BMH.user_id = BM.user_id AND BMH.action <> 'deleted'), 0)"
+	case model.SqliteDBType:
+		createAtField = "COALESCE((SELECT CAST((julianday(MAX(BMH.insert_at)) - 2440587.5) * 86400000 AS INTEGER) FROM " + tablePrefix + "board_members_history AS BMH WHERE BMH.board_id = BM.board_id AND BMH.user_id = BM.user_id AND BMH.action <> 'deleted'), 0)"
+	}
+
+	return []string{
+		"COALESCE(B.minimum_role, '')",
+		"BM.board_id",
+		"BM.user_id",
+		"BM.roles",
+		createAtField,
+		"BM.scheme_admin",
+		"BM.scheme_editor",
+		"BM.scheme_commenter",
+		"BM.scheme_viewer",
+		"COALESCE(BM.status_scope_enabled, false)",
+		"COALESCE(BM.status_scope_option_ids, '[]')",
+	}
 }
 
 func (s *SQLStore) boardsFromRows(rows *sql.Rows) ([]*model.Board, error) {
@@ -144,6 +157,7 @@ func (s *SQLStore) boardMembersFromRows(rows *sql.Rows) ([]*model.BoardMember, e
 			&boardMember.BoardID,
 			&boardMember.UserID,
 			&boardMember.Roles,
+			&boardMember.CreateAt,
 			&boardMember.SchemeAdmin,
 			&boardMember.SchemeEditor,
 			&boardMember.SchemeCommenter,
@@ -567,6 +581,12 @@ func (s *SQLStore) saveMember(db sq.BaseRunner, bm *model.BoardMember) (*model.B
 		}
 	}
 
+	if oldMember != nil {
+		bm.CreateAt = oldMember.CreateAt
+	} else {
+		bm.CreateAt = utils.GetMillis()
+	}
+
 	return bm, nil
 }
 
@@ -621,7 +641,7 @@ func (s *SQLStore) deleteMember(db sq.BaseRunner, boardID, userID string) error 
 
 func (s *SQLStore) getMemberForBoard(db sq.BaseRunner, boardID, userID string) (*model.BoardMember, error) {
 	query := s.getQueryBuilder(db).
-		Select(boardMemberFields...).
+		Select(boardMemberFields(s.tablePrefix, s.dbType)...).
 		From(s.tablePrefix + "board_members AS BM").
 		LeftJoin(s.tablePrefix + "boards AS B ON B.id=BM.board_id").
 		Where(sq.Eq{"BM.board_id": boardID}).
@@ -649,7 +669,7 @@ func (s *SQLStore) getMemberForBoard(db sq.BaseRunner, boardID, userID string) (
 
 func (s *SQLStore) getMembersForUser(db sq.BaseRunner, userID string) ([]*model.BoardMember, error) {
 	query := s.getQueryBuilder(db).
-		Select(boardMemberFields...).
+		Select(boardMemberFields(s.tablePrefix, s.dbType)...).
 		From(s.tablePrefix + "board_members AS BM").
 		LeftJoin(s.tablePrefix + "boards AS B ON B.id=BM.board_id").
 		Where(sq.Eq{"BM.user_id": userID})
@@ -671,7 +691,7 @@ func (s *SQLStore) getMembersForUser(db sq.BaseRunner, userID string) ([]*model.
 
 func (s *SQLStore) getMembersForBoard(db sq.BaseRunner, boardID string) ([]*model.BoardMember, error) {
 	query := s.getQueryBuilder(db).
-		Select(boardMemberFields...).
+		Select(boardMemberFields(s.tablePrefix, s.dbType)...).
 		From(s.tablePrefix + "board_members AS BM").
 		LeftJoin(s.tablePrefix + "boards AS B ON B.id=BM.board_id").
 		Where(sq.Eq{"BM.board_id": boardID})

@@ -226,7 +226,7 @@ describe('src/components/shareBoard/shareBoard', () => {
         expect(container).toMatchSnapshot()
         const shareButton = screen.getByRole('button', {name: 'Share'})
         expect(shareButton).toBeDefined()
-        const closeButton = screen.getByRole('button', {name: 'Close dialog'})
+        const closeButton = screen.getByRole('button', {name: 'Close'})
         expect(closeButton).toBeDefined()
     })
 
@@ -369,20 +369,20 @@ describe('src/components/shareBoard/shareBoard', () => {
 
         const publishButton = screen.getByRole('button', {name: 'Publish'})
         expect(publishButton).toBeDefined()
-        userEvent.click(publishButton)
         await act(async () => {
+            userEvent.click(publishButton)
             jest.runOnlyPendingTimers()
         })
 
-        const switchElement = container?.querySelector('.Switch')
-        expect(switchElement).toBeDefined()
+        const switchElement = document.querySelector('.Switch')
+        expect(switchElement).not.toBeNull()
         await act(async () => {
-            userEvent.click(switchElement!)
+            ;(switchElement as HTMLElement).click()
         })
 
         expect(mockedOctoClient.setSharing).toBeCalledTimes(1)
         expect(mockedOctoClient.getSharing).toBeCalledTimes(2)
-        expect(container).toMatchSnapshot()
+        expect(document.body).toMatchSnapshot()
     })
 
     test('return shareBoardComponent and click Switch without sharing', async () => {
@@ -394,8 +394,9 @@ describe('src/components/shareBoard/shareBoard', () => {
         mockedOctoClient.getSharing.mockResolvedValue(sharing)
         mockedUtils.createGuid.mockReturnValue('aToken')
         let container: Element | undefined
+        let result: any
         await act(async () => {
-            const result = render(
+            result = render(
                 wrapDNDIntl(
                     <ReduxProvider store={store}>
                         <ShareBoard
@@ -411,16 +412,23 @@ describe('src/components/shareBoard/shareBoard', () => {
                 enabled: true,
                 token: 'aToken',
             })
+        })
 
-            const publishButton = screen.getByRole('button', {name: 'Publish'})
-            expect(publishButton).toBeDefined()
+        const publishButton = screen.getByRole('button', {name: 'Publish'})
+        expect(publishButton).toBeDefined()
+        await act(async () => {
             userEvent.click(publishButton)
             jest.runOnlyPendingTimers()
+        })
 
-            const switchElement = container?.querySelector('.Switch')
-            expect(switchElement).toBeDefined()
-            userEvent.click(switchElement!)
+        const switchElement = document.querySelector('.Switch')
+        expect(switchElement).not.toBeNull()
+        await act(async () => {
+            ;(switchElement as HTMLElement).click()
             jest.runOnlyPendingTimers()
+        })
+
+        await act(async () => {
             result.rerender(
                 wrapDNDIntl(
                     <ReduxProvider store={store}>
@@ -433,8 +441,8 @@ describe('src/components/shareBoard/shareBoard', () => {
 
         expect(mockedOctoClient.setSharing).toBeCalledTimes(1)
         expect(mockedOctoClient.getSharing).toBeCalledTimes(2)
-        expect(mockedUtils.createGuid).toBeCalledTimes(1)
-        expect(container).toMatchSnapshot()
+        expect(mockedUtils.createGuid).not.toBeCalled()
+        expect(document.body).toMatchSnapshot()
     })
 
     test('should match snapshot with sharing and without workspaceId and subpath', async () => {
@@ -614,7 +622,7 @@ describe('src/components/shareBoard/shareBoard', () => {
         })
 
         expect(container).toMatchSnapshot()
-        const closeButton = screen.getByRole('button', {name: 'Close dialog'})
+        const closeButton = screen.getByRole('button', {name: 'Close'})
         expect(closeButton).toBeDefined()
     })
 

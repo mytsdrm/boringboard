@@ -11,20 +11,26 @@ exports[`src/components/shareBoard/userPermissionsRow should match snapshot 1`] 
       <div
         class="ml-3"
       >
-        <strong />
-        <strong
-          class="ml-2 text-light"
+        <div
+          class="user-item__name"
         >
-          @username_1
-        </strong>
-        <strong
-          class="ml-2 text-light"
-        >
-          (You)
-        </strong>
+          <strong />
+          <strong
+            class="ml-2 text-light"
+          >
+            @username_1
+          </strong>
+          <strong
+            class="ml-2 text-light"
+          >
+            (You)
+          </strong>
+        </div>
       </div>
     </div>
-    <div>
+    <div
+      class="user-item__actions"
+    >
       <div
         aria-label="menuwrapper"
         class="MenuWrapper override menuOpened"
@@ -262,20 +268,26 @@ exports[`src/components/shareBoard/userPermissionsRow should match snapshot in p
       <div
         class="ml-3"
       >
-        <strong />
-        <strong
-          class="ml-2 text-light"
+        <div
+          class="user-item__name"
         >
-          @username_1
-        </strong>
-        <strong
-          class="ml-2 text-light"
-        >
-          (You)
-        </strong>
+          <strong />
+          <strong
+            class="ml-2 text-light"
+          >
+            @username_1
+          </strong>
+          <strong
+            class="ml-2 text-light"
+          >
+            (You)
+          </strong>
+        </div>
       </div>
     </div>
-    <div>
+    <div
+      class="user-item__actions"
+    >
       <div
         aria-label="menuwrapper"
         class="MenuWrapper override menuOpened"
@@ -513,20 +525,26 @@ exports[`src/components/shareBoard/userPermissionsRow should match snapshot in t
       <div
         class="ml-3"
       >
-        <strong />
-        <strong
-          class="ml-2 text-light"
+        <div
+          class="user-item__name"
         >
-          @username_1
-        </strong>
-        <strong
-          class="ml-2 text-light"
-        >
-          (You)
-        </strong>
+          <strong />
+          <strong
+            class="ml-2 text-light"
+          >
+            @username_1
+          </strong>
+          <strong
+            class="ml-2 text-light"
+          >
+            (You)
+          </strong>
+        </div>
       </div>
     </div>
-    <div>
+    <div
+      class="user-item__actions"
+    >
       <div
         aria-label="menuwrapper"
         class="MenuWrapper override menuOpened"
@@ -734,29 +752,35 @@ exports[`src/components/shareBoard/userPermissionsRow should match snapshot-admi
       <div
         class="ml-3"
       >
-        <strong />
-        <strong
-          class="ml-2 text-light"
-        >
-          @username_1
-        </strong>
-        <strong
-          class="ml-2 text-light"
-        >
-          (You)
-        </strong>
         <div
-          class="AdminBadge"
+          class="user-item__name"
         >
-          <div
-            class="AdminBadge__box"
+          <strong />
+          <strong
+            class="ml-2 text-light"
           >
-            Admin
+            @username_1
+          </strong>
+          <strong
+            class="ml-2 text-light"
+          >
+            (You)
+          </strong>
+          <div
+            class="AdminBadge"
+          >
+            <div
+              class="AdminBadge__box"
+            >
+              Admin
+            </div>
           </div>
         </div>
       </div>
     </div>
-    <div>
+    <div
+      class="user-item__actions"
+    >
       <div
         aria-label="menuwrapper"
         class="MenuWrapper override menuOpened"

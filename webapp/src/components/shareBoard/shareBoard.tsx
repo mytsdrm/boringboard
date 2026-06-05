@@ -196,6 +196,7 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
             boardId: member.boardId,
             userId: member.userId,
             roles: member.roles,
+            createAt: member.createAt,
             statusScopeEnabled: member.statusScopeEnabled,
             statusScopeOptionIds: member.statusScopeOptionIds || [],
         } as BoardMember
@@ -310,6 +311,18 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
         />
     )
 
+    const teammateNameDisplay = me?.props?.teammateNameDisplay || clientConfig.teammateNameDisplay
+    const sortedBoardUsers = boardUsers.
+        filter((user) => members[user.id] && !members[user.id].synthetic).
+        sort((a, b) => {
+            const aCreateAt = members[a.id]?.createAt || 0
+            const bCreateAt = members[b.id]?.createAt || 0
+            if (aCreateAt !== bCreateAt) {
+                return bCreateAt - aCreateAt
+            }
+            return Utils.getUserDisplayName(a, teammateNameDisplay).localeCompare(Utils.getUserDisplayName(b, teammateNameDisplay))
+        })
+
     const formatOptionLabel = (userOrChannel: IUser | Channel) => {
         if ((userOrChannel as IUser).username) {
             const user = userOrChannel as IUser
@@ -352,7 +365,7 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
             showSaveButton={false}
             title={board.isTemplate ? shareTemplateTitle : shareBoardTitle}
             titleIcon={<CompassIcon icon='share-variant-outline'/>}
-            width='820px'
+            width='960px'
             onClose={props.onClose}
         >
             {showLinkChannelConfirmation &&
@@ -413,23 +426,18 @@ export default function ShareBoardDialog(props: Props): JSX.Element {
             <div className='user-items'>
                 <TeamPermissionsRow/>
 
-                {boardUsers.map((user) => {
-                    if (!members[user.id]) {
-                        return null
-                    }
-                    if (members[user.id].synthetic) {
-                        return null
-                    }
+                {sortedBoardUsers.map((user) => {
                     return (
                         <UserPermissionsRow
                             key={user.id}
                             user={user}
                             member={members[user.id]}
-                            teammateNameDisplay={me?.props?.teammateNameDisplay || clientConfig.teammateNameDisplay}
+                            teammateNameDisplay={teammateNameDisplay}
                             onDeleteBoardMember={onDeleteBoardMember}
                             onUpdateBoardMember={onUpdateBoardMember}
                             onUpdateBoardMemberScope={onUpdateBoardMemberScope}
                             isMe={user.id === me?.id}
+                            hideInvitedAt={user.id === board.createdBy}
                         />
                     )
                 })}

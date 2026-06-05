@@ -29,6 +29,7 @@ type Props = {
     onDeleteBoardMember: (member: BoardMember) => void
     onUpdateBoardMember: (member: BoardMember, permission: string) => void
     onUpdateBoardMemberScope: (member: BoardMember, statusScopeEnabled: boolean, statusScopeOptionIds: string[]) => void
+    hideInvitedAt?: boolean
 }
 
 const UserPermissionsRow = (props: Props): JSX.Element => {
@@ -77,11 +78,20 @@ const UserPermissionsRow = (props: Props): JSX.Element => {
         >
             <div className='user-item__content'>
                 <div className='ml-3'>
-                    <strong>{Utils.getUserDisplayName(user, teammateNameDisplay)}</strong>
-                    <strong className='ml-2 text-light'>{`@${user.username}`}</strong>
-                    {isMe && <strong className='ml-2 text-light'>{intl.formatMessage({id: 'ShareBoard.userPermissionsYouText', defaultMessage: '(You)'})}</strong>}
-                    <GuestBadge show={user.is_guest}/>
-                    <AdminBadge permissions={user.permissions}/>
+                    <div className='user-item__name'>
+                        <strong>{Utils.getUserDisplayName(user, teammateNameDisplay)}</strong>
+                        <strong className='ml-2 text-light'>{`@${user.username}`}</strong>
+                        {isMe && <strong className='ml-2 text-light'>{intl.formatMessage({id: 'ShareBoard.userPermissionsYouText', defaultMessage: '(You)'})}</strong>}
+                        <GuestBadge show={user.is_guest}/>
+                        <AdminBadge permissions={user.permissions}/>
+                    </div>
+                    {Boolean(member.createAt) && !props.hideInvitedAt &&
+                        <div className='user-item__invited-at'>
+                            {intl.formatMessage(
+                                {id: 'ShareBoard.userPermissionsInvitedAt', defaultMessage: 'Invited {datetime}'},
+                                {datetime: Utils.displayDateTime(new Date(member.createAt || 0), intl)},
+                            )}
+                        </div>}
                 </div>
             </div>
             <div className='user-item__actions'>

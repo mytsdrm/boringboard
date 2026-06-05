@@ -64,8 +64,15 @@ func (a *API) handleGetSharing(w http.ResponseWriter, r *http.Request) {
 
 	sharing, err := a.app.GetSharing(boardID)
 	if err != nil {
-		a.errorResponse(w, r, err)
-		return
+		if !model.IsErrNotFound(err) {
+			a.errorResponse(w, r, err)
+			return
+		}
+		sharing = &model.Sharing{
+			ID:      boardID,
+			Enabled: false,
+			Token:   "",
+		}
 	}
 
 	sharingData, err := json.Marshal(sharing)

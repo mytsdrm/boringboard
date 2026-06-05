@@ -66,6 +66,7 @@ type BoardMember = {
     boardId: string
     userId: string
     roles?: string
+    createAt?: number
     minimumRole: MemberRole
     schemeAdmin: boolean
     schemeEditor: boolean
