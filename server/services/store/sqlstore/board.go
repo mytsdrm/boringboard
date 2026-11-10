@@ -70,14 +70,23 @@ func boardHistoryFields() []string {
 }
 
 func boardMemberFields(tablePrefix string, dbType string) []string {
+	// The invite time is the first history entry of the current membership,
+	// i.e. the oldest non-deleted entry with no later "deleted" entry. Using the
+	// latest entry would move the invite time every time the member's role changes.
+	invitedAtSubquery := "SELECT MIN(BMH.insert_at) FROM " + tablePrefix + "board_members_history AS BMH" +
+		" WHERE BMH.board_id = BM.board_id AND BMH.user_id = BM.user_id AND BMH.action <> 'deleted'" +
+		" AND NOT EXISTS (SELECT 1 FROM " + tablePrefix + "board_members_history AS BMHD" +
+		" WHERE BMHD.board_id = BMH.board_id AND BMHD.user_id = BMH.user_id" +
+		" AND BMHD.action = 'deleted' AND BMHD.insert_at > BMH.insert_at)"
+
 	createAtField := "0"
 	switch dbType {
 	case model.PostgresDBType:
-		createAtField = "COALESCE((SELECT CAST(EXTRACT(EPOCH FROM MAX(BMH.insert_at)) * 1000 AS BIGINT) FROM " + tablePrefix + "board_members_history AS BMH WHERE BMH.board_id = BM.board_id AND BMH.user_id = BM.user_id AND BMH.action <> 'deleted'), 0)"
+		createAtField = "COALESCE(CAST(EXTRACT(EPOCH FROM (" + invitedAtSubquery + ")) * 1000 AS BIGINT), 0)"
 	case model.MysqlDBType:
-		createAtField = "COALESCE((SELECT CAST(UNIX_TIMESTAMP(MAX(BMH.insert_at)) * 1000 AS SIGNED) FROM " + tablePrefix + "board_members_history AS BMH WHERE BMH.board_id = BM.board_id AND BMH.user_id = BM.user_id AND BMH.action <> 'deleted'), 0)"
+		createAtField = "COALESCE(CAST(UNIX_TIMESTAMP((" + invitedAtSubquery + ")) * 1000 AS SIGNED), 0)"
 	case model.SqliteDBType:
-		createAtField = "COALESCE((SELECT CAST((julianday(MAX(BMH.insert_at)) - 2440587.5) * 86400000 AS INTEGER) FROM " + tablePrefix + "board_members_history AS BMH WHERE BMH.board_id = BM.board_id AND BMH.user_id = BM.user_id AND BMH.action <> 'deleted'), 0)"
+		createAtField = "COALESCE(CAST((julianday((" + invitedAtSubquery + ")) - 2440587.5) * 86400000 AS INTEGER), 0)"
 	}
 
 	return []string{

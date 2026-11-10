@@ -38,7 +38,7 @@ func (a *API) handleAdminSetPassword(w http.ResponseWriter, r *http.Request) {
 	defer a.audit.LogRecord(audit.LevelAuth, auditRec)
 	auditRec.AddMeta("username", username)
 
-	if !strings.Contains(requestData.Password, "") {
+	if strings.TrimSpace(requestData.Password) == "" {
 		a.errorResponse(w, r, model.NewErrBadRequest("password is required"))
 		return
 	}

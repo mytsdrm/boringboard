@@ -352,9 +352,8 @@ describe('src/components/shareBoard/shareBoard', () => {
             token: 'oneToken',
         }
         mockedOctoClient.getSharing.mockResolvedValue(sharing)
-        let container: Element | undefined
         await act(async () => {
-            const result = render(
+            render(
                 wrapDNDIntl(
                     <ReduxProvider store={store}>
                         <ShareBoard
@@ -364,7 +363,6 @@ describe('src/components/shareBoard/shareBoard', () => {
                     </ReduxProvider>),
                 {wrapper: MemoryRouter},
             )
-            container = result.container
         })
 
         const publishButton = screen.getByRole('button', {name: 'Publish'})
@@ -377,7 +375,7 @@ describe('src/components/shareBoard/shareBoard', () => {
         const switchElement = document.querySelector('.Switch')
         expect(switchElement).not.toBeNull()
         await act(async () => {
-            ;(switchElement as HTMLElement).click()
+            (switchElement as HTMLElement).click()
         })
 
         expect(mockedOctoClient.setSharing).toBeCalledTimes(1)
@@ -393,7 +391,6 @@ describe('src/components/shareBoard/shareBoard', () => {
         }
         mockedOctoClient.getSharing.mockResolvedValue(sharing)
         mockedUtils.createGuid.mockReturnValue('aToken')
-        let container: Element | undefined
         let result: any
         await act(async () => {
             result = render(
@@ -406,7 +403,6 @@ describe('src/components/shareBoard/shareBoard', () => {
                     </ReduxProvider>),
                 {wrapper: MemoryRouter},
             )
-            container = result.container
             mockedOctoClient.getSharing.mockResolvedValue({
                 id: boardId,
                 enabled: true,
@@ -424,7 +420,7 @@ describe('src/components/shareBoard/shareBoard', () => {
         const switchElement = document.querySelector('.Switch')
         expect(switchElement).not.toBeNull()
         await act(async () => {
-            ;(switchElement as HTMLElement).click()
+            (switchElement as HTMLElement).click()
             jest.runOnlyPendingTimers()
         })
 

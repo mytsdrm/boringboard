@@ -37,6 +37,27 @@ type TaskBoardInfoItem = {
     defaultMessage: string
     value: string
     isUrl?: boolean
+    href?: string | null
+}
+
+// Only http(s) links are rendered as anchors. A value without a scheme
+// (e.g. "github.com/org/repo") is treated as https, and anything else
+// (javascript:, data:, ...) is shown as plain text so it can't run script.
+export function toSafeExternalUrl(value: string): string | null {
+    const trimmed = value.trim()
+    if (!trimmed) {
+        return null
+    }
+    const candidate = (/^[a-z][a-z0-9+.-]*:\/\//i).test(trimmed) ? trimmed : `https://${trimmed}`
+    try {
+        const url = new URL(candidate)
+        if (url.protocol !== 'http:' && url.protocol !== 'https:') {
+            return null
+        }
+        return url.href
+    } catch {
+        return null
+    }
 }
 
 type ViewTitleStyle = React.CSSProperties & {
@@ -129,7 +150,9 @@ const ViewTitle = (props: Props) => {
             value: taskBoardSettings.productionUrl,
             isUrl: true,
         },
-    ].filter((item) => item.value.trim() !== '')
+    ].
+        filter((item) => item.value.trim() !== '').
+        map((item) => ({...item, href: item.isUrl ? toSafeExternalUrl(item.value) : null}))
     useLayoutEffect(() => {
         const updateHiddenText = () => {
             const viewTitleElement = viewTitleRef.current
@@ -298,9 +321,9 @@ const ViewTitle = (props: Props) => {
                                             defaultMessage={item.defaultMessage}
                                         />
                                     </span>
-                                    {item.isUrl ? (
+                                    {item.href ? (
                                         <a
-                                            href={item.value}
+                                            href={item.href}
                                             target='_blank'
                                             rel='noreferrer'
                                             className='ViewTitle__infoValue'

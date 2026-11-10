@@ -685,6 +685,13 @@ func testSaveMember(t *testing.T, store store.Store) {
 		require.NoError(t, err)
 		initialMemberHistory := len(memberHistory)
 
+		oldMember, err := store.GetMemberForBoard(boardID, userID)
+		require.NoError(t, err)
+		require.NotZero(t, oldMember.CreateAt)
+
+		// avoid sharing the same history timestamp
+		time.Sleep(10 * time.Millisecond)
+
 		nbm, err := store.SaveMember(bm)
 		require.NoError(t, err)
 		require.Equal(t, userID, nbm.UserID)
@@ -694,9 +701,24 @@ func testSaveMember(t *testing.T, store store.Store) {
 		require.True(t, nbm.SchemeEditor)
 		require.True(t, nbm.SchemeViewer)
 
+		// a role change is recorded in the member history
 		memberHistory, err = store.GetBoardMemberHistory(boardID, userID, 0)
 		require.NoError(t, err)
-		require.Len(t, memberHistory, initialMemberHistory)
+		require.Len(t, memberHistory, initialMemberHistory+1)
+
+		// but it does not change the time the member was invited
+		updatedMember, err := store.GetMemberForBoard(boardID, userID)
+		require.NoError(t, err)
+		require.Equal(t, oldMember.CreateAt, updatedMember.CreateAt)
+		require.Equal(t, oldMember.CreateAt, nbm.CreateAt)
+
+		// saving the same role again does not add history
+		time.Sleep(10 * time.Millisecond)
+		_, err = store.SaveMember(bm)
+		require.NoError(t, err)
+		memberHistory, err = store.GetBoardMemberHistory(boardID, userID, 0)
+		require.NoError(t, err)
+		require.Len(t, memberHistory, initialMemberHistory+1)
 	})
 
 	t.Run("should return empty list if no results are found", func(t *testing.T) {
