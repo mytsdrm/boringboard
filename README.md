@@ -81,7 +81,15 @@ The script starts the server, builds/watches the web app, and enables browser au
 
 Ports are picked automatically. The script tries `EXTERNAL_PORT` (default `8000`) for the web UI and `APP_PORT` (default `8001`) for the API server. A leftover BoringBoard process on those ports is stopped, but if another app is using a port, the script moves to the next free one and prints the URL to open.
 
-To deploy with Docker instead, run `docker/up.sh` (add `-f docker-compose-db.yml` or another compose file if needed). It uses `EXTERNAL_PORT` when it is free and otherwise picks the next free host port.
+## Deploy on a server (Docker)
+
+```bash
+./deploy               # standalone server (own Docker network, no CapRover)
+./deploy caprover      # server with CapRover (joins captain-overlay-network)
+./deploy --check       # only run the checks, change nothing
+```
+
+`./deploy` builds and starts BoringBoard with Postgres. It picks a free host port (starting at `EXTERNAL_PORT`, default `8000`), saves it in `.env`, and moves to the next free port if another program takes it later. Without a mode it keeps the mode of the install that is already running.
 
 ---
 

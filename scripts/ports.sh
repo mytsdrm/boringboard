@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Port helpers shared by run.sh and docker/up.sh. Source this file; do not execute it.
+# Port helpers shared by run.sh and ./deploy. Source this file; do not execute it.
 
 # port_is_free PORT
 # Succeeds when nothing is listening on PORT (checked by trying to bind it on all interfaces).

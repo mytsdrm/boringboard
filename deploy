@@ -1,0 +1,224 @@
+#!/usr/bin/env bash
+#
+# Build and (re)start BoringBoard with Docker on this server. Run it in the project folder:
+#
+#   ./deploy               standalone server (own Docker network, no CapRover)
+#   ./deploy caprover      server with CapRover (joins captain-overlay-network)
+#
+# Options:
+#   ./deploy --check       only run the checks, change nothing
+#   ./deploy --no-build    restart with the image already built
+#   ./deploy -h            show this help
+#
+# What it does on its own: picks a free host port (EXTERNAL_PORT, default 8000)
+# and saves it in .env, moves to the next free port when another program takes
+# it, keeps the mode (standalone or CapRover) of the running install unless you
+# name one, waits until BoringBoard answers and shows the logs if it does not.
+#
+set -euo pipefail
+cd "$(dirname "$0")"
+ROOT_DIR="$(pwd)"
+
+MODE_ARG=""; CHECK_ONLY=0; BUILD=1
+for arg in "$@"; do
+    case "$arg" in
+        caprover|--caprover) MODE_ARG=caprover ;;
+        standalone|--standalone) MODE_ARG=standalone ;;
+        --check) CHECK_ONLY=1 ;;
+        --no-build) BUILD=0 ;;
+        -h|--help) sed -n '2,17p' "$0" | sed 's/^# \{0,1\}//'; exit 0 ;;
+        *) echo "Unknown option: $arg (see ./deploy --help)" >&2; exit 1 ;;
+    esac
+done
+
+# ---------------------------------------------------------------------------
+# Output helpers
+# ---------------------------------------------------------------------------
+if [ -t 1 ]; then B=$'\e[1m'; G=$'\e[32m'; Y=$'\e[33m'; R=$'\e[31m'; N=$'\e[0m'; else B=; G=; Y=; R=; N=; fi
+WARNINGS=(); ERRORS=()
+step()  { echo; echo "${B}== $*${N}"; }
+ok()    { echo "  ${G}ok${N}    $*"; }
+fixed() { echo "  ${G}fixed${N} $*"; }
+info()  { echo "  ..    $*"; }
+warn()  { echo "  ${Y}WARN${N}  $1"; if [ -n "${2:-}" ]; then echo "        -> $2"; fi; WARNINGS+=("$1"); }
+err()   { echo "  ${R}ERROR${N} $1"; if [ -n "${2:-}" ]; then echo "        -> $2"; fi; ERRORS+=("$1"); }
+stop_if_errors() {
+    if [ "${#ERRORS[@]}" -gt 0 ]; then
+        echo; echo "${R}${B}Stopped: ${#ERRORS[@]} problem(s) to fix first (see -> above). The running containers were not touched.${N}"
+        exit 1
+    fi
+}
+
+env_get() { if [ -f .env ]; then grep -E "^$1=" .env | tail -n1 | cut -d= -f2- | sed -e 's/^"\(.*\)"$/\1/' -e "s/^'\(.*\)'$/\1/" || true; fi; }
+env_set() { # KEY VALUE: replace or append
+    local tmp; tmp="$(mktemp)"
+    touch .env
+    if grep -qE "^$1=" .env; then
+        KEY="$1" VAL="$2" awk 'index($0, ENVIRON["KEY"] "=") == 1 { print ENVIRON["KEY"] "=\"" ENVIRON["VAL"] "\""; next } { print }' .env > "$tmp"
+    else
+        cat .env > "$tmp"; [ -s "$tmp" ] && [ -n "$(tail -c1 "$tmp")" ] && echo >> "$tmp"; printf '%s="%s"\n' "$1" "$2" >> "$tmp"
+    fi
+    cat "$tmp" > .env; rm -f "$tmp"
+}
+
+# shellcheck source=scripts/ports.sh
+source "$ROOT_DIR/scripts/ports.sh"
+
+APP_CT=boringboard   # container_name in docker/docker-compose-db*.yml
+
+# ---------------------------------------------------------------------------
+# 1. Server
+# ---------------------------------------------------------------------------
+step "Checking the server"
+if ! command -v docker >/dev/null 2>&1; then
+    err "Docker is not installed" "install Docker Engine: https://docs.docker.com/engine/install/"
+    stop_if_errors
+fi
+if ! docker info >/dev/null 2>&1; then
+    err "Docker is not running, or this user may not use it" "start it (systemctl start docker) or run ./deploy as root"
+    stop_if_errors
+fi
+COMPOSE_V="$(docker compose version --short 2>/dev/null || true)"
+if [ -z "$COMPOSE_V" ]; then
+    err "docker compose (v2) is missing" "install the docker-compose-plugin package"
+    stop_if_errors
+fi
+ok "Docker $(docker version --format '{{.Server.Version}}' 2>/dev/null), compose $COMPOSE_V"
+
+AVAIL_KB="$(df -Pk . | awk 'NR==2 {print $4}')"
+if [ "${AVAIL_KB:-0}" -lt 3000000 ]; then
+    warn "only $((AVAIL_KB / 1024)) MB free disk space; a build needs about 3 GB" "free space: docker image prune -f"
+else
+    ok "disk space: $((AVAIL_KB / 1024 / 1024)) GB free"
+fi
+
+# Keep the compose project of an existing install, so its data volumes are reused.
+OLD_PROJECT="$(docker inspect --format '{{index .Config.Labels "com.docker.compose.project"}}' "$APP_CT" 2>/dev/null || true)"
+export COMPOSE_PROJECT_NAME="${COMPOSE_PROJECT_NAME:-${OLD_PROJECT:-boringboard}}"
+
+# ---------------------------------------------------------------------------
+# 2. Mode: standalone or CapRover
+# ---------------------------------------------------------------------------
+step "Checking the mode"
+SAVED_MODE=""
+if docker inspect "$APP_CT" >/dev/null 2>&1; then
+    if docker inspect --format '{{range $k, $v := .NetworkSettings.Networks}}{{$k}} {{end}}' "$APP_CT" | grep -q captain-overlay-network; then
+        SAVED_MODE=caprover
+    else
+        SAVED_MODE=standalone
+    fi
+fi
+MODE="${MODE_ARG:-${SAVED_MODE:-standalone}}"
+if [ -z "$MODE_ARG" ] && [ -n "$SAVED_MODE" ]; then
+    info "keeping the mode of the running install ($SAVED_MODE); name one to switch: ./deploy standalone | ./deploy caprover"
+elif [ -n "$SAVED_MODE" ] && [ "$SAVED_MODE" != "$MODE" ]; then
+    warn "switching from $SAVED_MODE to $MODE: the containers move to another Docker network (a few seconds of downtime)"
+fi
+
+if [ "$MODE" = caprover ]; then
+    COMPOSE_FILE_PATH="docker/docker-compose-db-caprover.yml"
+    if docker network inspect captain-overlay-network >/dev/null 2>&1; then
+        ok "CapRover mode (network captain-overlay-network)"
+    else
+        err "CapRover mode, but CapRover's network captain-overlay-network does not exist" \
+            "install CapRover first (https://caprover.com/docs/get-started.html), or deploy without it: ./deploy"
+    fi
+else
+    COMPOSE_FILE_PATH="docker/docker-compose-db.yml"
+    ok "standalone mode (own Docker network; put nginx/Caddy in front for https)"
+fi
+stop_if_errors
+
+compose() {
+    local env_args=()
+    [ -f .env ] && env_args=(--env-file .env)
+    docker compose "${env_args[@]}" -f "$COMPOSE_FILE_PATH" "$@"
+}
+
+# ---------------------------------------------------------------------------
+# 3. Port
+# ---------------------------------------------------------------------------
+step "Checking the port"
+# A port our own container already publishes counts as free (it is ours).
+port_ours() { docker port "$APP_CT" 8000/tcp 2>/dev/null | grep -qE ":$1\$"; }
+port_usable() { port_is_free "$1" || port_ours "$1"; }
+
+REQUESTED="$(env_get EXTERNAL_PORT)"
+PORT="${REQUESTED:-8000}"
+if ! port_usable "$PORT"; then
+    FROM="$PORT"
+    while ! port_usable "$PORT"; do
+        PORT=$((PORT + 1))
+        if [ "$PORT" -gt $((FROM + 200)) ]; then
+            err "no free port between $FROM and $PORT" "free a port, or set EXTERNAL_PORT in .env"
+            stop_if_errors
+        fi
+    done
+    if [ "$CHECK_ONLY" = 1 ]; then info "port $FROM is taken, would use $PORT"
+    else env_set EXTERNAL_PORT "$PORT"; fixed "port $FROM is taken, using $PORT (saved as EXTERNAL_PORT in .env)"; fi
+elif [ -z "$REQUESTED" ]; then
+    if [ "$CHECK_ONLY" = 1 ]; then info "port would be $PORT"
+    else env_set EXTERNAL_PORT "$PORT"; fixed "port $PORT (saved as EXTERNAL_PORT in .env)"; fi
+else
+    ok "port $PORT"
+fi
+export EXTERNAL_PORT="$PORT"
+
+if [ "$CHECK_ONLY" = 1 ]; then
+    step "Check finished (nothing was changed)"
+    if [ "${#WARNINGS[@]}" -gt 0 ]; then
+        echo "${Y}${B}${#WARNINGS[@]} warning(s):${N}"; for w in "${WARNINGS[@]}"; do echo "  - $w"; done
+    fi
+    exit 0
+fi
+
+# ---------------------------------------------------------------------------
+# 4. Build and start
+# ---------------------------------------------------------------------------
+if [ "$BUILD" = 1 ]; then
+    step "Building"
+    compose build
+fi
+
+step "Starting"
+# Containers from the other mode are left on the old network; recreate them.
+if [ -n "$SAVED_MODE" ] && [ "$SAVED_MODE" != "$MODE" ]; then
+    compose up -d --force-recreate --remove-orphans
+else
+    compose up -d --remove-orphans
+fi
+
+# Wait until BoringBoard answers on its port.
+STATUS=down
+for _ in $(seq 1 40); do
+    if (exec 3<>"/dev/tcp/127.0.0.1/$PORT") 2>/dev/null; then
+        if ! command -v curl >/dev/null 2>&1 || curl -fsS -o /dev/null "http://127.0.0.1:$PORT/"; then STATUS=up; break; fi
+    fi
+    sleep 3
+done
+if [ "$STATUS" != up ]; then
+    echo; echo "${R}${B}BoringBoard did not answer on port $PORT. Last log lines:${N}"
+    docker logs --tail 30 "$APP_CT" 2>&1 | sed 's/^/    /'
+    exit 1
+fi
+ok "BoringBoard is up"
+
+# ---------------------------------------------------------------------------
+# 5. Summary
+# ---------------------------------------------------------------------------
+step "Done"
+compose ps --format 'table {{.Name}}\t{{.Status}}' 2>/dev/null || compose ps
+HOST_IP="$(hostname -I 2>/dev/null | awk '{print $1}')"; HOST_IP="${HOST_IP:-<server-ip>}"
+echo
+echo "${G}${B}  Deployed ($MODE).${N}"
+echo "    BoringBoard   http://$HOST_IP:$PORT   (saved in .env as EXTERNAL_PORT)"
+echo
+if [ "$MODE" = caprover ]; then
+    echo "  CapRover: point the app's domain at container $APP_CT, port 8000 (or this server's port $PORT), with websocket support on."
+else
+    echo "  For a domain: point nginx/Caddy (with https) at port $PORT, and pass websocket upgrades on /ws."
+fi
+if [ "${#WARNINGS[@]}" -gt 0 ]; then
+    echo; echo "${Y}${B}${#WARNINGS[@]} warning(s) to look at:${N}"
+    for w in "${WARNINGS[@]}"; do echo "  - $w"; done
+fi
