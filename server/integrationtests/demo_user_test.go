@@ -28,21 +28,31 @@ func TestDemoUser(t *testing.T) {
 	require.Len(t, boards, 1)
 	board := boards[0]
 	require.Equal(t, "Demo Project", board.Title)
-	require.Len(t, board.CardProperties, 2)
+	require.Len(t, board.CardProperties, 16)
+	require.NotNil(t, board.Properties["boardIntegration"])
 
 	blocks, resp := th.Client.GetAllBlocksForBoard(board.ID)
 	th.CheckOK(resp)
-	cards, views := 0, 0
+	counts := map[model.BlockType]int{}
+	viewTypes := map[string]bool{}
+	templates := 0
 	for _, b := range blocks {
-		switch b.Type {
-		case model.TypeCard:
-			cards++
-		case model.TypeView:
-			views++
+		counts[b.Type]++
+		if b.Type == model.TypeView {
+			viewTypes[b.Fields["viewType"].(string)] = true
+		}
+		if b.Type == model.TypeCard && b.Fields["isTemplate"] == true {
+			templates++
 		}
 	}
-	require.Equal(t, 6, cards)
-	require.Equal(t, 1, views)
+	require.Equal(t, 9, counts[model.TypeCard]) // 8 tasks + 1 card template
+	require.Equal(t, 1, templates)
+	require.Equal(t, 5, counts[model.TypeView])
+	require.Equal(t, map[string]bool{"board": true, "table": true, "gallery": true, "calendar": true}, viewTypes)
+	require.Positive(t, counts[model.TypeText])
+	require.Positive(t, counts[model.TypeCheckbox])
+	require.Positive(t, counts[model.TypeDivider])
+	require.Positive(t, counts[model.TypeComment])
 
 	categories := th.GetUserCategoryBoards(model.GlobalTeamID)
 	found := false

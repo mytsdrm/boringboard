@@ -57,7 +57,7 @@ BORINGBOARD_AI_TIMEOUT="180"
 
 ### Demo account
 
-On first start, BoringBoard creates a demo account (`demo` / `demo123456`) with a sample "Demo Project" board and six tasks. It is created once and left alone after that. To change or turn it off, set these in `.env`:
+On first start, BoringBoard creates a demo account (`demo` / `demo123456`) with a sample "Demo Project" board that shows every feature: all property types, Board/Table/Gallery/Calendar views, a filtered view, a card template, and tasks with checklists, rich text, dividers and comments. The board is created once and left alone after that (it is replaced only when a new version of the sample data ships). To change or turn it off, set these in `.env`:
 
 ```bash
 BORINGBOARD_DEMOUSERENABLED="false"
