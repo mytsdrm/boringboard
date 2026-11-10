@@ -123,7 +123,7 @@ for i, (sid, _, _) in enumerate(SCENES):
     for b in blocks:
         lines = b.strip().split('\n')
         a, z = [srt_time(x.strip()) for x in lines[1].split('-->')]
-        text = ' '.join(lines[2:]).strip()
+        text = ' '.join(lines[2:]).strip().replace('project dot creativework dot asia', 'project.creativework.asia')
         words = text.split(); chunks, cur = [], ''
         for w in words:
             if len(cur) + len(w) + 1 > 52 and cur:

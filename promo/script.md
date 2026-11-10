@@ -18,7 +18,7 @@ Voice: ElevenLabs "Putri Maharani - Neutral and Witty" (voice id `I7sakys8pBZ1Z5
 | 9 | Share Board | Ajak tim Anda lewat Share, atur role setiap member, atau cukup copy link-nya. |
 | 10 | Create a board (templates) | Mulai project baru dalam hitungan detik dengan template siap pakai. Sprint planner, roadmap, project tasks, dan masih banyak lagi. |
 | 11 | Find task boards, dark theme | Cari board dengan cepat, lalu pilih tema sesuai selera. Light mode, atau dark mode. |
-| 12 | Outro card | BoringBoard. Open source, gratis, dan siap bikin kerjaan Anda jadi sedikit kurang membosankan. Coba sekarang di GitHub. |
+| 12 | Outro card with project.creativework.asia and the demo login | BoringBoard. Siap bikin kerjaan Anda jadi sedikit kurang membosankan. Coba demonya sekarang, di project dot creativework dot asia. |
 
 ## Rebuilding
 
@@ -35,6 +35,6 @@ python3 el_vo.py                           # voice-over into vo/ (key in promo/.
 python3 assemble.py ../boringboard-promo-id.mp4
 ```
 
-`BB_URL` points the recorder at another BoringBoard, `DEMO_USER` / `DEMO_PASSWORD` change the login, `PROMO_URL` changes the link on the outro card.
+`BB_URL` points the recorder at another BoringBoard, `DEMO_USER` / `DEMO_PASSWORD` change the login, `PROMO_URL` changes the demo link on the outro card (default project.creativework.asia; the spoken form in vo.json is respelled with "dot" and turned back into the URL in the subtitles).
 
 Recording leaves the demo board as it was: the card dragged in scene 3 is dragged back afterwards, dialogs are closed without saving, and the theme switch only lives in the recorder's own browser.

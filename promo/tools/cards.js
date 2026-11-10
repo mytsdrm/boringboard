@@ -4,7 +4,7 @@ const path = require('path');
 
 const logoPath = path.join(__dirname, '../../webapp/static/boringboard-logo.webp');
 const logo = 'data:image/webp;base64,' + fs.readFileSync(logoPath).toString('base64');
-const repoUrl = process.env.PROMO_URL || 'github.com/mytsdrm/boringboard';
+const demoUrl = process.env.PROMO_URL || 'project.creativework.asia';
 
 const base = `
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -35,6 +35,6 @@ exports.intro = `<!doctype html><html><head>${base}</head><body><div class="grid
 <div class="chips">${chips.map((c, i) => `<span class="chip" style="animation-delay:${1.3 + i * 0.18}s">${c}</span>`).join('')}</div></div></body></html>`;
 
 exports.outro = `<!doctype html><html><head>${base}</head><body><div class="grid"></div><div class="glow"></div>
-<div class="wrap"><div class="logo"><img src="${logo}"></div><p class="sub" style="font-size:50px;color:#fff;font-weight:700;margin-top:36px">Open source dan gratis. Coba sekarang</p>
-<div class="url">${repoUrl}</div>
+<div class="wrap"><div class="logo"><img src="${logo}"></div><p class="sub" style="font-size:50px;color:#fff;font-weight:700;margin-top:36px">Coba demonya sekarang</p>
+<div class="url">${demoUrl}</div>
 <p class="cred">Akun demo: <b>demo</b> / <b>demo123456</b></p></div></body></html>`;
