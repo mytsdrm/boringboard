@@ -47,12 +47,12 @@ func (s *SQLStore) getMigrationConnection() (*sql.DB, error) {
 	connectionString := s.connectionString
 	if s.dbType == model.MysqlDBType {
 		var err error
-		connectionString, err = sqlUtils.ResetReadTimeout(connectionString)
+		connectionString, err = ResetMySQLReadTimeout(connectionString)
 		if err != nil {
 			return nil, err
 		}
 
-		connectionString, err = sqlUtils.AppendMultipleStatementsFlag(connectionString)
+		connectionString, err = AppendMySQLMultipleStatementsFlag(connectionString)
 		if err != nil {
 			return nil, err
 		}
