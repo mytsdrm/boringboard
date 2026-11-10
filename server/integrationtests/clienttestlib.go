@@ -145,9 +145,16 @@ func newTestServer(singleUserToken string) *server.Server {
 }
 
 func newTestServerWithLicense(singleUserToken string, licenseType LicenseType) *server.Server {
+	return newTestServerWithConfig(singleUserToken, licenseType, nil)
+}
+
+func newTestServerWithConfig(singleUserToken string, licenseType LicenseType, configure func(*config.Configuration)) *server.Server {
 	cfg, err := getTestConfig()
 	if err != nil {
 		panic(err)
+	}
+	if configure != nil {
+		configure(cfg)
 	}
 
 	logger, _ := mlog.NewLogger()
@@ -314,6 +321,12 @@ func SetupTestHelperLocalMode(t *testing.T) *TestHelper {
 }
 
 func SetupTestHelperWithLicense(t *testing.T, licenseType LicenseType) *TestHelper {
+	return SetupTestHelperWithConfig(t, licenseType, nil)
+}
+
+// SetupTestHelperWithConfig is like SetupTestHelperWithLicense but lets the
+// test adjust the server configuration before the server is created.
+func SetupTestHelperWithConfig(t *testing.T, licenseType LicenseType, configure func(*config.Configuration)) *TestHelper {
 	origUnitTesting := os.Getenv("FOCALBOARD_UNIT_TESTING")
 	os.Setenv("FOCALBOARD_UNIT_TESTING", "1")
 
@@ -322,7 +335,7 @@ func SetupTestHelperWithLicense(t *testing.T, licenseType LicenseType) *TestHelp
 		origEnvUnitTesting: origUnitTesting,
 	}
 
-	th.Server = newTestServerWithLicense("", licenseType)
+	th.Server = newTestServerWithConfig("", licenseType, configure)
 	th.Client = client.NewClient(th.Server.Config().ServerRoot, "")
 	th.Client2 = client.NewClient(th.Server.Config().ServerRoot, "")
 	return th

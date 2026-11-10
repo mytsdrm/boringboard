@@ -15,6 +15,10 @@ func (a *App) initialize(skipTemplateInit bool) {
 		a.logger.Error(`InitializeDefaultAdminUser failed`, mlog.Err(err))
 	}
 
+	if err := a.ensureDemoUser(); err != nil {
+		a.logger.Error(`InitializeDemoUser failed`, mlog.Err(err))
+	}
+
 	if !skipTemplateInit {
 		if err := a.InitTemplates(); err != nil {
 			a.logger.Error(`InitializeTemplates failed`, mlog.Err(err))

@@ -63,6 +63,11 @@ type Configuration struct {
 	DefaultAdminUsername string `json:"defaultAdminUsername" mapstructure:"defaultAdminUsername"`
 	DefaultAdminPassword string `json:"defaultAdminPassword" mapstructure:"defaultAdminPassword"`
 
+	// Demo account seeded at startup (native auth only), with a sample project board and tasks.
+	DemoUserEnabled  bool   `json:"demoUserEnabled" mapstructure:"demoUserEnabled"`
+	DemoUserUsername string `json:"demoUserUsername" mapstructure:"demoUserUsername"`
+	DemoUserPassword string `json:"demoUserPassword" mapstructure:"demoUserPassword"`
+
 	LoggingCfgFile string `json:"logging_cfg_file" mapstructure:"logging_cfg_file"`
 	LoggingCfgJSON string `json:"logging_cfg_json" mapstructure:"logging_cfg_json"`
 
@@ -105,6 +110,9 @@ func ReadConfigFile(configFilePath string) (*Configuration, error) {
 	viper.SetDefault("AuthMode", "native")
 	viper.SetDefault("DefaultAdminUsername", "admin")
 	viper.SetDefault("DefaultAdminPassword", "admin123")
+	viper.SetDefault("DemoUserEnabled", true)
+	viper.SetDefault("DemoUserUsername", "demo")
+	viper.SetDefault("DemoUserPassword", "demo123456")
 	viper.SetDefault("NotifyFreqCardSeconds", 120)    // 2 minutes after last card edit
 	viper.SetDefault("NotifyFreqBoardSeconds", 86400) // 1 day after last card edit
 	viper.SetDefault("EnableDataRetention", false)
@@ -136,5 +144,6 @@ func ReadConfigFile(configFilePath string) (*Configuration, error) {
 func removeSecurityData(config Configuration) Configuration {
 	clean := config
 	clean.DefaultAdminPassword = ""
+	clean.DemoUserPassword = ""
 	return clean
 }

@@ -55,6 +55,16 @@ BORINGBOARD_AI_ANYTHINGLLM_ENDPOINT="http://localhost:3001/api/v1"
 BORINGBOARD_AI_TIMEOUT="180"
 ```
 
+### Demo account
+
+On first start, BoringBoard creates a demo account (`demo` / `demo123456`) with a sample "Demo Project" board and six tasks. It is created once and left alone after that. To change or turn it off, set these in `.env`:
+
+```bash
+BORINGBOARD_DEMOUSERENABLED="false"
+BORINGBOARD_DEMOUSERUSERNAME="demo"
+BORINGBOARD_DEMOUSERPASSWORD="demo123456"
+```
+
 Run the local development script:
 
 ```bash

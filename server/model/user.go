@@ -16,6 +16,8 @@ const (
 	RoleSystemUser                = "system_user"
 	DefaultAdminUsername          = "admin"
 	DefaultAdminPassword          = "admin123"
+	DefaultDemoUsername           = "demo"
+	DefaultDemoPassword           = "demo123456"
 )
 
 // User is a user
