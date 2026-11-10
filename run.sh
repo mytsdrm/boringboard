@@ -301,8 +301,51 @@ fi
 
 mkdir -p "$ROOT_DIR/bin"
 
-cleanup_port "$PORT"
-cleanup_port "$APP_PORT"
+# shellcheck source=scripts/ports.sh
+source "$ROOT_DIR/scripts/ports.sh"
+
+# Stop a BoringBoard process left over from an earlier run, but never touch other apps.
+stop_stale_boringboard_on_port() {
+    local port="$1"
+    local pid cmdline
+
+    command -v lsof >/dev/null 2>&1 || return 0
+
+    for pid in $(lsof -iTCP:"$port" -sTCP:LISTEN -t 2>/dev/null || true); do
+        cmdline="$(tr '\0' ' ' < "/proc/$pid/cmdline" 2>/dev/null || true)"
+        case "$cmdline" in
+            *focalboard-server*|*dev-reload-proxy.js*)
+                echo "Stopping leftover BoringBoard process on port $port: $pid" >&2
+                kill "$pid" 2>/dev/null || true
+                sleep 1
+                kill -9 "$pid" 2>/dev/null || true
+                ;;
+        esac
+    done
+}
+
+# pick_port NAME REQUESTED [EXCLUDED...]: prints REQUESTED if free, otherwise the next free port.
+pick_port() {
+    local name="$1"
+    local requested="$2"
+    shift 2
+    local chosen
+
+    stop_stale_boringboard_on_port "$requested"
+    chosen="$(find_free_port "$requested" "$@")" || exit 1
+
+    if [ "$chosen" != "$requested" ]; then
+        echo "Port $requested is not available; using port $chosen for $name instead." >&2
+    fi
+
+    echo "$chosen"
+}
+
+PORT="$(pick_port "the web UI" "$PORT")"
+APP_PORT="$(pick_port "the API server" "$APP_PORT" "$PORT")"
+
+# Keep generated links pointing at the port actually in use, unless serverRoot was set explicitly.
+export BORINGBOARD_SERVERROOT="${BORINGBOARD_SERVERROOT:-http://localhost:$PORT}"
 
 trap 'cleanup $?' EXIT
 trap 'cleanup 130' INT

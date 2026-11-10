@@ -67,7 +67,11 @@ Then open:
 http://localhost:8000
 ```
 
-The script starts the server, builds/watches the web app, clears ports `8000` and `8001` when needed, and enables browser auto-reload for frontend changes.
+The script starts the server, builds/watches the web app, and enables browser auto-reload for frontend changes.
+
+Ports are picked automatically. The script tries `EXTERNAL_PORT` (default `8000`) for the web UI and `APP_PORT` (default `8001`) for the API server. A leftover BoringBoard process on those ports is stopped, but if another app is using a port, the script moves to the next free one and prints the URL to open.
+
+To deploy with Docker instead, run `docker/up.sh` (add `-f docker-compose-db.yml` or another compose file if needed). It uses `EXTERNAL_PORT` when it is free and otherwise picks the next free host port.
 
 ---
 
