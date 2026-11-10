@@ -24,6 +24,7 @@ func TestUserRegister(t *testing.T) {
 		Username: fakeUsername,
 		Email:    fakeEmail,
 		Password: utils.NewID(utils.IDTypeNone),
+		Token:    th.SignupToken(),
 	}
 	success, resp := th.Client.Register(registerRequest)
 	require.NoError(t, resp.Error)
@@ -58,6 +59,7 @@ func TestUserLogin(t *testing.T) {
 			Username: fakeUsername,
 			Email:    fakeEmail,
 			Password: password,
+			Token:    th.SignupToken(),
 		}
 		success, resp := th.Client.Register(registerRequest)
 		require.NoError(t, resp.Error)
@@ -94,6 +96,7 @@ func TestGetMe(t *testing.T) {
 			Username: fakeUsername,
 			Email:    fakeEmail,
 			Password: password,
+			Token:    th.SignupToken(),
 		}
 		success, resp := th.Client.Register(registerRequest)
 		require.NoError(t, resp.Error)
@@ -114,7 +117,8 @@ func TestGetMe(t *testing.T) {
 		me, resp := th.Client.GetMe()
 		require.NoError(t, resp.Error)
 		require.NotNil(t, me)
-		require.Equal(t, "", me.Email)
+		// users can see their own email address
+		require.Equal(t, registerRequest.Email, me.Email)
 		require.Equal(t, registerRequest.Username, me.Username)
 	})
 }
@@ -129,6 +133,7 @@ func TestGetUser(t *testing.T) {
 		Username: fakeUsername,
 		Email:    fakeEmail,
 		Password: password,
+		Token:    th.SignupToken(),
 	}
 	success, resp := th.Client.Register(registerRequest)
 	require.NoError(t, resp.Error)
@@ -247,6 +252,7 @@ func TestUserChangePassword(t *testing.T) {
 		Username: fakeUsername,
 		Email:    fakeEmail,
 		Password: password,
+		Token:    th.SignupToken(),
 	}
 	success, resp := th.Client.Register(registerRequest)
 	require.NoError(t, resp.Error)

@@ -232,6 +232,12 @@ func (a *API) handlePatchBoardsAndBlocks(w http.ResponseWriter, r *http.Request)
 			return
 		}
 
+		// same rule as PATCH /boards/{id}: invited members can't rename the board
+		if (patch.Title != nil || patch.Description != nil) && !a.hasPermissionToEditTaskBoardMetadata(userID, boardID) {
+			a.errorResponse(w, r, model.NewErrPermission("access denied to modifying board title or description"))
+			return
+		}
+
 		if patch.Type != nil || patch.MinimumRole != nil {
 			if !a.permissions.HasPermissionToBoard(userID, boardID, model.PermissionManageBoardType) {
 				a.errorResponse(w, r, model.NewErrPermission("access denied to modifying board type"))

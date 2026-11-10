@@ -22,7 +22,7 @@ exports[`components/table/TableRow should match snapshot 1`] = `
     <div
       class="octo-table-cell title-cell"
       id="mainBoardHeader"
-      style="width: 100px;"
+      style="width: 280px;"
     >
       <div
         class="octo-icontitle"
@@ -30,7 +30,11 @@ exports[`components/table/TableRow should match snapshot 1`] = `
         <div
           class="octo-icon"
         >
-          i
+          <span
+            class="StoredIcon StoredIcon--emoji"
+          >
+            i
+          </span>
         </div>
         <input
           class="Editable "
@@ -41,24 +45,28 @@ exports[`components/table/TableRow should match snapshot 1`] = `
         />
       </div>
       <div
-        aria-label="menuwrapper"
-        class="MenuWrapper optionsMenu ml-2 mr-2"
-        role="button"
+        class="table-row-menu-anchor"
       >
         <div
-          class="octo-tooltip tooltip-top"
-          data-tooltip="More actions"
+          aria-label="menuwrapper"
+          class="MenuWrapper optionsMenu ml-2 mr-2"
+          role="button"
         >
-          <button
-            aria-label="MenuBtn"
-            class="IconButton"
-            title="MenuBtn"
-            type="button"
+          <div
+            class="octo-tooltip tooltip-top"
+            data-tooltip="More actions"
           >
-            <i
-              class="CompassIcon icon-dots-horizontal OptionsIcon"
-            />
-          </button>
+            <button
+              aria-label="MenuBtn"
+              class="IconButton"
+              title="MenuBtn"
+              type="button"
+            >
+              <i
+                class="CompassIcon icon-dots-horizontal OptionsIcon"
+              />
+            </button>
+          </div>
         </div>
       </div>
       <div
@@ -100,7 +108,7 @@ exports[`components/table/TableRow should match snapshot, collapsed tree 1`] = `
     <div
       class="octo-table-cell title-cell"
       id="mainBoardHeader"
-      style="width: 100px;"
+      style="width: 280px;"
     >
       <div
         class="octo-icontitle"
@@ -108,7 +116,11 @@ exports[`components/table/TableRow should match snapshot, collapsed tree 1`] = `
         <div
           class="octo-icon"
         >
-          i
+          <span
+            class="StoredIcon StoredIcon--emoji"
+          >
+            i
+          </span>
         </div>
         <input
           class="Editable "
@@ -119,24 +131,28 @@ exports[`components/table/TableRow should match snapshot, collapsed tree 1`] = `
         />
       </div>
       <div
-        aria-label="menuwrapper"
-        class="MenuWrapper optionsMenu ml-2 mr-2"
-        role="button"
+        class="table-row-menu-anchor"
       >
         <div
-          class="octo-tooltip tooltip-top"
-          data-tooltip="More actions"
+          aria-label="menuwrapper"
+          class="MenuWrapper optionsMenu ml-2 mr-2"
+          role="button"
         >
-          <button
-            aria-label="MenuBtn"
-            class="IconButton"
-            title="MenuBtn"
-            type="button"
+          <div
+            class="octo-tooltip tooltip-top"
+            data-tooltip="More actions"
           >
-            <i
-              class="CompassIcon icon-dots-horizontal OptionsIcon"
-            />
-          </button>
+            <button
+              aria-label="MenuBtn"
+              class="IconButton"
+              title="MenuBtn"
+              type="button"
+            >
+              <i
+                class="CompassIcon icon-dots-horizontal OptionsIcon"
+              />
+            </button>
+          </div>
         </div>
       </div>
       <div
@@ -178,7 +194,7 @@ exports[`components/table/TableRow should match snapshot, display properties 1`]
     <div
       class="octo-table-cell title-cell"
       id="mainBoardHeader"
-      style="width: 100px;"
+      style="width: 280px;"
     >
       <div
         class="octo-icontitle"
@@ -186,7 +202,11 @@ exports[`components/table/TableRow should match snapshot, display properties 1`]
         <div
           class="octo-icon"
         >
-          i
+          <span
+            class="StoredIcon StoredIcon--emoji"
+          >
+            i
+          </span>
         </div>
         <input
           class="Editable "
@@ -197,24 +217,28 @@ exports[`components/table/TableRow should match snapshot, display properties 1`]
         />
       </div>
       <div
-        aria-label="menuwrapper"
-        class="MenuWrapper optionsMenu ml-2 mr-2"
-        role="button"
+        class="table-row-menu-anchor"
       >
         <div
-          class="octo-tooltip tooltip-top"
-          data-tooltip="More actions"
+          aria-label="menuwrapper"
+          class="MenuWrapper optionsMenu ml-2 mr-2"
+          role="button"
         >
-          <button
-            aria-label="MenuBtn"
-            class="IconButton"
-            title="MenuBtn"
-            type="button"
+          <div
+            class="octo-tooltip tooltip-top"
+            data-tooltip="More actions"
           >
-            <i
-              class="CompassIcon icon-dots-horizontal OptionsIcon"
-            />
-          </button>
+            <button
+              aria-label="MenuBtn"
+              class="IconButton"
+              title="MenuBtn"
+              type="button"
+            >
+              <i
+                class="CompassIcon icon-dots-horizontal OptionsIcon"
+              />
+            </button>
+          </div>
         </div>
       </div>
       <div
@@ -294,7 +318,7 @@ exports[`components/table/TableRow should match snapshot, isSelected 1`] = `
     <div
       class="octo-table-cell title-cell"
       id="mainBoardHeader"
-      style="width: 100px;"
+      style="width: 280px;"
     >
       <div
         class="octo-icontitle"
@@ -302,7 +326,11 @@ exports[`components/table/TableRow should match snapshot, isSelected 1`] = `
         <div
           class="octo-icon"
         >
-          i
+          <span
+            class="StoredIcon StoredIcon--emoji"
+          >
+            i
+          </span>
         </div>
         <input
           class="Editable "
@@ -313,24 +341,28 @@ exports[`components/table/TableRow should match snapshot, isSelected 1`] = `
         />
       </div>
       <div
-        aria-label="menuwrapper"
-        class="MenuWrapper optionsMenu ml-2 mr-2"
-        role="button"
+        class="table-row-menu-anchor"
       >
         <div
-          class="octo-tooltip tooltip-top"
-          data-tooltip="More actions"
+          aria-label="menuwrapper"
+          class="MenuWrapper optionsMenu ml-2 mr-2"
+          role="button"
         >
-          <button
-            aria-label="MenuBtn"
-            class="IconButton"
-            title="MenuBtn"
-            type="button"
+          <div
+            class="octo-tooltip tooltip-top"
+            data-tooltip="More actions"
           >
-            <i
-              class="CompassIcon icon-dots-horizontal OptionsIcon"
-            />
-          </button>
+            <button
+              aria-label="MenuBtn"
+              class="IconButton"
+              title="MenuBtn"
+              type="button"
+            >
+              <i
+                class="CompassIcon icon-dots-horizontal OptionsIcon"
+              />
+            </button>
+          </div>
         </div>
       </div>
       <div
@@ -363,7 +395,7 @@ exports[`components/table/TableRow should match snapshot, read-only 1`] = `
     <div
       class="octo-table-cell title-cell"
       id="mainBoardHeader"
-      style="width: 100px;"
+      style="width: 280px;"
     >
       <div
         class="octo-icontitle"
@@ -371,7 +403,11 @@ exports[`components/table/TableRow should match snapshot, read-only 1`] = `
         <div
           class="octo-icon"
         >
-          i
+          <span
+            class="StoredIcon StoredIcon--emoji"
+          >
+            i
+          </span>
         </div>
         <input
           class="Editable readonly "
@@ -421,7 +457,7 @@ exports[`components/table/TableRow should match snapshot, resizing column 1`] = 
     <div
       class="octo-table-cell title-cell"
       id="mainBoardHeader"
-      style="width: 100px;"
+      style="width: 280px;"
     >
       <div
         class="octo-icontitle"
@@ -429,7 +465,11 @@ exports[`components/table/TableRow should match snapshot, resizing column 1`] = 
         <div
           class="octo-icon"
         >
-          i
+          <span
+            class="StoredIcon StoredIcon--emoji"
+          >
+            i
+          </span>
         </div>
         <input
           class="Editable "
@@ -440,24 +480,28 @@ exports[`components/table/TableRow should match snapshot, resizing column 1`] = 
         />
       </div>
       <div
-        aria-label="menuwrapper"
-        class="MenuWrapper optionsMenu ml-2 mr-2"
-        role="button"
+        class="table-row-menu-anchor"
       >
         <div
-          class="octo-tooltip tooltip-top"
-          data-tooltip="More actions"
+          aria-label="menuwrapper"
+          class="MenuWrapper optionsMenu ml-2 mr-2"
+          role="button"
         >
-          <button
-            aria-label="MenuBtn"
-            class="IconButton"
-            title="MenuBtn"
-            type="button"
+          <div
+            class="octo-tooltip tooltip-top"
+            data-tooltip="More actions"
           >
-            <i
-              class="CompassIcon icon-dots-horizontal OptionsIcon"
-            />
-          </button>
+            <button
+              aria-label="MenuBtn"
+              class="IconButton"
+              title="MenuBtn"
+              type="button"
+            >
+              <i
+                class="CompassIcon icon-dots-horizontal OptionsIcon"
+              />
+            </button>
+          </div>
         </div>
       </div>
       <div

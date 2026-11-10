@@ -250,9 +250,9 @@ export const getSortedTemplates = createSelector(
 
 export function getBoard(boardId: string): (state: RootState) => Board|null {
     return (state: RootState): Board|null => {
-        if (state.boards.boards && state.boards.boards[boardId]) {
+        if (state.boards?.boards?.[boardId]) {
             return state.boards.boards[boardId]
-        } else if (state.boards.templates && state.boards.templates[boardId]) {
+        } else if (state.boards?.templates?.[boardId]) {
             return state.boards.templates[boardId]
         }
         return null
@@ -276,13 +276,13 @@ export const getCurrentBoardMembers = createSelector(
     (state: RootState): string => state.boards.current,
     (state: RootState): {[key: string]: {[key: string]: BoardMember}} => state.boards.membersInBoards,
     (boardId: string, membersInBoards: {[key: string]: {[key: string]: BoardMember}}): {[key: string]: BoardMember} => {
-        return membersInBoards[boardId] || {}
+        return membersInBoards?.[boardId] || {}
     },
 )
 
 export function getMyBoardMembership(boardId: string): (state: RootState) => BoardMember|null {
     return (state: RootState): BoardMember|null => {
-        return state.boards.myBoardMemberships[boardId] || null
+        return state.boards?.myBoardMemberships?.[boardId] || null
     }
 }
 

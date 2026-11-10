@@ -99,6 +99,8 @@ describe('components/blockIconSelector', () => {
             fireEvent.mouseEnter(menuPicker!)
         })
 
+        // the picker opens on the icon library tab
+        userEvent.click(getByRole('button', {name: 'Emoji'}))
         const allButtonThumbUp = getAllByRole('button', {name: /thumbsup/i})
         userEvent.click(allButtonThumbUp[0])
         expect(mockedMutator.changeBlockIcon).toBeCalledTimes(1)

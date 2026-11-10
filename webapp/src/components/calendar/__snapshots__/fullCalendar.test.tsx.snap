@@ -79,21 +79,20 @@ exports[`components/calendar/toolbar return calendar, no date property 1`] = `
       </div>
       <div
         aria-labelledby="fc-dom-1"
-        class="fc-view-harness fc-view-harness-active"
-        style="padding-bottom: 74.07407407407408%; height: 0px;"
+        class="fc-view-harness fc-view-harness-passive"
       >
         <div
           class="fc-daygrid fc-dayGridMonth-view fc-view"
         >
           <table
-            class="fc-scrollgrid  fc-scrollgrid-liquid"
+            class="fc-scrollgrid "
             role="grid"
           >
             <tbody
               role="rowgroup"
             >
               <tr
-                class="fc-scrollgrid-section fc-scrollgrid-section-header "
+                class="fc-scrollgrid-section fc-scrollgrid-section-header  fc-scrollgrid-section-sticky"
                 role="presentation"
               >
                 <th
@@ -104,7 +103,7 @@ exports[`components/calendar/toolbar return calendar, no date property 1`] = `
                   >
                     <div
                       class="fc-scroller"
-                      style="overflow-x: hidden; overflow-y: hidden;"
+                      style="overflow-x: visible; overflow-y: visible;"
                     >
                       <table
                         class="fc-col-header "
@@ -231,27 +230,27 @@ exports[`components/calendar/toolbar return calendar, no date property 1`] = `
                 </th>
               </tr>
               <tr
-                class="fc-scrollgrid-section fc-scrollgrid-section-body  fc-scrollgrid-section-liquid"
+                class="fc-scrollgrid-section fc-scrollgrid-section-body "
                 role="presentation"
               >
                 <td
                   role="presentation"
                 >
                   <div
-                    class="fc-scroller-harness fc-scroller-harness-liquid"
+                    class="fc-scroller-harness"
                   >
                     <div
-                      class="fc-scroller fc-scroller-liquid-absolute"
-                      style="overflow-x: hidden; overflow-y: auto;"
+                      class="fc-scroller"
+                      style="overflow-x: visible; overflow-y: visible;"
                     >
                       <div
-                        class="fc-daygrid-body fc-daygrid-body-unbalanced "
+                        class="fc-daygrid-body fc-daygrid-body-unbalanced fc-daygrid-body-natural"
                         style="width: 0px;"
                       >
                         <table
                           class="fc-scrollgrid-sync-table"
                           role="presentation"
-                          style="width: 0px; height: 0px;"
+                          style="width: 0px;"
                         >
                           <colgroup />
                           <tbody
@@ -747,7 +746,11 @@ exports[`components/calendar/toolbar return calendar, no date property 1`] = `
                                               <div
                                                 class="octo-icon"
                                               >
-                                                i
+                                                <span
+                                                  class="StoredIcon StoredIcon--emoji"
+                                                >
+                                                  i
+                                                </span>
                                               </div>
                                               <div
                                                 class="fc-event-title"
@@ -2353,21 +2356,20 @@ exports[`components/calendar/toolbar return calendar, with date property not set
       </div>
       <div
         aria-labelledby="fc-dom-86"
-        class="fc-view-harness fc-view-harness-active"
-        style="padding-bottom: 74.07407407407408%; height: 0px;"
+        class="fc-view-harness fc-view-harness-passive"
       >
         <div
           class="fc-daygrid fc-dayGridMonth-view fc-view"
         >
           <table
-            class="fc-scrollgrid  fc-scrollgrid-liquid"
+            class="fc-scrollgrid "
             role="grid"
           >
             <tbody
               role="rowgroup"
             >
               <tr
-                class="fc-scrollgrid-section fc-scrollgrid-section-header "
+                class="fc-scrollgrid-section fc-scrollgrid-section-header  fc-scrollgrid-section-sticky"
                 role="presentation"
               >
                 <th
@@ -2378,7 +2380,7 @@ exports[`components/calendar/toolbar return calendar, with date property not set
                   >
                     <div
                       class="fc-scroller"
-                      style="overflow-x: hidden; overflow-y: hidden;"
+                      style="overflow-x: visible; overflow-y: visible;"
                     >
                       <table
                         class="fc-col-header "
@@ -2505,27 +2507,27 @@ exports[`components/calendar/toolbar return calendar, with date property not set
                 </th>
               </tr>
               <tr
-                class="fc-scrollgrid-section fc-scrollgrid-section-body  fc-scrollgrid-section-liquid"
+                class="fc-scrollgrid-section fc-scrollgrid-section-body "
                 role="presentation"
               >
                 <td
                   role="presentation"
                 >
                   <div
-                    class="fc-scroller-harness fc-scroller-harness-liquid"
+                    class="fc-scroller-harness"
                   >
                     <div
-                      class="fc-scroller fc-scroller-liquid-absolute"
-                      style="overflow-x: hidden; overflow-y: auto;"
+                      class="fc-scroller"
+                      style="overflow-x: visible; overflow-y: visible;"
                     >
                       <div
-                        class="fc-daygrid-body fc-daygrid-body-unbalanced "
+                        class="fc-daygrid-body fc-daygrid-body-unbalanced fc-daygrid-body-natural"
                         style="width: 0px;"
                       >
                         <table
                           class="fc-scrollgrid-sync-table"
                           role="presentation"
-                          style="width: 0px; height: 0px;"
+                          style="width: 0px;"
                         >
                           <colgroup />
                           <tbody
@@ -3021,7 +3023,11 @@ exports[`components/calendar/toolbar return calendar, with date property not set
                                               <div
                                                 class="octo-icon"
                                               >
-                                                i
+                                                <span
+                                                  class="StoredIcon StoredIcon--emoji"
+                                                >
+                                                  i
+                                                </span>
                                               </div>
                                               <div
                                                 class="fc-event-title"
@@ -4627,21 +4633,20 @@ exports[`components/calendar/toolbar return calendar, with date property set 1`]
       </div>
       <div
         aria-labelledby="fc-dom-171"
-        class="fc-view-harness fc-view-harness-active"
-        style="padding-bottom: 74.07407407407408%; height: 0px;"
+        class="fc-view-harness fc-view-harness-passive"
       >
         <div
           class="fc-daygrid fc-dayGridMonth-view fc-view"
         >
           <table
-            class="fc-scrollgrid  fc-scrollgrid-liquid"
+            class="fc-scrollgrid "
             role="grid"
           >
             <tbody
               role="rowgroup"
             >
               <tr
-                class="fc-scrollgrid-section fc-scrollgrid-section-header "
+                class="fc-scrollgrid-section fc-scrollgrid-section-header  fc-scrollgrid-section-sticky"
                 role="presentation"
               >
                 <th
@@ -4652,7 +4657,7 @@ exports[`components/calendar/toolbar return calendar, with date property set 1`]
                   >
                     <div
                       class="fc-scroller"
-                      style="overflow-x: hidden; overflow-y: hidden;"
+                      style="overflow-x: visible; overflow-y: visible;"
                     >
                       <table
                         class="fc-col-header "
@@ -4779,27 +4784,27 @@ exports[`components/calendar/toolbar return calendar, with date property set 1`]
                 </th>
               </tr>
               <tr
-                class="fc-scrollgrid-section fc-scrollgrid-section-body  fc-scrollgrid-section-liquid"
+                class="fc-scrollgrid-section fc-scrollgrid-section-body "
                 role="presentation"
               >
                 <td
                   role="presentation"
                 >
                   <div
-                    class="fc-scroller-harness fc-scroller-harness-liquid"
+                    class="fc-scroller-harness"
                   >
                     <div
-                      class="fc-scroller fc-scroller-liquid-absolute"
-                      style="overflow-x: hidden; overflow-y: auto;"
+                      class="fc-scroller"
+                      style="overflow-x: visible; overflow-y: visible;"
                     >
                       <div
-                        class="fc-daygrid-body fc-daygrid-body-unbalanced "
+                        class="fc-daygrid-body fc-daygrid-body-unbalanced fc-daygrid-body-natural"
                         style="width: 0px;"
                       >
                         <table
                           class="fc-scrollgrid-sync-table"
                           role="presentation"
-                          style="width: 0px; height: 0px;"
+                          style="width: 0px;"
                         >
                           <colgroup />
                           <tbody
@@ -5993,7 +5998,11 @@ exports[`components/calendar/toolbar return calendar, with date property set 1`]
                                               <div
                                                 class="octo-icon"
                                               >
-                                                i
+                                                <span
+                                                  class="StoredIcon StoredIcon--emoji"
+                                                >
+                                                  i
+                                                </span>
                                               </div>
                                               <div
                                                 class="fc-event-title"
@@ -6907,21 +6916,20 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
       </div>
       <div
         aria-labelledby="fc-dom-256"
-        class="fc-view-harness fc-view-harness-active"
-        style="padding-bottom: 74.07407407407408%; height: 0px;"
+        class="fc-view-harness fc-view-harness-passive"
       >
         <div
           class="fc-daygrid fc-dayGridMonth-view fc-view"
         >
           <table
-            class="fc-scrollgrid  fc-scrollgrid-liquid"
+            class="fc-scrollgrid "
             role="grid"
           >
             <tbody
               role="rowgroup"
             >
               <tr
-                class="fc-scrollgrid-section fc-scrollgrid-section-header "
+                class="fc-scrollgrid-section fc-scrollgrid-section-header  fc-scrollgrid-section-sticky"
                 role="presentation"
               >
                 <th
@@ -6932,7 +6940,7 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                   >
                     <div
                       class="fc-scroller"
-                      style="overflow-x: hidden; overflow-y: hidden;"
+                      style="overflow-x: visible; overflow-y: visible;"
                     >
                       <table
                         class="fc-col-header "
@@ -7059,27 +7067,27 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                 </th>
               </tr>
               <tr
-                class="fc-scrollgrid-section fc-scrollgrid-section-body  fc-scrollgrid-section-liquid"
+                class="fc-scrollgrid-section fc-scrollgrid-section-body "
                 role="presentation"
               >
                 <td
                   role="presentation"
                 >
                   <div
-                    class="fc-scroller-harness fc-scroller-harness-liquid"
+                    class="fc-scroller-harness"
                   >
                     <div
-                      class="fc-scroller fc-scroller-liquid-absolute"
-                      style="overflow-x: hidden; overflow-y: auto;"
+                      class="fc-scroller"
+                      style="overflow-x: visible; overflow-y: visible;"
                     >
                       <div
-                        class="fc-daygrid-body fc-daygrid-body-unbalanced "
+                        class="fc-daygrid-body fc-daygrid-body-unbalanced fc-daygrid-body-natural"
                         style="width: 0px;"
                       >
                         <table
                           class="fc-scrollgrid-sync-table"
                           role="presentation"
-                          style="width: 0px; height: 0px;"
+                          style="width: 0px;"
                         >
                           <colgroup />
                           <tbody
@@ -7108,11 +7116,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -7155,11 +7158,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           27
@@ -7200,11 +7198,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -7247,11 +7240,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           29
@@ -7292,11 +7280,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -7339,11 +7322,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           1
@@ -7384,11 +7362,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -7435,11 +7408,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           3
@@ -7481,11 +7449,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           4
@@ -7526,11 +7489,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -7575,7 +7533,11 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                               <div
                                                 class="octo-icon"
                                               >
-                                                i
+                                                <span
+                                                  class="StoredIcon StoredIcon--emoji"
+                                                >
+                                                  i
+                                                </span>
                                               </div>
                                               <div
                                                 class="fc-event-title"
@@ -7618,11 +7580,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           6
@@ -7663,11 +7620,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -7710,11 +7662,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           8
@@ -7755,11 +7702,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -7806,11 +7748,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           10
@@ -7851,11 +7788,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -7898,11 +7830,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           12
@@ -7943,11 +7870,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -7990,11 +7912,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           14
@@ -8036,11 +7953,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           15
@@ -8081,11 +7993,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -8132,11 +8039,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           17
@@ -8177,11 +8079,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -8224,11 +8121,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           19
@@ -8269,11 +8161,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -8316,11 +8203,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           21
@@ -8362,11 +8244,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           22
@@ -8407,11 +8284,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -8458,11 +8330,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           24
@@ -8503,11 +8370,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -8550,11 +8412,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           26
@@ -8595,11 +8452,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -8642,11 +8494,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           28
@@ -8688,11 +8535,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           29
@@ -8733,11 +8575,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -8784,11 +8621,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           31
@@ -8829,11 +8661,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -8876,11 +8703,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           2
@@ -8921,11 +8743,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >
@@ -8968,11 +8785,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           4
@@ -9014,11 +8826,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                         class="dateContainer "
                                       >
                                         <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
-                                        <div
                                           class="dateDisplay"
                                         >
                                           5
@@ -9059,11 +8866,6 @@ exports[`components/calendar/toolbar return calendar, without permissions 1`] = 
                                       <div
                                         class="dateContainer "
                                       >
-                                        <div
-                                          class="addEvent"
-                                        >
-                                          +
-                                        </div>
                                         <div
                                           class="dateDisplay"
                                         >

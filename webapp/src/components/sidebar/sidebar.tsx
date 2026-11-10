@@ -163,8 +163,8 @@ const Sidebar = (props: Props) => {
         async function loadSystemSettings() {
             const settings = await octoClient.getSystemSettings()
             if (!canceled) {
-                setAISettings(settings.ai)
-                setModuleSettings(settings.modules || getStoredProjectSystemSettings().modules)
+                setAISettings(settings?.ai || getStoredProjectSystemSettings().ai)
+                setModuleSettings(settings?.modules || getStoredProjectSystemSettings().modules)
             }
         }
 

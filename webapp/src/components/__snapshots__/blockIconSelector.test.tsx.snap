@@ -13,7 +13,9 @@ exports[`components/blockIconSelector return an icon correctly 1`] = `
       <div
         class="octo-icon size-l"
       >
-        <span>
+        <span
+          class="StoredIcon StoredIcon--emoji"
+        >
           👍
         </span>
       </div>
@@ -35,7 +37,9 @@ exports[`components/blockIconSelector return menu on click 1`] = `
       <div
         class="octo-icon size-l"
       >
-        <span>
+        <span
+          class="StoredIcon StoredIcon--emoji"
+        >
           👍
         </span>
       </div>
@@ -190,7 +194,9 @@ exports[`components/blockIconSelector return no menu in readonly 1`] = `
     <div
       class="octo-icon size-m readonly"
     >
-      <span>
+      <span
+        class="StoredIcon StoredIcon--emoji"
+      >
         👍
       </span>
     </div>

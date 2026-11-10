@@ -555,7 +555,7 @@ class OctoClient {
     }
 
     async getAdminBoards(teamID: string): Promise<Board[]> {
-        const path = `/api/v2/admin/boards?teamID=${encodeURIComponent(teamID)}`
+        const path = `/api/v2/admin/dashboard/boards?teamID=${encodeURIComponent(teamID)}`
         return this.getBoardsWithPath(path)
     }
 

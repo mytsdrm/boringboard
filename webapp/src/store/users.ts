@@ -119,7 +119,7 @@ const usersSlice = createSlice({
 export const {setMe, setBoardUsers, removeBoardUsersById, addBoardUsers, followBlock, unfollowBlock, patchProps} = usersSlice.actions
 export const {reducer} = usersSlice
 
-export const getMe = (state: RootState): IUser|null => state.users.me
+export const getMe = (state: RootState): IUser|null => state.users?.me || null
 export const getLoggedIn = (state: RootState): boolean|null => state.users.loggedIn
 export const getBoardUsers = (state: RootState): {[key: string]: IUser} => state.users.boardUsers
 export const getMyConfig = (state: RootState): Record<string, UserPreference> => state.users.myConfig || {} as Record<string, UserPreference>

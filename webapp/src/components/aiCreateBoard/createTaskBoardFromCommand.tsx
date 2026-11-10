@@ -74,8 +74,9 @@ const CreateTaskBoardFromCommand = (props: Props): JSX.Element => {
         async function loadAISettings() {
             const settings = await octoClient.getSystemSettings()
             if (!canceled) {
-                setAISettings(settings.ai)
-                setLanguage(normalizeTaskBoardLanguage(settings.ai.outputLanguagePreference))
+                const nextAISettings = settings?.ai || getStoredProjectSystemSettings().ai
+                setAISettings(nextAISettings)
+                setLanguage(normalizeTaskBoardLanguage(nextAISettings?.outputLanguagePreference))
             }
         }
 

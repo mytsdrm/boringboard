@@ -12,7 +12,7 @@ import (
 func (a *API) registerAdminDashboardRoutes(r *mux.Router) {
 	r.HandleFunc("/system-branding", a.attachSession(a.handleGetSystemBranding, false)).Methods(http.MethodGet)
 	r.HandleFunc("/system-settings", a.sessionRequired(a.handleGetSystemSettings)).Methods(http.MethodGet)
-	r.HandleFunc("/admin/boards", a.sessionRequired(a.handleGetAdminBoards)).Methods(http.MethodGet)
+	r.HandleFunc("/admin/dashboard/boards", a.sessionRequired(a.handleGetAdminBoards)).Methods(http.MethodGet)
 	r.HandleFunc("/admin/users", a.sessionRequired(a.handleGetAdminUsers)).Methods(http.MethodGet)
 	r.HandleFunc("/admin/users", a.sessionRequired(a.handleCreateAdminUser)).Methods(http.MethodPost)
 	r.HandleFunc("/admin/users/{userID}", a.sessionRequired(a.handleUpdateAdminUser)).Methods(http.MethodPut)

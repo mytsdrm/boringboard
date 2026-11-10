@@ -3,6 +3,7 @@
 package app
 
 import (
+	"sync"
 	"testing"
 
 	"github.com/golang/mock/gomock"
@@ -71,4 +72,28 @@ func SetupTestHelper(t *testing.T) (*TestHelper, func()) {
 		logger:       logger,
 		API:          mockAPI,
 	}, tearDown
+}
+
+// waitForBroadcasts blocks until every callback queued on the block change
+// notifier before the call has finished. Broadcasts run asynchronously and
+// call the mocked store, so subtests that share a helper must wait for them
+// or the calls land in the next subtest's expectations.
+func (th *TestHelper) waitForBroadcasts() {
+	var started sync.WaitGroup
+	started.Add(blockChangeNotifierPoolSize)
+	release := make(chan struct{})
+	var finished sync.WaitGroup
+	finished.Add(blockChangeNotifierPoolSize)
+	for i := 0; i < blockChangeNotifierPoolSize; i++ {
+		th.App.blockChangeNotifier.Enqueue(func() error {
+			defer finished.Done()
+			started.Done()
+			<-release
+			return nil
+		})
+	}
+	// all workers are parked here, so everything queued earlier has run
+	started.Wait()
+	close(release)
+	finished.Wait()
 }

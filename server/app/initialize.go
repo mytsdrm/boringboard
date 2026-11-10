@@ -38,6 +38,10 @@ func (a *App) ensureDefaultAdminUser() error {
 
 	user, err := a.store.GetUserByUsername(username)
 	if err == nil {
+		if auth.ComparePassword(user.Password, model.DefaultAdminPassword) {
+			a.logger.Warn("The default admin still uses the built-in default password; change it or set BORINGBOARD_DEFAULTADMINPASSWORD",
+				mlog.String("username", username))
+		}
 		adminRoles := model.RoleSystemAdmin + " " + model.GroupSuperAdmin
 		if user.Roles != adminRoles {
 			user.Roles = adminRoles

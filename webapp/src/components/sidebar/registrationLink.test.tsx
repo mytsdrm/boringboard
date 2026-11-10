@@ -36,7 +36,8 @@ describe('components/sidebar/RegistrationLink', () => {
         const {container} = render(component)
         expect(container).toMatchSnapshot()
 
-        const anchor = container.querySelector('.shareUrl')
+        // the dialog renders in a portal outside the container
+        const anchor = document.querySelector('.shareUrl')
         const url = new URL(anchor?.getAttribute('href') as string)
         expect(url.searchParams.get('t')).toStrictEqual(state.teams.current.signupToken)
     })

@@ -335,7 +335,8 @@ describe('components/centerPanel', () => {
 
             act(() => {
                 //select card2
-                const card2Element = screen.getByRole('textbox', {name: 'card2'})
+                // the table can render the title field more than once
+                const card2Element = screen.getAllByRole('textbox', {name: 'card2'})[0]
                 expect(card2Element).not.toBeNull()
                 userEvent.click(card2Element, {shiftKey: true, ctrlKey: true})
             })

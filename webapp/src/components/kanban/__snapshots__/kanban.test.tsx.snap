@@ -9,7 +9,8 @@ exports[`src/component/kanban/kanban do not return a kanban with groupByProperty
 exports[`src/component/kanban/kanban return kanban and change title on KanbanColumnHeader 1`] = `
 <div>
   <div
-    class="Kanban"
+    class="Kanban "
+    style="--kanban-view-header-offset: 0px;"
   >
     <div
       class="octo-board-header"
@@ -167,7 +168,11 @@ exports[`src/component/kanban/kanban return kanban and change title on KanbanCol
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -200,7 +205,11 @@ exports[`src/component/kanban/kanban return kanban and change title on KanbanCol
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -244,7 +253,11 @@ exports[`src/component/kanban/kanban return kanban and change title on KanbanCol
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -295,7 +308,8 @@ exports[`src/component/kanban/kanban return kanban and change title on KanbanCol
 exports[`src/component/kanban/kanban return kanban and click on KanbanCalculationMenu 1`] = `
 <div>
   <div
-    class="Kanban"
+    class="Kanban "
+    style="--kanban-view-header-offset: 0px;"
   >
     <div
       class="octo-board-header"
@@ -617,7 +631,11 @@ exports[`src/component/kanban/kanban return kanban and click on KanbanCalculatio
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -650,7 +668,11 @@ exports[`src/component/kanban/kanban return kanban and click on KanbanCalculatio
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -694,7 +716,11 @@ exports[`src/component/kanban/kanban return kanban and click on KanbanCalculatio
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -745,7 +771,8 @@ exports[`src/component/kanban/kanban return kanban and click on KanbanCalculatio
 exports[`src/component/kanban/kanban should match snapshot 1`] = `
 <div>
   <div
-    class="Kanban"
+    class="Kanban "
+    style="--kanban-view-header-offset: 0px;"
   >
     <div
       class="octo-board-header"
@@ -903,7 +930,11 @@ exports[`src/component/kanban/kanban should match snapshot 1`] = `
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -936,7 +967,11 @@ exports[`src/component/kanban/kanban should match snapshot 1`] = `
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -980,7 +1015,11 @@ exports[`src/component/kanban/kanban should match snapshot 1`] = `
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -1031,7 +1070,8 @@ exports[`src/component/kanban/kanban should match snapshot 1`] = `
 exports[`src/component/kanban/kanban should match snapshot without permissions 1`] = `
 <div>
   <div
-    class="Kanban"
+    class="Kanban "
+    style="--kanban-view-header-offset: 0px;"
   >
     <div
       class="octo-board-header"
@@ -1118,29 +1158,20 @@ exports[`src/component/kanban/kanban should match snapshot without permissions 1
       >
         <div
           class="KanbanCard"
-          draggable="true"
+          draggable="false"
           style="opacity: 1;"
         >
-          <div
-            aria-label="menuwrapper"
-            class="MenuWrapper optionsMenu"
-            role="button"
-          >
-            <button
-              type="button"
-            >
-              <i
-                class="CompassIcon icon-dots-horizontal OptionsIcon"
-              />
-            </button>
-          </div>
           <div
             class="octo-icontitle"
           >
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -1151,29 +1182,20 @@ exports[`src/component/kanban/kanban should match snapshot without permissions 1
         </div>
         <div
           class="KanbanCard"
-          draggable="true"
+          draggable="false"
           style="opacity: 1;"
         >
-          <div
-            aria-label="menuwrapper"
-            class="MenuWrapper optionsMenu"
-            role="button"
-          >
-            <button
-              type="button"
-            >
-              <i
-                class="CompassIcon icon-dots-horizontal OptionsIcon"
-              />
-            </button>
-          </div>
           <div
             class="octo-icontitle"
           >
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"
@@ -1188,29 +1210,20 @@ exports[`src/component/kanban/kanban should match snapshot without permissions 1
       >
         <div
           class="KanbanCard"
-          draggable="true"
+          draggable="false"
           style="opacity: 1;"
         >
-          <div
-            aria-label="menuwrapper"
-            class="MenuWrapper optionsMenu"
-            role="button"
-          >
-            <button
-              type="button"
-            >
-              <i
-                class="CompassIcon icon-dots-horizontal OptionsIcon"
-              />
-            </button>
-          </div>
           <div
             class="octo-icontitle"
           >
             <div
               class="octo-icon"
             >
-              i
+              <span
+                class="StoredIcon StoredIcon--emoji"
+              >
+                i
+              </span>
             </div>
             <div
               class="octo-titletext"

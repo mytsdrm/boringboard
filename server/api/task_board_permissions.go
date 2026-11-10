@@ -8,6 +8,11 @@ func (a *API) canInvitedUserShareTaskBoard(userID, boardID string) bool {
 		return false
 	}
 
+	// guests can't share boards, same as upstream
+	if isGuest, err := a.userIsGuest(userID); err != nil || isGuest {
+		return false
+	}
+
 	member, err := a.app.GetMemberForBoard(boardID, userID)
 	if err != nil || member == nil {
 		return false

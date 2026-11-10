@@ -162,7 +162,11 @@ exports[`src/components/kanban/kanbanCard return kanbanCard and click on copy li
       <div
         class="octo-icon"
       >
-        i
+        <span
+          class="StoredIcon StoredIcon--emoji"
+        >
+          i
+        </span>
       </div>
       <div
         class="octo-titletext"
@@ -344,7 +348,11 @@ exports[`src/components/kanban/kanbanCard return kanbanCard and click on delete 
       <div
         class="octo-icon"
       >
-        i
+        <span
+          class="StoredIcon StoredIcon--emoji"
+        >
+          i
+        </span>
       </div>
       <div
         class="octo-titletext"
@@ -526,7 +534,11 @@ exports[`src/components/kanban/kanbanCard return kanbanCard and click on duplica
       <div
         class="octo-icon"
       >
-        i
+        <span
+          class="StoredIcon StoredIcon--emoji"
+        >
+          i
+        </span>
       </div>
       <div
         class="octo-titletext"
@@ -572,7 +584,11 @@ exports[`src/components/kanban/kanbanCard should match snapshot 1`] = `
       <div
         class="octo-icon"
       >
-        i
+        <span
+          class="StoredIcon StoredIcon--emoji"
+        >
+          i
+        </span>
       </div>
       <div
         class="octo-titletext"
@@ -605,7 +621,11 @@ exports[`src/components/kanban/kanbanCard should match snapshot with readonly 1`
       <div
         class="octo-icon"
       >
-        i
+        <span
+          class="StoredIcon StoredIcon--emoji"
+        >
+          i
+        </span>
       </div>
       <div
         class="octo-titletext"

@@ -166,6 +166,13 @@ func (a *API) handleAddMember(w http.ResponseWriter, r *http.Request) {
 		StatusScopeOptionIDs: reqBoardMember.StatusScopeOptionIDs,
 	}
 
+	// Members that are allowed to share without managing roles (e.g. invited
+	// users when invited sharing is enabled) must not hand out more access
+	// than they have themselves, and never admin.
+	if !a.permissions.HasPermissionToBoard(userID, boardID, model.PermissionManageBoardRoles) {
+		capBoardMemberRole(newBoardMember, a.maxGrantableBoardRole(userID, boardID))
+	}
+
 	auditRec := a.makeAuditRecord(r, "addMember", audit.Fail)
 	defer a.audit.LogRecord(audit.LevelModify, auditRec)
 	auditRec.AddMeta("boardID", boardID)
@@ -546,4 +553,50 @@ func (a *API) handleDeleteMember(w http.ResponseWriter, r *http.Request) {
 	jsonStringResponse(w, http.StatusOK, "{}")
 
 	auditRec.Success()
+}
+
+const (
+	boardRoleNone = iota
+	boardRoleViewer
+	boardRoleCommenter
+	boardRoleEditor
+	boardRoleAdmin
+)
+
+func boardMemberRoleRank(member *model.BoardMember) int {
+	switch {
+	case member.SchemeAdmin:
+		return boardRoleAdmin
+	case member.SchemeEditor:
+		return boardRoleEditor
+	case member.SchemeCommenter:
+		return boardRoleCommenter
+	case member.SchemeViewer:
+		return boardRoleViewer
+	default:
+		return boardRoleNone
+	}
+}
+
+// maxGrantableBoardRole is the highest role a member without role management
+// permission may give to someone else: their own role, at most editor.
+func (a *API) maxGrantableBoardRole(userID, boardID string) int {
+	rank := boardRoleViewer
+	switch {
+	case a.permissions.HasPermissionToBoard(userID, boardID, model.PermissionManageBoardCards):
+		rank = boardRoleEditor
+	case a.permissions.HasPermissionToBoard(userID, boardID, model.PermissionCommentBoardCards):
+		rank = boardRoleCommenter
+	}
+	return rank
+}
+
+func capBoardMemberRole(member *model.BoardMember, maxRank int) {
+	if boardMemberRoleRank(member) <= maxRank {
+		return
+	}
+	member.SchemeAdmin = false
+	member.SchemeEditor = maxRank >= boardRoleEditor
+	member.SchemeCommenter = maxRank >= boardRoleCommenter
+	member.SchemeViewer = true
 }

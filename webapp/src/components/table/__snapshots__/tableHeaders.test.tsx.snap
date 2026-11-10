@@ -7,8 +7,8 @@ exports[`components/table/TableHeaders should match snapshot 1`] = `
     id="mainBoardHeader"
   >
     <div
-      class="octo-table-cell header-cell"
-      style="overflow: unset; opacity: 1; width: 100px;"
+      class="octo-table-cell header-cell title-cell"
+      style="overflow: unset; opacity: 1; width: 280px;"
     >
       <div
         aria-label="menuwrapper"

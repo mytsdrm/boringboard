@@ -105,7 +105,11 @@ exports[`components/sidebarBoardItem sidebar board item 1`] = `
         <div
           class="octo-sidebar-icon"
         >
-          i
+          <span
+            class="StoredIcon StoredIcon--emoji"
+          >
+            i
+          </span>
         </div>
         <div
           class="octo-sidebar-title"
@@ -408,7 +412,11 @@ exports[`components/sidebarBoardItem sidebar board item for guest 1`] = `
         <div
           class="octo-sidebar-icon"
         >
-          i
+          <span
+            class="StoredIcon StoredIcon--emoji"
+          >
+            i
+          </span>
         </div>
         <div
           class="octo-sidebar-title"

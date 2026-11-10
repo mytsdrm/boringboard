@@ -134,6 +134,9 @@ func getTestConfig() (*config.Configuration, error) {
 		LoggingCfgJSON:    logging,
 		SessionExpireTime: int64(30 * time.Second),
 		AuthMode:          "native",
+		// keep the seeded admin clear of the "admin" test user
+		DefaultAdminUsername: testDefaultAdminUsername,
+		DefaultAdminPassword: testDefaultAdminPassword,
 	}, nil
 }
 
@@ -368,20 +371,34 @@ func (th *TestHelper) InitBasic() *TestHelper {
 
 	th.Start()
 
-	// user1
-	th.RegisterAndLogin(th.Client, user1Username, "user1@sample.com", password, "")
+	signupToken := th.SignupToken()
 
-	// get token
-	team, resp := th.Client.GetTeam(model.GlobalTeamID)
-	th.CheckOK(resp)
-	require.NotNil(th.T, team)
-	require.NotNil(th.T, team.SignupToken)
+	// user1
+	th.RegisterAndLogin(th.Client, user1Username, "user1@sample.com", password, signupToken)
 
 	// user2
-	th.RegisterAndLogin(th.Client2, user2Username, "user2@sample.com", password, team.SignupToken)
+	th.RegisterAndLogin(th.Client2, user2Username, "user2@sample.com", password, signupToken)
 
 	return th
 }
+
+// SignupToken returns the team sign-up token. The server seeds a default
+// admin user on start, so registering without a token is closed; the token
+// is read with that admin's session.
+func (th *TestHelper) SignupToken() string {
+	adminClient := client.NewClient(th.Server.Config().ServerRoot, "")
+	th.Login(adminClient, testDefaultAdminUsername, testDefaultAdminPassword)
+	team, resp := adminClient.GetTeam(model.GlobalTeamID)
+	th.CheckOK(resp)
+	require.NotNil(th.T, team)
+	require.NotEmpty(th.T, team.SignupToken)
+	return team.SignupToken
+}
+
+const (
+	testDefaultAdminUsername = "seededadmin"
+	testDefaultAdminPassword = "seeded-admin-password"
+)
 
 var ErrRegisterFail = errors.New("register failed")
 

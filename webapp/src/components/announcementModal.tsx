@@ -65,7 +65,7 @@ const AnnouncementModal = (props: Props): JSX.Element | null => {
         async function loadAnnouncements() {
             const settings = await octoClient.getSystemSettings()
             if (!canceled) {
-                setAnnouncements(settings.announcements || [])
+                setAnnouncements(settings?.announcements || [])
             }
         }
 

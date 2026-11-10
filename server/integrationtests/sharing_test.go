@@ -42,9 +42,12 @@ func TestSharing(t *testing.T) {
 		require.True(t, model.IsErrNotFound(err))
 		require.Nil(t, s)
 
+		// BoringBoard returns a disabled sharing record instead of 404
 		sharing, resp := th.Client.GetSharing(boardID)
-		th.CheckNotFound(resp)
-		require.Nil(t, sharing)
+		th.CheckOK(resp)
+		require.NotNil(t, sharing)
+		require.False(t, sharing.Enabled)
+		require.Empty(t, sharing.Token)
 	})
 
 	t.Run("POST sharing, config = false", func(t *testing.T) {
@@ -62,9 +65,10 @@ func TestSharing(t *testing.T) {
 
 		t.Run("GET sharing", func(t *testing.T) {
 			sharing, resp := th.Client.GetSharing(boardID)
-			// Expect empty sharing object
-			th.CheckNotFound(resp)
-			require.Nil(t, sharing)
+			// Expect a disabled sharing object
+			th.CheckOK(resp)
+			require.NotNil(t, sharing)
+			require.False(t, sharing.Enabled)
 		})
 	})
 
