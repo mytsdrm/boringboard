@@ -1,0 +1,10 @@
+*.mp4
+*.webm
+*.mp3
+*.wav
+*.srt
+tools/rec/
+tools/build/
+tools/vo/
+tools/state_*.json
+.elevenlabs_key

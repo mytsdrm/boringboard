@@ -1,0 +1,14 @@
+[
+["s01", "Kenalkan BoringBoard. Tempat untuk semua task yang selalu bilang, nanti aja deh. Project management yang simpel, rapi, dan sedikit lebih seru."],
+["s02", "Begitu login, dashboard langsung merangkum semuanya. Jumlah task board, total task, member yang diundang, board yang baru di-update, sampai recent activity."],
+["s03", "Buka board, dan semua task tersusun di kolom Kanban, dari Backlog sampai Done. Tinggal drag and drop untuk memindahkan task, dan total estimasi per kolom langsung terhitung."],
+["s04", "Setiap task punya detail lengkap. Status, priority, label, assignee, reviewer, dan due date. Plus catatan, checklist, dan komentar dari tim."],
+["s05", "Lebih suka spreadsheet? Pindah ke table view, lengkap dengan sort, filter, dan kalkulasi otomatis. Simpan juga view khusus, misalnya hanya task yang urgent dan high."],
+["s06", "Calendar view menampilkan task berdasarkan due date, jadi tidak ada deadline yang terlewat."],
+["s07", "Gallery view menampilkan task sebagai kartu visual, lengkap dengan preview isinya."],
+["s08", "Untuk tim developer, setiap board bisa menyimpan repository, dev branch, prod branch, dan URL environment. Semua info penting langsung tampil di header board."],
+["s09", "Ajak tim Anda lewat Share, atur role setiap member, atau cukup copy link-nya."],
+["s10", "Mulai project baru dalam hitungan detik dengan template siap pakai. Sprint planner, roadmap, project tasks, dan masih banyak lagi."],
+["s11", "Cari board dengan cepat, lalu pilih tema sesuai selera. Light mode, atau dark mode."],
+["s12", "BoringBoard. Open source, gratis, dan siap bikin kerjaan Anda jadi sedikit kurang membosankan. Coba sekarang di GitHub."]
+]
