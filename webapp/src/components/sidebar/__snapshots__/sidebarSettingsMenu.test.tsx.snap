@@ -301,6 +301,24 @@ exports[`components/sidebar/SidebarSettingsMenu imports menu open should match s
             </div>
             <div>
               <div
+                class="MenuOption SubMenuOption menu-option"
+                id="accent"
+              >
+                <div
+                  class="noicon"
+                />
+                <div
+                  class="menu-name"
+                >
+                  Accent color
+                </div>
+                <i
+                  class="CompassIcon icon-chevron-right"
+                />
+              </div>
+            </div>
+            <div>
+              <div
                 aria-label="Random icons"
                 class="MenuOption SwitchOption menu-option"
                 role="button"
@@ -944,6 +962,24 @@ exports[`components/sidebar/SidebarSettingsMenu languages menu open should match
             </div>
             <div>
               <div
+                class="MenuOption SubMenuOption menu-option"
+                id="accent"
+              >
+                <div
+                  class="noicon"
+                />
+                <div
+                  class="menu-name"
+                >
+                  Accent color
+                </div>
+                <i
+                  class="CompassIcon icon-chevron-right"
+                />
+              </div>
+            </div>
+            <div>
+              <div
                 aria-label="Random icons"
                 class="MenuOption SwitchOption menu-option"
                 role="button"
@@ -1132,6 +1168,24 @@ exports[`components/sidebar/SidebarSettingsMenu settings menu open should match 
             </div>
             <div>
               <div
+                class="MenuOption SubMenuOption menu-option"
+                id="accent"
+              >
+                <div
+                  class="noicon"
+                />
+                <div
+                  class="menu-name"
+                >
+                  Accent color
+                </div>
+                <i
+                  class="CompassIcon icon-chevron-right"
+                />
+              </div>
+            </div>
+            <div>
+              <div
                 aria-label="Random icons"
                 class="MenuOption SwitchOption menu-option"
                 role="button"
@@ -1306,7 +1360,7 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                       class="menu-options"
                     >
                       <div
-                        aria-label="Default theme"
+                        aria-label="Modern"
                         class="MenuOption TextOption menu-option"
                         role="button"
                       >
@@ -1314,8 +1368,16 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                           class="d-flex"
                         >
                           <div
-                            class="noicon"
-                          />
+                            class="menu-option__icon"
+                          >
+                            <span
+                              class="SidebarSettingsMenu__theme-preview"
+                            >
+                              <span
+                                style="background: rgb(79, 70, 229);"
+                              />
+                            </span>
+                          </div>
                         </div>
                         <div
                           class="menu-option__content"
@@ -1323,7 +1385,7 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                           <div
                             class="menu-name"
                           >
-                            Default theme
+                            Modern
                           </div>
                         </div>
                         <svg
@@ -1337,7 +1399,7 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                         </svg>
                       </div>
                       <div
-                        aria-label="Dark theme"
+                        aria-label="Classic"
                         class="MenuOption TextOption menu-option"
                         role="button"
                       >
@@ -1345,8 +1407,16 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                           class="d-flex"
                         >
                           <div
-                            class="noicon"
-                          />
+                            class="menu-option__icon"
+                          >
+                            <span
+                              class="SidebarSettingsMenu__theme-preview"
+                            >
+                              <span
+                                style="background: rgb(18, 98, 255);"
+                              />
+                            </span>
+                          </div>
                         </div>
                         <div
                           class="menu-option__content"
@@ -1354,7 +1424,7 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                           <div
                             class="menu-name"
                           >
-                            Dark theme
+                            Classic
                           </div>
                         </div>
                         <div
@@ -1362,7 +1432,7 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                         />
                       </div>
                       <div
-                        aria-label="Light theme"
+                        aria-label="Dark"
                         class="MenuOption TextOption menu-option"
                         role="button"
                       >
@@ -1370,8 +1440,16 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                           class="d-flex"
                         >
                           <div
-                            class="noicon"
-                          />
+                            class="menu-option__icon"
+                          >
+                            <span
+                              class="SidebarSettingsMenu__theme-preview"
+                            >
+                              <span
+                                style="background: rgb(59, 130, 246);"
+                              />
+                            </span>
+                          </div>
                         </div>
                         <div
                           class="menu-option__content"
@@ -1379,7 +1457,7 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                           <div
                             class="menu-name"
                           >
-                            Light theme
+                            Dark
                           </div>
                         </div>
                         <div
@@ -1387,7 +1465,7 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                         />
                       </div>
                       <div
-                        aria-label="System theme"
+                        aria-label="Midnight"
                         class="MenuOption TextOption menu-option"
                         role="button"
                       >
@@ -1395,8 +1473,16 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                           class="d-flex"
                         >
                           <div
-                            class="noicon"
-                          />
+                            class="menu-option__icon"
+                          >
+                            <span
+                              class="SidebarSettingsMenu__theme-preview"
+                            >
+                              <span
+                                style="background: rgb(139, 92, 246);"
+                              />
+                            </span>
+                          </div>
                         </div>
                         <div
                           class="menu-option__content"
@@ -1404,7 +1490,40 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                           <div
                             class="menu-name"
                           >
-                            System theme
+                            Midnight
+                          </div>
+                        </div>
+                        <div
+                          class="noicon"
+                        />
+                      </div>
+                      <div
+                        aria-label="System (Modern / Midnight)"
+                        class="MenuOption TextOption menu-option"
+                        role="button"
+                      >
+                        <div
+                          class="d-flex"
+                        >
+                          <div
+                            class="menu-option__icon"
+                          >
+                            <span
+                              class="SidebarSettingsMenu__theme-preview"
+                            >
+                              <span
+                                style="background: rgb(79, 70, 229);"
+                              />
+                            </span>
+                          </div>
+                        </div>
+                        <div
+                          class="menu-option__content"
+                        >
+                          <div
+                            class="menu-name"
+                          >
+                            System (Modern / Midnight)
                           </div>
                         </div>
                         <div
@@ -1446,6 +1565,24 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                     </div>
                   </div>
                 </div>
+              </div>
+            </div>
+            <div>
+              <div
+                class="MenuOption SubMenuOption menu-option"
+                id="accent"
+              >
+                <div
+                  class="noicon"
+                />
+                <div
+                  class="menu-name"
+                >
+                  Accent color
+                </div>
+                <i
+                  class="CompassIcon icon-chevron-right"
+                />
               </div>
             </div>
             <div>

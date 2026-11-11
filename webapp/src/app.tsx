@@ -14,13 +14,14 @@ import {FlashMessages} from './components/flashMessages'
 import NewVersionBanner from './components/newVersionBanner'
 import AnnouncementModal from './components/announcementModal'
 import {Utils} from './utils'
-import {fetchMe, getMe} from './store/users'
+import {fetchMe, getMe, getMyConfig} from './store/users'
 import {getLanguage, fetchLanguage} from './store/language'
 import {useAppSelector, useAppDispatch} from './store/hooks'
 import {fetchClientConfig} from './store/clientConfig'
 import FocalboardRouter from './router'
 import octoClient from './octoClient'
 import {applySystemBranding, getStoredCustomBranding} from './branding'
+import {getActiveAccentName, getActiveThemeName, setAppearance} from './theme'
 
 import {IUser} from './user'
 
@@ -31,6 +32,7 @@ type Props = {
 const App = (props: Props): JSX.Element => {
     const language = useAppSelector<string>(getLanguage)
     const me = useAppSelector<IUser|null>(getMe)
+    const myConfig = useAppSelector(getMyConfig)
     const dispatch = useAppDispatch()
 
     useEffect(() => {
@@ -55,6 +57,21 @@ const App = (props: Props): JSX.Element => {
             TelemetryClient.setUser(me)
         }
     }, [me])
+
+    // The theme and accent saved on the user's profile win over this browser's
+    // copy, so the choice follows them across devices.
+    const savedThemeName = myConfig.themeName?.value
+    const savedAccentName = myConfig.accentColor?.value
+    useEffect(() => {
+        if (!savedThemeName && !savedAccentName) {
+            return
+        }
+        const themeName = savedThemeName || getActiveThemeName()
+        const accentName = savedAccentName || getActiveAccentName()
+        if (themeName !== getActiveThemeName() || accentName !== getActiveAccentName()) {
+            setAppearance(themeName, accentName)
+        }
+    }, [savedThemeName, savedAccentName])
 
     return (
         <IntlProvider

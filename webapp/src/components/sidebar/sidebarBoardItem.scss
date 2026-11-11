@@ -15,7 +15,7 @@
     }
 
     &:hover {
-        background-color: rgba(18, 98, 255, 0.08);
+        background-color: rgba(var(--button-bg-rgb), 0.08);
         display: flex;
     }
 

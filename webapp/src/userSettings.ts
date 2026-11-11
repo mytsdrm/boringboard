@@ -8,6 +8,8 @@ import {Utils} from './utils'
 export enum UserSettingKey {
     Language = 'language',
     Theme = 'theme',
+    ThemeName = 'themeName',
+    AccentColor = 'accentColor',
     LastTeamId = 'lastTeamId',
     LastBoardId = 'lastBoardId',
     LastViewId = 'lastViewId',
@@ -51,6 +53,22 @@ export class UserSettings {
 
     static set theme(newValue: string | null) {
         UserSettings.set(UserSettingKey.Theme, newValue)
+    }
+
+    static get themeName(): string | null {
+        return UserSettings.get(UserSettingKey.ThemeName)
+    }
+
+    static set themeName(newValue: string | null) {
+        UserSettings.set(UserSettingKey.ThemeName, newValue)
+    }
+
+    static get accentColor(): string | null {
+        return UserSettings.get(UserSettingKey.AccentColor)
+    }
+
+    static set accentColor(newValue: string | null) {
+        UserSettings.set(UserSettingKey.AccentColor, newValue)
     }
 
     static get lastTeamId(): string | null {

@@ -6,7 +6,7 @@
     .BoardsSwitcher {
         display: flex;
         flex-direction: row;
-        background-color: rgba(3, 20, 84, 0.06);
+        background-color: rgba(var(--sidebar-text-rgb), 0.06);
         color: rgba(var(--sidebar-text-rgb), 0.74);
         flex: 1;
         padding: 0 10px;
@@ -19,7 +19,7 @@
         font-weight: 600;
 
         &:hover {
-            background: rgba(18, 98, 255, 0.1);
+            background: rgba(var(--button-bg-rgb), 0.1);
             color: var(--sidebar-text);
         }
     }

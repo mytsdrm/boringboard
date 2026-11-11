@@ -32,25 +32,25 @@ export type Theme = {
     propPurple: string
     propPink: string
     propRed: string
+
+    // How derived surfaces (page background, panels, kanban columns, table
+    // headers) are tinted: 'accent' mixes in the accent color, 'neutral' keeps
+    // them gray so the accent only shows on buttons, links and highlights.
+    surfaceTint?: 'accent' | 'neutral'
 }
 
+export const modernThemeName = 'modern-theme'
+export const classicThemeName = 'classic-theme'
+export const darkThemeName = 'dark-theme'
+export const midnightThemeName = 'midnight-theme'
 export const systemThemeName = 'system-theme'
 
-export const defaultThemeName = 'default-theme'
+// Kept for older imports: "light" is the classic blue look.
+export const lightThemeName = classicThemeName
 
-export const defaultTheme = {
-    mainBg: '251, 253, 255',
-    mainFg: '31, 41, 55',
-    buttonBg: '18, 98, 255',
-    buttonFg: '255, 255, 255',
-    sidebarBg: '238, 244, 252',
-    sidebarFg: '3, 20, 84',
-    sidebarTextActiveBorder: '18, 98, 255',
-    sidebarWhiteLogo: 'false',
+export const defaultThemeName = modernThemeName
 
-    link: '18, 98, 255',
-    linkVisited: '#551a8b',
-
+const lightProps = {
     propDefault: '#fff',
     propGray: '#e5e7eb',
     propBrown: '#fde7d2',
@@ -63,23 +63,7 @@ export const defaultTheme = {
     propRed: '#fecaca',
 }
 
-export const darkThemeName = 'dark-theme'
-
-export const darkTheme = {
-    ...defaultTheme,
-
-    mainBg: '15, 23, 42',
-    mainFg: '226, 232, 240',
-    buttonBg: '59, 130, 246',
-    buttonFg: '255, 255, 255',
-    sidebarBg: '11, 18, 32',
-    sidebarFg: '219, 234, 254',
-    sidebarTextActiveBorder: '96, 165, 250',
-    sidebarWhiteLogo: 'true',
-
-    link: '96, 165, 250',
-    linkVisited: '147, 197, 253',
-
+const darkProps = {
     propDefault: 'hsla(0, 100%, 100%, 0.08)',
     propGray: 'hsla(0, 0%, 70%, 0.4)',
     propBrown: 'hsla(25, 60%, 40%, 0.4)',
@@ -92,11 +76,24 @@ export const darkTheme = {
     propRed: 'hsla(4, 100%, 70%, 0.4)',
 }
 
-export const lightThemeName = 'light-theme'
+export const modernTheme: Theme = {
+    mainBg: '255, 255, 255',
+    mainFg: '24, 24, 27',
+    buttonBg: '79, 70, 229',
+    buttonFg: '255, 255, 255',
+    sidebarBg: '250, 250, 250',
+    sidebarFg: '39, 39, 42',
+    sidebarTextActiveBorder: '79, 70, 229',
+    sidebarWhiteLogo: 'false',
 
-export const lightTheme = {
-    ...defaultTheme,
+    link: '79, 70, 229',
+    linkVisited: '#6d28d9',
 
+    ...lightProps,
+    surfaceTint: 'neutral',
+}
+
+export const classicTheme: Theme = {
     mainBg: '251, 253, 255',
     mainFg: '31, 41, 55',
     buttonBg: '18, 98, 255',
@@ -105,120 +102,277 @@ export const lightTheme = {
     sidebarFg: '3, 20, 84',
     sidebarTextActiveBorder: '18, 98, 255',
     sidebarWhiteLogo: 'false',
+
+    link: '18, 98, 255',
+    linkVisited: '#551a8b',
+
+    ...lightProps,
+    surfaceTint: 'accent',
+}
+
+export const darkTheme: Theme = {
+    mainBg: '15, 23, 42',
+    mainFg: '226, 232, 240',
+    buttonBg: '59, 130, 246',
+    buttonFg: '255, 255, 255',
+    sidebarBg: '11, 18, 32',
+    sidebarFg: '219, 234, 254',
+    sidebarTextActiveBorder: '96, 165, 250',
+    sidebarWhiteLogo: 'true',
+
+    link: '96, 165, 250',
+    linkVisited: '147, 197, 253',
+
+    ...darkProps,
+    surfaceTint: 'accent',
+}
+
+export const midnightTheme: Theme = {
+    mainBg: '20, 20, 23',
+    mainFg: '228, 228, 231',
+    buttonBg: '139, 92, 246',
+    buttonFg: '255, 255, 255',
+    sidebarBg: '14, 14, 16',
+    sidebarFg: '228, 228, 231',
+    sidebarTextActiveBorder: '167, 139, 250',
+    sidebarWhiteLogo: 'true',
+
+    link: '167, 139, 250',
+    linkVisited: '196, 181, 253',
+
+    ...darkProps,
+    surfaceTint: 'neutral',
+}
+
+export const defaultTheme = modernTheme
+export const lightTheme = classicTheme
+
+export type ThemeOption = {
+    id: string
+    displayName: string
+    theme: Theme | null
+    preview: [string, string, string]
+}
+
+export const themeOptions: ThemeOption[] = [
+    {id: modernThemeName, displayName: 'Modern', theme: modernTheme, preview: ['#ffffff', '#fafafa', '#4f46e5']},
+    {id: classicThemeName, displayName: 'Classic', theme: classicTheme, preview: ['#fbfdff', '#eef4fc', '#1262ff']},
+    {id: darkThemeName, displayName: 'Dark', theme: darkTheme, preview: ['#0f172a', '#0b1220', '#3b82f6']},
+    {id: midnightThemeName, displayName: 'Midnight', theme: midnightTheme, preview: ['#141417', '#0e0e10', '#8b5cf6']},
+    {id: systemThemeName, displayName: 'System (Modern / Midnight)', theme: null, preview: ['#ffffff', '#141417', '#4f46e5']},
+]
+
+export const themeAccentName = 'theme'
+
+export type AccentOption = {
+    id: string
+    displayName: string
+
+    // rgb triplets: one for light themes, one for dark themes
+    light: string
+    dark: string
+}
+
+export const accentOptions: AccentOption[] = [
+    {id: themeAccentName, displayName: 'Theme default', light: '', dark: ''},
+    {id: 'indigo', displayName: 'Indigo', light: '79, 70, 229', dark: '129, 140, 248'},
+    {id: 'blue', displayName: 'Blue', light: '37, 99, 235', dark: '96, 165, 250'},
+    {id: 'violet', displayName: 'Violet', light: '124, 58, 237', dark: '167, 139, 250'},
+    {id: 'teal', displayName: 'Teal', light: '13, 148, 136', dark: '45, 212, 191'},
+    {id: 'green', displayName: 'Green', light: '22, 163, 74', dark: '74, 222, 128'},
+    {id: 'orange', displayName: 'Orange', light: '234, 88, 12', dark: '251, 146, 60'},
+    {id: 'rose', displayName: 'Rose', light: '225, 29, 72', dark: '251, 113, 133'},
+    {id: 'slate', displayName: 'Slate', light: '71, 85, 105', dark: '148, 163, 184'},
+]
+
+export const defaultAccentName = themeAccentName
+
+function isThemeName(name: string | null | undefined): name is string {
+    return Boolean(name) && themeOptions.some((t) => t.id === name)
+}
+
+function isAccentName(name: string | null | undefined): name is string {
+    return Boolean(name) && accentOptions.some((a) => a.id === name)
+}
+
+function prefersDark(): boolean {
+    return Boolean(window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches)
+}
+
+function resolveBaseTheme(themeName: string): Theme {
+    if (themeName === systemThemeName) {
+        return prefersDark() ? midnightTheme : modernTheme
+    }
+    return themeOptions.find((t) => t.id === themeName)?.theme || defaultTheme
+}
+
+// Applies an accent on top of a base theme. Dark themes get the lighter
+// variant of the accent so it stays readable. Buttons keep a darker shade so
+// white button text stays legible.
+export function buildTheme(themeName: string, accentName: string): Theme {
+    const base = resolveBaseTheme(themeName)
+    const accent = accentOptions.find((a) => a.id === accentName)
+    if (!accent || accent.id === themeAccentName) {
+        return {...base}
+    }
+
+    const isDark = color(`rgb(${base.mainBg})`).isDark()
+    const highlight = isDark ? accent.dark : accent.light
+    return {
+        ...base,
+        buttonBg: accent.light,
+        sidebarTextActiveBorder: highlight,
+        link: highlight,
+        linkVisited: color(`rgb(${highlight})`).mix(color(isDark ? 'white' : 'black'), 0.25).hex(),
+    }
 }
 
 function setBoringBoardThemeVariables(theme: Theme) {
     const mainBg = color(`rgb(${theme.mainBg})`)
     const mainFg = color(`rgb(${theme.mainFg})`)
     const buttonBg = color(`rgb(${theme.buttonBg})`)
+    const highlight = color(`rgb(${theme.link})`)
     const isDark = mainBg.isDark()
+    const neutral = theme.surfaceTint === 'neutral'
 
-    const bg = isDark ? mainBg.darken(0.08) : mainBg.mix(buttonBg, 0.035)
-    const bgSoft = isDark ? mainBg.lighten(0.06) : mainBg.mix(buttonBg, 0.02).lighten(0.01)
-    const panel = isDark ? mainBg.lighten(0.12) : mainBg.lighten(0.06)
-    const panelSoft = isDark ? mainBg.lighten(0.18) : mainBg.mix(buttonBg, 0.025)
-    const card = isDark ? mainBg.lighten(0.17) : mainBg.lighten(0.08)
-    const cardHover = isDark ? mainBg.lighten(0.22) : mainBg.mix(buttonBg, 0.025).lighten(0.02)
-    const kanbanColumnFrom = isDark ? mainBg.lighten(0.14) : mainBg.mix(buttonBg, 0.075)
-    const kanbanColumnTo = isDark ? mainBg.lighten(0.09) : mainBg.mix(buttonBg, 0.04)
-    const border = mainFg.alpha(isDark ? 0.16 : 0.16)
-    const borderStrong = mainFg.alpha(isDark ? 0.24 : 0.26)
+    // Surfaces either pick up a hint of the accent (classic look) or stay
+    // neutral gray (modern look).
+    const tint = (amount: number) => (neutral ? mainBg.mix(mainFg, amount * 0.55) : mainBg.mix(buttonBg, amount))
+    const lift = (amount: number) => (neutral ? mainBg.mix(mainFg, amount * 0.3) : mainBg.lighten(amount))
+
+    const darkBg = mainBg.darken(neutral ? 0.15 : 0.08)
+    const bg = isDark ? darkBg : tint(0.035)
+    const bgSoft = isDark ? lift(0.06) : tint(0.02).lighten(0.01)
+    const panel = isDark ? lift(0.12) : mainBg.lighten(0.06)
+    const panelSoft = isDark ? lift(0.18) : tint(0.025)
+    const card = isDark ? lift(0.17) : mainBg.lighten(0.08)
+    const cardHover = isDark ? lift(0.22) : tint(0.025).lighten(0.02)
+    const kanbanColumnFrom = isDark ? lift(0.14) : tint(0.075)
+    const kanbanColumnTo = isDark ? lift(0.09) : tint(0.04)
+    const border = mainFg.alpha(neutral ? 0.12 : 0.16)
+    let borderStrongAlpha = isDark ? 0.24 : 0.26
+    if (neutral) {
+        borderStrongAlpha = 0.2
+    }
+    const borderStrong = mainFg.alpha(borderStrongAlpha)
     const shadow = isDark ? 'rgba(0, 0, 0, 0.24)' : 'rgba(15, 23, 42, 0.06)'
     const shadowSoft = isDark ? 'rgba(0, 0, 0, 0.18)' : 'rgba(15, 23, 42, 0.035)'
-    const sidebarShadow = isDark ? 'rgba(0, 0, 0, 0.28)' : 'rgba(3, 20, 84, 0.055)'
-    const tableHeader = isDark ? mainBg.lighten(0.2) : mainBg.mix(buttonBg, 0.07)
-    const tableRow = isDark ? mainBg.lighten(0.11) : mainBg.lighten(0.07)
-    const tableRowAlt = isDark ? mainBg.lighten(0.14) : mainBg.mix(buttonBg, 0.018).lighten(0.04)
-    const tableRowHover = isDark ? mainBg.lighten(0.19) : mainBg.mix(buttonBg, 0.045).lighten(0.02)
+    let sidebarShadow = neutral ? 'rgba(24, 24, 27, 0.04)' : 'rgba(3, 20, 84, 0.055)'
+    if (isDark) {
+        sidebarShadow = 'rgba(0, 0, 0, 0.28)'
+    }
+    const tableHeader = isDark ? lift(0.2) : tint(0.07)
+    const tableRow = isDark ? lift(0.11) : mainBg.lighten(0.07)
+    const tableRowAlt = isDark ? lift(0.14) : tint(0.018).lighten(0.04)
+    const tableRowHover = isDark ? lift(0.19) : tint(0.045).lighten(0.02)
     const tableBorder = mainFg.alpha(isDark ? 0.18 : 0.16)
     const tableBorderStrong = mainFg.alpha(isDark ? 0.28 : 0.24)
     const purple = color('#673aff')
     const green = color('#16a34a')
     const orange = color('#f97316')
 
-    document.documentElement.style.setProperty('--bb-bg', bg.rgb().string())
-    document.documentElement.style.setProperty('--bb-bg-soft', bgSoft.rgb().string())
-    document.documentElement.style.setProperty('--bb-panel-bg', panel.rgb().string())
-    document.documentElement.style.setProperty('--bb-panel-bg-soft', panelSoft.rgb().string())
-    document.documentElement.style.setProperty('--bb-card-bg', card.rgb().string())
-    document.documentElement.style.setProperty('--bb-card-hover-bg', cardHover.rgb().string())
-    document.documentElement.style.setProperty('--bb-kanban-column-from', kanbanColumnFrom.rgb().string())
-    document.documentElement.style.setProperty('--bb-kanban-column-to', kanbanColumnTo.rgb().string())
-    document.documentElement.style.setProperty('--bb-text', mainFg.rgb().string())
-    document.documentElement.style.setProperty('--bb-text-muted', mainFg.alpha(isDark ? 0.72 : 0.68).rgb().string())
-    document.documentElement.style.setProperty('--bb-text-subtle', mainFg.alpha(isDark ? 0.52 : 0.5).rgb().string())
-    document.documentElement.style.setProperty('--bb-date-text', isDark ? '#475569' : mainFg.alpha(0.72).rgb().string())
-    document.documentElement.style.setProperty('--bb-border', border.rgb().string())
-    document.documentElement.style.setProperty('--bb-border-strong', borderStrong.rgb().string())
-    document.documentElement.style.setProperty('--bb-shadow', shadow)
-    document.documentElement.style.setProperty('--bb-shadow-soft', shadowSoft)
-    document.documentElement.style.setProperty('--bb-sidebar-shadow', sidebarShadow)
-    document.documentElement.style.setProperty('--bb-blue-soft', buttonBg.alpha(isDark ? 0.18 : 0.1).rgb().string())
-    document.documentElement.style.setProperty('--bb-blue-text', buttonBg.rgb().string())
-    document.documentElement.style.setProperty('--bb-purple-soft', purple.alpha(isDark ? 0.24 : 0.12).rgb().string())
-    document.documentElement.style.setProperty('--bb-purple-text', isDark ? purple.lighten(0.35).rgb().string() : purple.rgb().string())
-    document.documentElement.style.setProperty('--bb-green-soft', green.alpha(isDark ? 0.2 : 0.1).rgb().string())
-    document.documentElement.style.setProperty('--bb-green-text', isDark ? green.lighten(0.32).rgb().string() : green.darken(0.12).rgb().string())
-    document.documentElement.style.setProperty('--bb-orange-soft', orange.alpha(isDark ? 0.22 : 0.12).rgb().string())
-    document.documentElement.style.setProperty('--bb-orange-text', isDark ? orange.lighten(0.22).rgb().string() : orange.rgb().string())
-    document.documentElement.style.setProperty('--bb-assigned-soft', orange.alpha(isDark ? 0.22 : 0.12).rgb().string())
-    document.documentElement.style.setProperty('--bb-assigned-text', isDark ? orange.lighten(0.22).rgb().string() : orange.rgb().string())
-    document.documentElement.style.setProperty('--bb-dashboard-panel-bg', isDark ? panel.rgb().string() : '#ffffff')
-    document.documentElement.style.setProperty('--bb-dashboard-glow', buttonBg.alpha(isDark ? 0.12 : 0.08).rgb().string())
-    document.documentElement.style.setProperty('--bb-template-sidebar-bg', isDark ? mainBg.lighten(0.08).rgb().string() : '#f6f9fd')
-    document.documentElement.style.setProperty('--bb-template-item-active-bg', buttonBg.alpha(isDark ? 0.18 : 0.12).rgb().string())
-    document.documentElement.style.setProperty('--bb-table-header-bg', tableHeader.rgb().string())
-    document.documentElement.style.setProperty('--bb-table-row-bg', tableRow.rgb().string())
-    document.documentElement.style.setProperty('--bb-table-row-alt-bg', tableRowAlt.rgb().string())
-    document.documentElement.style.setProperty('--bb-table-row-hover-bg', tableRowHover.rgb().string())
-    document.documentElement.style.setProperty('--bb-table-border', tableBorder.rgb().string())
-    document.documentElement.style.setProperty('--bb-table-border-strong', tableBorderStrong.rgb().string())
-    document.documentElement.style.setProperty('--bb-table-shadow', isDark ? 'rgba(0, 0, 0, 0.16)' : 'rgba(15, 23, 42, 0.024)')
+    const root = document.documentElement
+    root.style.setProperty('--bb-bg', bg.rgb().string())
+    root.style.setProperty('--bb-bg-soft', bgSoft.rgb().string())
+    root.style.setProperty('--bb-panel-bg', panel.rgb().string())
+    root.style.setProperty('--bb-panel-bg-soft', panelSoft.rgb().string())
+    root.style.setProperty('--bb-card-bg', card.rgb().string())
+    root.style.setProperty('--bb-card-hover-bg', cardHover.rgb().string())
+    root.style.setProperty('--bb-kanban-column-from', kanbanColumnFrom.rgb().string())
+    root.style.setProperty('--bb-kanban-column-to', kanbanColumnTo.rgb().string())
+    root.style.setProperty('--bb-text', mainFg.rgb().string())
+    root.style.setProperty('--bb-text-muted', mainFg.alpha(isDark ? 0.72 : 0.68).rgb().string())
+    root.style.setProperty('--bb-text-subtle', mainFg.alpha(isDark ? 0.52 : 0.5).rgb().string())
+    root.style.setProperty('--bb-date-text', isDark ? '#475569' : mainFg.alpha(0.72).rgb().string())
+    root.style.setProperty('--bb-border', border.rgb().string())
+    root.style.setProperty('--bb-border-strong', borderStrong.rgb().string())
+    root.style.setProperty('--bb-shadow', shadow)
+    root.style.setProperty('--bb-shadow-soft', shadowSoft)
+    root.style.setProperty('--bb-sidebar-shadow', sidebarShadow)
+    root.style.setProperty('--bb-sidebar-glow', neutral ? 'transparent' : buttonBg.alpha(isDark ? 0.18 : 0.1).rgb().string())
+    root.style.setProperty('--bb-blue-soft', buttonBg.alpha(isDark ? 0.18 : 0.1).rgb().string())
+    root.style.setProperty('--bb-blue-text', (isDark ? highlight : buttonBg).rgb().string())
+    root.style.setProperty('--bb-purple-soft', purple.alpha(isDark ? 0.24 : 0.12).rgb().string())
+    root.style.setProperty('--bb-purple-text', isDark ? purple.lighten(0.35).rgb().string() : purple.rgb().string())
+    root.style.setProperty('--bb-green-soft', green.alpha(isDark ? 0.2 : 0.1).rgb().string())
+    root.style.setProperty('--bb-green-text', isDark ? green.lighten(0.32).rgb().string() : green.darken(0.12).rgb().string())
+    root.style.setProperty('--bb-orange-soft', orange.alpha(isDark ? 0.22 : 0.12).rgb().string())
+    root.style.setProperty('--bb-orange-text', isDark ? orange.lighten(0.22).rgb().string() : orange.rgb().string())
+    root.style.setProperty('--bb-assigned-soft', orange.alpha(isDark ? 0.22 : 0.12).rgb().string())
+    root.style.setProperty('--bb-assigned-text', isDark ? orange.lighten(0.22).rgb().string() : orange.rgb().string())
+    root.style.setProperty('--bb-dashboard-panel-bg', isDark ? panel.rgb().string() : '#ffffff')
+    root.style.setProperty('--bb-dashboard-glow', buttonBg.alpha(isDark ? 0.12 : 0.08).rgb().string())
+    root.style.setProperty('--bb-template-sidebar-bg', isDark ? lift(0.08).rgb().string() : tint(0.03).rgb().string())
+    root.style.setProperty('--bb-template-item-active-bg', buttonBg.alpha(isDark ? 0.18 : 0.12).rgb().string())
+    root.style.setProperty('--bb-table-header-bg', tableHeader.rgb().string())
+    root.style.setProperty('--bb-table-row-bg', tableRow.rgb().string())
+    root.style.setProperty('--bb-table-row-alt-bg', tableRowAlt.rgb().string())
+    root.style.setProperty('--bb-table-row-hover-bg', tableRowHover.rgb().string())
+    root.style.setProperty('--bb-table-border', tableBorder.rgb().string())
+    root.style.setProperty('--bb-table-border-strong', tableBorderStrong.rgb().string())
+    root.style.setProperty('--bb-table-shadow', isDark ? 'rgba(0, 0, 0, 0.16)' : 'rgba(15, 23, 42, 0.024)')
+    root.style.setProperty('color-scheme', isDark ? 'dark' : 'light')
 }
 
-export function setTheme(theme: Theme | null): Theme {
-    let consolidatedTheme = defaultTheme
-    if (theme) {
-        consolidatedTheme = {...defaultTheme, ...theme}
-        UserSettings.theme = JSON.stringify(consolidatedTheme)
-    } else {
-        UserSettings.theme = ''
-        const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)')
-        if (darkThemeMq.matches) {
-            consolidatedTheme = {...defaultTheme, ...darkTheme}
-        }
-    }
+// Writes a theme's colors into the CSS variables the app styles read.
+export function applyThemeColors(theme: Theme): Theme {
+    const consolidatedTheme = {...defaultTheme, ...theme}
+    const root = document.documentElement
 
-    setActiveThemeName(consolidatedTheme, theme)
+    root.style.setProperty('--center-channel-bg-rgb', consolidatedTheme.mainBg)
+    root.style.setProperty('--center-channel-color-rgb', consolidatedTheme.mainFg)
+    root.style.setProperty('--button-bg-rgb', consolidatedTheme.buttonBg)
+    root.style.setProperty('--button-color-rgb', consolidatedTheme.buttonFg)
+    root.style.setProperty('--sidebar-bg-rgb', consolidatedTheme.sidebarBg)
+    root.style.setProperty('--sidebar-text-rgb', consolidatedTheme.sidebarFg)
+    root.style.setProperty('--link-color-rgb', consolidatedTheme.link)
+    root.style.setProperty('--sidebar-text-active-border-rgb', consolidatedTheme.sidebarTextActiveBorder)
 
-    // for personal server and desktop, BoringBoard is responsible for managing the theme,
-    // so we set all the color variables here.
-    document.documentElement.style.setProperty('--center-channel-bg-rgb', consolidatedTheme.mainBg)
-    document.documentElement.style.setProperty('--center-channel-color-rgb', consolidatedTheme.mainFg)
-    document.documentElement.style.setProperty('--button-bg-rgb', consolidatedTheme.buttonBg)
-    document.documentElement.style.setProperty('--button-color-rgb', consolidatedTheme.buttonFg)
-    document.documentElement.style.setProperty('--sidebar-bg-rgb', consolidatedTheme.sidebarBg)
-    document.documentElement.style.setProperty('--sidebar-text-rgb', consolidatedTheme.sidebarFg)
-    document.documentElement.style.setProperty('--link-color-rgb', consolidatedTheme.link)
-    document.documentElement.style.setProperty('--sidebar-text-active-border-rgb', consolidatedTheme.sidebarTextActiveBorder)
+    root.style.setProperty('--sidebar-white-logo', consolidatedTheme.sidebarWhiteLogo)
+    root.style.setProperty('--link-visited-color-rgb', consolidatedTheme.linkVisited)
 
-    document.documentElement.style.setProperty('--sidebar-white-logo', consolidatedTheme.sidebarWhiteLogo)
-    document.documentElement.style.setProperty('--link-visited-color-rgb', consolidatedTheme.linkVisited)
-
-    document.documentElement.style.setProperty('--prop-default', consolidatedTheme.propDefault)
-    document.documentElement.style.setProperty('--prop-gray', consolidatedTheme.propGray)
-    document.documentElement.style.setProperty('--prop-brown', consolidatedTheme.propBrown)
-    document.documentElement.style.setProperty('--prop-orange', consolidatedTheme.propOrange)
-    document.documentElement.style.setProperty('--prop-yellow', consolidatedTheme.propYellow)
-    document.documentElement.style.setProperty('--prop-green', consolidatedTheme.propGreen)
-    document.documentElement.style.setProperty('--prop-blue', consolidatedTheme.propBlue)
-    document.documentElement.style.setProperty('--prop-purple', consolidatedTheme.propPurple)
-    document.documentElement.style.setProperty('--prop-pink', consolidatedTheme.propPink)
-    document.documentElement.style.setProperty('--prop-red', consolidatedTheme.propRed)
+    root.style.setProperty('--prop-default', consolidatedTheme.propDefault)
+    root.style.setProperty('--prop-gray', consolidatedTheme.propGray)
+    root.style.setProperty('--prop-brown', consolidatedTheme.propBrown)
+    root.style.setProperty('--prop-orange', consolidatedTheme.propOrange)
+    root.style.setProperty('--prop-yellow', consolidatedTheme.propYellow)
+    root.style.setProperty('--prop-green', consolidatedTheme.propGreen)
+    root.style.setProperty('--prop-blue', consolidatedTheme.propBlue)
+    root.style.setProperty('--prop-purple', consolidatedTheme.propPurple)
+    root.style.setProperty('--prop-pink', consolidatedTheme.propPink)
+    root.style.setProperty('--prop-red', consolidatedTheme.propRed)
 
     setBoringBoardThemeVariables(consolidatedTheme)
 
     return consolidatedTheme
+}
+
+let activeAccentName: string = defaultAccentName
+
+// Applies a theme + accent and remembers the choice in this browser.
+export function setAppearance(themeName: string, accentName: string): Theme {
+    const name = isThemeName(themeName) ? themeName : defaultThemeName
+    const accent = isAccentName(accentName) ? accentName : defaultAccentName
+
+    activeThemeName = name
+    activeAccentName = accent
+    UserSettings.themeName = name
+    UserSettings.accentColor = accent
+
+    document.documentElement.setAttribute('data-bb-theme', name)
+    return applyThemeColors(buildTheme(name, accent))
+}
+
+// Back-compat: a full theme object is applied as-is; null means "follow the system".
+export function setTheme(theme: Theme | null): Theme {
+    if (theme === null) {
+        return setAppearance(systemThemeName, activeAccentName)
+    }
+    const match = themeOptions.find((t) => t.theme && isEqual(t.theme, theme))
+    if (match) {
+        return setAppearance(match.id, activeAccentName)
+    }
+    return applyThemeColors(theme)
 }
 
 export function setMattermostTheme(theme: any): Theme {
@@ -226,16 +380,7 @@ export function setMattermostTheme(theme: any): Theme {
         return setTheme(defaultTheme)
     }
 
-    document.documentElement.style.setProperty('--center-channel-bg-rgb', color(theme.centerChannelBg).rgb().array().join(', '))
-    document.documentElement.style.setProperty('--center-channel-color-rgb', color(theme.centerChannelColor).rgb().array().join(', '))
-    document.documentElement.style.setProperty('--button-bg-rgb', color(theme.buttonBg).rgb().array().join(', '))
-    document.documentElement.style.setProperty('--button-color-rgb', color(theme.buttonColor).rgb().array().join(', '))
-    document.documentElement.style.setProperty('--sidebar-bg-rgb', color(theme.sidebarBg).rgb().array().join(', '))
-    document.documentElement.style.setProperty('--sidebar-text-rgb', color(theme.sidebarText).rgb().array().join(', '))
-    document.documentElement.style.setProperty('--link-color-rgb', theme.linkColor)
-    document.documentElement.style.setProperty('--sidebar-text-active-border-rgb', color(theme.sidebarTextActiveBorder).rgb().array().join(', '))
-
-    return setTheme({
+    return applyThemeColors({
         ...defaultTheme,
         mainBg: color(theme.centerChannelBg).rgb().array().join(', '),
         mainFg: color(theme.centerChannelColor).rgb().array().join(', '),
@@ -244,44 +389,44 @@ export function setMattermostTheme(theme: any): Theme {
         sidebarBg: color(theme.sidebarBg).rgb().array().join(', '),
         sidebarFg: color(theme.sidebarColor || '#ffffff').rgb().array().join(', '),
         sidebarTextActiveBorder: color(theme.sidebarTextActiveBorder).rgb().array().join(', '),
-        link: theme.linkColor,
+        link: color(theme.linkColor).rgb().array().join(', '),
+        surfaceTint: 'accent',
     })
 }
 
-function setActiveThemeName(consolidatedTheme: Theme, theme: Theme | null) {
-    if (theme === null) {
-        activeThemeName = systemThemeName
-    } else if (isEqual(consolidatedTheme, darkTheme)) {
-        activeThemeName = darkThemeName
-    } else if (isEqual(consolidatedTheme, lightTheme)) {
-        activeThemeName = lightThemeName
-    } else {
-        activeThemeName = defaultThemeName
+// Older versions stored the whole theme object under the "theme" key.
+// A stored dark theme stays dark; anything else moves to the new Modern default.
+function migrateLegacyTheme(): string | null {
+    const legacy = UserSettings.theme
+    if (!legacy) {
+        return null
     }
+    UserSettings.theme = null
+    try {
+        const parsed = JSON.parse(legacy)
+        if (parsed?.mainBg && color(`rgb(${parsed.mainBg})`).isDark()) {
+            return darkThemeName
+        }
+    } catch (e) {
+        // ignore and fall through to the default
+    }
+    return defaultThemeName
 }
 
 export function loadTheme(): Theme {
-    const themeStr = UserSettings.theme
-    if (themeStr) {
-        try {
-            const theme = JSON.parse(themeStr)
-            const consolidatedTheme = setTheme(theme)
-            setActiveThemeName(consolidatedTheme, theme)
-            return consolidatedTheme
-        } catch (e) {
-            return setTheme(null)
-        }
-    } else {
-        return setTheme(null)
+    let name = UserSettings.themeName
+    if (!isThemeName(name)) {
+        name = migrateLegacyTheme() || defaultThemeName
     }
+    const accent = UserSettings.accentColor
+    return setAppearance(name, isAccentName(accent) ? accent : defaultAccentName)
 }
 
 export function initThemes(): void {
     const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)')
     const changeHandler = () => {
-        const themeStr = UserSettings.theme
-        if (!themeStr) {
-            setTheme(null)
+        if (activeThemeName === systemThemeName) {
+            setAppearance(systemThemeName, activeAccentName)
         }
     }
     if (darkThemeMq.addEventListener) {
@@ -358,4 +503,8 @@ export function getSelectBaseStyle() {
 
 export function getActiveThemeName(): string {
     return activeThemeName || defaultThemeName
+}
+
+export function getActiveAccentName(): string {
+    return activeAccentName || defaultAccentName
 }

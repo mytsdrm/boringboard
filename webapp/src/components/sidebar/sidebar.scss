@@ -12,7 +12,7 @@
     min-height: 100%;
     color: rgb(var(--sidebar-text-rgb));
     background:
-        linear-gradient(180deg, var(--bb-blue-soft), transparent),
+        linear-gradient(180deg, var(--bb-sidebar-glow, var(--bb-blue-soft)), transparent),
         rgb(var(--sidebar-bg-rgb));
     padding: 18px 10px 12px;
     border-right: 1px solid var(--bb-border-strong);

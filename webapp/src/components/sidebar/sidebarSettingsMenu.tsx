@@ -5,14 +5,11 @@ import {FormattedMessage, useIntl} from 'react-intl'
 
 import {Archiver} from '../../archiver'
 import {
-    darkTheme,
-    darkThemeName,
-    defaultTheme,
-    defaultThemeName,
-    lightTheme,
-    lightThemeName,
-    setTheme, systemThemeName,
-    Theme,
+    accentOptions,
+    getActiveAccentName,
+    setAppearance,
+    themeAccentName,
+    themeOptions,
 } from '../../theme'
 import Menu from '../../widgets/menu'
 import MenuWrapper from '../../widgets/menuWrapper'
@@ -22,6 +19,8 @@ import {getCurrentTeam, Team} from '../../store/teams'
 import {initialLoad} from '../../store/initialLoad'
 import {fetchSidebarCategories} from '../../store/sidebar'
 import {UserSettings} from '../../userSettings'
+import {getMe, patchProps} from '../../store/users'
+import octoClient from '../../octoClient'
 
 import './sidebarSettingsMenu.scss'
 import CheckIcon from '../../widgets/icons/check'
@@ -38,14 +37,28 @@ const SidebarSettingsMenu = (props: Props) => {
     const dispatch = useAppDispatch()
     const currentTeam = useAppSelector<Team|null>(getCurrentTeam)
 
+    const me = useAppSelector(getMe)
+
     // we need this as the sidebar doesn't always need to re-render
     // on theme change. This can cause props and the actual
     // active theme can go out of sync
     const [themeName, setThemeName] = useState(props.activeTheme)
+    const [accentName, setAccentName] = useState(getActiveAccentName())
 
-    const updateTheme = (theme: Theme | null, name: string) => {
-        setTheme(theme)
-        setThemeName(name)
+    // Applies the choice right away and saves it to the user's profile so it
+    // follows them to other browsers and devices.
+    const updateAppearance = async (newThemeName: string, newAccentName: string) => {
+        setAppearance(newThemeName, newAccentName)
+        setThemeName(newThemeName)
+        setAccentName(newAccentName)
+        if (me) {
+            const patchedProps = await octoClient.patchUserConfig(me.id, {
+                updatedFields: {themeName: newThemeName, accentColor: newAccentName},
+            })
+            if (patchedProps) {
+                dispatch(patchProps(patchedProps))
+            }
+        }
     }
 
     const [randomIcons, setRandomIcons] = useState(UserSettings.prefillRandomIcons)
@@ -53,29 +66,6 @@ const SidebarSettingsMenu = (props: Props) => {
         UserSettings.prefillRandomIcons = !UserSettings.prefillRandomIcons
         setRandomIcons(!randomIcons)
     }
-
-    const themes = [
-        {
-            id: defaultThemeName,
-            displayName: 'Default theme',
-            theme: defaultTheme,
-        },
-        {
-            id: darkThemeName,
-            displayName: 'Dark theme',
-            theme: darkTheme,
-        },
-        {
-            id: lightThemeName,
-            displayName: 'Light theme',
-            theme: lightTheme,
-        },
-        {
-            id: systemThemeName,
-            displayName: 'System theme',
-            theme: null,
-        },
-    ]
 
     return (
         <div className='SidebarSettingsMenu'>
@@ -152,14 +142,47 @@ const SidebarSettingsMenu = (props: Props) => {
                         position='top'
                     >
                         {
-                            themes.map((theme) =>
+                            themeOptions.map((theme) =>
                                 (
                                     <Menu.Text
                                         key={theme.id}
                                         id={theme.id}
                                         name={intl.formatMessage({id: `Sidebar.${theme.id}`, defaultMessage: theme.displayName})}
-                                        onClick={async () => updateTheme(theme.theme, theme.id)}
+                                        icon={
+                                            <span
+                                                className='SidebarSettingsMenu__theme-preview'
+                                                style={{background: `linear-gradient(135deg, ${theme.preview[1]} 0 50%, ${theme.preview[0]} 50% 100%)`}}
+                                            >
+                                                <span style={{background: theme.preview[2]}}/>
+                                            </span>
+                                        }
+                                        onClick={async () => updateAppearance(theme.id, accentName)}
                                         rightIcon={themeName === theme.id ? <CheckIcon/> : null}
+                                    />
+                                ),
+                            )
+                        }
+                    </Menu.SubMenu>
+                    <Menu.SubMenu
+                        id='accent'
+                        name={intl.formatMessage({id: 'Sidebar.accent-color', defaultMessage: 'Accent color'})}
+                        position='top'
+                    >
+                        {
+                            accentOptions.map((accent) =>
+                                (
+                                    <Menu.Text
+                                        key={accent.id}
+                                        id={`accent-${accent.id}`}
+                                        name={intl.formatMessage({id: `Sidebar.accent-${accent.id}`, defaultMessage: accent.displayName})}
+                                        icon={
+                                            <span
+                                                className={`SidebarSettingsMenu__accent-swatch${accent.id === themeAccentName ? ' SidebarSettingsMenu__accent-swatch--theme' : ''}`}
+                                                style={accent.light ? {background: `rgb(${accent.light})`} : undefined}
+                                            />
+                                        }
+                                        onClick={async () => updateAppearance(themeName, accent.id)}
+                                        rightIcon={accentName === accent.id ? <CheckIcon/> : null}
                                     />
                                 ),
                             )

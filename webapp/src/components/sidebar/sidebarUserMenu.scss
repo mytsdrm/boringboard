@@ -18,14 +18,14 @@
                 margin-right: 7px;
                 position: relative;
                 bottom: 1px;
-                box-shadow: 0 0 0 1px rgba(18, 98, 255, 0.16);
+                box-shadow: 0 0 0 1px rgba(var(--button-bg-rgb), 0.16);
             }
 
             .brand-logo {
                 width: 28px;
                 height: 28px;
                 margin-right: 8px;
-                border: 1px solid rgba(18, 98, 255, 0.14);
+                border: 1px solid rgba(var(--button-bg-rgb), 0.14);
                 border-radius: 50%;
                 background: #fff;
                 box-shadow: 0 4px 12px rgba(16, 24, 40, 0.12);
@@ -39,7 +39,7 @@
                 max-width: 150px;
                 height: 32px;
                 overflow: hidden;
-                color: #031454;
+                color: rgb(var(--sidebar-text-rgb));
                 font-weight: 800;
                 letter-spacing: 0;
                 line-height: 32px;

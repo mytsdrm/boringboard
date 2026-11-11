@@ -919,5 +919,20 @@
     "ViewTitle.show-less": "Show less",
     "ViewTitle.show-more": "Show more",
     "ViewTitle.task-board-info-title": "Task Board Info",
-    "Workspace.loading-board": "Loading board..."
+    "Workspace.loading-board": "Loading board...",
+    "Sidebar.accent-color": "Accent color",
+    "Sidebar.modern-theme": "Modern",
+    "Sidebar.classic-theme": "Classic",
+    "Sidebar.dark-theme": "Dark",
+    "Sidebar.midnight-theme": "Midnight",
+    "Sidebar.system-theme": "System (Modern / Midnight)",
+    "Sidebar.accent-theme": "Theme default",
+    "Sidebar.accent-indigo": "Indigo",
+    "Sidebar.accent-blue": "Blue",
+    "Sidebar.accent-violet": "Violet",
+    "Sidebar.accent-teal": "Teal",
+    "Sidebar.accent-green": "Green",
+    "Sidebar.accent-orange": "Orange",
+    "Sidebar.accent-rose": "Rose",
+    "Sidebar.accent-slate": "Slate"
 }
