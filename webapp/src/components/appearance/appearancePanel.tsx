@@ -2,10 +2,11 @@
 // See LICENSE.txt for license information.
 import React, {useEffect, useRef, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
-import {IconCheck, IconPalette, IconRefresh} from '@tabler/icons-react'
+import {IconCheck, IconPalette, IconRefresh, IconX} from '@tabler/icons-react'
+import {useHotkeys} from 'react-hotkeys-hook'
 import color from 'color'
 
-import AppModal from '../appModal'
+import RootPortal from '../rootPortal'
 import octoClient from '../../octoClient'
 import {useAppDispatch, useAppSelector} from '../../store/hooks'
 import {getMe, patchProps} from '../../store/users'
@@ -24,6 +25,7 @@ import {
     themeAccentName,
     themeOptions,
 } from '../../theme'
+import {defaultLayoutName, getActiveLayoutName, layoutOptions, setLayout} from '../../layout'
 
 import './appearancePanel.scss'
 
@@ -122,10 +124,13 @@ const AppearancePanel = (props: Props): JSX.Element => {
     const dispatch = useAppDispatch()
     const me = useAppSelector(getMe)
     const [appearance, setAppearanceState] = useState<Appearance>(getAppearance())
+    const [layoutName, setLayoutNameState] = useState(getActiveLayoutName())
     const saveTimer = useRef<ReturnType<typeof setTimeout>>()
 
+    useHotkeys('esc', () => props.onClose())
+
     // Save to the user's profile (debounced: the color picker fires on every drag).
-    const saveToProfile = (next: Appearance) => {
+    const saveToProfile = (next: Appearance, nextLayout: string) => {
         if (!me) {
             return
         }
@@ -134,7 +139,7 @@ const AppearancePanel = (props: Props): JSX.Element => {
         }
         saveTimer.current = setTimeout(async () => {
             const patchedProps = await octoClient.patchUserConfig(me.id, {
-                updatedFields: {themeName: next.themeName, accentColor: next.accent, baseColor: next.base},
+                updatedFields: {themeName: next.themeName, accentColor: next.accent, baseColor: next.base, layoutName: nextLayout},
             })
             if (patchedProps) {
                 dispatch(patchProps(patchedProps))
@@ -146,7 +151,19 @@ const AppearancePanel = (props: Props): JSX.Element => {
         const next = {...appearance, ...patch}
         setAppearance(next.themeName, next.accent, next.base)
         setAppearanceState(next)
-        saveToProfile(next)
+        saveToProfile(next, layoutName)
+    }
+
+    const updateLayout = (nextLayout: string) => {
+        setLayoutNameState(setLayout(nextLayout))
+        saveToProfile(appearance, nextLayout)
+    }
+
+    const resetAll = () => {
+        setAppearance(defaultAppearance.themeName, defaultAppearance.accent, defaultAppearance.base)
+        setAppearanceState(defaultAppearance)
+        setLayoutNameState(setLayout(defaultLayoutName))
+        saveToProfile(defaultAppearance, defaultLayoutName)
     }
 
     const customAccent = isHexColor(appearance.accent) ? appearance.accent : ''
@@ -155,18 +172,213 @@ const AppearancePanel = (props: Props): JSX.Element => {
     const label = (id: string, defaultMessage: string) => intl.formatMessage({id, defaultMessage})
 
     return (
-        <AppModal
-            className='AppearancePanel'
-            title={label('Appearance.title', 'Appearance')}
-            titleIcon={<IconPalette size={18}/>}
-            width='720px'
-            onClose={props.onClose}
-            footerContent={(
-                <>
+        <RootPortal>
+            <aside
+                className='AppearancePanel'
+                role='dialog'
+                aria-label={label('Appearance.title', 'Appearance')}
+            >
+                <header className='AppearancePanel__header'>
+                    <span className='AppearancePanel__titleIcon'><IconPalette size={18}/></span>
+                    <h2>{label('Appearance.title', 'Appearance')}</h2>
+                    <button
+                        type='button'
+                        className='AppearancePanel__close'
+                        aria-label={label('Appearance.close', 'Close')}
+                        onClick={props.onClose}
+                    >
+                        <IconX size={18}/>
+                    </button>
+                </header>
+                <div className='AppearancePanel__body'>
+                    <section className='AppearancePanel__section'>
+                        <h3>
+                            <FormattedMessage
+                                id='Appearance.layout'
+                                defaultMessage='Layout'
+                            />
+                        </h3>
+                        <p>
+                            <FormattedMessage
+                                id='Appearance.layout-help'
+                                defaultMessage='Pick a desktop style for the app frame.'
+                            />
+                        </p>
+                        <div className='AppearancePanel__layouts'>
+                            {layoutOptions.map((option) => {
+                                const active = layoutName === option.id
+                                return (
+                                    <button
+                                        key={option.id}
+                                        type='button'
+                                        className={`AppearancePanel__layout${active ? ' active' : ''}`}
+                                        aria-pressed={active}
+                                        title={label(`Appearance.layout-${option.id}-help`, option.description)}
+                                        onClick={() => updateLayout(option.id)}
+                                    >
+                                        <span className={`AppearancePanel__layoutPreview AppearancePanel__layoutPreview--${option.id}`}>
+                                            <i className='bar'/>
+                                            <i className='side'/>
+                                            <i className='main'/>
+                                            <i className='shelf'/>
+                                        </span>
+                                        <span className='AppearancePanel__themeName'>
+                                            {label(`Appearance.layout-${option.id}`, option.displayName)}
+                                            {active && <IconCheck size={14}/>}
+                                        </span>
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    </section>
+
+                    <section className='AppearancePanel__section'>
+                        <h3>
+                            <FormattedMessage
+                                id='Appearance.theme'
+                                defaultMessage='Theme'
+                            />
+                        </h3>
+                        <div className='AppearancePanel__themes'>
+                            {themeOptions.map((option) => {
+                                const active = appearance.themeName === option.id
+                                return (
+                                    <button
+                                        key={option.id}
+                                        type='button'
+                                        className={`AppearancePanel__theme${active ? ' active' : ''}`}
+                                        aria-pressed={active}
+                                        onClick={() => update({themeName: option.id})}
+                                    >
+                                        {option.id === systemThemeName ? (
+                                            <span className='AppearancePanel__previewSplit'>
+                                                <ThemePreview
+                                                    themeName={defaultThemeName}
+                                                    accent={appearance.accent}
+                                                    base=''
+                                                />
+                                                <span className='AppearancePanel__previewSplitDark'>
+                                                    <ThemePreview
+                                                        themeName={midnightThemeName}
+                                                        accent={appearance.accent}
+                                                        base=''
+                                                    />
+                                                </span>
+                                            </span>
+                                        ) : (
+                                            <ThemePreview
+                                                themeName={option.id}
+                                                accent={appearance.accent}
+                                                base=''
+                                            />
+                                        )}
+                                        <span className='AppearancePanel__themeName'>
+                                            {label(`Sidebar.${option.id}`, option.displayName)}
+                                            {active && <IconCheck size={14}/>}
+                                        </span>
+                                    </button>
+                                )
+                            })}
+                        </div>
+                    </section>
+
+                    <section className='AppearancePanel__section'>
+                        <h3>
+                            <FormattedMessage
+                                id='Appearance.accent'
+                                defaultMessage='Accent color'
+                            />
+                        </h3>
+                        <p>
+                            <FormattedMessage
+                                id='Appearance.accent-help'
+                                defaultMessage='Buttons, links, highlights and the active item in the sidebar.'
+                            />
+                        </p>
+                        <div className='AppearancePanel__swatches'>
+                            {accentOptions.map((option) => {
+                                const active = appearance.accent === option.id
+                                const name = label(`Sidebar.accent-${option.id}`, option.displayName)
+                                return (
+                                    <button
+                                        key={option.id}
+                                        type='button'
+                                        title={name}
+                                        aria-label={name}
+                                        aria-pressed={active}
+                                        className={`AppearancePanel__swatch${option.id === themeAccentName ? ' AppearancePanel__swatch--theme' : ''}${active ? ' active' : ''}`}
+                                        style={option.light ? {background: rgb(option.light)} : undefined}
+                                        onClick={() => update({accent: option.id})}
+                                    >
+                                        {active && <IconCheck size={14}/>}
+                                    </button>
+                                )
+                            })}
+                            <CustomColor
+                                value={customAccent}
+                                active={Boolean(customAccent)}
+                                label={label('Appearance.custom-accent', 'Custom accent color')}
+                                onChange={(hex) => update({accent: hex})}
+                            />
+                        </div>
+                    </section>
+
+                    <section className='AppearancePanel__section'>
+                        <h3>
+                            <FormattedMessage
+                                id='Appearance.base'
+                                defaultMessage='Base color'
+                            />
+                        </h3>
+                        <p>
+                            <FormattedMessage
+                                id='Appearance.base-help'
+                                defaultMessage='The background of the app. Text and surfaces adjust to stay readable.'
+                            />
+                        </p>
+                        <div className='AppearancePanel__swatches'>
+                            <button
+                                type='button'
+                                title={label('Appearance.base-theme', 'Theme default')}
+                                aria-label={label('Appearance.base-theme', 'Theme default')}
+                                aria-pressed={!appearance.base}
+                                className={`AppearancePanel__swatch AppearancePanel__swatch--base AppearancePanel__swatch--themeBase${appearance.base ? '' : ' active'}`}
+                                onClick={() => update({base: ''})}
+                            >
+                                {!appearance.base && <IconCheck size={14}/>}
+                            </button>
+                            {baseOptions.map((option) => {
+                                const active = appearance.base === option.hex
+                                const name = label(`Appearance.base-${option.id}`, option.displayName)
+                                return (
+                                    <button
+                                        key={option.id}
+                                        type='button'
+                                        title={name}
+                                        aria-label={name}
+                                        aria-pressed={active}
+                                        className={`AppearancePanel__swatch AppearancePanel__swatch--base${active ? ' active' : ''}`}
+                                        style={{background: option.hex, color: color(option.hex).isDark() ? '#fff' : '#18181b'}}
+                                        onClick={() => update({base: option.hex})}
+                                    >
+                                        {active && <IconCheck size={14}/>}
+                                    </button>
+                                )
+                            })}
+                            <CustomColor
+                                value={customBase}
+                                active={Boolean(customBase)}
+                                label={label('Appearance.custom-base', 'Custom base color')}
+                                onChange={(hex) => update({base: hex})}
+                            />
+                        </div>
+                    </section>
+                </div>
+                <footer className='AppearancePanel__footer'>
                     <button
                         type='button'
                         className='AppearancePanel__reset'
-                        onClick={() => update(defaultAppearance)}
+                        onClick={resetAll}
                     >
                         <IconRefresh size={16}/>
                         <FormattedMessage
@@ -177,7 +389,7 @@ const AppearancePanel = (props: Props): JSX.Element => {
                     <span className='AppearancePanel__spacer'/>
                     <button
                         type='button'
-                        className='AppModal__save'
+                        className='AppearancePanel__done'
                         onClick={props.onClose}
                     >
                         <IconCheck size={17}/>
@@ -186,151 +398,9 @@ const AppearancePanel = (props: Props): JSX.Element => {
                             defaultMessage='Done'
                         />
                     </button>
-                </>
-            )}
-        >
-            <section className='AppearancePanel__section'>
-                <h3>
-                    <FormattedMessage
-                        id='Appearance.theme'
-                        defaultMessage='Theme'
-                    />
-                </h3>
-                <div className='AppearancePanel__themes'>
-                    {themeOptions.map((option) => {
-                        const active = appearance.themeName === option.id
-                        return (
-                            <button
-                                key={option.id}
-                                type='button'
-                                className={`AppearancePanel__theme${active ? ' active' : ''}`}
-                                aria-pressed={active}
-                                onClick={() => update({themeName: option.id})}
-                            >
-                                {option.id === systemThemeName ? (
-                                    <span className='AppearancePanel__previewSplit'>
-                                        <ThemePreview
-                                            themeName={defaultThemeName}
-                                            accent={appearance.accent}
-                                            base=''
-                                        />
-                                        <span className='AppearancePanel__previewSplitDark'>
-                                            <ThemePreview
-                                                themeName={midnightThemeName}
-                                                accent={appearance.accent}
-                                                base=''
-                                            />
-                                        </span>
-                                    </span>
-                                ) : (
-                                    <ThemePreview
-                                        themeName={option.id}
-                                        accent={appearance.accent}
-                                        base=''
-                                    />
-                                )}
-                                <span className='AppearancePanel__themeName'>
-                                    {label(`Sidebar.${option.id}`, option.displayName)}
-                                    {active && <IconCheck size={14}/>}
-                                </span>
-                            </button>
-                        )
-                    })}
-                </div>
-            </section>
-
-            <section className='AppearancePanel__section'>
-                <h3>
-                    <FormattedMessage
-                        id='Appearance.accent'
-                        defaultMessage='Accent color'
-                    />
-                </h3>
-                <p>
-                    <FormattedMessage
-                        id='Appearance.accent-help'
-                        defaultMessage='Buttons, links, highlights and the active item in the sidebar.'
-                    />
-                </p>
-                <div className='AppearancePanel__swatches'>
-                    {accentOptions.map((option) => {
-                        const active = appearance.accent === option.id
-                        const name = label(`Sidebar.accent-${option.id}`, option.displayName)
-                        return (
-                            <button
-                                key={option.id}
-                                type='button'
-                                title={name}
-                                aria-label={name}
-                                aria-pressed={active}
-                                className={`AppearancePanel__swatch${option.id === themeAccentName ? ' AppearancePanel__swatch--theme' : ''}${active ? ' active' : ''}`}
-                                style={option.light ? {background: rgb(option.light)} : undefined}
-                                onClick={() => update({accent: option.id})}
-                            >
-                                {active && <IconCheck size={14}/>}
-                            </button>
-                        )
-                    })}
-                    <CustomColor
-                        value={customAccent}
-                        active={Boolean(customAccent)}
-                        label={label('Appearance.custom-accent', 'Custom accent color')}
-                        onChange={(hex) => update({accent: hex})}
-                    />
-                </div>
-            </section>
-
-            <section className='AppearancePanel__section'>
-                <h3>
-                    <FormattedMessage
-                        id='Appearance.base'
-                        defaultMessage='Base color'
-                    />
-                </h3>
-                <p>
-                    <FormattedMessage
-                        id='Appearance.base-help'
-                        defaultMessage='The background of the app. Text and surfaces adjust to stay readable.'
-                    />
-                </p>
-                <div className='AppearancePanel__swatches'>
-                    <button
-                        type='button'
-                        title={label('Appearance.base-theme', 'Theme default')}
-                        aria-label={label('Appearance.base-theme', 'Theme default')}
-                        aria-pressed={!appearance.base}
-                        className={`AppearancePanel__swatch AppearancePanel__swatch--base AppearancePanel__swatch--themeBase${appearance.base ? '' : ' active'}`}
-                        onClick={() => update({base: ''})}
-                    >
-                        {!appearance.base && <IconCheck size={14}/>}
-                    </button>
-                    {baseOptions.map((option) => {
-                        const active = appearance.base === option.hex
-                        const name = label(`Appearance.base-${option.id}`, option.displayName)
-                        return (
-                            <button
-                                key={option.id}
-                                type='button'
-                                title={name}
-                                aria-label={name}
-                                aria-pressed={active}
-                                className={`AppearancePanel__swatch AppearancePanel__swatch--base${active ? ' active' : ''}`}
-                                style={{background: option.hex, color: color(option.hex).isDark() ? '#fff' : '#18181b'}}
-                                onClick={() => update({base: option.hex})}
-                            >
-                                {active && <IconCheck size={14}/>}
-                            </button>
-                        )
-                    })}
-                    <CustomColor
-                        value={customBase}
-                        active={Boolean(customBase)}
-                        label={label('Appearance.custom-base', 'Custom base color')}
-                        onChange={(hex) => update({base: hex})}
-                    />
-                </div>
-            </section>
-        </AppModal>
+                </footer>
+            </aside>
+        </RootPortal>
     )
 }
 

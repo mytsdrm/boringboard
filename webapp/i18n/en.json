@@ -957,5 +957,22 @@
     "Appearance.base-slate": "Slate",
     "Appearance.base-charcoal": "Charcoal",
     "Appearance.base-ink": "Ink",
-    "Appearance.base-forest": "Forest"
+    "Appearance.base-forest": "Forest",
+    "Appearance.close": "Close",
+    "Appearance.layout": "Layout",
+    "Appearance.layout-help": "Pick a desktop style for the app frame.",
+    "Appearance.layout-default": "BoringBoard",
+    "Appearance.layout-macos": "macOS",
+    "Appearance.layout-windows": "Windows",
+    "Appearance.layout-ubuntu": "Ubuntu",
+    "Appearance.layout-chromeos": "ChromeOS",
+    "Appearance.layout-compact": "Compact",
+    "Appearance.layout-mirrored": "Mirrored",
+    "Appearance.layout-default-help": "Sidebar on the left, the standard look.",
+    "Appearance.layout-macos-help": "Menu bar on top, floating translucent sidebar.",
+    "Appearance.layout-windows-help": "Title bar with window controls, Mica-style panels.",
+    "Appearance.layout-ubuntu-help": "Dark top bar with clock, GNOME-style headers.",
+    "Appearance.layout-chromeos-help": "Shelf at the bottom, rounded cards.",
+    "Appearance.layout-compact-help": "Narrower sidebar and denser spacing.",
+    "Appearance.layout-mirrored-help": "Sidebar on the right."
 }

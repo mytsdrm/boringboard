@@ -11,6 +11,7 @@ export enum UserSettingKey {
     ThemeName = 'themeName',
     AccentColor = 'accentColor',
     BaseColor = 'baseColor',
+    LayoutName = 'layoutName',
     LastTeamId = 'lastTeamId',
     LastBoardId = 'lastBoardId',
     LastViewId = 'lastViewId',
@@ -78,6 +79,14 @@ export class UserSettings {
 
     static set baseColor(newValue: string | null) {
         UserSettings.set(UserSettingKey.BaseColor, newValue)
+    }
+
+    static get layoutName(): string | null {
+        return UserSettings.get(UserSettingKey.LayoutName)
+    }
+
+    static set layoutName(newValue: string | null) {
+        UserSettings.set(UserSettingKey.LayoutName, newValue)
     }
 
     static get lastTeamId(): string | null {

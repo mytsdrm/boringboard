@@ -185,5 +185,22 @@
   "Appearance.base-slate": "Batu tulis",
   "Appearance.base-charcoal": "Arang",
   "Appearance.base-ink": "Tinta",
-  "Appearance.base-forest": "Hutan"
+  "Appearance.base-forest": "Hutan",
+  "Appearance.close": "Tutup",
+  "Appearance.layout": "Tata letak",
+  "Appearance.layout-help": "Pilih gaya desktop untuk bingkai aplikasi.",
+  "Appearance.layout-default": "BoringBoard",
+  "Appearance.layout-macos": "macOS",
+  "Appearance.layout-windows": "Windows",
+  "Appearance.layout-ubuntu": "Ubuntu",
+  "Appearance.layout-chromeos": "ChromeOS",
+  "Appearance.layout-compact": "Ringkas",
+  "Appearance.layout-mirrored": "Cermin",
+  "Appearance.layout-default-help": "Sidebar di kiri, tampilan standar.",
+  "Appearance.layout-macos-help": "Bilah menu di atas, sidebar transparan mengambang.",
+  "Appearance.layout-windows-help": "Bilah judul dengan tombol jendela, panel gaya Mica.",
+  "Appearance.layout-ubuntu-help": "Bilah atas gelap dengan jam, gaya GNOME.",
+  "Appearance.layout-chromeos-help": "Rak di bawah, kartu membulat.",
+  "Appearance.layout-compact-help": "Sidebar lebih sempit dan jarak lebih rapat.",
+  "Appearance.layout-mirrored-help": "Sidebar di kanan."
 }

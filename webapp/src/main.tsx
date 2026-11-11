@@ -7,6 +7,7 @@ import {store as emojiMartStore} from 'emoji-mart'
 
 import App from './app'
 import {initThemes} from './theme'
+import {loadLayout} from './layout'
 import {importNativeAppSettings} from './nativeApp'
 import {UserSettings} from './userSettings'
 
@@ -41,6 +42,7 @@ emojiMartStore.setHandlers({getter: UserSettings.getEmojiMartSetting, setter: Us
 importNativeAppSettings()
 
 initThemes()
+loadLayout()
 
 const MainApp = () => {
     const me = useAppSelector<IUser|null>(getMe)

@@ -22,6 +22,8 @@ import FocalboardRouter from './router'
 import octoClient from './octoClient'
 import {applySystemBranding, getStoredCustomBranding} from './branding'
 import {getActiveAccentName, getActiveBaseColor, getActiveThemeName, setAppearance} from './theme'
+import {getActiveLayoutName, setLayout} from './layout'
+import LayoutChrome from './components/appearance/layoutChrome'
 
 import {IUser} from './user'
 
@@ -75,6 +77,13 @@ const App = (props: Props): JSX.Element => {
         }
     }, [savedThemeName, savedAccentName, savedBaseColor])
 
+    const savedLayoutName = myConfig.layoutName?.value
+    useEffect(() => {
+        if (savedLayoutName && savedLayoutName !== getActiveLayoutName()) {
+            setLayout(savedLayoutName)
+        }
+    }, [savedLayoutName])
+
     return (
         <IntlProvider
             locale={language.split(/[_]/)[0]}
@@ -85,7 +94,9 @@ const App = (props: Props): JSX.Element => {
                 <div id='frame'>
                     <div id='main'>
                         <NewVersionBanner/>
+                        {me && <LayoutChrome position='top'/>}
                         <FocalboardRouter history={props.history}/>
+                        {me && <LayoutChrome position='bottom'/>}
                         <AnnouncementModal me={me}/>
                     </div>
                 </div>
