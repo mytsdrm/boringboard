@@ -1,52 +1,152 @@
 # BoringBoard
 
-Focalboard is one of those rare tools that just makes sense. Simple, clean, and easy to understand. Big love to the original team ❤️
+**A place for all those "I'll do it later" tasks.**
 
-BoringBoard started as a small fork of Focalboard, then slowly evolved into my personal playground for project management. It follows my own workflow, habits, and occasionally my questionable decisions.
+BoringBoard is a self-hosted project and task board. It started as a small fork of [Focalboard](https://github.com/mattermost/focalboard) (big love to the original team ❤️) and grew into a personal playground for project management: it follows my own workflow, my habits, and occasionally my questionable decisions.
 
-The goal isn't to reinvent project management. The goal is to make it a little less painful, a little more practical, and maybe even a little less boring.
+The goal isn't to reinvent project management. The goal is to make it a little less painful, a little more practical, and maybe even a little less boring. That's why it's called **BoringBoard**.
 
-That's why it's called **BoringBoard**.
+<a href="https://www.producthunt.com/products/boringboard-another-fork-of-focalboard?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-boringboard-another-fork-of-focalboard" target="_blank" rel="noopener noreferrer"><img alt="BoringBoard on Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1161605&amp;theme=light&amp;t=1780545806963"></a>
 
-<a href="https://www.producthunt.com/products/boringboard-another-fork-of-focalboard?embed=true&amp;utm_source=badge-featured&amp;utm_medium=badge&amp;utm_campaign=badge-boringboard-another-fork-of-focalboard" target="_blank" rel="noopener noreferrer"><img alt="BoringBoard, another fork of focalboard - BoringBoard, A place for all those &quot;I'll do it later&quot; tasks | Product Hunt" width="250" height="54" src="https://api.producthunt.com/widgets/embed-image/v1/featured.svg?post_id=1161605&amp;theme=light&amp;t=1780545806963"></a>
+![The Demo Project board in the default Nova theme](README.assets/screenshots/board.png)
 
-**Default Theme**
-![BoringBoard](README.assets/boringboard.png)
+**Try it online:** <https://project.creativework.asia> &nbsp;·&nbsp; log in with **`demo` / `demo123456`**
 
-**Admin**
-![BoringBoard](README.assets/admin.png)
+## Contents
 
-![BoringBoard](README.assets/adminsetting.png)
+- [Quick start](#quick-start)
+- [Features](#features)
+  - [Boards, views and tasks](#boards-views-and-tasks)
+  - [Dashboard](#dashboard)
+  - [Appearance: themes, colors and layouts](#appearance-themes-colors-and-layouts)
+  - [Task board info and sharing](#task-board-info-and-sharing)
+  - [AI board creation](#ai-board-creation)
+  - [Administration](#administration)
+- [Configuration](#configuration)
+- [Deploy on a server](#deploy-on-a-server)
+- [Development](#development)
+- [Credits and license](#credits-and-license)
 
-**Dark Theme**
-![BoringBoard](README.assets/boringboard-dark.png)
+## Quick start
 
-## Added Features
+```bash
+git clone https://github.com/mytsdrm/boringboard.git
+cd boringboard
+./run.sh
+```
 
-- **AI integration**: Create task board previews from a command before creating the real board.
-- **Available AI providers**: OpenAI, Gemini, Ollama, Cline, and Anything LLM.
-- **AI model selection**: Select provider models from System Settings, including Ollama model loading from the configured endpoint.
-- **AI access control**: Enable AI for all users or selected users with a searchable multi-user picker designed for large user lists.
-- **Centralized admin user**: Default `SuperAdmin` user/group support with configurable admin username and password from `.env`.
-- **User management**: Admin-only Users menu with search, group filtering, pagination, add/edit/delete modals, and Tabler-styled tables.
-- **Activity logs**: Admin activity log view across registered users with search, filters, date range, pagination, and scrollable table area.
-- **System Settings**: Manage app name, logo upload, timezone, AI provider settings, AI user access, and task board permissions.
-- **Realtime settings updates**: Branding, logo, favicon, and selected task board permission settings update across active clients.
-- **Task board permissions**: Configure whether invited users can share task boards or edit task board properties.
-- **Task board settings**: Board owners can save repository, dev/prod branch, and environment URL details at the task-board level, with a read-only Task Board Info panel in the board header.
-- **Profile menu improvements**: Top-right user menu with Invite users, Profile, Change password, and Logout modals.
-- **Branding updates**: Custom app name/logo/favicon support with custom branding loaded first on login and sidebar header to avoid default-logo flashes on slow connections.
-- **Table utilities**: Reusable table module with search alignment, Options menu, and print/export actions.
+Open the URL the script prints (normally <http://localhost:8000>) and sign in with one of the accounts that are created on first start:
 
-## How to start
+| Account | Username | Password | What it is for |
+| --- | --- | --- | --- |
+| Demo | `demo` | `demo123456` | A regular user with a ready-made **Demo Project** board |
+| Admin | `admin` | `admin123` | The `SuperAdmin` account with the Users, System Settings and module menus |
 
-Create an `.env` file in the BoringBoard directory if it does not already exist:
+Change the admin password right away, or set your own credentials in `.env` before the first start (see [Configuration](#configuration)).
+
+`run.sh` installs missing system packages on Linux, starts the Go server, builds and watches the web app, and reloads the browser when frontend files change. Ports are picked automatically: it tries `EXTERNAL_PORT` (default `8000`) for the web UI and `APP_PORT` (default `8001`) for the API. A leftover BoringBoard process on those ports is stopped; if another program owns a port, the script moves to the next free one and prints the URL to open.
+
+## Features
+
+### Boards, views and tasks
+
+Everything you expect from a Focalboard-style board, with a cleaner look:
+
+- **Board, Table, Gallery and Calendar views** of the same tasks, plus saved filtered views (the demo has an "Urgent and high" view).
+- **Rich task cards** with every property type (select, multi-select, person, multi-person, date ranges, numbers, checkbox, URL, email, phone, text), checklists, rich text, dividers, attachments and comments.
+- **Card templates** and **board templates** (Meeting Agenda, Sales Pipeline CRM, Sprint Planner, Roadmap and more).
+- **Personal and joined boards** grouped in the sidebar, with counters.
+
+The **demo account** gets a sample *Demo Project* board on first start that shows all of this off. It is created once and then left alone (it is only replaced when a new version of the sample data ships).
+
+| Card detail | Calendar view |
+| --- | --- |
+| ![Task card with properties](README.assets/screenshots/card.png) | ![Calendar view](README.assets/screenshots/calendar.png) |
+| **Gallery view** | **Table view (Windows layout)** |
+| ![Gallery view](README.assets/screenshots/gallery.png) | ![Table view in the Windows layout](README.assets/screenshots/layout-windows.png) |
+
+### Dashboard
+
+A personal summary page: how many boards you own and have joined, total tasks, how many people you've invited, recently updated boards (with who changed them last) and a recent activity feed.
+
+![Dashboard](README.assets/screenshots/dashboard.png)
+
+### Appearance: themes, colors and layouts
+
+Click the **palette icon** next to the logo (or **Settings → Appearance**) to open the Appearance drawer. It slides in from the right without dimming the page, so every change shows up live. Your choice is saved to your profile and follows you to other devices.
+
+![Appearance drawer](README.assets/screenshots/appearance.png)
+
+- **Themes:** Nova (default: white workspace, deep ink sidebar, violet accent), Modern, Sand, Classic (the old blue look), Dark, Midnight, and System (Nova or Midnight, following your OS).
+- **Custom colors:** pick an accent from the presets or any hex color, and optionally a base (background) color. Text and sidebar colors are derived from it and contrast is adjusted automatically.
+- **Layouts** that dress the app like a desktop OS: BoringBoard, macOS (menu bar and floating dock), Windows (title bar and taskbar), Ubuntu (top bar and dock), ChromeOS (shelf and rounded cards), Compact (denser spacing) and Mirrored (sidebar on the right). Layouts apply on screens 768 px and wider.
+- **Sidebar position:** left, bottom or right. macOS, Windows and Ubuntu put it at the bottom like a taskbar or dock, and the board tree opens from a **Task Boards** button.
+
+| Midnight theme | Custom base and accent (Paper + Teal) |
+| --- | --- |
+| ![Midnight theme](README.assets/screenshots/theme-midnight.png) | ![Custom colors](README.assets/screenshots/custom-colors.png) |
+| **macOS layout** | **Ubuntu layout** |
+| ![macOS layout](README.assets/screenshots/layout-macos.png) | ![Ubuntu layout](README.assets/screenshots/layout-ubuntu.png) |
+
+### Task board info and sharing
+
+- **Task Board Info:** board owners can store the repository URL, dev and prod branches, and environment URLs on a board. They show in a read-only panel in the board header (see the screenshots above).
+- **Share dialog** with invite history: who was invited and when, newest first.
+- **Permissions:** admins decide whether invited users may re-share a board or edit its properties. Invited users can't rename the board or change its description.
+
+### AI board creation
+
+Describe a project in a sentence and BoringBoard drafts a task board for you. You see a preview first and only create the real board when you're happy with it.
+
+- Providers: **OpenAI, Gemini, Ollama, Cline and AnythingLLM**.
+- Pick the provider and model in System Settings (Ollama models are loaded from the configured endpoint).
+- Turn AI on for everyone or for selected users only, with a searchable picker built for long user lists.
+
+### Administration
+
+Log in as the `SuperAdmin` to get these menus in the sidebar.
+
+- **Users:** search, filter by group, paginate, and add, edit or delete users (including a contact number).
+- **System Settings**
+  - *General:* app name, logo (also used as favicon), time zone, AI settings and task board permissions. Branding changes reach every open browser in real time, and custom branding loads first so the default logo never flashes.
+  - *Modules:* switch the optional **Reminder**, **Announcement** and **Plugin** menus on or off.
+  - *Notification:* choose which events notify people (task board activity, task activity) and through which channels (web, email, WhatsApp, Telegram).
+- **Activity Logs:** board activity from every registered user, with search, user filter, date range, pagination, and print or export.
+- **Templates:** browse and manage the board templates.
+- **Reminder** (module): scheduled reminders with an audience, a channel, and a repeat rule.
+- **Announcement** (module): messages shown to logged-in users, with priority, audience and schedule.
+- **Plugin** (module): import a plugin ZIP, run it, and add its page or widget to the sidebar. See [`examples/plugins`](examples/plugins) for the manifest format and a starter plugin.
+- **Profile menu** (every user): invite users, edit your profile, change your password, log out.
+
+| Users | System Settings |
+| --- | --- |
+| ![Users](README.assets/screenshots/admin-users.png) | ![System Settings](README.assets/screenshots/admin-system-settings.png) |
+| **Modules** | **Activity Logs** |
+| ![Modules](README.assets/screenshots/admin-modules.png) | ![Activity Logs](README.assets/screenshots/admin-activity-logs.png) |
+| **Reminders** | **Announcements** |
+| ![Reminders](README.assets/screenshots/admin-reminders.png) | ![Announcements](README.assets/screenshots/admin-announcements.png) |
+| **Templates** | **Plugin** |
+| ![Templates](README.assets/screenshots/admin-templates.png) | ![Plugin](README.assets/screenshots/admin-plugin.png) |
+
+## Configuration
+
+Settings are read from an `.env` file in the project folder. Create it if it doesn't exist; every line is optional.
 
 ```bash
 EXCLUDE_ENTERPRISE="1"
-EXTERNAL_PORT="8000"
+EXTERNAL_PORT="8000"          # first port to try for the web UI
+APP_PORT="8001"               # first port to try for the API (run.sh only)
+
+# Admin account (the password is only used when the account is first created)
 BORINGBOARD_DEFAULTADMINUSERNAME="admin"
 BORINGBOARD_DEFAULTADMINPASSWORD="admin123"
+
+# Demo account with the sample board
+BORINGBOARD_DEMOUSERENABLED="true"
+BORINGBOARD_DEMOUSERUSERNAME="demo"
+BORINGBOARD_DEMOUSERPASSWORD="demo123456"
+
+# AI provider endpoints
 BORINGBOARD_AI_OPENAI_ENDPOINT="https://api.openai.com/v1"
 BORINGBOARD_AI_GEMINI_ENDPOINT="https://generativelanguage.googleapis.com/v1beta"
 BORINGBOARD_AI_OLLAMA_ENDPOINT="http://localhost:11434"
@@ -55,43 +155,45 @@ BORINGBOARD_AI_ANYTHINGLLM_ENDPOINT="http://localhost:3001/api/v1"
 BORINGBOARD_AI_TIMEOUT="180"
 ```
 
-### Demo account
+Set `BORINGBOARD_DEMOUSERENABLED="false"` to skip the demo account on a production server.
 
-On first start, BoringBoard creates a demo account (`demo` / `demo123456`) with a sample "Demo Project" board that shows every feature: all property types, Board/Table/Gallery/Calendar views, a filtered view, a card template, and tasks with checklists, rich text, dividers and comments. The board is created once and left alone after that (it is replaced only when a new version of the sample data ships). To change or turn it off, set these in `.env`:
-
-```bash
-BORINGBOARD_DEMOUSERENABLED="false"
-BORINGBOARD_DEMOUSERUSERNAME="demo"
-BORINGBOARD_DEMOUSERPASSWORD="demo123456"
-```
-
-Run the local development script:
-
-```bash
-./run.sh
-```
-
-Then open:
-
-```text
-http://localhost:8000
-```
-
-The script starts the server, builds/watches the web app, and enables browser auto-reload for frontend changes.
-
-Ports are picked automatically. The script tries `EXTERNAL_PORT` (default `8000`) for the web UI and `APP_PORT` (default `8001`) for the API server. A leftover BoringBoard process on those ports is stopped, but if another app is using a port, the script moves to the next free one and prints the URL to open.
-
-## Deploy on a server (Docker)
+## Deploy on a server
 
 ```bash
 ./deploy               # standalone server (own Docker network, no CapRover)
 ./deploy caprover      # server with CapRover (joins captain-overlay-network)
 ./deploy --check       # only run the checks, change nothing
+./deploy --no-build    # restart with the image that is already built
 ```
 
-`./deploy` builds and starts BoringBoard with Postgres. It picks a free host port (starting at `EXTERNAL_PORT`, default `8000`), saves it in `.env`, and moves to the next free port if another program takes it later. Without a mode it keeps the mode of the install that is already running.
+`./deploy` builds and starts BoringBoard with Postgres in Docker. It picks a free host port (starting at `EXTERNAL_PORT`, default `8000`), saves it in `.env`, and moves to the next free port if another program takes it later. Without a mode it keeps the mode of the install that is already running. It waits until BoringBoard answers and shows the logs if it doesn't.
 
----
+## Development
+
+| Path | What's there |
+| --- | --- |
+| `server/` | Go API server (Focalboard based), including the demo seed in `server/app/demo.go` |
+| `webapp/` | React + TypeScript web app |
+| `examples/plugins/` | Plugin manifest docs and an example plugin |
+| `docker/` | Dockerfiles and compose files used by `./deploy` |
+| `promo/` | Scripts that record the promo video from the demo board |
+
+Useful commands:
+
+```bash
+./run.sh                         # dev server with auto-reload
+make server                      # build the server into bin/
+cd webapp && npm run pack        # production build of the web app
+make server-test                 # Go tests
+cd webapp && npm run check       # ESLint and stylelint
+cd webapp && npm run test        # Jest unit tests
+```
+
+**Branches:** there are only two. All work goes to `dev`, and `dev` is merged into `main` for releases. Please don't open other branches.
+
+## Credits and license
+
+BoringBoard is built on [Focalboard](https://github.com/mattermost/focalboard) by Mattermost and keeps its license. See [LICENSE.txt](LICENSE.txt) and [NOTICE.txt](NOTICE.txt).
 
 <details>
 <summary><strong>Original Focalboard README</strong></summary>
