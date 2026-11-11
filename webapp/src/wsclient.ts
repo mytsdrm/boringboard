@@ -28,6 +28,7 @@ export type WSMessage = {
     error?: string
     teamId?: string
     member?: BoardMember
+    clientconfig?: ClientConfig
     timestamp?: number
     categoryOrder?: string[]
     settings?: AdminSystemSettings
@@ -38,6 +39,8 @@ export const ACTION_UPDATE_MEMBER = 'UPDATE_MEMBER'
 export const ACTION_DELETE_MEMBER = 'DELETE_MEMBER'
 export const ACTION_UPDATE_BLOCK = 'UPDATE_BLOCK'
 export const ACTION_AUTH = 'AUTH'
+export const ACTION_PING = 'PING'
+export const ACTION_PONG = 'PONG'
 export const ACTION_SUBSCRIBE_BLOCKS = 'SUBSCRIBE_BLOCKS'
 export const ACTION_SUBSCRIBE_TEAM = 'SUBSCRIBE_TEAM'
 export const ACTION_UNSUBSCRIBE_TEAM = 'UNSUBSCRIBE_TEAM'
@@ -49,6 +52,7 @@ export const ACTION_UPDATE_BOARD_CATEGORY = 'UPDATE_BOARD_CATEGORY'
 export const ACTION_UPDATE_SUBSCRIPTION = 'UPDATE_SUBSCRIPTION'
 export const ACTION_UPDATE_CARD_LIMIT_TIMESTAMP = 'UPDATE_CARD_LIMIT_TIMESTAMP'
 export const ACTION_REORDER_CATEGORIES = 'REORDER_CATEGORIES'
+export const ACTION_REORDER_CATEGORY_BOARDS = 'REORDER_CATEGORY_BOARDS'
 
 type WSSubscriptionMsg = {
     action?: string
@@ -131,9 +135,23 @@ class WSClient {
     onFollowBlock: FollowChangeHandler = () => {}
     onUnfollowBlock: FollowChangeHandler = () => {}
     private notificationDelay = 100
-    private reopenDelay = 3000
+
+    // reconnects back off from minReopenDelay up to maxReopenDelay
+    private minReopenDelay = 1000
+    private maxReopenDelay = 30000
     private reopenRetryCount = 0
+    private reopenTimeout?: ReturnType<typeof setTimeout>
     private reconnecting = false
+
+    // the client sends an application level ping every
+    // heartbeatInterval; if nothing at all arrives for heartbeatTimeout
+    // the connection is treated as dead (sleeping laptop, network
+    // switch, proxy dropping the connection) and reopened
+    private heartbeatInterval = 20000
+    private heartbeatTimeout = 45000
+    private heartbeatId?: ReturnType<typeof setInterval>
+    private lastMessageAt = 0
+    private browserListenersAdded = false
     private updatedData: UpdatedData = {Blocks: [], Categories: [], BoardCategories: [], Boards: [], BoardMembers: [], CategoryOrder: []}
     private updateTimeout?: NodeJS.Timeout
     private errorPollId?: NodeJS.Timeout
@@ -417,6 +435,9 @@ class WSClient {
             return
         }
 
+        this.clearReopenTimeout()
+        this.addBrowserListeners()
+
         const url = new URL(this.getBaseURL())
         const protocol = (url.protocol === 'https:') ? 'wss:' : 'ws:'
         const wsServerUrl = `${protocol}//${url.host}${url.pathname.replace(/\/$/, '')}/ws`
@@ -425,9 +446,15 @@ class WSClient {
         this.ws = ws
 
         ws.onopen = () => {
+            if (ws !== this.ws) {
+                return
+            }
+
             Utils.log('WSClient webSocket opened.')
             this.state = 'open'
             this.reopenRetryCount = 0
+            this.lastMessageAt = Date.now()
+            this.startHeartbeat()
 
             // if has a token defined when connecting, authenticate
             if (this.token) {
@@ -462,18 +489,9 @@ class WSClient {
             if (ws === this.ws) {
                 // Unexpected close, re-open
                 Utils.logError('Unexpected WSClient close')
-                for (const handler of this.onStateChange) {
-                    handler(this, 'close')
-                }
-                this.state = 'close'
-
-                setTimeout(() => {
-                    this.reopenRetryCount++
-                    Utils.log(`Reopening websocket connection, count: ${this.reopenRetryCount}`)
-
-                    this.reconnecting = true
-                    this.open()
-                }, this.reopenDelay)
+                this.stopHeartbeat()
+                this.setClosedState()
+                this.scheduleReopen()
             }
         }
 
@@ -483,14 +501,18 @@ class WSClient {
                 return
             }
 
+            this.lastMessageAt = Date.now()
+
             try {
                 const message = JSON.parse(e.data) as WSMessage
                 if (message.error) {
-                    Utils.logError(`Listener websocket error: ${message.error}`)
+                    Utils.logError(`Listener websocket error (${message.action}): ${message.error}`)
                     return
                 }
 
                 switch (message.action) {
+                case ACTION_PONG:
+                    break
                 case ACTION_UPDATE_BOARD:
                     this.updateHandler(message)
                     break
@@ -518,6 +540,20 @@ class WSClient {
                 case ACTION_UPDATE_SYSTEM_SETTINGS:
                     this.updateSystemSettingsHandler(message)
                     break
+                case ACTION_UPDATE_CLIENT_CONFIG:
+                    if (message.clientconfig) {
+                        this.updateClientConfigHandler(message.clientconfig)
+                    }
+                    break
+                case ACTION_UPDATE_CARD_LIMIT_TIMESTAMP:
+                    if (typeof message.timestamp === 'number') {
+                        this.updateCardLimitTimestampHandler({action: message.action, timestamp: message.timestamp})
+                    }
+                    break
+                case ACTION_REORDER_CATEGORY_BOARDS:
+                    // the sidebar reloads its boards order on its own;
+                    // nothing to do here
+                    break
                 default:
                     Utils.logError(`Unexpected action: ${message.action}`)
                 }
@@ -525,6 +561,125 @@ class WSClient {
                 Utils.log('message is not an object')
             }
         }
+    }
+
+    private setClosedState(): void {
+        if (this.state === 'close') {
+            return
+        }
+        for (const handler of this.onStateChange) {
+            handler(this, 'close')
+        }
+        this.state = 'close'
+    }
+
+    private clearReopenTimeout(): void {
+        if (this.reopenTimeout) {
+            clearTimeout(this.reopenTimeout)
+            this.reopenTimeout = undefined
+        }
+    }
+
+    // scheduleReopen retries with an exponential backoff and some
+    // jitter, so a restarting server isn't hit by every client at once
+    private scheduleReopen(): void {
+        this.clearReopenTimeout()
+        const backoff = Math.min(this.maxReopenDelay, this.minReopenDelay * (2 ** Math.min(this.reopenRetryCount, 10)))
+        const delay = Math.round(backoff * (0.75 + (Math.random() * 0.5)))
+        this.reopenTimeout = setTimeout(() => {
+            this.reopenTimeout = undefined
+            this.reopenRetryCount++
+            Utils.log(`Reopening websocket connection, count: ${this.reopenRetryCount}`)
+
+            this.reconnecting = true
+            this.open()
+        }, delay)
+    }
+
+    // reconnect drops the current connection, if any, and opens a new
+    // one right away. Components get their onReconnect callbacks so
+    // they can reload what they may have missed.
+    reconnect(reason: string): void {
+        if (this.client !== null) {
+            return
+        }
+
+        Utils.log(`WSClient reconnecting: ${reason}`)
+        const ws = this.ws
+        this.ws = null
+        this.stopHeartbeat()
+        this.clearReopenTimeout()
+        if (ws) {
+            this.setClosedState()
+            try {
+                ws.close()
+            } catch {
+                Utils.log('WSClient unable to close the websocket')
+            }
+        }
+
+        this.reconnecting = true
+        this.open()
+    }
+
+    private startHeartbeat(): void {
+        this.stopHeartbeat()
+        this.heartbeatId = setInterval(() => this.checkHeartbeat(), this.heartbeatInterval)
+    }
+
+    private stopHeartbeat(): void {
+        if (this.heartbeatId) {
+            clearInterval(this.heartbeatId)
+            this.heartbeatId = undefined
+        }
+    }
+
+    private checkHeartbeat(): void {
+        if (!this.ws || this.ws.readyState !== WebSocket.OPEN) {
+            return
+        }
+
+        if (Date.now() - this.lastMessageAt > this.heartbeatTimeout) {
+            this.reconnect('no answer from the server')
+            return
+        }
+
+        this.sendCommand({action: ACTION_PING})
+    }
+
+    // reconnect at once when the browser comes back online or the tab
+    // becomes visible again, instead of waiting for the backoff or the
+    // heartbeat to notice
+    private addBrowserListeners(): void {
+        if (this.browserListenersAdded || typeof window === 'undefined') {
+            return
+        }
+        this.browserListenersAdded = true
+
+        const wakeUp = () => {
+            if (this.client !== null) {
+                return
+            }
+
+            // waiting to reopen: do it now
+            if (this.reopenTimeout) {
+                this.reopenRetryCount = 0
+                this.reconnect('browser back online')
+                return
+            }
+
+            // open but quiet for a while: check it right away
+            if (this.ws?.readyState === WebSocket.OPEN && Date.now() - this.lastMessageAt > this.heartbeatInterval) {
+                this.sendCommand({action: ACTION_PING})
+            }
+        }
+
+        window.addEventListener('online', wakeUp)
+        document.addEventListener('visibilitychange', () => {
+            if (document.visibilityState === 'visible') {
+                wakeUp()
+            }
+        })
     }
 
     hasConn(): boolean {
@@ -626,11 +781,34 @@ class WSClient {
             return
         }
 
+        const previousToken = this.token
+        this.token = token
+
+        // the server keeps the first user a connection authenticated
+        // as, so a different user (or a renewed session) needs a fresh
+        // connection; the new one authenticates on open
+        if (previousToken && previousToken !== token && this.ws && this.client === null) {
+            this.reconnect('session changed')
+            return
+        }
+
         if (this.hasConn()) {
             this.sendAuthenticationCommand(token)
         }
+    }
 
-        this.token = token
+    // clearAuthentication forgets the session token after a logout and
+    // replaces the connection, so the server stops sending the previous
+    // user's updates to this browser
+    clearAuthentication(): void {
+        if (!this.token) {
+            return
+        }
+
+        this.token = ''
+        if (this.ws && this.client === null) {
+            this.reconnect('logged out')
+        }
     }
 
     subscribeToTeam(teamId: string): void {
@@ -805,7 +983,10 @@ class WSClient {
     }
 
     close(): void {
-        if (!this.hasConn()) {
+        this.clearReopenTimeout()
+        this.stopHeartbeat()
+
+        if (!this.ws && this.client === null) {
             return
         }
 

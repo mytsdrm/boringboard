@@ -1,6 +1,6 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React, {useEffect} from 'react'
+import React, {useEffect, useRef} from 'react'
 
 import wsClient, {MMWebSocketClient} from '../wsclient'
 import {Utils} from '../utils'
@@ -19,6 +19,7 @@ type Props = {
 // it's not yet running and subscribes to the current team
 const WithWebSockets = (props: Props): React.ReactElement => {
     const queryString = new URLSearchParams(window.location.search)
+    const lastUserId = useRef(props.userId)
 
     useEffect(() => {
         // if the websocket client was already connected, do nothing
@@ -41,7 +42,14 @@ const WithWebSockets = (props: Props): React.ReactElement => {
     }, [props.webSocketClient])
 
     useEffect(() => {
+        const previousUserId = lastUserId.current
+        lastUserId.current = props.userId
+
         if (!props.userId) {
+            // logged out: stop receiving the previous user's updates
+            if (previousUserId) {
+                wsClient.clearAuthentication()
+            }
             return
         }
 

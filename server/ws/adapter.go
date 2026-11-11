@@ -7,6 +7,8 @@ import (
 
 const (
 	websocketActionAuth                     = "AUTH"
+	websocketActionPing                     = "PING"
+	websocketActionPong                     = "PONG"
 	websocketActionSubscribeTeam            = "SUBSCRIBE_TEAM"
 	websocketActionUnsubscribeTeam          = "UNSUBSCRIBE_TEAM"
 	websocketActionSubscribeBlocks          = "SUBSCRIBE_BLOCKS"

@@ -131,9 +131,9 @@ func TestTeamSubscription(t *testing.T) {
 		require.Len(t, server.listeners, 3)
 		require.Len(t, server.listenersByTeam[teamID], 3)
 
-		listener := server.getListenerForUser(teamID, userID1)
-		require.NotNil(t, listener)
-		require.Equal(t, listener.userID, userID1)
+		listeners := server.getListenersForUser(teamID, userID1)
+		require.Len(t, listeners, 1)
+		require.Equal(t, listeners[0].userID, userID1)
 
 		server.removeListener(session)
 		server.removeListener(userSession1)
@@ -141,7 +141,7 @@ func TestTeamSubscription(t *testing.T) {
 
 		require.Empty(t, server.listeners)
 		require.Empty(t, server.listenersByTeam[teamID])
-		require.Empty(t, server.getListenerForUser(teamID, userID1))
+		require.Empty(t, server.getListenersForUser(teamID, userID1))
 	})
 }
 

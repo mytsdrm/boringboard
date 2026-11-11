@@ -2,6 +2,7 @@ package ws
 
 import (
 	"encoding/json"
+	"errors"
 	"net/http"
 	"strings"
 	"sync"
@@ -16,20 +17,74 @@ import (
 	"github.com/mattermost/mattermost/server/public/shared/mlog"
 )
 
-const websocketPingInterval = 25 * time.Second
-const websocketPingTimeout = 10 * time.Second
+const (
+	// websocketPingInterval is how often the server pings each client.
+	// It has to stay below the idle timeout of any proxy in front of
+	// the server (nginx and CapRover default to 60s).
+	websocketPingInterval = 25 * time.Second
+	// websocketPongWait is how long the server waits for any frame
+	// (a pong or a message) before it treats the client as gone.
+	websocketPongWait = 60 * time.Second
+	// websocketWriteWait bounds every write, so a stalled client can't
+	// hold up anything else.
+	websocketWriteWait = 10 * time.Second
+	// websocketSendBufferSize is how many messages can wait for a slow
+	// client before its connection is dropped (it reconnects and
+	// reloads its data).
+	websocketSendBufferSize = 256
+	// websocketMaxMessageSize caps the size of a client command.
+	websocketMaxMessageSize = 512 * 1024
+)
 
+var (
+	errWebsocketSessionClosed  = errors.New("websocket session closed")
+	errWebsocketSendBufferFull = errors.New("websocket send buffer full")
+)
+
+// WriteJSON queues a message for the session's writer goroutine. It
+// never blocks on the network, so one slow or dead client can't stall
+// the broadcasts to everyone else.
 func (wss *websocketSession) WriteJSON(v interface{}) error {
+	data, err := json.Marshal(v)
+	if err != nil {
+		return err
+	}
+
 	wss.mu.Lock()
 	defer wss.mu.Unlock()
-	err := wss.conn.WriteJSON(v)
-	return err
+	if wss.closed || wss.send == nil {
+		return errWebsocketSessionClosed
+	}
+
+	select {
+	case wss.send <- data:
+		return nil
+	default:
+		return errWebsocketSendBufferFull
+	}
 }
 
-func (wss *websocketSession) WritePing() error {
+// closeSend stops the writer goroutine, which sends a close frame and
+// closes the connection. It is safe to call more than once.
+func (wss *websocketSession) closeSend() {
 	wss.mu.Lock()
 	defer wss.mu.Unlock()
-	return wss.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(websocketPingTimeout))
+	if wss.closed {
+		return
+	}
+	wss.closed = true
+	if wss.send != nil {
+		close(wss.send)
+	}
+}
+
+// drop closes a session whose messages can't be delivered. The read
+// loop then fails and removes the session from the server.
+func (wss *websocketSession) drop() {
+	wss.closeSend()
+	if wss.conn != nil {
+		wss.conn.Close()
+	}
 }
 
 func (wss *websocketSession) isSubscribedToTeam(teamID string) bool {
@@ -67,15 +122,17 @@ type Server struct {
 }
 
 type websocketSession struct {
-	conn   *websocket.Conn
+	conn *websocket.Conn
+	// userID is written by the session's read loop and read by
+	// broadcasts, so it is guarded by Server.mu.
 	userID string
+	// mu guards send and closed.
 	mu     sync.Mutex
+	send   chan []byte
+	closed bool
+	// teams and blocks are guarded by Server.mu.
 	teams  []string
 	blocks []string
-}
-
-func (wss *websocketSession) isAuthenticated() bool {
-	return wss.userID != ""
 }
 
 func isExpectedWebsocketDisconnect(err error) bool {
@@ -122,7 +179,7 @@ func (ws *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	wsSession := &websocketSession{
 		conn:   client,
 		userID: "",
-		mu:     sync.Mutex{},
+		send:   make(chan []byte, websocketSendBufferSize),
 		teams:  []string{},
 		blocks: []string{},
 	}
@@ -132,38 +189,27 @@ func (ws *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 	}
 
 	ws.addListener(wsSession)
-	done := make(chan struct{})
 
 	// Make sure we close the connection when the function returns
 	defer func() {
-		close(done)
 		ws.logger.Debug("DISCONNECT WebSocket", mlog.Stringer("client", wsSession.conn.RemoteAddr()))
 
-		// Remove session from listeners
+		// Remove session from listeners and stop its writer
 		ws.removeListener(wsSession)
+		wsSession.closeSend()
 		wsSession.conn.Close()
 	}()
 
-	go func() {
-		ticker := time.NewTicker(websocketPingInterval)
-		defer ticker.Stop()
+	// A client that stops answering pings (sleeping laptop, dropped
+	// network, dead proxy connection) is closed after
+	// websocketPongWait instead of lingering as a listener forever.
+	client.SetReadLimit(websocketMaxMessageSize)
+	_ = client.SetReadDeadline(time.Now().Add(websocketPongWait))
+	client.SetPongHandler(func(string) error {
+		return client.SetReadDeadline(time.Now().Add(websocketPongWait))
+	})
 
-		for {
-			select {
-			case <-ticker.C:
-				if err := wsSession.WritePing(); err != nil {
-					ws.logger.Debug("PING WebSocket failed",
-						mlog.Stringer("client", wsSession.conn.RemoteAddr()),
-						mlog.Err(err),
-					)
-					wsSession.conn.Close()
-					return
-				}
-			case <-done:
-				return
-			}
-		}
-	}()
+	go ws.writePump(wsSession)
 
 	// Simple message handling loop
 	for {
@@ -180,9 +226,9 @@ func (ws *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 					mlog.Err(err),
 				)
 			}
-			ws.removeListener(wsSession)
 			break
 		}
+		_ = client.SetReadDeadline(time.Now().Add(websocketPongWait))
 
 		var command WebsocketCommand
 
@@ -191,6 +237,15 @@ func (ws *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			// handle this error
 			ws.logger.Error(`ERROR webSocket parsing command`, mlog.String("json", string(p)))
 
+			continue
+		}
+
+		// application level heartbeat: browsers can't see protocol
+		// pings, so the webapp sends its own to find dead connections
+		if command.Action == websocketActionPing {
+			if err := wsSession.WriteJSON(map[string]string{"action": websocketActionPong}); err != nil {
+				wsSession.drop()
+			}
 			continue
 		}
 
@@ -246,7 +301,7 @@ func (ws *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 
 		// if the command is not authenticated at this point, it will
 		// not be processed
-		if !wsSession.isAuthenticated() {
+		if ws.getSessionUserID(wsSession) == "" {
 			ws.logger.Error(`Rejected unauthenticated message`,
 				mlog.Stringer("client", wsSession.conn.RemoteAddr()),
 				mlog.String("action", command.Action),
@@ -265,7 +320,7 @@ func (ws *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			// if single user mode, check that the userID is valid and
 			// assume that the user has permission if so
 			if len(ws.singleUserToken) != 0 {
-				if wsSession.userID != model.SingleUser {
+				if ws.getSessionUserID(wsSession) != model.SingleUser {
 					continue
 				}
 
@@ -273,8 +328,9 @@ func (ws *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 				// has permissions to the team
 			} else {
 				ws.logger.Debug("Not single user mode")
-				if !ws.auth.DoesUserHaveTeamAccess(wsSession.userID, command.TeamID) {
-					ws.logger.Error("WS user doesn't have team access", mlog.String("teamID", command.TeamID), mlog.String("userID", wsSession.userID))
+				userID := ws.getSessionUserID(wsSession)
+				if !ws.auth.DoesUserHaveTeamAccess(userID, command.TeamID) {
+					ws.logger.Error("WS user doesn't have team access", mlog.String("teamID", command.TeamID), mlog.String("userID", userID))
 					continue
 				}
 			}
@@ -289,6 +345,44 @@ func (ws *Server) handleWebSocket(w http.ResponseWriter, r *http.Request) {
 			ws.unsubscribeListenerFromTeam(wsSession, command.TeamID)
 		default:
 			ws.logger.Error(`ERROR webSocket command, invalid action`, mlog.String("action", command.Action))
+		}
+	}
+}
+
+// writePump is the only goroutine that writes to a session's
+// connection. It sends queued messages and the keepalive pings, and
+// closes the connection when the session's send channel is closed or a
+// write fails.
+func (ws *Server) writePump(wss *websocketSession) {
+	ticker := time.NewTicker(websocketPingInterval)
+	defer func() {
+		ticker.Stop()
+		wss.conn.Close()
+	}()
+
+	for {
+		select {
+		case message, ok := <-wss.send:
+			_ = wss.conn.SetWriteDeadline(time.Now().Add(websocketWriteWait))
+			if !ok {
+				_ = wss.conn.WriteMessage(websocket.CloseMessage, websocket.FormatCloseMessage(websocket.CloseNormalClosure, ""))
+				return
+			}
+			if err := wss.conn.WriteMessage(websocket.TextMessage, message); err != nil {
+				ws.logger.Debug("WRITE WebSocket failed",
+					mlog.Stringer("client", wss.conn.RemoteAddr()),
+					mlog.Err(err),
+				)
+				return
+			}
+		case <-ticker.C:
+			if err := wss.conn.WriteControl(websocket.PingMessage, nil, time.Now().Add(websocketWriteWait)); err != nil {
+				ws.logger.Debug("PING WebSocket failed",
+					mlog.Stringer("client", wss.conn.RemoteAddr()),
+					mlog.Err(err),
+				)
+				return
+			}
 		}
 	}
 }
@@ -365,12 +459,12 @@ func (ws *Server) removeListener(listener *websocketSession) {
 // subscribeListenerToTeam safely modifies the listener and the
 // server to subscribe the listener to a given team updates.
 func (ws *Server) subscribeListenerToTeam(listener *websocketSession, teamID string) {
+	ws.mu.Lock()
+	defer ws.mu.Unlock()
+
 	if listener.isSubscribedToTeam(teamID) {
 		return
 	}
-
-	ws.mu.Lock()
-	defer ws.mu.Unlock()
 
 	ws.listenersByTeam[teamID] = append(ws.listenersByTeam[teamID], listener)
 	listener.teams = append(listener.teams, teamID)
@@ -380,12 +474,12 @@ func (ws *Server) subscribeListenerToTeam(listener *websocketSession, teamID str
 // the server data structures to remove the link between the listener
 // and a given team ID.
 func (ws *Server) unsubscribeListenerFromTeam(listener *websocketSession, teamID string) {
+	ws.mu.Lock()
+	defer ws.mu.Unlock()
+
 	if !listener.isSubscribedToTeam(teamID) {
 		return
 	}
-
-	ws.mu.Lock()
-	defer ws.mu.Unlock()
 
 	ws.removeListenerFromTeam(listener, teamID)
 }
@@ -483,14 +577,14 @@ func (ws *Server) getUserIDForToken(token string) string {
 
 func (ws *Server) authenticateListener(wsSession *websocketSession, token string) {
 	ws.logger.Debug("authenticateListener",
-		mlog.String("token", token),
-		mlog.String("wsSession.userID", wsSession.userID),
+		mlog.String("wsSession.userID", ws.getSessionUserID(wsSession)),
 	)
-	if wsSession.isAuthenticated() {
-		// Do not allow multiple auth calls (for security)
+	if ws.getSessionUserID(wsSession) != "" {
+		// Do not allow multiple auth calls (for security). A client
+		// that changes user opens a new connection.
 		ws.logger.Debug(
 			"authenticateListener: Ignoring already authenticated session",
-			mlog.String("userID", wsSession.userID),
+			mlog.String("userID", ws.getSessionUserID(wsSession)),
 			mlog.Stringer("client", wsSession.conn.RemoteAddr()),
 		)
 		return
@@ -499,30 +593,62 @@ func (ws *Server) authenticateListener(wsSession *websocketSession, token string
 	// Authenticate session
 	userID := ws.getUserIDForToken(token)
 	if userID == "" {
-		wsSession.conn.Close()
+		// Keep the connection open but unauthenticated. Closing it
+		// made the client reconnect and retry the same stale token
+		// in a loop; it re-authenticates once it has a valid token.
+		ws.logger.Debug("authenticateListener: invalid token", mlog.Stringer("client", wsSession.conn.RemoteAddr()))
+		if err := wsSession.WriteJSON(map[string]string{"action": websocketActionAuth, "error": "invalid or expired session token"}); err != nil {
+			wsSession.drop()
+		}
 		return
 	}
 
 	// Authenticated
+	ws.mu.Lock()
 	wsSession.userID = userID
+	ws.mu.Unlock()
 	ws.logger.Debug("authenticateListener: Authenticated", mlog.String("userID", userID), mlog.Stringer("client", wsSession.conn.RemoteAddr()))
+}
+
+func (ws *Server) getSessionUserID(wsSession *websocketSession) string {
+	ws.mu.RLock()
+	defer ws.mu.RUnlock()
+	return wsSession.userID
 }
 
 // getListenersForBlock returns the listeners subscribed to a
 // block changes.
 func (ws *Server) getListenersForBlock(blockID string) []*websocketSession {
-	return ws.listenersByBlock[blockID]
+	ws.mu.RLock()
+	defer ws.mu.RUnlock()
+	return append([]*websocketSession{}, ws.listenersByBlock[blockID]...)
 }
 
-// getListenersForUser returns the listener for a user subscribed to a
-// team changes.
-func (ws *Server) getListenerForUser(teamID, userID string) *websocketSession {
+// getListenersForUser returns every listener of a user subscribed to
+// a team changes: one per open tab or device.
+func (ws *Server) getListenersForUser(teamID, userID string) []*websocketSession {
+	ws.mu.RLock()
+	defer ws.mu.RUnlock()
+
+	listeners := []*websocketSession{}
 	for _, listener := range ws.listenersByTeam[teamID] {
 		if listener.userID == userID {
-			return listener
+			listeners = append(listeners, listener)
 		}
 	}
-	return nil
+	return listeners
+}
+
+// getAllListeners returns a snapshot of every connected listener.
+func (ws *Server) getAllListeners() []*websocketSession {
+	ws.mu.RLock()
+	defer ws.mu.RUnlock()
+
+	listeners := make([]*websocketSession, 0, len(ws.listeners))
+	for listener := range ws.listeners {
+		listeners = append(listeners, listener)
+	}
+	return listeners
 }
 
 // getListenersForTeamAndBoard returns the listeners subscribed to a
@@ -534,6 +660,7 @@ func (ws *Server) getListenersForTeamAndBoard(teamID, boardID string, ensureUser
 			mlog.String("method", "getListenersForTeamAndBoard"),
 			mlog.String("teamID", teamID),
 			mlog.String("boardID", boardID),
+			mlog.Err(err),
 		)
 		return nil
 	}
@@ -546,20 +673,38 @@ func (ws *Server) getListenersForTeamAndBoard(teamID, boardID string, ensureUser
 		memberMap[id] = true
 	}
 
-	memberIDs := []string{}
-	for id := range memberMap {
-		memberIDs = append(memberIDs, id)
-	}
+	ws.mu.RLock()
+	defer ws.mu.RUnlock()
 
 	listeners := []*websocketSession{}
-	for _, memberID := range memberIDs {
-		for _, listener := range ws.listenersByTeam[teamID] {
-			if listener.userID == memberID {
-				listeners = append(listeners, listener)
-			}
+	for _, listener := range ws.listenersByTeam[teamID] {
+		if memberMap[listener.userID] {
+			listeners = append(listeners, listener)
 		}
 	}
 	return listeners
+}
+
+// sendToListeners delivers a message once to each listener, even if a
+// listener was matched more than once (by team and by block).
+func (ws *Server) sendToListeners(listeners []*websocketSession, message interface{}, logMsg string, fields ...mlog.Field) {
+	seen := make(map[*websocketSession]bool, len(listeners))
+	for _, listener := range listeners {
+		if listener == nil || seen[listener] {
+			continue
+		}
+		seen[listener] = true
+
+		ws.logger.Debug(logMsg, append(fields, mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()))...)
+		if err := listener.WriteJSON(message); err != nil {
+			ws.logger.Warn("websocket broadcast failed, dropping client",
+				mlog.String("message", logMsg),
+				mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
+				mlog.Err(err),
+			)
+			listener.drop()
+		}
+	}
 }
 
 // BroadcastBlockDelete broadcasts delete messages to clients.
@@ -592,6 +737,9 @@ func (ws *Server) BroadcastBlockChange(teamID string, block *model.Block) {
 	)
 
 	for _, blockID := range blockIDsToNotify {
+		if blockID == "" {
+			continue
+		}
 		listeners = append(listeners, ws.getListenersForBlock(blockID)...)
 		ws.logger.Trace("listener(s) for blockID",
 			mlog.Int("listener_count", len(listeners)),
@@ -599,19 +747,10 @@ func (ws *Server) BroadcastBlockChange(teamID string, block *model.Block) {
 		)
 	}
 
-	for _, listener := range listeners {
-		ws.logger.Debug("Broadcast block change",
-			mlog.String("teamID", teamID),
-			mlog.String("blockID", block.ID),
-			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
-		)
-
-		err := listener.WriteJSON(message)
-		if err != nil {
-			ws.logger.Error("broadcast error", mlog.Err(err))
-			listener.conn.Close()
-		}
-	}
+	ws.sendToListeners(listeners, message, "Broadcast block change",
+		mlog.String("teamID", teamID),
+		mlog.String("blockID", block.ID),
+	)
 }
 
 func (ws *Server) BroadcastCategoryChange(category model.Category) {
@@ -621,20 +760,11 @@ func (ws *Server) BroadcastCategoryChange(category model.Category) {
 		Category: &category,
 	}
 
-	listener := ws.getListenerForUser(category.TeamID, category.UserID)
-	if listener != nil {
-		ws.logger.Debug("Broadcast category change",
-			mlog.String("userID", category.UserID),
-			mlog.String("teamID", category.TeamID),
-			mlog.String("categoryID", category.ID),
-			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
-		)
-
-		if err := listener.WriteJSON(message); err != nil {
-			ws.logger.Error("broadcast category change error", mlog.Err(err))
-			listener.conn.Close()
-		}
-	}
+	ws.sendToListeners(ws.getListenersForUser(category.TeamID, category.UserID), message, "Broadcast category change",
+		mlog.String("userID", category.UserID),
+		mlog.String("teamID", category.TeamID),
+		mlog.String("categoryID", category.ID),
+	)
 }
 
 func (ws *Server) BroadcastCategoryReorder(teamID, userID string, categoryOrder []string) {
@@ -644,19 +774,10 @@ func (ws *Server) BroadcastCategoryReorder(teamID, userID string, categoryOrder 
 		TeamID:        teamID,
 	}
 
-	listener := ws.getListenerForUser(teamID, userID)
-	if listener != nil {
-		ws.logger.Debug("Broadcast category order change",
-			mlog.String("userID", userID),
-			mlog.String("teamID", teamID),
-			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
-		)
-
-		if err := listener.WriteJSON(message); err != nil {
-			ws.logger.Error("broadcast category order change error", mlog.Err(err))
-			listener.conn.Close()
-		}
-	}
+	ws.sendToListeners(ws.getListenersForUser(teamID, userID), message, "Broadcast category order change",
+		mlog.String("userID", userID),
+		mlog.String("teamID", teamID),
+	)
 }
 
 func (ws *Server) BroadcastCategoryBoardsReorder(teamID, userID, categoryID string, boardOrder []string) {
@@ -667,20 +788,11 @@ func (ws *Server) BroadcastCategoryBoardsReorder(teamID, userID, categoryID stri
 		TeamID:     teamID,
 	}
 
-	listener := ws.getListenerForUser(teamID, userID)
-	if listener != nil {
-		ws.logger.Debug("Broadcast board category order change",
-			mlog.String("userID", userID),
-			mlog.String("teamID", teamID),
-			mlog.String("categoryID", categoryID),
-			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
-		)
-
-		if err := listener.WriteJSON(message); err != nil {
-			ws.logger.Error("broadcast category boards order change error", mlog.Err(err))
-			listener.conn.Close()
-		}
-	}
+	ws.sendToListeners(ws.getListenersForUser(teamID, userID), message, "Broadcast board category order change",
+		mlog.String("userID", userID),
+		mlog.String("teamID", teamID),
+		mlog.String("categoryID", categoryID),
+	)
 }
 
 func (ws *Server) BroadcastCategoryBoardChange(teamID, userID string, boardCategories []*model.BoardCategoryWebsocketData) {
@@ -690,20 +802,11 @@ func (ws *Server) BroadcastCategoryBoardChange(teamID, userID string, boardCateg
 		BoardCategories: boardCategories,
 	}
 
-	listener := ws.getListenerForUser(teamID, userID)
-	if listener != nil {
-		ws.logger.Debug("Broadcast category board change",
-			mlog.String("userID", userID),
-			mlog.String("teamID", teamID),
-			mlog.Int("numEntries", len(boardCategories)),
-			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
-		)
-
-		if err := listener.WriteJSON(message); err != nil {
-			ws.logger.Error("broadcast category change error", mlog.Err(err))
-			listener.conn.Close()
-		}
-	}
+	ws.sendToListeners(ws.getListenersForUser(teamID, userID), message, "Broadcast category board change",
+		mlog.String("userID", userID),
+		mlog.String("teamID", teamID),
+		mlog.Int("numEntries", len(boardCategories)),
+	)
 }
 
 // BroadcastConfigChange broadcasts update messages to clients.
@@ -713,21 +816,11 @@ func (ws *Server) BroadcastConfigChange(clientConfig model.ClientConfig) {
 		ClientConfig: clientConfig,
 	}
 
-	listeners := ws.listeners
+	listeners := ws.getAllListeners()
 	ws.logger.Debug("broadcasting config change to listener(s)",
 		mlog.Int("listener_count", len(listeners)),
 	)
-
-	for listener := range listeners {
-		ws.logger.Debug("Broadcast Config change",
-			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
-		)
-		err := listener.WriteJSON(message)
-		if err != nil {
-			ws.logger.Error("broadcast error", mlog.Err(err))
-			listener.conn.Close()
-		}
-	}
+	ws.sendToListeners(listeners, message, "Broadcast Config change")
 }
 
 func (ws *Server) BroadcastSystemSettingsChange(settings model.AdminSystemSettings) {
@@ -736,21 +829,11 @@ func (ws *Server) BroadcastSystemSettingsChange(settings model.AdminSystemSettin
 		Settings: settings,
 	}
 
-	listeners := ws.listeners
+	listeners := ws.getAllListeners()
 	ws.logger.Debug("broadcasting system settings change to listener(s)",
 		mlog.Int("listener_count", len(listeners)),
 	)
-
-	for listener := range listeners {
-		ws.logger.Debug("Broadcast system settings change",
-			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
-		)
-		err := listener.WriteJSON(message)
-		if err != nil {
-			ws.logger.Error("broadcast system settings error", mlog.Err(err))
-			listener.conn.Close()
-		}
-	}
+	ws.sendToListeners(listeners, message, "Broadcast system settings change")
 }
 
 func (ws *Server) BroadcastBoardChange(teamID string, board *model.Board) {
@@ -766,20 +849,10 @@ func (ws *Server) BroadcastBoardChange(teamID string, board *model.Board) {
 		mlog.String("teamID", teamID),
 		mlog.String("boardID", board.ID),
 	)
-
-	for _, listener := range listeners {
-		ws.logger.Debug("Broadcast board change",
-			mlog.String("teamID", teamID),
-			mlog.String("boardID", board.ID),
-			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
-		)
-
-		err := listener.WriteJSON(message)
-		if err != nil {
-			ws.logger.Error("broadcast error", mlog.Err(err))
-			listener.conn.Close()
-		}
-	}
+	ws.sendToListeners(listeners, message, "Broadcast board change",
+		mlog.String("teamID", teamID),
+		mlog.String("boardID", board.ID),
+	)
 }
 
 func (ws *Server) BroadcastBoardDelete(teamID, boardID string) {
@@ -806,20 +879,10 @@ func (ws *Server) BroadcastMemberChange(teamID, boardID string, member *model.Bo
 		mlog.String("teamID", teamID),
 		mlog.String("boardID", boardID),
 	)
-
-	for _, listener := range listeners {
-		ws.logger.Debug("Broadcast member change",
-			mlog.String("teamID", teamID),
-			mlog.String("boardID", boardID),
-			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
-		)
-
-		err := listener.WriteJSON(message)
-		if err != nil {
-			ws.logger.Error("broadcast error", mlog.Err(err))
-			listener.conn.Close()
-		}
-	}
+	ws.sendToListeners(listeners, message, "Broadcast member change",
+		mlog.String("teamID", teamID),
+		mlog.String("boardID", boardID),
+	)
 }
 
 func (ws *Server) BroadcastMemberDelete(teamID, boardID, userID string) {
@@ -838,20 +901,10 @@ func (ws *Server) BroadcastMemberDelete(teamID, boardID, userID string) {
 		mlog.String("teamID", teamID),
 		mlog.String("boardID", boardID),
 	)
-
-	for _, listener := range listeners {
-		ws.logger.Debug("Broadcast member removal",
-			mlog.String("teamID", teamID),
-			mlog.String("boardID", boardID),
-			mlog.Stringer("remoteAddr", listener.conn.RemoteAddr()),
-		)
-
-		err := listener.WriteJSON(message)
-		if err != nil {
-			ws.logger.Error("broadcast error", mlog.Err(err))
-			listener.conn.Close()
-		}
-	}
+	ws.sendToListeners(listeners, message, "Broadcast member removal",
+		mlog.String("teamID", teamID),
+		mlog.String("boardID", boardID),
+	)
 }
 
 func (ws *Server) BroadcastSubscriptionChange(workspaceID string, subscription *model.Subscription) {
