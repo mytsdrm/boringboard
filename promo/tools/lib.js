@@ -41,12 +41,21 @@ class Director {
 
   async start(statePath) {
     this.browser = await chromium.launch({ executablePath: process.env.CHROME_PATH || '/usr/bin/google-chrome', args: ['--hide-scrollbars', '--force-device-scale-factor=1'] });
+    await this.useState(statePath);
+  }
+
+  // Fresh browser context with the given saved login (switches between the demo and admin users).
+  async useState(statePath) {
+    if (this.ctx && this.statePath === statePath) return;
+    if (this.ctx) await this.ctx.close();
+    this.statePath = statePath;
     const opts = { viewport: { width: W, height: H }, deviceScaleFactor: 1, locale: 'en-US', timezoneId: 'Asia/Jakarta' };
     if (statePath && fs.existsSync(statePath)) opts.storageState = statePath;
     this.ctx = await this.browser.newContext(opts);
     await this.ctx.addInitScript(INIT);
     this.page = await this.ctx.newPage();
-    this.page.on('dialog', (d) => d.accept().catch(() => {}));
+    // Dismiss confirm dialogs so a stray click can never confirm a delete.
+    this.page.on('dialog', (d) => d.dismiss().catch(() => {}));
     this.cdp = await this.ctx.newCDPSession(this.page);
   }
 

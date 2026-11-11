@@ -12,7 +12,10 @@ SCENES = [
     ('s01', ['s01a', 's01b'], 'fade'), ('s02', ['s02'], 'fade'), ('s03', ['s03'], 'smoothleft'),
     ('s04', ['s04'], 'fade'), ('s05', ['s05a', 's05b'], 'smoothleft'), ('s06', ['s06'], 'smoothleft'),
     ('s07', ['s07'], 'smoothleft'), ('s08', ['s08'], 'smoothleft'), ('s09', ['s09'], 'fade'),
-    ('s10', ['s10'], 'fade'), ('s11', ['s11'], 'smoothleft'), ('s12', ['s12'], 'fade'),
+    ('s10', ['s10'], 'fade'), ('s11', ['s11a', 's11b'], 'smoothleft'), ('s12', ['s11c'], 'fade'),
+    # admin
+    ('s13', ['a01', 'a02'], 'fadeblack'), ('s14', ['a03'], 'smoothleft'), ('s15', ['a04'], 'smoothleft'),
+    ('s16', ['a05a', 'a05b'], 'smoothleft'), ('s17', ['a06a', 'a06b'], 'smoothleft'), ('s18', ['outro'], 'fade'),
 ]
 
 def run(cmd):

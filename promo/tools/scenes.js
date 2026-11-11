@@ -1,8 +1,8 @@
 // Records every scene part into rec/<part>/ (jpeg frames + ffconcat list).
 // Usage: node scenes.js [part names...]   (default: all, in order)
-// Run s01b first: it logs in as the demo user and saves the session for the other parts.
+// Run s01b first (logs in as the demo user) and a01 first for the admin parts a02-a06; each saves its session.
 // Nothing on the demo board is changed for good: the card moved in s03 is moved back after recording,
-// dialogs are closed without saving, and the theme is set back to the default.
+// dialogs are closed without saving, and the Appearance changes are reset to the defaults.
 const { Director, sleep, B } = require('./lib');
 const cards = require('./cards');
 const STATE = __dirname + '/state_demo.json';
@@ -28,7 +28,7 @@ const column = (d, n) => d.page.locator('.octo-board-column').nth(n);
 
 // ---------- s01: intro card + login ----------
 parts.s01a = async (d) => {
-  await d.page.setContent('<html><body style="background:#0b2357"></body></html>');
+  await d.page.setContent('<html><body style="background:#1e1b4b"></body></html>');
   d.mouse = { x: 2100, y: 1200 };
   await d.rec('s01a');
   await d.page.setContent(cards.intro, { waitUntil: 'load' });
@@ -37,6 +37,8 @@ parts.s01a = async (d) => {
 };
 parts.s01b = async (d) => {
   await d.ctx.clearCookies();
+  await d.goto('/login', 300);
+  await d.page.evaluate(() => localStorage.clear());
   await d.goto('/login', 1500);
   d.mouse = { x: 1500, y: 900 }; await d.placeCursor();
   await d.rec('s01b');
@@ -253,48 +255,197 @@ parts.s10 = async (d) => {
   await d.stop();
 };
 
-// ---------- s11: find boards + dark theme ----------
-parts.s11 = async (d) => {
+// ---------- s11: find boards + Appearance drawer ----------
+// Appearance choices are saved to the user's profile, so every s11 part ends by putting the demo user back on defaults.
+const APPEARANCE_FIELDS = ['themeName', 'accentColor', 'baseColor', 'layoutName', 'sidebarPosition'];
+async function resetAppearance(d) {
+  const panelReset = d.page.locator('.AppearancePanel__reset');
+  if (await panelReset.count()) { await panelReset.click().catch(() => {}); await sleep(500); }
+  const result = await d.page.evaluate(async (fields) => {
+    const headers = { 'X-Requested-With': 'XMLHttpRequest', 'Content-Type': 'application/json', Authorization: 'Bearer ' + localStorage.getItem('focalboardSessionId') };
+    const me = await (await fetch('/api/v2/users/me', { headers })).json();
+    const r = await fetch('/api/v2/users/' + encodeURIComponent(me.id) + '/config', { method: 'PUT', headers, body: JSON.stringify({ deletedFields: fields }) });
+    return r.status;
+  }, APPEARANCE_FIELDS);
+  console.log(result === 200 ? 'appearance reset to defaults' : 'WARNING: reset the demo user appearance by hand (status ' + result + ')');
+}
+const appearanceButton = (d) => d.page.locator('button[title=Appearance]').first();
+const panelButton = (d, kind, name) => d.page.locator('.AppearancePanel__' + kind, { hasText: name }).first();
+
+parts.s11a = async (d) => {
   await openView(d, 'Board');
   d.mouse = { x: 800, y: 600 }; await d.placeCursor();
-  await d.rec('s11');
+  await d.rec('s11a');
   await sleep(300);
   await d.click(d.page.getByText('Find task boards'), 800);
   await sleep(600);
   await d.type('demo', 140);
-  await sleep(1200);
+  await sleep(1300);
   await d.page.keyboard.press('Escape');
-  await sleep(500);
-  await d.click(d.page.locator('.octo-sidebar .menu-entry, .octo-sidebar').getByText('Settings', { exact: true }).last(), 900);
-  await sleep(500);
-  await d.moveTo(d.page.locator('.menu-name', { hasText: /^Set theme$/ }), 700);
-  await sleep(600);
-  // Go sideways into the submenu first: a diagonal path crosses "Set language" and opens that submenu instead.
-  const dark = await d.box(d.page.locator('.menu-name', { hasText: /^Dark theme$/ }));
-  await d.move(dark.x + 30, d.mouse.y, 400);
-  await d.click(d.page.locator('.menu-name', { hasText: /^Dark theme$/ }), 500);
-  await sleep(500);
-  await d.move(1200, 600, 900);
-  await d.holdUntil(9.5);
-  await d.stop();
-  // The theme lives in this browser's localStorage only; switch back anyway so later parts record in the default theme.
-  await setTheme(d, 'Default theme').catch(() => console.log('theme not switched back'));
-};
-async function setTheme(d, name) {
-  await d.page.keyboard.press('Escape');
-  await d.page.locator('.octo-sidebar').getByText('Settings', { exact: true }).last().click();
   await sleep(400);
-  await d.page.locator('.menu-name', { hasText: /^Set theme$/ }).hover();
-  await sleep(500);
-  await d.page.locator('.menu-name', { hasText: new RegExp('^' + name + '$') }).click();
-  await sleep(600);
-}
+  await d.holdUntil(5);
+  await d.stop();
+};
+parts.s11b = async (d) => {
+  await openView(d, 'Board');
+  d.mouse = { x: 900, y: 500 }; await d.placeCursor();
+  await d.rec('s11b');
+  try {
+    await sleep(300);
+    await d.click(appearanceButton(d), 900);
+    await sleep(900);
+    for (const theme of ['Sand', 'Midnight', 'Classic', 'Nova']) { await d.click(panelButton(d, 'theme', theme), 650); await sleep(900); }
+    await d.page.locator('.AppearancePanel__swatch[title=Teal], .AppearancePanel__swatch[aria-label=Teal]').first().scrollIntoViewIfNeeded().catch(() => {});
+    await sleep(400);
+    for (const accent of ['Teal', 'Rose', 'Orange']) {
+      await d.click(d.page.locator(`.AppearancePanel__swatch:not(.AppearancePanel__swatch--base)[title="${accent}"], .AppearancePanel__swatch:not(.AppearancePanel__swatch--base)[aria-label="${accent}"]`).first(), 550);
+      await sleep(700);
+    }
+    await d.holdUntil(11);
+    await d.stop();
+  } finally { await resetAppearance(d); }
+};
+parts.s11c = async (d) => {
+  await openView(d, 'Board');
+  d.mouse = { x: 900, y: 500 }; await d.placeCursor();
+  await d.rec('s11c');
+  try {
+    await sleep(300);
+    await d.click(appearanceButton(d), 900);
+    await sleep(900);
+    for (const layout of ['macOS', 'Windows', 'Ubuntu']) { await d.click(panelButton(d, 'layout', layout), 700); await sleep(1500); }
+    await d.click(panelButton(d, 'done', 'Done'), 800);
+    await sleep(1800);
+    await d.holdUntil(11);
+    await d.stop();
+  } finally { await resetAppearance(d); }
+};
 
-// ---------- s12: outro ----------
-parts.s12 = async (d) => {
-  await d.page.setContent('<html><body style="background:#0b2357"></body></html>');
+// ---------- s12-s16: admin ----------
+// The admin user is read from the project's .env (BORINGBOARD_DEFAULTADMIN*), the same account ./deploy creates.
+function readEnvFile() {
+  const env = {};
+  try {
+    for (const line of require('fs').readFileSync(__dirname + '/../../.env', 'utf8').split('\n')) {
+      const m = line.match(/^\s*([A-Z0-9_]+)=(.*)$/);
+      if (m) env[m[1]] = m[2].trim().replace(/^"(.*)"$/, '$1').replace(/^'(.*)'$/, '$1');
+    }
+  } catch (e) { /* no .env: fall back to the defaults below */ }
+  return env;
+}
+const dotenv = readEnvFile();
+const ADMIN_USER = process.env.ADMIN_USER || dotenv.BORINGBOARD_DEFAULTADMINUSERNAME || 'admin';
+const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || dotenv.BORINGBOARD_DEFAULTADMINPASSWORD || '';
+const ADMIN_STATE = __dirname + '/state_admin.json';
+const adminMenu = (d, label) => d.page.locator('.octo-sidebar').getByText(label, { exact: true }).first();
+
+parts.a01 = async (d) => {
+  await d.ctx.clearCookies();
+  await d.goto('/login', 300);
+  await d.page.evaluate(() => localStorage.clear());
+  await d.goto('/login', 1500);
+  d.mouse = { x: 1500, y: 900 }; await d.placeCursor();
+  await d.rec('a01');
+  await sleep(300);
+  await d.cam(720, 250, 480, 580, 1100, 1.6);
+  await d.click('#login-username', 700); await d.type(ADMIN_USER, 110);
+  await d.click('#login-password', 500); await d.type(ADMIN_PASSWORD, 60);
+  await sleep(250);
+  await d.moveTo('button[type=submit]', 500);
+  await d.page.mouse.down(); await sleep(80); await d.page.mouse.up();
+  await d.page.waitForURL((u) => !u.pathname.startsWith('/login'), { timeout: 15000 }).catch(() => {});
+  await d.page.evaluate(() => { document.body.style.transition = 'none'; document.body.style.transform = ''; window.__cam = { s: 1, tx: 0, ty: 0 }; });
+  await sleep(1200);
+  await d.move(120, 330, 900);
+  await d.holdUntil(7.5);
+  await d.stop();
+  await d.ctx.storageState({ path: ADMIN_STATE });
+};
+parts.a02 = async (d) => {
+  await d.goto('/users', 1800);
+  d.mouse = { x: 900, y: 600 }; await d.placeCursor();
+  await d.rec('a02');
+  await sleep(400);
+  await d.cam(250, 0, 1670, 560, 1200, 1.3);
+  await d.move(1000, 270, 900); await d.move(1000, 330, 600);
+  await d.moveTo(d.page.getByRole('button', { name: /Add User/ }), 900);
+  await d.holdUntil(7);
+  await d.stop();
+};
+parts.a03 = async (d) => {
+  await d.goto('/system-settings', 1800);
+  d.mouse = { x: 900, y: 600 }; await d.placeCursor();
+  await d.rec('a03');
+  await sleep(400);
+  await d.cam(250, 60, 1300, 640, 1200, 1.4);
+  await d.move(700, 330, 800); await d.move(700, 520, 800);
+  for (const tab of ['Modules', 'Notification', 'General']) {
+    await d.click(d.page.getByText(tab, { exact: true }).first(), 700);
+    await sleep(1300);
+  }
+  await d.holdUntil(13);
+  await d.stop();
+};
+parts.a04 = async (d) => {
+  await d.goto('/activity-logs', 1800);
+  d.mouse = { x: 900, y: 600 }; await d.placeCursor();
+  await d.rec('a04');
+  await sleep(400);
+  await d.cam(250, 60, 1670, 700, 1200, 1.25);
+  await d.move(1100, 470, 900); await d.move(1100, 700, 1200);
+  await d.camReset(800);
+  await d.holdUntil(7.5);
+  await d.stop();
+};
+parts.a05a = async (d) => {
+  await d.goto('/reminders', 1800);
+  d.mouse = { x: 900, y: 600 }; await d.placeCursor();
+  await d.rec('a05a');
+  await sleep(400);
+  await d.cam(250, 60, 1670, 560, 1200, 1.3);
+  await d.move(800, 500, 900);
+  await d.moveTo(d.page.getByRole('button', { name: /Add Reminder/ }), 900);
+  await d.holdUntil(6);
+  await d.stop();
+};
+parts.a05b = async (d) => {
+  await d.goto('/announcements', 1800);
+  d.mouse = { x: 1500, y: 300 }; await d.placeCursor();
+  await d.rec('a05b');
+  await sleep(400);
+  await d.cam(250, 60, 1670, 560, 1200, 1.3);
+  await d.moveTo(d.page.getByRole('button', { name: /Add Announcement/ }), 900);
+  await d.holdUntil(5.5);
+  await d.stop();
+};
+parts.a06a = async (d) => {
+  await d.goto('/plugin', 1800);
+  d.mouse = { x: 900, y: 600 }; await d.placeCursor();
+  await d.rec('a06a');
+  await sleep(400);
+  await d.cam(250, 60, 1300, 700, 1200, 1.4);
+  await d.move(500, 280, 800); await d.move(900, 480, 900);
+  await d.holdUntil(6);
+  await d.stop();
+};
+parts.a06b = async (d) => {
+  await d.goto('/templates', 1800);
+  d.mouse = { x: 900, y: 600 }; await d.placeCursor();
+  await d.rec('a06b');
+  await sleep(400);
+  for (const name of ['Sprint Planner', 'Roadmap']) {
+    await d.click(d.page.locator('.BoardTemplateSelectorItem', { hasText: name }).first(), 800).catch(() => {});
+    await sleep(1200);
+  }
+  await d.holdUntil(6);
+  await d.stop();
+};
+
+// ---------- outro ----------
+parts.outro = async (d) => {
+  await d.page.setContent('<html><body style="background:#1e1b4b"></body></html>');
   d.mouse = { x: 2100, y: 1200 };
-  await d.rec('s12');
+  await d.rec('outro');
   await d.page.setContent(cards.outro, { waitUntil: 'load' });
   await d.holdUntil(7);
   await d.stop();
@@ -307,6 +458,7 @@ parts.s12 = async (d) => {
   try {
     for (const n of names) {
       if (!parts[n]) { console.log('unknown part', n); continue; }
+      await d.useState(/^a\d/.test(n) ? ADMIN_STATE : STATE);
       try { await parts[n](d); } catch (e) {
         console.log('FAILED', n, e.message.split('\n')[0]);
         if (d.recording) await d.stop().catch(() => {});
