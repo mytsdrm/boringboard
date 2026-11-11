@@ -21,9 +21,9 @@ const DEFAULT_AI_SETTINGS: AdminAISettings = {
 }
 
 const DEFAULT_MODULE_SETTINGS: AdminModuleSettings = {
-    announcement: false,
-    plugin: false,
-    reminder: false,
+    announcement: true,
+    plugin: true,
+    reminder: true,
 }
 
 const DEFAULT_NOTIFICATION_SETTINGS: AdminNotificationSettings = {

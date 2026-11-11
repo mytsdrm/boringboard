@@ -96,9 +96,9 @@ const defaultSettings: AdminSystemSettings = {
         enableInvitedUserShare: true,
     },
     modules: {
-        announcement: false,
-        plugin: false,
-        reminder: false,
+        announcement: true,
+        plugin: true,
+        reminder: true,
     },
     notifications: {
         email: false,

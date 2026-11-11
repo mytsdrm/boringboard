@@ -12,6 +12,10 @@ import (
 
 const adminSystemSettingsKey = "boringboard_admin_system_settings"
 
+// adminModulesDefaultOnKey marks that existing installs have had their admin
+// modules switched on once, so an admin who later turns one off keeps it off.
+const adminModulesDefaultOnKey = "boringboard_admin_modules_default_on_v1"
+
 func defaultAdminSystemSettings() model.AdminSystemSettings {
 	return model.AdminSystemSettings{
 		AppName:  "BoringBoard",
@@ -33,9 +37,9 @@ func defaultAdminSystemSettings() model.AdminSystemSettings {
 			EnableInvitedUserEditProperty: false,
 		},
 		Modules: model.AdminModuleSettings{
-			Reminder:     false,
-			Announcement: false,
-			Plugin:       false,
+			Reminder:     true,
+			Announcement: true,
+			Plugin:       true,
 		},
 		Notifications: model.AdminNotificationSettings{
 			TaskBoardActivity: true,
@@ -282,4 +286,38 @@ func defaultAIModel(provider string) string {
 	default:
 		return "gpt-4o-mini"
 	}
+}
+
+// ensureAdminModulesEnabled turns on every admin module (Reminder,
+// Announcement, Plugin) once for installs whose settings were saved while the
+// modules still defaulted to off, so every install shows the full admin menu.
+func (a *App) ensureAdminModulesEnabled() error {
+	done, err := a.store.GetSystemSetting(adminModulesDefaultOnKey)
+	if err != nil {
+		return err
+	}
+	if done == "true" {
+		return nil
+	}
+
+	value, err := a.store.GetSystemSetting(adminSystemSettingsKey)
+	if err != nil {
+		return err
+	}
+	if value != "" {
+		settings := defaultAdminSystemSettings()
+		if err = json.Unmarshal([]byte(value), &settings); err != nil {
+			return err
+		}
+		settings.Modules = defaultAdminSystemSettings().Modules
+		data, err := json.Marshal(settings)
+		if err != nil {
+			return err
+		}
+		if err = a.store.SetSystemSetting(adminSystemSettingsKey, string(data)); err != nil {
+			return err
+		}
+	}
+
+	return a.store.SetSystemSetting(adminModulesDefaultOnKey, "true")
 }

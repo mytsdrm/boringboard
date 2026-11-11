@@ -15,6 +15,12 @@ func (a *App) initialize(skipTemplateInit bool) {
 		a.logger.Error(`InitializeDefaultAdminUser failed`, mlog.Err(err))
 	}
 
+	if a.config.AuthMode == "native" {
+		if err := a.ensureAdminModulesEnabled(); err != nil {
+			a.logger.Error(`InitializeAdminModules failed`, mlog.Err(err))
+		}
+	}
+
 	if err := a.ensureDemoUser(); err != nil {
 		a.logger.Error(`InitializeDemoUser failed`, mlog.Err(err))
 	}
