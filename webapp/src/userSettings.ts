@@ -12,6 +12,7 @@ export enum UserSettingKey {
     AccentColor = 'accentColor',
     BaseColor = 'baseColor',
     LayoutName = 'layoutName',
+    SidebarPosition = 'sidebarPosition',
     LastTeamId = 'lastTeamId',
     LastBoardId = 'lastBoardId',
     LastViewId = 'lastViewId',
@@ -87,6 +88,14 @@ export class UserSettings {
 
     static set layoutName(newValue: string | null) {
         UserSettings.set(UserSettingKey.LayoutName, newValue)
+    }
+
+    static get sidebarPosition(): string | null {
+        return UserSettings.get(UserSettingKey.SidebarPosition)
+    }
+
+    static set sidebarPosition(newValue: string | null) {
+        UserSettings.set(UserSettingKey.SidebarPosition, newValue)
     }
 
     static get lastTeamId(): string | null {

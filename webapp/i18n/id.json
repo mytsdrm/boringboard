@@ -197,10 +197,14 @@
   "Appearance.layout-compact": "Ringkas",
   "Appearance.layout-mirrored": "Cermin",
   "Appearance.layout-default-help": "Sidebar di kiri, tampilan standar.",
-  "Appearance.layout-macos-help": "Bilah menu di atas, sidebar transparan mengambang.",
-  "Appearance.layout-windows-help": "Bilah judul dengan tombol jendela, panel gaya Mica.",
-  "Appearance.layout-ubuntu-help": "Bilah atas gelap dengan jam, gaya GNOME.",
+  "Appearance.layout-macos-help": "Bilah menu di atas, dock mengambang di bawah.",
+  "Appearance.layout-windows-help": "Taskbar di bawah, bilah judul dengan tombol jendela.",
+  "Appearance.layout-ubuntu-help": "Bilah atas gelap dengan jam, dock di bawah.",
   "Appearance.layout-chromeos-help": "Rak di bawah, kartu membulat.",
   "Appearance.layout-compact-help": "Sidebar lebih sempit dan jarak lebih rapat.",
-  "Appearance.layout-mirrored-help": "Sidebar di kanan."
+  "Appearance.layout-mirrored-help": "Sidebar di kanan.",
+  "Appearance.sidebar-position": "Posisi sidebar",
+  "Appearance.sidebar-left": "Kiri",
+  "Appearance.sidebar-bottom": "Bawah",
+  "Appearance.sidebar-right": "Kanan"
 }

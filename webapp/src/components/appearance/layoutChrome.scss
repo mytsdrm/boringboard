@@ -6,6 +6,28 @@
     display: none;
 }
 
+// The board tree wrapper is invisible to layout unless the sidebar sits at
+// the bottom, and the launcher button only shows there.
+.octo-sidebar-boards {
+    display: contents;
+}
+
+.octo-sidebar-boards-launcher {
+    display: none;
+}
+
+@keyframes dock-panel-in {
+    from {
+        opacity: 0;
+        transform: translateY(8px);
+    }
+
+    to {
+        opacity: 1;
+        transform: none;
+    }
+}
+
 @media screen and (min-width: 768px) {
     .LayoutChrome {
         display: flex;
@@ -288,7 +310,9 @@
         }
     }
 
-    html[data-bb-layout='mirrored'] {
+    // ---- Sidebar position ----
+
+    html[data-bb-sidebar='right'] {
         // Keep the appearance drawer off the sidebar.
         .AppearancePanel {
             right: auto;
@@ -303,6 +327,258 @@
             border-right: 0;
             border-left: 1px solid var(--bb-border-strong);
             box-shadow: -6px 0 14px var(--bb-sidebar-shadow), -14px 0 28px var(--bb-shadow-soft);
+        }
+    }
+
+    html[data-bb-layout='macos'][data-bb-sidebar='right'] .Workspace {
+        padding: 8px 8px 8px 0;
+    }
+
+    // Bottom: the sidebar becomes a taskbar / dock. The board tree moves into
+    // a pop-up panel above it, opened from the "Task Boards" button.
+    html[data-bb-sidebar='bottom'] {
+        .Workspace {
+            flex-direction: column-reverse;
+        }
+
+        .Sidebar:not(.hidden) {
+            flex: 0 0 auto;
+            flex-direction: row;
+            align-items: center;
+            gap: 4px;
+            width: 100%;
+            max-width: none;
+            height: 60px;
+            min-height: 0;
+            padding: 0 12px;
+            border-top: 1px solid var(--bb-border-strong);
+            border-right: 0;
+            background: rgb(var(--sidebar-bg-rgb));
+            box-shadow: 0 -6px 18px var(--bb-sidebar-shadow);
+
+            &::before {
+                content: none;
+            }
+
+            > * {
+                margin-top: 0;
+                margin-bottom: 0;
+            }
+
+            .octo-sidebar-header {
+                flex: 0 0 auto;
+                gap: 2px;
+                height: auto;
+                margin: 0 6px 0 0;
+                padding: 0;
+
+                .octo-spacer {
+                    display: none;
+                }
+            }
+
+            .sidebarSwitcher,
+            .WorkspaceTitle,
+            .octo-sidebar-plugin-section-title {
+                display: none;
+            }
+
+            .BoardsSwitcherWrapper {
+                flex: 0 1 220px;
+                min-width: 44px;
+                margin: 0 4px;
+
+                .BoardsSwitcher > div {
+                    overflow: hidden;
+                    min-width: 0;
+                    white-space: nowrap;
+                    text-overflow: ellipsis;
+                }
+            }
+
+            .octo-sidebar-plugin-section {
+                display: flex;
+                margin: 0;
+                padding: 0;
+                border: 0;
+            }
+
+            .octo-sidebar-dashboard-item,
+            .octo-sidebar-boards-launcher {
+                flex: 0 0 auto;
+                height: 40px;
+                margin: 0;
+                padding: 0 10px;
+                border-radius: 10px;
+                white-space: nowrap;
+
+                .active-text {
+                    overflow: hidden;
+                    text-overflow: ellipsis;
+                }
+            }
+
+            .octo-sidebar-dashboard-item.active,
+            .octo-sidebar-boards-launcher.active,
+            .octo-sidebar-boards-launcher.open {
+                background: rgba(var(--sidebar-text-rgb), 0.1);
+            }
+
+            .octo-sidebar-boards-launcher {
+                display: inline-flex;
+                align-items: center;
+                gap: 8px;
+                border: 0;
+                background: transparent;
+                color: rgba(var(--sidebar-text-rgb), 0.86);
+                cursor: pointer;
+                font-size: 14px;
+                font-weight: 600;
+
+                &:hover {
+                    background: rgba(var(--sidebar-text-rgb), 0.08);
+                    color: rgb(var(--sidebar-text-rgb));
+                }
+            }
+
+            .octo-sidebar-boards {
+                position: absolute;
+                bottom: calc(100% + 10px);
+                left: 12px;
+                display: none;
+                flex-direction: column;
+                width: min(360px, calc(100vw - 24px));
+                max-height: min(70vh, 640px);
+                padding: 10px 8px;
+                border: 1px solid var(--bb-border-strong);
+                border-radius: 14px;
+                background: rgb(var(--sidebar-bg-rgb));
+                box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+                z-index: 30; /* stylelint-disable-line property-disallowed-list */
+
+                &.open {
+                    display: flex;
+                    animation: dock-panel-in 140ms ease-out;
+                }
+
+                .octo-sidebar-list {
+                    flex: 1 1 auto;
+                    min-height: 0;
+                    margin-top: 0;
+                }
+            }
+
+            > .octo-spacer {
+                flex: 1 1 0;
+                min-width: 8px;
+            }
+
+            .sidebar-ai-create,
+            .add-board {
+                flex: 0 0 auto;
+                margin: 0;
+                white-space: nowrap;
+            }
+
+            .SidebarSettingsMenu .menu-entry {
+                height: 40px;
+                padding: 0 12px;
+                border-radius: 10px;
+            }
+        }
+    }
+
+    // Windows: full-width taskbar, Task Boards button first like Start.
+    html[data-bb-layout='windows'][data-bb-sidebar='bottom'] {
+        .Workspace > .mainFrame {
+            border-left: 0;
+            border-top-left-radius: 0;
+        }
+
+        .Sidebar:not(.hidden) {
+            height: 52px;
+            border-top: 1px solid var(--bb-border);
+            box-shadow: none;
+
+            .octo-sidebar-boards-launcher {
+                order: -1;
+                margin-right: 4px;
+                color: rgb(var(--button-bg-rgb));
+            }
+        }
+    }
+
+    // macOS and Ubuntu: a floating, rounded dock.
+    html[data-bb-layout='macos'][data-bb-sidebar='bottom'],
+    html[data-bb-layout='ubuntu'][data-bb-sidebar='bottom'] {
+        .Workspace {
+            padding: 0;
+        }
+
+        .Sidebar:not(.hidden) {
+            align-self: center;
+            width: auto;
+            max-width: calc(100% - 24px);
+            height: 60px;
+            margin: 6px auto 10px;
+            padding: 0 10px;
+            border: 1px solid var(--bb-border-strong);
+            border-radius: 18px;
+            box-shadow: 0 12px 34px var(--bb-shadow), 0 2px 6px var(--bb-shadow-soft);
+
+            > .octo-spacer {
+                flex: 0 0 12px;
+                height: 32px;
+                border-left: 1px solid rgba(var(--sidebar-text-rgb), 0.18);
+            }
+        }
+    }
+
+    html[data-bb-layout='macos'][data-bb-sidebar='bottom'] .Sidebar:not(.hidden) {
+        background: rgba(var(--sidebar-bg-rgb), 0.82);
+        backdrop-filter: blur(28px) saturate(1.6);
+    }
+
+    html[data-bb-layout='ubuntu'][data-bb-sidebar='bottom'] .Sidebar:not(.hidden) {
+        --sidebar-bg-rgb: 34, 34, 34;
+        --sidebar-text-rgb: 242, 242, 242;
+
+        border-color: rgba(255, 255, 255, 0.1);
+        background: rgba(var(--sidebar-bg-rgb), 0.92);
+    }
+
+    // Keep the bottom bar fluid: labels collapse to icons as space runs out.
+    @media (max-width: 1280px) {
+        html[data-bb-sidebar='bottom'] .Sidebar:not(.hidden) {
+            .octo-sidebar-dashboard-item .active-text,
+            .SidebarUserMenu .versionFrame {
+                display: none;
+            }
+
+            .BoardsSwitcherWrapper {
+                flex-basis: 160px;
+            }
+        }
+    }
+
+    @media (max-width: 1024px) {
+        html[data-bb-sidebar='bottom'] .Sidebar:not(.hidden) {
+            .octo-sidebar-boards-launcher .active-text,
+            .SidebarUserMenu .brand-name {
+                display: none;
+            }
+
+            .BoardsSwitcherWrapper {
+                flex: 0 0 44px;
+
+                .BoardsSwitcher > div {
+                    display: none;
+                }
+            }
+
+            .add-board {
+                display: none;
+            }
         }
     }
 }

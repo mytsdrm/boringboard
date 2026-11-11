@@ -2,7 +2,7 @@
 // See LICENSE.txt for license information.
 import React, {useEffect, useRef, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
-import {IconCheck, IconPalette, IconRefresh, IconX} from '@tabler/icons-react'
+import {IconCheck, IconLayoutBottombar, IconLayoutSidebar, IconLayoutSidebarRight, IconPalette, IconRefresh, IconX} from '@tabler/icons-react'
 import {useHotkeys} from 'react-hotkeys-hook'
 import color from 'color'
 
@@ -25,7 +25,7 @@ import {
     themeAccentName,
     themeOptions,
 } from '../../theme'
-import {defaultLayoutName, getActiveLayoutName, layoutOptions, setLayout} from '../../layout'
+import {defaultLayoutName, getActiveLayoutName, getActiveSidebarPosition, layoutOptions, setLayout, setSidebarPosition, sidebarPositions} from '../../layout'
 
 import './appearancePanel.scss'
 
@@ -125,12 +125,13 @@ const AppearancePanel = (props: Props): JSX.Element => {
     const me = useAppSelector(getMe)
     const [appearance, setAppearanceState] = useState<Appearance>(getAppearance())
     const [layoutName, setLayoutNameState] = useState(getActiveLayoutName())
+    const [sidebarPosition, setSidebarPositionState] = useState<string>(getActiveSidebarPosition())
     const saveTimer = useRef<ReturnType<typeof setTimeout>>()
 
     useHotkeys('esc', () => props.onClose())
 
     // Save to the user's profile (debounced: the color picker fires on every drag).
-    const saveToProfile = (next: Appearance, nextLayout: string) => {
+    const saveToProfile = (next: Appearance, nextLayout: string, nextPosition: string) => {
         if (!me) {
             return
         }
@@ -139,7 +140,7 @@ const AppearancePanel = (props: Props): JSX.Element => {
         }
         saveTimer.current = setTimeout(async () => {
             const patchedProps = await octoClient.patchUserConfig(me.id, {
-                updatedFields: {themeName: next.themeName, accentColor: next.accent, baseColor: next.base, layoutName: nextLayout},
+                updatedFields: {themeName: next.themeName, accentColor: next.accent, baseColor: next.base, layoutName: nextLayout, sidebarPosition: nextPosition},
             })
             if (patchedProps) {
                 dispatch(patchProps(patchedProps))
@@ -151,19 +152,26 @@ const AppearancePanel = (props: Props): JSX.Element => {
         const next = {...appearance, ...patch}
         setAppearance(next.themeName, next.accent, next.base)
         setAppearanceState(next)
-        saveToProfile(next, layoutName)
+        saveToProfile(next, layoutName, sidebarPosition)
     }
 
     const updateLayout = (nextLayout: string) => {
         setLayoutNameState(setLayout(nextLayout))
-        saveToProfile(appearance, nextLayout)
+        setSidebarPositionState(getActiveSidebarPosition())
+        saveToProfile(appearance, nextLayout, getActiveSidebarPosition())
+    }
+
+    const updateSidebarPosition = (position: string) => {
+        setSidebarPositionState(setSidebarPosition(position))
+        saveToProfile(appearance, layoutName, position)
     }
 
     const resetAll = () => {
         setAppearance(defaultAppearance.themeName, defaultAppearance.accent, defaultAppearance.base)
         setAppearanceState(defaultAppearance)
         setLayoutNameState(setLayout(defaultLayoutName))
-        saveToProfile(defaultAppearance, defaultLayoutName)
+        setSidebarPositionState(getActiveSidebarPosition())
+        saveToProfile(defaultAppearance, defaultLayoutName, getActiveSidebarPosition())
     }
 
     const customAccent = isHexColor(appearance.accent) ? appearance.accent : ''
@@ -226,6 +234,39 @@ const AppearancePanel = (props: Props): JSX.Element => {
                                             {label(`Appearance.layout-${option.id}`, option.displayName)}
                                             {active && <IconCheck size={14}/>}
                                         </span>
+                                    </button>
+                                )
+                            })}
+                        </div>
+                        <div className='AppearancePanel__subheading'>
+                            <FormattedMessage
+                                id='Appearance.sidebar-position'
+                                defaultMessage='Sidebar position'
+                            />
+                        </div>
+                        <div
+                            className='AppearancePanel__segmented'
+                            role='radiogroup'
+                        >
+                            {sidebarPositions.map((position) => {
+                                const active = sidebarPosition === position
+                                const names: Record<string, string> = {left: 'Left', bottom: 'Bottom', right: 'Right'}
+                                const icons: Record<string, JSX.Element> = {
+                                    left: <IconLayoutSidebar size={16}/>,
+                                    bottom: <IconLayoutBottombar size={16}/>,
+                                    right: <IconLayoutSidebarRight size={16}/>,
+                                }
+                                return (
+                                    <button
+                                        key={position}
+                                        type='button'
+                                        role='radio'
+                                        aria-checked={active}
+                                        className={active ? 'active' : ''}
+                                        onClick={() => updateSidebarPosition(position)}
+                                    >
+                                        {icons[position]}
+                                        {label(`Appearance.sidebar-${position}`, names[position])}
                                     </button>
                                 )
                             })}

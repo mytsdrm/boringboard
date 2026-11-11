@@ -1,8 +1,8 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
-import React, {useCallback, useEffect, useState} from 'react'
+import React, {useCallback, useEffect, useRef, useState} from 'react'
 import {FormattedMessage, useIntl} from 'react-intl'
-import {IconPalette} from '@tabler/icons-react'
+import {IconLayoutGrid, IconPalette} from '@tabler/icons-react'
 import {DragDropContext, Droppable, DropResult} from 'react-beautiful-dnd'
 import {useHistory, useRouteMatch} from 'react-router-dom'
 
@@ -109,6 +109,35 @@ function canUseAIForTaskBoard(aiSettings: AdminAISettings, user: IUser|null, isS
 const Sidebar = (props: Props) => {
     const intl = useIntl()
     const [showAppearance, setShowAppearance] = useState(false)
+
+    // With the sidebar at the bottom (taskbar/dock), the board tree lives in a
+    // pop-up panel opened from the "Task Boards" button, like a start menu.
+    const [boardsOpen, setBoardsOpen] = useState(false)
+    const boardsRef = useRef<HTMLDivElement>(null)
+    const boardsLauncherRef = useRef<HTMLButtonElement>(null)
+    useEffect(() => {
+        if (!boardsOpen) {
+            return undefined
+        }
+        const onPointerDown = (e: MouseEvent) => {
+            const target = e.target as Node
+            if (boardsRef.current?.contains(target) || boardsLauncherRef.current?.contains(target)) {
+                return
+            }
+            setBoardsOpen(false)
+        }
+        const onKeyDown = (e: KeyboardEvent) => {
+            if (e.key === 'Escape') {
+                setBoardsOpen(false)
+            }
+        }
+        document.addEventListener('mousedown', onPointerDown)
+        document.addEventListener('keydown', onKeyDown)
+        return () => {
+            document.removeEventListener('mousedown', onPointerDown)
+            document.removeEventListener('keydown', onKeyDown)
+        }
+    }, [boardsOpen])
     const [isHidden, setHidden] = useState(false)
     const [userHidden, setUserHidden] = useState(false)
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions())
@@ -122,6 +151,11 @@ const Sidebar = (props: Props) => {
     const sidebarCategories = useAppSelector<CategoryBoards[]>(getSidebarCategories)
     const me = useAppSelector<IUser|null>(getMe)
     const activeViewID = useAppSelector(getCurrentViewId)
+
+    // Close the bottom-bar boards panel once a board or view is opened.
+    useEffect(() => {
+        setBoardsOpen(false)
+    }, [props.activeBoardId, activeViewID, props.dashboardActive])
     const currentBoard = useAppSelector(getCurrentBoard)
     const isSystemAdmin = Boolean(me?.roles && Utils.isSystemAdmin(me.roles)) || Boolean(me?.permissions?.includes('manage_system'))
     const canViewPluginMenu = Boolean(
@@ -602,42 +636,63 @@ const Sidebar = (props: Props) => {
                     </div>
                 </div>}
 
-            <DragDropContext
-                onDragEnd={onDragEnd}
+            <button
+                type='button'
+                ref={boardsLauncherRef}
+                className={`octo-sidebar-boards-launcher${boardsOpen ? ' open' : ''}${props.activeBoardId ? ' active' : ''}`}
+                aria-expanded={boardsOpen}
+                onClick={() => setBoardsOpen(!boardsOpen)}
             >
-                <Droppable
-                    droppableId='lhs-categories'
-                    type='category'
-                    key={sidebarCategories.length}
+                <IconLayoutGrid size={18}/>
+                <span className='active-text'>
+                    <FormattedMessage
+                        id='Sidebar.task-boards'
+                        defaultMessage='Task Boards'
+                    />
+                </span>
+            </button>
+
+            <div
+                ref={boardsRef}
+                className={`octo-sidebar-boards${boardsOpen ? ' open' : ''}`}
+            >
+                <DragDropContext
+                    onDragEnd={onDragEnd}
                 >
-                    {(provided) => (
-                        <div
-                            ref={provided.innerRef}
-                            {...provided.droppableProps}
-                            className='octo-sidebar-list'
-                        >
-                            {
-                                sidebarCategories.map((category, index) => (
-                                    <SidebarCategory
-                                        hideSidebar={hideSidebar}
-                                        key={category.id}
-                                        activeBoardID={props.activeBoardId}
-                                        activeViewID={activeViewID}
-                                        categoryBoards={category}
-                                        boards={getSortedCategoryBoards(category)}
-                                        allCategories={sidebarCategories}
-                                        index={index}
-                                        onBoardTemplateSelectorClose={props.onBoardTemplateSelectorClose}
-                                        draggedItemID={draggedItemID}
-                                        forceCollapse={isCategoryBeingDragged}
-                                    />
-                                ))
-                            }
-                            {provided.placeholder}
-                        </div>
-                    )}
-                </Droppable>
-            </DragDropContext>
+                    <Droppable
+                        droppableId='lhs-categories'
+                        type='category'
+                        key={sidebarCategories.length}
+                    >
+                        {(provided) => (
+                            <div
+                                ref={provided.innerRef}
+                                {...provided.droppableProps}
+                                className='octo-sidebar-list'
+                            >
+                                {
+                                    sidebarCategories.map((category, index) => (
+                                        <SidebarCategory
+                                            hideSidebar={hideSidebar}
+                                            key={category.id}
+                                            activeBoardID={props.activeBoardId}
+                                            activeViewID={activeViewID}
+                                            categoryBoards={category}
+                                            boards={getSortedCategoryBoards(category)}
+                                            allCategories={sidebarCategories}
+                                            index={index}
+                                            onBoardTemplateSelectorClose={props.onBoardTemplateSelectorClose}
+                                            draggedItemID={draggedItemID}
+                                            forceCollapse={isCategoryBeingDragged}
+                                        />
+                                    ))
+                                }
+                                {provided.placeholder}
+                            </div>
+                        )}
+                    </Droppable>
+                </DragDropContext>
+            </div>
 
             <div className='octo-spacer'/>
 

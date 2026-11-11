@@ -22,7 +22,7 @@ import FocalboardRouter from './router'
 import octoClient from './octoClient'
 import {applySystemBranding, getStoredCustomBranding} from './branding'
 import {getActiveAccentName, getActiveBaseColor, getActiveThemeName, setAppearance} from './theme'
-import {getActiveLayoutName, setLayout} from './layout'
+import {getActiveLayoutName, getActiveSidebarPosition, setLayout} from './layout'
 import LayoutChrome from './components/appearance/layoutChrome'
 
 import {IUser} from './user'
@@ -78,11 +78,15 @@ const App = (props: Props): JSX.Element => {
     }, [savedThemeName, savedAccentName, savedBaseColor])
 
     const savedLayoutName = myConfig.layoutName?.value
+    const savedSidebarPosition = myConfig.sidebarPosition?.value
     useEffect(() => {
-        if (savedLayoutName && savedLayoutName !== getActiveLayoutName()) {
-            setLayout(savedLayoutName)
+        if (!savedLayoutName) {
+            return
         }
-    }, [savedLayoutName])
+        if (savedLayoutName !== getActiveLayoutName() || (savedSidebarPosition && savedSidebarPosition !== getActiveSidebarPosition())) {
+            setLayout(savedLayoutName, savedSidebarPosition)
+        }
+    }, [savedLayoutName, savedSidebarPosition])
 
     return (
         <IntlProvider

@@ -969,10 +969,14 @@
     "Appearance.layout-compact": "Compact",
     "Appearance.layout-mirrored": "Mirrored",
     "Appearance.layout-default-help": "Sidebar on the left, the standard look.",
-    "Appearance.layout-macos-help": "Menu bar on top, floating translucent sidebar.",
-    "Appearance.layout-windows-help": "Title bar with window controls, Mica-style panels.",
-    "Appearance.layout-ubuntu-help": "Dark top bar with clock, GNOME-style headers.",
+    "Appearance.layout-macos-help": "Menu bar on top, floating dock at the bottom.",
+    "Appearance.layout-windows-help": "Taskbar at the bottom, title bar with window controls.",
+    "Appearance.layout-ubuntu-help": "Dark top bar with clock, dock at the bottom.",
     "Appearance.layout-chromeos-help": "Shelf at the bottom, rounded cards.",
     "Appearance.layout-compact-help": "Narrower sidebar and denser spacing.",
-    "Appearance.layout-mirrored-help": "Sidebar on the right."
+    "Appearance.layout-mirrored-help": "Sidebar on the right.",
+    "Appearance.sidebar-position": "Sidebar position",
+    "Appearance.sidebar-left": "Left",
+    "Appearance.sidebar-bottom": "Bottom",
+    "Appearance.sidebar-right": "Right"
 }
