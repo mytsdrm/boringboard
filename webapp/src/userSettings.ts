@@ -10,6 +10,7 @@ export enum UserSettingKey {
     Theme = 'theme',
     ThemeName = 'themeName',
     AccentColor = 'accentColor',
+    BaseColor = 'baseColor',
     LastTeamId = 'lastTeamId',
     LastBoardId = 'lastBoardId',
     LastViewId = 'lastViewId',
@@ -69,6 +70,14 @@ export class UserSettings {
 
     static set accentColor(newValue: string | null) {
         UserSettings.set(UserSettingKey.AccentColor, newValue)
+    }
+
+    static get baseColor(): string | null {
+        return UserSettings.get(UserSettingKey.BaseColor)
+    }
+
+    static set baseColor(newValue: string | null) {
+        UserSettings.set(UserSettingKey.BaseColor, newValue)
     }
 
     static get lastTeamId(): string | null {

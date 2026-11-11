@@ -65,10 +65,14 @@ describe('components/sidebar/SidebarSettingsMenu', () => {
         expect(container).toMatchSnapshot()
     })
 
-    test('theme menu open should match snapshot', () => {
+    test('appearance item opens the appearance panel', () => {
+        const onAppearanceOpen = jest.fn()
         const component = wrapIntl(
             <ReduxProvider store={store}>
-                <SidebarSettingsMenu activeTheme={defaultThemeName}/>
+                <SidebarSettingsMenu
+                    activeTheme={defaultThemeName}
+                    onAppearanceOpen={onAppearanceOpen}
+                />
             </ReduxProvider>,
         )
 
@@ -77,9 +81,9 @@ describe('components/sidebar/SidebarSettingsMenu', () => {
             userEvent.click(container.querySelector('.menu-entry') as Element)
         })
         act(() => {
-            userEvent.hover(container.querySelector('#theme') as Element)
+            userEvent.click(container.querySelector('[aria-label="Appearance"]') as Element)
         })
-        expect(container).toMatchSnapshot()
+        expect(onAppearanceOpen).toBeCalled()
     })
 
     test('languages menu open should match snapshot', () => {

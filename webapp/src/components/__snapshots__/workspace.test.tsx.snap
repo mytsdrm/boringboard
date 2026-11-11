@@ -61,6 +61,41 @@ exports[`src/components/workspace return workspace and showcard 1`] = `
           class="octo-spacer"
         />
         <div
+          class="sidebarAppearance"
+        >
+          <button
+            aria-label="Appearance"
+            title="Appearance"
+            type="button"
+          >
+            <svg
+              class="tabler-icon tabler-icon-palette "
+              fill="none"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"
+              />
+              <path
+                d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+              />
+              <path
+                d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+              />
+              <path
+                d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+              />
+            </svg>
+          </button>
+        </div>
+        <div
           class="sidebarSwitcher"
         >
           <button
@@ -1206,6 +1241,41 @@ exports[`src/components/workspace should match snapshot 1`] = `
         <div
           class="octo-spacer"
         />
+        <div
+          class="sidebarAppearance"
+        >
+          <button
+            aria-label="Appearance"
+            title="Appearance"
+            type="button"
+          >
+            <svg
+              class="tabler-icon tabler-icon-palette "
+              fill="none"
+              height="20"
+              stroke="currentColor"
+              stroke-linecap="round"
+              stroke-linejoin="round"
+              stroke-width="2"
+              viewBox="0 0 24 24"
+              width="20"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"
+              />
+              <path
+                d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+              />
+              <path
+                d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+              />
+              <path
+                d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+              />
+            </svg>
+          </button>
+        </div>
         <div
           class="sidebarSwitcher"
         >

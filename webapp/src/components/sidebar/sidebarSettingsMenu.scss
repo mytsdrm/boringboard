@@ -16,33 +16,3 @@
         }
     }
 }
-
-.SidebarSettingsMenu__theme-preview {
-    position: relative;
-    display: inline-block;
-    width: 18px;
-    height: 18px;
-    border-radius: 6px;
-    box-shadow: inset 0 0 0 1px rgba(var(--center-channel-color-rgb), 0.18);
-
-    > span {
-        position: absolute;
-        right: 3px;
-        bottom: 3px;
-        width: 6px;
-        height: 6px;
-        border-radius: 50%;
-    }
-}
-
-.SidebarSettingsMenu__accent-swatch {
-    display: inline-block;
-    width: 16px;
-    height: 16px;
-    border-radius: 50%;
-    box-shadow: inset 0 0 0 1px rgba(0, 0, 0, 0.12);
-
-    &--theme {
-        background: conic-gradient(#4f46e5, #2563eb, #0d9488, #16a34a, #ea580c, #e11d48, #7c3aed, #4f46e5);
-    }
-}

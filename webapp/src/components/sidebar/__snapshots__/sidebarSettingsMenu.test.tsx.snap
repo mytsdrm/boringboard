@@ -283,37 +283,54 @@ exports[`components/sidebar/SidebarSettingsMenu imports menu open should match s
             </div>
             <div>
               <div
-                class="MenuOption SubMenuOption menu-option"
-                id="theme"
+                aria-label="Appearance"
+                class="MenuOption TextOption menu-option"
+                role="button"
               >
                 <div
-                  class="noicon"
-                />
-                <div
-                  class="menu-name"
+                  class="d-flex"
                 >
-                  Set theme
+                  <div
+                    class="menu-option__icon"
+                  >
+                    <svg
+                      class="tabler-icon tabler-icon-palette "
+                      fill="none"
+                      height="16"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"
+                      />
+                      <path
+                        d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+                      />
+                      <path
+                        d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+                      />
+                      <path
+                        d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+                      />
+                    </svg>
+                  </div>
                 </div>
-                <i
-                  class="CompassIcon icon-chevron-right"
-                />
-              </div>
-            </div>
-            <div>
-              <div
-                class="MenuOption SubMenuOption menu-option"
-                id="accent"
-              >
+                <div
+                  class="menu-option__content"
+                >
+                  <div
+                    class="menu-name"
+                  >
+                    Appearance
+                  </div>
+                </div>
                 <div
                   class="noicon"
-                />
-                <div
-                  class="menu-name"
-                >
-                  Accent color
-                </div>
-                <i
-                  class="CompassIcon icon-chevron-right"
                 />
               </div>
             </div>
@@ -944,37 +961,54 @@ exports[`components/sidebar/SidebarSettingsMenu languages menu open should match
             </div>
             <div>
               <div
-                class="MenuOption SubMenuOption menu-option"
-                id="theme"
+                aria-label="Appearance"
+                class="MenuOption TextOption menu-option"
+                role="button"
               >
                 <div
-                  class="noicon"
-                />
-                <div
-                  class="menu-name"
+                  class="d-flex"
                 >
-                  Set theme
+                  <div
+                    class="menu-option__icon"
+                  >
+                    <svg
+                      class="tabler-icon tabler-icon-palette "
+                      fill="none"
+                      height="16"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"
+                      />
+                      <path
+                        d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+                      />
+                      <path
+                        d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+                      />
+                      <path
+                        d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+                      />
+                    </svg>
+                  </div>
                 </div>
-                <i
-                  class="CompassIcon icon-chevron-right"
-                />
-              </div>
-            </div>
-            <div>
-              <div
-                class="MenuOption SubMenuOption menu-option"
-                id="accent"
-              >
+                <div
+                  class="menu-option__content"
+                >
+                  <div
+                    class="menu-name"
+                  >
+                    Appearance
+                  </div>
+                </div>
                 <div
                   class="noicon"
-                />
-                <div
-                  class="menu-name"
-                >
-                  Accent color
-                </div>
-                <i
-                  class="CompassIcon icon-chevron-right"
                 />
               </div>
             </div>
@@ -1150,148 +1184,7 @@ exports[`components/sidebar/SidebarSettingsMenu settings menu open should match 
             </div>
             <div>
               <div
-                class="MenuOption SubMenuOption menu-option"
-                id="theme"
-              >
-                <div
-                  class="noicon"
-                />
-                <div
-                  class="menu-name"
-                >
-                  Set theme
-                </div>
-                <i
-                  class="CompassIcon icon-chevron-right"
-                />
-              </div>
-            </div>
-            <div>
-              <div
-                class="MenuOption SubMenuOption menu-option"
-                id="accent"
-              >
-                <div
-                  class="noicon"
-                />
-                <div
-                  class="menu-name"
-                >
-                  Accent color
-                </div>
-                <i
-                  class="CompassIcon icon-chevron-right"
-                />
-              </div>
-            </div>
-            <div>
-              <div
-                aria-label="Random icons"
-                class="MenuOption SwitchOption menu-option"
-                role="button"
-              >
-                <div
-                  class="noicon"
-                />
-                <div
-                  class="menu-name"
-                >
-                  Random icons
-                </div>
-                <div
-                  class="Switch override-main size--small on"
-                >
-                  <div
-                    class="octo-switch-inner"
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-          <div
-            class="menu-spacer hideOnWidescreen"
-          />
-          <div
-            class="menu-options hideOnWidescreen"
-          >
-            <div
-              aria-label="Cancel"
-              class="MenuOption TextOption menu-option menu-cancel"
-              role="button"
-            >
-              <div
-                class="d-flex"
-              >
-                <div
-                  class="noicon"
-                />
-              </div>
-              <div
-                class="menu-option__content"
-              >
-                <div
-                  class="menu-name"
-                >
-                  Cancel
-                </div>
-              </div>
-              <div
-                class="noicon"
-              />
-            </div>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-`;
-
-exports[`components/sidebar/SidebarSettingsMenu theme menu open should match snapshot 1`] = `
-<div>
-  <div
-    class="SidebarSettingsMenu"
-  >
-    <div
-      aria-label="menuwrapper"
-      class="MenuWrapper override menuOpened"
-      role="button"
-    >
-      <div
-        class="menu-entry"
-      >
-        Settings
-      </div>
-      <div
-        class="Menu noselect top "
-      >
-        <div
-          class="menu-contents"
-        >
-          <div
-            class="menu-options"
-          >
-            <div>
-              <div
-                class="MenuOption SubMenuOption menu-option"
-                id="import"
-              >
-                <div
-                  class="noicon"
-                />
-                <div
-                  class="menu-name"
-                >
-                  Import
-                </div>
-                <i
-                  class="CompassIcon icon-chevron-right"
-                />
-              </div>
-            </div>
-            <div>
-              <div
-                aria-label="Export archive"
+                aria-label="Appearance"
                 class="MenuOption TextOption menu-option"
                 role="button"
               >
@@ -1299,8 +1192,34 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                   class="d-flex"
                 >
                   <div
-                    class="noicon"
-                  />
+                    class="menu-option__icon"
+                  >
+                    <svg
+                      class="tabler-icon tabler-icon-palette "
+                      fill="none"
+                      height="16"
+                      stroke="currentColor"
+                      stroke-linecap="round"
+                      stroke-linejoin="round"
+                      stroke-width="2"
+                      viewBox="0 0 24 24"
+                      width="16"
+                      xmlns="http://www.w3.org/2000/svg"
+                    >
+                      <path
+                        d="M12 21a9 9 0 0 1 0 -18c4.97 0 9 3.582 9 8c0 1.06 -.474 2.078 -1.318 2.828c-.844 .75 -1.989 1.172 -3.182 1.172h-2.5a2 2 0 0 0 -1 3.75a1.3 1.3 0 0 1 -1 2.25"
+                      />
+                      <path
+                        d="M7.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+                      />
+                      <path
+                        d="M11.5 7.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+                      />
+                      <path
+                        d="M15.5 10.5a1 1 0 1 0 2 0a1 1 0 1 0 -2 0"
+                      />
+                    </svg>
+                  </div>
                 </div>
                 <div
                   class="menu-option__content"
@@ -1308,280 +1227,11 @@ exports[`components/sidebar/SidebarSettingsMenu theme menu open should match sna
                   <div
                     class="menu-name"
                   >
-                    Export archive
+                    Appearance
                   </div>
                 </div>
                 <div
                   class="noicon"
-                />
-              </div>
-            </div>
-            <div>
-              <div
-                class="MenuOption SubMenuOption menu-option"
-                id="lang"
-              >
-                <div
-                  class="noicon"
-                />
-                <div
-                  class="menu-name"
-                >
-                  Set language
-                </div>
-                <i
-                  class="CompassIcon icon-chevron-right"
-                />
-              </div>
-            </div>
-            <div>
-              <div
-                class="MenuOption SubMenuOption menu-option menu-option-active"
-                id="theme"
-              >
-                <div
-                  class="noicon"
-                />
-                <div
-                  class="menu-name"
-                >
-                  Set theme
-                </div>
-                <i
-                  class="CompassIcon icon-chevron-right"
-                />
-                <div
-                  class="SubMenu Menu noselect top"
-                >
-                  <div
-                    class="menu-contents"
-                  >
-                    <div
-                      class="menu-options"
-                    >
-                      <div
-                        aria-label="Modern"
-                        class="MenuOption TextOption menu-option"
-                        role="button"
-                      >
-                        <div
-                          class="d-flex"
-                        >
-                          <div
-                            class="menu-option__icon"
-                          >
-                            <span
-                              class="SidebarSettingsMenu__theme-preview"
-                            >
-                              <span
-                                style="background: rgb(79, 70, 229);"
-                              />
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          class="menu-option__content"
-                        >
-                          <div
-                            class="menu-name"
-                          >
-                            Modern
-                          </div>
-                        </div>
-                        <svg
-                          class="CheckIcon Icon"
-                          viewBox="0 0 100 100"
-                          xmlns="http://www.w3.org/2000/svg"
-                        >
-                          <polyline
-                            points="20,60 40,80 80,40"
-                          />
-                        </svg>
-                      </div>
-                      <div
-                        aria-label="Classic"
-                        class="MenuOption TextOption menu-option"
-                        role="button"
-                      >
-                        <div
-                          class="d-flex"
-                        >
-                          <div
-                            class="menu-option__icon"
-                          >
-                            <span
-                              class="SidebarSettingsMenu__theme-preview"
-                            >
-                              <span
-                                style="background: rgb(18, 98, 255);"
-                              />
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          class="menu-option__content"
-                        >
-                          <div
-                            class="menu-name"
-                          >
-                            Classic
-                          </div>
-                        </div>
-                        <div
-                          class="noicon"
-                        />
-                      </div>
-                      <div
-                        aria-label="Dark"
-                        class="MenuOption TextOption menu-option"
-                        role="button"
-                      >
-                        <div
-                          class="d-flex"
-                        >
-                          <div
-                            class="menu-option__icon"
-                          >
-                            <span
-                              class="SidebarSettingsMenu__theme-preview"
-                            >
-                              <span
-                                style="background: rgb(59, 130, 246);"
-                              />
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          class="menu-option__content"
-                        >
-                          <div
-                            class="menu-name"
-                          >
-                            Dark
-                          </div>
-                        </div>
-                        <div
-                          class="noicon"
-                        />
-                      </div>
-                      <div
-                        aria-label="Midnight"
-                        class="MenuOption TextOption menu-option"
-                        role="button"
-                      >
-                        <div
-                          class="d-flex"
-                        >
-                          <div
-                            class="menu-option__icon"
-                          >
-                            <span
-                              class="SidebarSettingsMenu__theme-preview"
-                            >
-                              <span
-                                style="background: rgb(139, 92, 246);"
-                              />
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          class="menu-option__content"
-                        >
-                          <div
-                            class="menu-name"
-                          >
-                            Midnight
-                          </div>
-                        </div>
-                        <div
-                          class="noicon"
-                        />
-                      </div>
-                      <div
-                        aria-label="System (Modern / Midnight)"
-                        class="MenuOption TextOption menu-option"
-                        role="button"
-                      >
-                        <div
-                          class="d-flex"
-                        >
-                          <div
-                            class="menu-option__icon"
-                          >
-                            <span
-                              class="SidebarSettingsMenu__theme-preview"
-                            >
-                              <span
-                                style="background: rgb(79, 70, 229);"
-                              />
-                            </span>
-                          </div>
-                        </div>
-                        <div
-                          class="menu-option__content"
-                        >
-                          <div
-                            class="menu-name"
-                          >
-                            System (Modern / Midnight)
-                          </div>
-                        </div>
-                        <div
-                          class="noicon"
-                        />
-                      </div>
-                    </div>
-                    <div
-                      class="menu-spacer hideOnWidescreen"
-                    />
-                    <div
-                      class="menu-options hideOnWidescreen"
-                    >
-                      <div
-                        aria-label="Cancel"
-                        class="MenuOption TextOption menu-option menu-cancel"
-                        role="button"
-                      >
-                        <div
-                          class="d-flex"
-                        >
-                          <div
-                            class="noicon"
-                          />
-                        </div>
-                        <div
-                          class="menu-option__content"
-                        >
-                          <div
-                            class="menu-name"
-                          >
-                            Cancel
-                          </div>
-                        </div>
-                        <div
-                          class="noicon"
-                        />
-                      </div>
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div>
-              <div
-                class="MenuOption SubMenuOption menu-option"
-                id="accent"
-              >
-                <div
-                  class="noicon"
-                />
-                <div
-                  class="menu-name"
-                >
-                  Accent color
-                </div>
-                <i
-                  class="CompassIcon icon-chevron-right"
                 />
               </div>
             </div>

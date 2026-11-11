@@ -1,11 +1,12 @@
 // Copyright (c) 2015-present Mattermost, Inc. All Rights Reserved.
 // See LICENSE.txt for license information.
 import React, {useCallback, useEffect, useState} from 'react'
-import {FormattedMessage} from 'react-intl'
+import {FormattedMessage, useIntl} from 'react-intl'
+import {IconPalette} from '@tabler/icons-react'
 import {DragDropContext, Droppable, DropResult} from 'react-beautiful-dnd'
 import {useHistory, useRouteMatch} from 'react-router-dom'
 
-import {getActiveThemeName, loadTheme} from '../../theme'
+import {loadTheme} from '../../theme'
 import IconButton from '../../widgets/buttons/iconButton'
 import CompassIcon from '../../widgets/icons/compassIcon'
 import HamburgerIcon from '../../widgets/icons/hamburger'
@@ -53,6 +54,8 @@ import {Board} from '../../blocks/board'
 import CreateTaskBoardFromCommand from '../aiCreateBoard/createTaskBoardFromCommand'
 import {AdminModuleKey} from '../admin/adminModulePage'
 import {getStoredPluginMenuSettings, PluginMenuSettings, PLUGIN_PACKAGE_UPDATED_EVENT} from '../admin/pluginModuleStorage'
+
+import AppearancePanel from '../appearance/appearancePanel'
 
 import SidebarCategory from './sidebarCategory'
 import SidebarSettingsMenu from './sidebarSettingsMenu'
@@ -104,6 +107,8 @@ function canUseAIForTaskBoard(aiSettings: AdminAISettings, user: IUser|null, isS
 }
 
 const Sidebar = (props: Props) => {
+    const intl = useIntl()
+    const [showAppearance, setShowAppearance] = useState(false)
     const [isHidden, setHidden] = useState(false)
     const [userHidden, setUserHidden] = useState(false)
     const [windowDimensions, setWindowDimensions] = useState(getWindowDimensions())
@@ -449,6 +454,13 @@ const Sidebar = (props: Props) => {
                 </div>
 
                 <div className='octo-spacer'/>
+                <div className='sidebarAppearance'>
+                    <IconButton
+                        title={intl.formatMessage({id: 'Sidebar.appearance', defaultMessage: 'Appearance'})}
+                        onClick={() => setShowAppearance(true)}
+                        icon={<IconPalette size={20}/>}
+                    />
+                </div>
                 <div className='sidebarSwitcher'>
                     <IconButton
                         onClick={() => {
@@ -652,7 +664,8 @@ const Sidebar = (props: Props) => {
                 />
             </div>
 
-            <SidebarSettingsMenu activeTheme={getActiveThemeName()}/>
+            <SidebarSettingsMenu onAppearanceOpen={() => setShowAppearance(true)}/>
+            {showAppearance && <AppearancePanel onClose={() => setShowAppearance(false)}/>}
         </div>
     )
 }

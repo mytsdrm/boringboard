@@ -21,7 +21,7 @@ import {fetchClientConfig} from './store/clientConfig'
 import FocalboardRouter from './router'
 import octoClient from './octoClient'
 import {applySystemBranding, getStoredCustomBranding} from './branding'
-import {getActiveAccentName, getActiveThemeName, setAppearance} from './theme'
+import {getActiveAccentName, getActiveBaseColor, getActiveThemeName, setAppearance} from './theme'
 
 import {IUser} from './user'
 
@@ -58,20 +58,22 @@ const App = (props: Props): JSX.Element => {
         }
     }, [me])
 
-    // The theme and accent saved on the user's profile win over this browser's
+    // The appearance saved on the user's profile wins over this browser's
     // copy, so the choice follows them across devices.
     const savedThemeName = myConfig.themeName?.value
     const savedAccentName = myConfig.accentColor?.value
+    const savedBaseColor = myConfig.baseColor?.value
     useEffect(() => {
-        if (!savedThemeName && !savedAccentName) {
+        if (!savedThemeName && !savedAccentName && savedBaseColor === undefined) {
             return
         }
         const themeName = savedThemeName || getActiveThemeName()
         const accentName = savedAccentName || getActiveAccentName()
-        if (themeName !== getActiveThemeName() || accentName !== getActiveAccentName()) {
-            setAppearance(themeName, accentName)
+        const baseColor = savedBaseColor ?? getActiveBaseColor()
+        if (themeName !== getActiveThemeName() || accentName !== getActiveAccentName() || baseColor !== getActiveBaseColor()) {
+            setAppearance(themeName, accentName, baseColor)
         }
-    }, [savedThemeName, savedAccentName])
+    }, [savedThemeName, savedAccentName, savedBaseColor])
 
     return (
         <IntlProvider

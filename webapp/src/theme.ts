@@ -9,6 +9,8 @@ let activeThemeName: string
 
 import {UserSettings} from './userSettings'
 
+type Color = ReturnType<typeof color>
+
 export type Theme = {
     mainBg: string
     mainFg: string
@@ -37,9 +39,14 @@ export type Theme = {
     // headers) are tinted: 'accent' mixes in the accent color, 'neutral' keeps
     // them gray so the accent only shows on buttons, links and highlights.
     surfaceTint?: 'accent' | 'neutral'
+
+    // Soft accent glow at the top of the sidebar.
+    sidebarGlow?: boolean
 }
 
+export const novaThemeName = 'nova-theme'
 export const modernThemeName = 'modern-theme'
+export const sandThemeName = 'sand-theme'
 export const classicThemeName = 'classic-theme'
 export const darkThemeName = 'dark-theme'
 export const midnightThemeName = 'midnight-theme'
@@ -48,7 +55,7 @@ export const systemThemeName = 'system-theme'
 // Kept for older imports: "light" is the classic blue look.
 export const lightThemeName = classicThemeName
 
-export const defaultThemeName = modernThemeName
+export const defaultThemeName = novaThemeName
 
 const lightProps = {
     propDefault: '#fff',
@@ -74,6 +81,42 @@ const darkProps = {
     propPurple: 'hsla(270, 100%, 64%, 0.4)',
     propPink: 'hsla(310, 100%, 80%, 0.4)',
     propRed: 'hsla(4, 100%, 70%, 0.4)',
+}
+
+// Default: light, airy content next to a deep ink sidebar, violet accent.
+export const novaTheme: Theme = {
+    mainBg: '255, 255, 255',
+    mainFg: '22, 22, 34',
+    buttonBg: '108, 71, 255',
+    buttonFg: '255, 255, 255',
+    sidebarBg: '24, 22, 40',
+    sidebarFg: '229, 228, 245',
+    sidebarTextActiveBorder: '167, 139, 250',
+    sidebarWhiteLogo: 'true',
+
+    link: '96, 61, 240',
+    linkVisited: '#5b21b6',
+
+    ...lightProps,
+    surfaceTint: 'neutral',
+    sidebarGlow: true,
+}
+
+export const sandTheme: Theme = {
+    mainBg: '250, 247, 242',
+    mainFg: '41, 37, 36',
+    buttonBg: '194, 65, 12',
+    buttonFg: '255, 255, 255',
+    sidebarBg: '242, 236, 226',
+    sidebarFg: '68, 64, 60',
+    sidebarTextActiveBorder: '194, 65, 12',
+    sidebarWhiteLogo: 'false',
+
+    link: '180, 60, 10',
+    linkVisited: '#7c2d12',
+
+    ...lightProps,
+    surfaceTint: 'neutral',
 }
 
 export const modernTheme: Theme = {
@@ -144,22 +187,23 @@ export const midnightTheme: Theme = {
     surfaceTint: 'neutral',
 }
 
-export const defaultTheme = modernTheme
+export const defaultTheme = novaTheme
 export const lightTheme = classicTheme
 
 export type ThemeOption = {
     id: string
     displayName: string
     theme: Theme | null
-    preview: [string, string, string]
 }
 
 export const themeOptions: ThemeOption[] = [
-    {id: modernThemeName, displayName: 'Modern', theme: modernTheme, preview: ['#ffffff', '#fafafa', '#4f46e5']},
-    {id: classicThemeName, displayName: 'Classic', theme: classicTheme, preview: ['#fbfdff', '#eef4fc', '#1262ff']},
-    {id: darkThemeName, displayName: 'Dark', theme: darkTheme, preview: ['#0f172a', '#0b1220', '#3b82f6']},
-    {id: midnightThemeName, displayName: 'Midnight', theme: midnightTheme, preview: ['#141417', '#0e0e10', '#8b5cf6']},
-    {id: systemThemeName, displayName: 'System (Modern / Midnight)', theme: null, preview: ['#ffffff', '#141417', '#4f46e5']},
+    {id: novaThemeName, displayName: 'Nova', theme: novaTheme},
+    {id: modernThemeName, displayName: 'Modern', theme: modernTheme},
+    {id: sandThemeName, displayName: 'Sand', theme: sandTheme},
+    {id: classicThemeName, displayName: 'Classic', theme: classicTheme},
+    {id: darkThemeName, displayName: 'Dark', theme: darkTheme},
+    {id: midnightThemeName, displayName: 'Midnight', theme: midnightTheme},
+    {id: systemThemeName, displayName: 'System', theme: null},
 ]
 
 export const themeAccentName = 'theme'
@@ -187,12 +231,86 @@ export const accentOptions: AccentOption[] = [
 
 export const defaultAccentName = themeAccentName
 
+export type BaseOption = {
+    id: string
+    displayName: string
+    hex: string
+}
+
+// Ready-made base (background) colors. Any other color can be picked freely.
+export const baseOptions: BaseOption[] = [
+    {id: 'snow', displayName: 'Snow', hex: '#ffffff'},
+    {id: 'mist', displayName: 'Mist', hex: '#f3f5f9'},
+    {id: 'paper', displayName: 'Paper', hex: '#f8f4ec'},
+    {id: 'mint', displayName: 'Mint', hex: '#eef7f2'},
+    {id: 'blush', displayName: 'Blush', hex: '#fbf1f3'},
+    {id: 'lavender', displayName: 'Lavender', hex: '#f3f1fb'},
+    {id: 'slate', displayName: 'Slate', hex: '#1e2430'},
+    {id: 'charcoal', displayName: 'Charcoal', hex: '#18181b'},
+    {id: 'ink', displayName: 'Ink', hex: '#0b1020'},
+    {id: 'forest', displayName: 'Forest', hex: '#0f1f1a'},
+]
+
+export type Appearance = {
+    themeName: string
+    accent: string
+    base: string
+}
+
+export const defaultAppearance: Appearance = {themeName: defaultThemeName, accent: defaultAccentName, base: ''}
+
+const hexPattern = /^#[0-9a-f]{6}$/i
+
+export function isHexColor(value: string | null | undefined): value is string {
+    return Boolean(value) && hexPattern.test(value as string)
+}
+
 function isThemeName(name: string | null | undefined): name is string {
     return Boolean(name) && themeOptions.some((t) => t.id === name)
 }
 
 function isAccentName(name: string | null | undefined): name is string {
-    return Boolean(name) && accentOptions.some((a) => a.id === name)
+    return Boolean(name) && (accentOptions.some((a) => a.id === name) || isHexColor(name))
+}
+
+const rgbString = (c: Color): string => c.rgb().round().array().slice(0, 3).join(', ')
+
+// Darkens (on light backgrounds) or lightens (on dark ones) a color until it
+// reads well against the background.
+function readableOn(fg: Color, bg: Color, minContrast = 3.2): Color {
+    let result = fg
+    const isDarkBg = bg.isDark()
+    for (let i = 0; i < 12 && result.contrast(bg) < minContrast; i++) {
+        result = isDarkBg ? result.mix(color('white'), 0.15) : result.mix(color('black'), 0.15)
+    }
+    return result
+}
+
+// Replaces the theme's background with a custom base color and derives the
+// text, sidebar and tag colors from it.
+function applyBaseColor(theme: Theme, baseHex: string): Theme {
+    const base = color(baseHex)
+    const isDark = base.isDark()
+    const themeMainDark = color(`rgb(${theme.mainBg})`).isDark()
+    const themeSidebarDark = color(`rgb(${theme.sidebarBg})`).isDark()
+    const fg = isDark ? base.mix(color('white'), 0.9) : base.mix(color('black'), 0.88)
+
+    // Themes with a contrasting sidebar (like Nova) keep it when the base
+    // color stays on the same light/dark side.
+    const keepSidebar = themeSidebarDark !== themeMainDark && isDark === themeMainDark
+    const sidebar = isDark ? base.mix(color('black'), 0.3) : base.mix(fg, 0.045)
+
+    return {
+        ...theme,
+        ...(isDark ? darkProps : lightProps),
+        mainBg: rgbString(base),
+        mainFg: rgbString(fg),
+        sidebarBg: keepSidebar ? theme.sidebarBg : rgbString(sidebar),
+        sidebarFg: keepSidebar ? theme.sidebarFg : rgbString(fg),
+        sidebarWhiteLogo: keepSidebar ? theme.sidebarWhiteLogo : String(isDark),
+        link: rgbString(readableOn(color(`rgb(${theme.link})`), base)),
+        surfaceTint: 'neutral',
+    }
 }
 
 function prefersDark(): boolean {
@@ -201,29 +319,51 @@ function prefersDark(): boolean {
 
 function resolveBaseTheme(themeName: string): Theme {
     if (themeName === systemThemeName) {
-        return prefersDark() ? midnightTheme : modernTheme
+        return prefersDark() ? midnightTheme : novaTheme
     }
     return themeOptions.find((t) => t.id === themeName)?.theme || defaultTheme
 }
 
-// Applies an accent on top of a base theme. Dark themes get the lighter
-// variant of the accent so it stays readable. Buttons keep a darker shade so
-// white button text stays legible.
-export function buildTheme(themeName: string, accentName: string): Theme {
-    const base = resolveBaseTheme(themeName)
-    const accent = accentOptions.find((a) => a.id === accentName)
-    if (!accent || accent.id === themeAccentName) {
-        return {...base}
+// Builds the final colors from a theme, an accent (preset id or #hex) and an
+// optional custom base color (#hex). Dark backgrounds get lighter accent
+// shades so links and highlights stay readable.
+export function buildTheme(themeName: string, accentName: string, baseHex = ''): Theme {
+    let theme = {...resolveBaseTheme(themeName)}
+    if (isHexColor(baseHex)) {
+        theme = applyBaseColor(theme, baseHex)
     }
 
-    const isDark = color(`rgb(${base.mainBg})`).isDark()
-    const highlight = isDark ? accent.dark : accent.light
+    const mainBg = color(`rgb(${theme.mainBg})`)
+    const sidebarBg = color(`rgb(${theme.sidebarBg})`)
+    const isDark = mainBg.isDark()
+
+    let button: Color | null = null
+    let highlight: Color | null = null
+    let sidebarHighlight: Color | null = null
+    if (isHexColor(accentName)) {
+        button = color(accentName)
+        highlight = readableOn(button, mainBg)
+        sidebarHighlight = readableOn(button, sidebarBg)
+    } else {
+        const accent = accentOptions.find((a) => a.id === accentName)
+        if (accent && accent.id !== themeAccentName) {
+            button = color(`rgb(${accent.light})`)
+            highlight = readableOn(color(`rgb(${isDark ? accent.dark : accent.light})`), mainBg)
+            sidebarHighlight = readableOn(color(`rgb(${sidebarBg.isDark() ? accent.dark : accent.light})`), sidebarBg)
+        }
+    }
+
+    if (!button || !highlight || !sidebarHighlight) {
+        return theme
+    }
+
     return {
-        ...base,
-        buttonBg: accent.light,
-        sidebarTextActiveBorder: highlight,
-        link: highlight,
-        linkVisited: color(`rgb(${highlight})`).mix(color(isDark ? 'white' : 'black'), 0.25).hex(),
+        ...theme,
+        buttonBg: rgbString(button),
+        buttonFg: button.isLight() && button.contrast(color('white')) < 2.6 ? '24, 24, 27' : '255, 255, 255',
+        sidebarTextActiveBorder: rgbString(sidebarHighlight),
+        link: rgbString(highlight),
+        linkVisited: highlight.mix(color(isDark ? 'white' : 'black'), 0.25).hex(),
     }
 }
 
@@ -262,7 +402,11 @@ function setBoringBoardThemeVariables(theme: Theme) {
         sidebarShadow = 'rgba(0, 0, 0, 0.28)'
     }
     const tableHeader = isDark ? lift(0.2) : tint(0.07)
-    const tableRow = isDark ? lift(0.11) : mainBg.lighten(0.07)
+    let tableRow = isDark ? lift(0.11) : mainBg.lighten(0.07)
+    if (neutral) {
+        // Match the editable cell background so rows read as one surface.
+        tableRow = mainBg
+    }
     const tableRowAlt = isDark ? lift(0.14) : tint(0.018).lighten(0.04)
     const tableRowHover = isDark ? lift(0.19) : tint(0.045).lighten(0.02)
     const tableBorder = mainFg.alpha(isDark ? 0.18 : 0.16)
@@ -283,13 +427,17 @@ function setBoringBoardThemeVariables(theme: Theme) {
     root.style.setProperty('--bb-text', mainFg.rgb().string())
     root.style.setProperty('--bb-text-muted', mainFg.alpha(isDark ? 0.72 : 0.68).rgb().string())
     root.style.setProperty('--bb-text-subtle', mainFg.alpha(isDark ? 0.52 : 0.5).rgb().string())
-    root.style.setProperty('--bb-date-text', isDark ? '#475569' : mainFg.alpha(0.72).rgb().string())
+    root.style.setProperty('--bb-date-text', mainFg.alpha(isDark ? 0.62 : 0.72).rgb().string())
     root.style.setProperty('--bb-border', border.rgb().string())
     root.style.setProperty('--bb-border-strong', borderStrong.rgb().string())
     root.style.setProperty('--bb-shadow', shadow)
     root.style.setProperty('--bb-shadow-soft', shadowSoft)
     root.style.setProperty('--bb-sidebar-shadow', sidebarShadow)
-    root.style.setProperty('--bb-sidebar-glow', neutral ? 'transparent' : buttonBg.alpha(isDark ? 0.18 : 0.1).rgb().string())
+    let sidebarGlow = 'transparent'
+    if (theme.sidebarGlow || !neutral) {
+        sidebarGlow = buttonBg.alpha(theme.sidebarGlow || isDark ? 0.18 : 0.1).rgb().string()
+    }
+    root.style.setProperty('--bb-sidebar-glow', sidebarGlow)
     root.style.setProperty('--bb-blue-soft', buttonBg.alpha(isDark ? 0.18 : 0.1).rgb().string())
     root.style.setProperty('--bb-blue-text', (isDark ? highlight : buttonBg).rgb().string())
     root.style.setProperty('--bb-purple-soft', purple.alpha(isDark ? 0.24 : 0.12).rgb().string())
@@ -348,29 +496,38 @@ export function applyThemeColors(theme: Theme): Theme {
 }
 
 let activeAccentName: string = defaultAccentName
+let activeBaseColor = ''
 
-// Applies a theme + accent and remembers the choice in this browser.
-export function setAppearance(themeName: string, accentName: string): Theme {
+// Applies a theme + accent (+ optional base color) and remembers the choice
+// in this browser.
+export function setAppearance(themeName: string, accentName: string, baseHex = ''): Theme {
     const name = isThemeName(themeName) ? themeName : defaultThemeName
     const accent = isAccentName(accentName) ? accentName : defaultAccentName
+    const base = isHexColor(baseHex) ? baseHex.toLowerCase() : ''
 
     activeThemeName = name
     activeAccentName = accent
+    activeBaseColor = base
     UserSettings.themeName = name
     UserSettings.accentColor = accent
+    UserSettings.baseColor = base || null
 
     document.documentElement.setAttribute('data-bb-theme', name)
-    return applyThemeColors(buildTheme(name, accent))
+    return applyThemeColors(buildTheme(name, accent, base))
+}
+
+export function getAppearance(): Appearance {
+    return {themeName: getActiveThemeName(), accent: activeAccentName, base: activeBaseColor}
 }
 
 // Back-compat: a full theme object is applied as-is; null means "follow the system".
 export function setTheme(theme: Theme | null): Theme {
     if (theme === null) {
-        return setAppearance(systemThemeName, activeAccentName)
+        return setAppearance(systemThemeName, activeAccentName, activeBaseColor)
     }
     const match = themeOptions.find((t) => t.theme && isEqual(t.theme, theme))
     if (match) {
-        return setAppearance(match.id, activeAccentName)
+        return setAppearance(match.id, activeAccentName, activeBaseColor)
     }
     return applyThemeColors(theme)
 }
@@ -419,14 +576,14 @@ export function loadTheme(): Theme {
         name = migrateLegacyTheme() || defaultThemeName
     }
     const accent = UserSettings.accentColor
-    return setAppearance(name, isAccentName(accent) ? accent : defaultAccentName)
+    return setAppearance(name, isAccentName(accent) ? accent : defaultAccentName, UserSettings.baseColor || '')
 }
 
 export function initThemes(): void {
     const darkThemeMq = window.matchMedia('(prefers-color-scheme: dark)')
     const changeHandler = () => {
         if (activeThemeName === systemThemeName) {
-            setAppearance(systemThemeName, activeAccentName)
+            setAppearance(systemThemeName, activeAccentName, activeBaseColor)
         }
     }
     if (darkThemeMq.addEventListener) {
@@ -507,4 +664,8 @@ export function getActiveThemeName(): string {
 
 export function getActiveAccentName(): string {
     return activeAccentName || defaultAccentName
+}
+
+export function getActiveBaseColor(): string {
+    return activeBaseColor
 }
