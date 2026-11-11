@@ -95,19 +95,11 @@ vo_fc.append(''.join(labs) + f'amix=inputs={len(labs)}:normalize=0,apad=whole_du
 voice = f'{BUILD}/voice.wav'
 run(['ffmpeg', '-v', 'error', '-y', *vo_inputs, '-filter_complex', ';'.join(vo_fc), '-map', '[vo]', '-ac', '2', voice])
 
-# 5) soft synth music bed (generated, no third-party audio): slow chord pad I-V-vi-IV in C
-chords = [(261.63, 329.63, 392.00), (196.00, 246.94, 293.66), (220.00, 261.63, 329.63), (174.61, 220.00, 261.63)]
-bar = 4.0
-expr_parts = []
-for k, ch in enumerate(chords):
-    gate = f'between(mod(t,{bar*4}),{k*bar},{(k+1)*bar})'
-    tones = '+'.join(f'sin(2*PI*{f}*t)+0.5*sin(2*PI*{f*2}*t)*0.3' for f in ch)
-    expr_parts.append(f'{gate}*({tones})')
-bass = '+'.join(f'between(mod(t,{bar*4}),{k*bar},{(k+1)*bar})*0.8*sin(2*PI*{ch[0]/2}*t)' for k, ch in enumerate(chords))
-expr = f'0.05*(({"+".join(expr_parts)})+{bass})*(0.75+0.25*sin(2*PI*0.25*t))'
-music = f'{BUILD}/music.wav'
-run(['ffmpeg', '-v', 'error', '-y', '-f', 'lavfi', '-i', f"aevalsrc='{expr}':s=48000:d={total:.3f}",
-     '-af', f'lowpass=f=1800,aecho=0.8:0.7:120|260:0.35|0.25,volume=0.55,afade=t=in:d=2,afade=t=out:st={total-3:.3f}:d=3',
+# 5) upbeat music bed, synthesized by music.py (no third-party audio)
+music_raw, music = f'{BUILD}/music_raw.wav', f'{BUILD}/music.wav'
+run([sys.executable, f'{ROOT}/music.py', music_raw, f'{total:.3f}'])
+run(['ffmpeg', '-v', 'error', '-y', '-i', music_raw,
+     '-af', f'aresample=48000,aecho=0.8:0.6:90|170:0.18|0.1,volume=0.3,afade=t=in:d=1.5,afade=t=out:st={total-3:.3f}:d=3',
      '-ac', '2', music])
 
 # 6) subtitles (ASS) from per-scene sentence timings, split into short chunks
