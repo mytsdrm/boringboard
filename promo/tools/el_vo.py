@@ -15,7 +15,7 @@ only = sys.argv[4].split(',') if len(sys.argv) > 4 else None
 os.makedirs(out, exist_ok=True)
 lines = json.load(open('vo.json'))
 from pron import spoken
-# The voice gets the respelled text (English terms said the English way); subtitles keep the written text.
+# The voice gets the text from pron.spoken (only acronyms change); subtitles keep the written text.
 texts = [spoken(t) for _, t in lines]
 
 def written_sentences(text):
@@ -28,9 +28,9 @@ durs = json.load(open(f'{out}/durations.json')) if os.path.exists(f'{out}/durati
 for i, (k, text) in enumerate(lines):
     if only and k not in only:
         continue
-    # Low stability and high style give a livelier, more enthusiastic read.
+    # Putri Maharani's settings from the ERP promo, with a little more style for a livelier read.
     body = {'text': texts[i], 'model_id': model,
-            'voice_settings': {'stability': 0.3, 'similarity_boost': 0.8, 'style': 0.6, 'use_speaker_boost': True, 'speed': 1.08}}
+            'voice_settings': {'stability': 0.45, 'similarity_boost': 0.8, 'style': 0.35, 'use_speaker_boost': True, 'speed': 1.05}}
     if model != 'eleven_v3':
         body['previous_text'] = texts[i - 1] if i else ''
         body['next_text'] = texts[i + 1] if i + 1 < len(texts) else ''

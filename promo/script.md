@@ -3,7 +3,7 @@
 Output: `boringboard-promo-id.mp4` (1920x1080, 30 fps, about 3:21, burned-in subtitles) and `boringboard-promo-id_nosub.mp4`. Videos, audio, recordings and the API key are gitignored; rebuild them with the steps below.
 
 Recorded on a local `./deploy` (http://localhost:8000) logged in as the seeded demo user (`demo` / `demo123456`) and, for the admin scenes, as the admin from `.env` (`BORINGBOARD_DEFAULTADMIN*`). UI in English, default Nova theme.
-Voice: ElevenLabs "Putri Maharani - Neutral and Witty" (voice id `I7sakys8pBZ1Z5f0UhT9`), model `eleven_multilingual_v2`, speed 1.08, low stability and high style for an enthusiastic read. English and IT terms are respelled for the voice by `tools/pron.py` (AI -> "Ei Ai", dashboard -> "desbor") so they are said the English way; the subtitles keep the written text. Add new terms there. The music bed is a bouncy 132 BPM track in major chords synthesized by `tools/music.py` (no third-party audio).
+Voice: ElevenLabs "Putri Maharani - Neutral and Witty" (voice id `I7sakys8pBZ1Z5f0UhT9`), model `eleven_multilingual_v2`, speed 1.05 (stability 0.45, style 0.35). English and IT terms are sent as written so the voice says them in English; never respell them. Only the acronym "AI" is sent as "Ei Ai" (`tools/pron.py`); the subtitles keep the written text. The music bed is a bouncy 132 BPM track in major chords synthesized by `tools/music.py` (no third-party audio).
 
 | # | Screen | Voice-over |
 |---|---|---|
