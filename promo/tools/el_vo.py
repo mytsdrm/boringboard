@@ -14,7 +14,12 @@ out = sys.argv[3] if len(sys.argv) > 3 else 'vo'
 only = sys.argv[4].split(',') if len(sys.argv) > 4 else None
 os.makedirs(out, exist_ok=True)
 lines = json.load(open('vo.json'))
-texts = [t for _, t in lines]
+from pron import spoken
+# The voice gets the respelled text (English terms said the English way); subtitles keep the written text.
+texts = [spoken(t) for _, t in lines]
+
+def written_sentences(text):
+    return [m.strip() for m in re.findall(r'[^.?!]*[.?!]+|[^.?!]+$', text) if m.strip()]
 
 def srt_t(x):
     ms = int(round(x * 1000)); return f'{ms//3600000:02d}:{ms//60000%60:02d}:{ms//1000%60:02d},{ms%1000:03d}'
@@ -23,8 +28,9 @@ durs = json.load(open(f'{out}/durations.json')) if os.path.exists(f'{out}/durati
 for i, (k, text) in enumerate(lines):
     if only and k not in only:
         continue
-    body = {'text': text, 'model_id': model,
-            'voice_settings': {'stability': 0.45, 'similarity_boost': 0.8, 'style': 0.25, 'use_speaker_boost': True, 'speed': 1.05}}
+    # Low stability and high style give a livelier, more enthusiastic read.
+    body = {'text': texts[i], 'model_id': model,
+            'voice_settings': {'stability': 0.3, 'similarity_boost': 0.8, 'style': 0.6, 'use_speaker_boost': True, 'speed': 1.08}}
     if model != 'eleven_v3':
         body['previous_text'] = texts[i - 1] if i else ''
         body['next_text'] = texts[i + 1] if i + 1 < len(texts) else ''
@@ -44,6 +50,11 @@ for i, (k, text) in enumerate(lines):
             if cur.strip(): blocks.append((a, e, cur.strip()))
             cur, a = '', None
     if cur.strip(): blocks.append((a if a is not None else st[0], en[-1], cur.strip()))
+    shown = written_sentences(text)
+    if len(shown) == len(blocks):
+        blocks = [(a, z, w) for (a, z, _), w in zip(blocks, shown)]
+    else:
+        print(k, 'WARNING: sentence count differs, subtitles show the spoken spelling')
     with open(f'{out}/{k}.srt', 'w') as f:
         for n, (a, z, t) in enumerate(blocks, 1):
             f.write(f'{n}\n{srt_t(a)} --> {srt_t(z)}\n{t}\n\n')

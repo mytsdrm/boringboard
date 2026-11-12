@@ -102,7 +102,7 @@ run(['ffmpeg', '-v', 'error', '-y', *vo_inputs, '-filter_complex', ';'.join(vo_f
 music_raw, music = f'{BUILD}/music_raw.wav', f'{BUILD}/music.wav'
 run([sys.executable, f'{ROOT}/music.py', music_raw, f'{total:.3f}'])
 run(['ffmpeg', '-v', 'error', '-y', '-i', music_raw,
-     '-af', f'aresample=48000,aecho=0.8:0.6:90|170:0.18|0.1,volume=0.3,afade=t=in:d=1.5,afade=t=out:st={total-3:.3f}:d=3',
+     '-af', f'aresample=48000,aecho=0.8:0.6:90|170:0.18|0.1,volume=0.4,afade=t=in:d=1.5,afade=t=out:st={total-3:.3f}:d=3',
      '-ac', '2', music])
 
 # 6) subtitles (ASS) from per-scene sentence timings, split into short chunks

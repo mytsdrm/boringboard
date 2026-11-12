@@ -1,30 +1,30 @@
 # BoringBoard promo video (Bahasa Indonesia)
 
-Output: `boringboard-promo-id.mp4` (1920x1080, 30 fps, about 3:19, burned-in subtitles) and `boringboard-promo-id_nosub.mp4`. Videos, audio, recordings and the API key are gitignored; rebuild them with the steps below.
+Output: `boringboard-promo-id.mp4` (1920x1080, 30 fps, about 3:21, burned-in subtitles) and `boringboard-promo-id_nosub.mp4`. Videos, audio, recordings and the API key are gitignored; rebuild them with the steps below.
 
 Recorded on a local `./deploy` (http://localhost:8000) logged in as the seeded demo user (`demo` / `demo123456`) and, for the admin scenes, as the admin from `.env` (`BORINGBOARD_DEFAULTADMIN*`). UI in English, default Nova theme.
-Voice: ElevenLabs "Putri Maharani - Neutral and Witty" (voice id `I7sakys8pBZ1Z5f0UhT9`), model `eleven_multilingual_v2`, speed 1.05. English product terms stay in English. The music bed is an upbeat 124 BPM track synthesized by `tools/music.py` (no third-party audio).
+Voice: ElevenLabs "Putri Maharani - Neutral and Witty" (voice id `I7sakys8pBZ1Z5f0UhT9`), model `eleven_multilingual_v2`, speed 1.08, low stability and high style for an enthusiastic read. English and IT terms are respelled for the voice by `tools/pron.py` (AI -> "Ei Ai", dashboard -> "desbor") so they are said the English way; the subtitles keep the written text. Add new terms there. The music bed is a bouncy 132 BPM track in major chords synthesized by `tools/music.py` (no third-party audio).
 
 | # | Screen | Voice-over |
 |---|---|---|
-| 1 | Title card, demo login | Kenalkan BoringBoard. Tempat untuk semua task yang selalu bilang, nanti aja deh. Project management yang simpel, rapi, dan sedikit lebih seru. |
-| 2 | Dashboard | Begitu login, dashboard langsung merangkum semuanya. Jumlah task board, total task, member yang diundang, board yang baru di-update, sampai recent activity. |
-| 3 | Kanban board, drag a card | Buka board, dan semua task tersusun di kolom Kanban, dari Backlog sampai Done. Tinggal drag and drop untuk memindahkan task, dan total estimasi per kolom langsung terhitung. |
-| 4 | Card detail | Setiap task punya detail lengkap. Status, priority, label, assignee, reviewer, dan due date. Plus catatan, checklist, dan komentar dari tim. |
-| 5 | Table view, "Urgent and high" view | Lebih suka spreadsheet? Pindah ke table view, lengkap dengan sort, filter, dan kalkulasi otomatis. Simpan juga view khusus, misalnya hanya task yang urgent dan high. |
-| 6 | Calendar view | Calendar view menampilkan task berdasarkan due date, jadi tidak ada deadline yang terlewat. |
-| 7 | Gallery view | Gallery view menampilkan task sebagai kartu visual, lengkap dengan preview isinya. |
-| 8 | Task Board Info, Task Board Settings | Untuk tim developer, setiap board bisa menyimpan repository, dev branch, prod branch, dan URL environment. Semua info penting langsung tampil di header board. |
-| 9 | Share Board | Ajak tim Anda lewat Share, atur role setiap member, atau cukup copy link-nya. |
-| 10 | Create a board (templates) | Mulai project baru dalam hitungan detik dengan template siap pakai. Sprint planner, roadmap, project tasks, dan masih banyak lagi. |
-| 11 | Find task boards, Appearance drawer: themes and accent colors | Cari board dengan cepat. Lalu buka panel Appearance, dan pilih tema favorit Anda. Nova, Sand, Midnight, atau Classic, lengkap dengan accent color sesuai selera. |
-| 12 | Appearance: macOS, Windows and Ubuntu layouts | Mau suasana baru? Ganti layout dengan gaya macOS, Windows, atau Ubuntu, lengkap dengan dock dan taskbar. Semua tersimpan otomatis di profil Anda. |
-| 13 | Admin login, Users | Sekarang kita login sebagai admin. Di menu Users, admin bisa menambah, mengedit, dan mengatur group semua user. |
-| 14 | System Settings (General, Modules, Notification) | Di System Settings, atur nama aplikasi, logo, timezone, dan AI provider. Aktifkan module yang dibutuhkan, dan pilih notifikasi yang dikirim ke tim. |
+| 1 | Title card, demo login | Halo! Kenalkan BoringBoard! Tempat untuk semua task yang selalu bilang, nanti aja deh. Project management yang simpel, rapi, dan pastinya lebih seru! |
+| 2 | Dashboard | Begitu login, dashboard langsung merangkum semuanya! Jumlah task board, total task, member yang diundang, board yang baru di-update, sampai recent activity. |
+| 3 | Kanban board, drag a card | Buka board-nya, dan semua task langsung tersusun di kolom Kanban, dari Backlog sampai Done. Tinggal drag and drop, dan total estimasi per kolom langsung terhitung otomatis! |
+| 4 | Card detail | Setiap task punya detail lengkap! Status, priority, label, assignee, reviewer, dan due date. Plus catatan, checklist, dan komentar dari tim. |
+| 5 | Table view, "Urgent and high" view | Suka spreadsheet? Gampang! Pindah ke table view, lengkap dengan sort, filter, dan kalkulasi otomatis. Simpan juga view khusus, misalnya cuma task yang urgent dan high. |
+| 6 | Calendar view | Calendar view menampilkan task berdasarkan due date. Dijamin, nggak ada deadline yang terlewat! |
+| 7 | Gallery view | Gallery view menampilkan task sebagai kartu visual, lengkap dengan preview isinya. Keren, kan? |
+| 8 | Task Board Info, Task Board Settings | Buat tim developer, setiap board bisa menyimpan repository, dev branch, prod branch, dan URL environment. Semua info penting langsung tampil di header board! |
+| 9 | Share Board | Ajak tim Anda lewat Share, atur role setiap member, atau cukup copy link-nya. Simpel banget! |
+| 10 | Create a board (templates) | Mulai project baru dalam hitungan detik, pakai template siap pakai! Sprint planner, roadmap, project tasks, dan masih banyak lagi. |
+| 11 | Find task boards, Appearance drawer: themes and accent colors | Cari board dengan cepat. Lalu buka panel Appearance, dan pilih tema favorit Anda! Nova, Sand, Midnight, atau Classic, lengkap dengan accent color sesuai selera. |
+| 12 | Appearance: macOS, Windows and Ubuntu layouts | Mau suasana baru? Ganti layout dengan gaya macOS, Windows, atau Ubuntu, lengkap dengan dock dan taskbar. Semua tersimpan otomatis di profil Anda! |
+| 13 | Admin login, Users | Sekarang, kita login sebagai admin! Di menu Users, admin bisa menambah, mengedit, dan mengatur group semua user. |
+| 14 | System Settings (General, Modules, Notification) | Di System Settings, atur nama aplikasi, logo, timezone, sampai AI provider. Aktifkan module yang dibutuhkan, dan pilih notifikasi yang dikirim ke tim. |
 | 15 | Activity logs | Activity logs mencatat setiap perubahan dari semua user, lengkap dengan filter dan rentang tanggal. |
-| 16 | Reminders, Announcements | Kirim reminder terjadwal, dan buat announcement untuk seluruh tim, langsung dari panel admin. |
+| 16 | Reminders, Announcements | Kirim reminder terjadwal, dan buat announcement untuk seluruh tim, langsung dari panel admin! |
 | 17 | Plugin manager, Templates | Perluas BoringBoard dengan plugin, dan kelola template board untuk seluruh workspace. |
-| 18 | Outro card with project.creativework.asia and the demo login | BoringBoard. Siap bikin kerjaan Anda jadi sedikit kurang membosankan. Coba demonya sekarang, di project dot creativework dot asia. |
+| 18 | Outro card with project.creativework.asia and the demo login | Yuk, bikin kerjaan Anda jadi sedikit kurang membosankan, bareng BoringBoard! Coba demonya sekarang, di project dot creativework dot asia! |
 
 ## Rebuilding
 
